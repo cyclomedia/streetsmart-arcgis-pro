@@ -1,0 +1,80 @@
+Street Smart to do:
+===================
+  - Haal de streetSmart libraries eruit
+  - Haal de streetSmart links namen in de resources eruit
+  - streetSmart32 symbool veranderen naar StreetSmart32 symbool
+  - geupdate APIKey
+  - Agreement updaten
+
+
+Migratie naar ArcGIS Pro 2.0:
+=============================
+  - Test of alle functionaliteit nog steeds goed werkt, ook vooral meten testen, het opnieuw opstarten en dan in dezelfde state terecht komen, test of dat ook goed werkt.
+  - Test of de geodatabase kopeling via file goed werkt
+  - Ga alle xaml styles na en kijk of die allemaal goed zijn afgestemd op arcGIS Pro 2.0
+
+
+Recent Recording Layer:
+=======================
+  - De limiet van 10 karakters per item in de database moet eruit.
+  - De recent recording layer button ook in de layer tab van de map group plaatsen.
+  - Bij PIP images moet ook nog de rotation worden toegevoegd.
+
+
+Open Location Tool:
+===================
+  - De open locatie tool moet de focus verliezen als deze niet meer gebruikt kan worden.
+
+
+Historische data:
+=================
+  - Het zou mogelijk moeten zijn om bij de slider ook de kleurstippen aan te geven, zodat te zien is welk jaar welke kleur heeft.
+
+
+ImageId zoek functionaliteit:
+=============================
+  - Het zou mogelijk moeten zijn om de zoekfuctionaliteit op een goede manier te integreren in ArcGIS Pro
+
+
+Bugs in ArcGIS Pro / SDK:
+=========================
+  - Als er ArcGIS Pro icons beschikbaar gesteld worden, dan moeten de icons in de ArcGIS Pro style gemaakt worden
+  - Als ik 2 keer een geoprocessing tool aanroep vanuit de code, dan gaat de 2e aanroep niet goed, terwijl ik wel netjes wacht tot de eerste is afgerond.
+  - Er zit een bug in ArcGIS Pro, als een cursor van een tool wordt gewijzigd, dan wijzigd deze cursor niet op de kaart
+  - Als de kaart van coordinaat systeem veranderd, dan moet de 'open locatie tool' eerst gewisselt worden en weer terug gewisselt worden, voordat de 'open locatie' tool weer werkt.
+
+  - De Sketch van de linemeasurement bevat 0 of 2 punten, deze kan niet bestaan met 1 punt, hoe kan dat?
+
+Bugs in ArcGIS Pro:
+===================
+  - Als een featureLayer wordt verwijderd, dan wil ArcGIS Pro van de andere layers die in dezelfde feature database voorkomen de unsaved edits verwijderen.
+
+
+Aan te bevelen uitbreidingen van de SDK:
+========================================
+  - Het zou ook mogelijk moeten zijn om geo-databases te creeeren vanuit de code.
+  - Is het ook mogelijk om een waarde te updaten in een mappoint zoals een z? of een item te verwijderen of toe te voegen of te updaten in een geometry?
+
+
+Bugs / Uitbreidingen in het meten:
+==================================
+- Als een selectie wordt discard, of een cancel, dan wordt deze niet goed uitgevoerd in de cyclorama
+- Bij het editen van een polygon wordt de hoogte niet automatisch toegevoegd.
+- Selecteren van een verticle, het juiste punt moet dan ook in edit komen in de cyclorama
+- Misbruik de M met pointnummers
+- Het measurement detail knopje moet ook in de edit features tab komen
+
+- verwijderen van een vertex, gaat bij de update nog niet helemaal goed
+- In de move modus moet je een meetpunt niet kunnen openen
+- De hoogte moet nog worden toegevoegd bij punt, lijn en polygon meetingen in de kaart
+- Vlakmetingen, gedrag soms nog een beetje vreemd, beelden worden verwijderd, meetpunten worden verwijderd
+
+
+- Het kan voorkomen dat na het toevoegen van de recording laag Arcgis pro eerst een keer herstart moet worden
+
+
+=====================
+- Vlak lagen werkt nog niet echt lekker
+
+- Bug met streetSmart, als 2 viewers open, problemen met het zien van lijn vector lagen
+- Kijken wat we met drawpoint moeten, of deze misschien kan worden weggehaald

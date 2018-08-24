@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreetSmartArcGISPro", "StreetSmartArcGISPro\StreetSmartArcGISPro.csproj", "{FF025699-0123-458E-8A61-3BD27D7A0733}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF025699-0123-458E-8A61-3BD27D7A0733}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF025699-0123-458E-8A61-3BD27D7A0733}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF025699-0123-458E-8A61-3BD27D7A0733}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF025699-0123-458E-8A61-3BD27D7A0733}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BEF87CAA-EC8B-49CB-930E-403A476F5706}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,299 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FF025699-0123-458E-8A61-3BD27D7A0733}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StreetSmartArcGISPro</RootNamespace>
+    <AssemblyName>StreetSmartArcGISPro</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe</StartProgram>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe</StartProgram>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ArcGIS.Desktop.Extensions">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Framework">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Editing">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
+    </Reference>
+    <Reference Include="ArcGIS.Core">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Core">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Mapping">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="GlobeSpotterAPI, Version=2.8.5.0, Culture=neutral, PublicKeyToken=40e543d64118bdd4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libs\GlobeSpotterAPI3.1\GlobeSpotterAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Config.daml">
+      <SubType>Designer</SubType>
+    </AddInContent>
+    <AddInContent Include="Images\StreetSmartArcGISPro32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddIns\Buttons\Help.cs" />
+    <Compile Include="AddIns\Buttons\MeasurementDetail.cs" />
+    <Compile Include="AddIns\Buttons\ImageIdSearch.cs" />
+    <Compile Include="AddIns\Buttons\HistoricalRecordingLayer.cs" />
+    <Compile Include="AddIns\Buttons\ShowInCyclorama.cs" />
+    <Compile Include="AddIns\Buttons\RecentRecordingLayer.cs" />
+    <Compile Include="AddIns\DockPanes\MeasurementDetail.cs" />
+    <Compile Include="AddIns\Pages\Agreement.cs" />
+    <Compile Include="AddIns\Pages\Configuration.cs" />
+    <Compile Include="AddIns\Pages\About.cs" />
+    <Compile Include="AddIns\Pages\Settings.cs" />
+    <Compile Include="AddIns\Pages\Login.cs" />
+    <Compile Include="AddIns\Buttons\CycloMediaOptions.cs" />
+    <Compile Include="AddIns\Modules\StreetSmart.cs" />
+    <Compile Include="AddIns\Tools\OpenLocation.cs" />
+    <Compile Include="AddIns\Views\Agreement.xaml.cs">
+      <DependentUpon>Agreement.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Configuration.xaml.cs">
+      <DependentUpon>Configuration.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
+    <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
+    <Compile Include="AddIns\Views\Converters\RecentHistorical.cs" />
+    <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
+    <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
+    <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementUndo.cs" />
+    <Compile Include="AddIns\Views\Converters\IsNotNull.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementObservationSelected.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementOpenClose.cs" />
+    <Compile Include="AddIns\Views\Converters\ConfigurationService.cs" />
+    <Compile Include="AddIns\Views\Converters\CombineBoolean.cs" />
+    <Compile Include="AddIns\Views\About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Converters\CanMeasuring.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementObservationWidth.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementColor.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementImageStd.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementMatch.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementImage.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementRelEst.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementPositionStd.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementPosition.cs" />
+    <Compile Include="AddIns\Views\Converters\LoginStatus.cs" />
+    <Compile Include="AddIns\Views\MeasurementDetail.xaml.cs">
+      <DependentUpon>MeasurementDetail.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Converters\InverseBoolean.cs" />
+    <Compile Include="Configuration\File\Agreement.cs" />
+    <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
+    <Compile Include="Configuration\File\HistoricalRecordings.cs" />
+    <Compile Include="Configuration\File\ConstantsViewer.cs" />
+    <Compile Include="Configuration\File\Layers\StoredLayer.cs" />
+    <Compile Include="Configuration\File\Layers\StoredLayerList.cs" />
+    <Compile Include="Configuration\File\Settings.cs" />
+    <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Images.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Point.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Location.cs" />
+    <Compile Include="Configuration\Remote\Recordings\FeatureMembers.cs" />
+    <Compile Include="Configuration\Remote\Recordings\ProductType.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Image.cs" />
+    <Compile Include="Configuration\Remote\Recordings\TileSchema.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\Bounds.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Recording.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\SpatialReference.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\SpatialReferenceList.cs" />
+    <Compile Include="Configuration\Resource\APIKey.cs" />
+    <Compile Include="Configuration\Remote\GlobeSpotter\ApplicationConfiguration.cs" />
+    <Compile Include="Configuration\Remote\GlobeSpotter\Functionality.cs" />
+    <Compile Include="Configuration\Remote\GlobeSpotter\GlobeSpotterConfiguration.cs" />
+    <Compile Include="Configuration\File\Configuration.cs" />
+    <Compile Include="Configuration\Remote\State.cs" />
+    <Compile Include="Configuration\Remote\Urls.cs" />
+    <Compile Include="Configuration\Remote\Web.cs" />
+    <Compile Include="Configuration\File\Login.cs" />
+    <Compile Include="AddIns\Views\StreetSmart.xaml.cs">
+      <DependentUpon>StreetSmart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\DockPanes\StreetSmart.cs" />
+    <Compile Include="AddIns\Views\ImageIdSearch.xaml.cs">
+      <DependentUpon>ImageIdSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\DockPanes\ImageIdSearch.cs" />
+    <Compile Include="Overlays\Measurement\MeasurementList.cs" />
+    <Compile Include="Overlays\Measurement\Measurement.cs" />
+    <Compile Include="Overlays\Measurement\MeasurementObservation.cs" />
+    <Compile Include="Overlays\Measurement\MeasurementPoint.cs" />
+    <Compile Include="Overlays\ViewerList.cs" />
+    <Compile Include="Utilities\ImageExtensions.cs" />
+    <Compile Include="VectorLayers\EditTools.cs" />
+    <Compile Include="VectorLayers\VectorLayer.cs" />
+    <Compile Include="CycloMediaLayers\CycloMediaGroupLayer.cs" />
+    <Compile Include="CycloMediaLayers\CycloMediaLayer.cs" />
+    <Compile Include="CycloMediaLayers\HistoricalLayer.cs" />
+    <Compile Include="CycloMediaLayers\RecordingLayer.cs" />
+    <Compile Include="Overlays\Viewer.cs" />
+    <Compile Include="Overlays\CrossCheck.cs" />
+    <Compile Include="Overlays\ViewingCone.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\CoordSystemUtils.cs" />
+    <Compile Include="Utilities\CurrentCult.cs" />
+    <Compile Include="Utilities\FileUtils.cs" />
+    <Compile Include="VectorLayers\VectorLayerList.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AddIns\Views\Agreement.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Configuration.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\About.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\MeasurementDetail.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Login.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddIns\Views\StreetSmart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddIns\Views\ImageIdSearch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Images\CycloMediaOptions32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Agreement.txt" />
+    <EmbeddedResource Include="Resources\APIKey.xml" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Images\RecentRecordingLayer32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Images\StreetSmart32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\Doc\LGPL-3.0.txt">
+      <Link>LGPL-3.0.txt</Link>
+    </Content>
+    <Content Include="..\..\Doc\Release notes.txt">
+      <Link>Release notes.txt</Link>
+    </Content>
+    <AddInContent Include="Images\OpenLocation32.png" />
+    <Content Include="..\..\Doc\ToDo.txt">
+      <Link>ToDo.txt</Link>
+    </Content>
+    <AddInContent Include="Images\HistoricalRecordingLayer32.png" />
+    <AddInContent Include="Images\ImageIdSearch32.png" />
+    <AddInContent Include="Images\MeasurementDetail32.png" />
+    <EmbeddedResource Include="Images\UserTrash16.png" />
+    <EmbeddedResource Include="Images\FocusMode16.png" />
+    <EmbeddedResource Include="Images\SystemSearch16.png" />
+    <EmbeddedResource Include="Images\OpenLocation.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
+    <EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
+    <EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
+      <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
+  <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.CleanAddIn" />
+  <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.ConvertToRelativePath" />
+  <Import Project="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Target Name="BeforeBuild">
+    <Error Text="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets not found." Condition="!Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
+  </Target>
+</Project>
