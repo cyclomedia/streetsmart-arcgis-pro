@@ -23,8 +23,8 @@ using System.Xml.Serialization;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 {
-  [XmlType(AnonymousType = true, Namespace = "https://www.streetSmart.com/gsc")]
-  [XmlRoot("SpatialReferences", Namespace = "https://www.streetSmart.com/gsc", IsNullable = false)]
+  [XmlType(AnonymousType = true, Namespace = "https://www.globespotter.com/gsc")]
+  [XmlRoot("SpatialReferences", Namespace = "https://www.globespotter.com/gsc", IsNullable = false)]
   public class SpatialReferenceList : List<SpatialReference>
   {
     #region Members

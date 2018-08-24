@@ -57,7 +57,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     public static StreetSmart Current
       =>
         _streetSmart ??
-        (_streetSmart = (StreetSmart) FrameworkApplication.FindModule("StreetSmartArcGISPro_module"));
+        (_streetSmart = (StreetSmart) FrameworkApplication.FindModule("streetSmartArcGISPro_module"));
 
     public CycloMediaGroupLayer CycloMediaGroupLayer
     {
@@ -87,7 +87,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (_agreement.Value)
       {
-        FrameworkApplication.State.Activate("StreetSmartArcGISPro_agreementAcceptedState");
+        FrameworkApplication.State.Activate("streetSmartArcGISPro_agreementAcceptedState");
       }
 
       Login login = Login.Instance;

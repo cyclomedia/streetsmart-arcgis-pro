@@ -885,11 +885,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       if (InsideScale)
       {
-        FrameworkApplication.State.Activate("StreetSmartArcGISPro_InsideScaleState");
+        FrameworkApplication.State.Activate("streetSmartArcGISPro_InsideScaleState");
       }
       else
       {
-        FrameworkApplication.State.Deactivate("StreetSmartArcGISPro_InsideScaleState");
+        FrameworkApplication.State.Deactivate("streetSmartArcGISPro_InsideScaleState");
       }
     }
 

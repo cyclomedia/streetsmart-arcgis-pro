@@ -184,7 +184,7 @@
       <dockPanes>
         <dockPane id="streetSmartArcGISPro_streetSmartDockPane"
                   caption="Cyclorama Viewer"
-                  className="AddIns.DockPanes.streetSmart"
+                  className="AddIns.DockPanes.StreetSmart"
                   dock="bottom"
                   smallImage="Images\StreetSmart32.png"
                   dockWith="esri_mapping_mapPane">

@@ -97,11 +97,11 @@ namespace StreetSmartArcGISPro.Configuration.File
 
           if (value)
           {
-            FrameworkApplication.State.Activate("StreetSmartArcGISPro_loginSuccessfullyState");
+            FrameworkApplication.State.Activate("streetSmartArcGISPro_loginSuccessfullyState");
           }
           else
           {
-            FrameworkApplication.State.Deactivate("StreetSmartArcGISPro_loginSuccessfullyState");
+            FrameworkApplication.State.Deactivate("streetSmartArcGISPro_loginSuccessfullyState");
           }
         }
       }

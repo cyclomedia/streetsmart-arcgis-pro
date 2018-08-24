@@ -104,7 +104,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       if (_value)
       {
-        FrameworkApplication.State.Activate("StreetSmartArcGISPro_agreementAcceptedState");
+        FrameworkApplication.State.Activate("streetSmartArcGISPro_agreementAcceptedState");
       }
 
       return base.CommitAsync();

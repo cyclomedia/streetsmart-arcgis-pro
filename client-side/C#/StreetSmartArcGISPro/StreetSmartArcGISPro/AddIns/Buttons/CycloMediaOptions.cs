@@ -34,11 +34,11 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
 
       if (agreement.Value && !login.Credentials)
       {
-        PropertySheet.ShowDialog("StreetSmartArcGISPro_optionsPropertySheet", "StreetSmartArcGISPro_loginPage");
+        PropertySheet.ShowDialog("streetSmartArcGISPro_optionsPropertySheet", "streetSmartArcGISPro_loginPage");
       }
       else
       {
-        PropertySheet.ShowDialog("StreetSmartArcGISPro_optionsPropertySheet");
+        PropertySheet.ShowDialog("streetSmartArcGISPro_optionsPropertySheet");
       }
     }
 

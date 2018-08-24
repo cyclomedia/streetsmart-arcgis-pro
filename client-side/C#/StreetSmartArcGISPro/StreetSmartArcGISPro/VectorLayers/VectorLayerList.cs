@@ -388,11 +388,11 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         if (EditTool == EditTools.NoEditTool)
         {
-          FrameworkApplication.State.Deactivate("StreetSmartArcGISPro_measurementState");
+          FrameworkApplication.State.Deactivate("streetSmartArcGISPro_measurementState");
         }
         else
         {
-          FrameworkApplication.State.Activate("StreetSmartArcGISPro_measurementState");
+          FrameworkApplication.State.Activate("streetSmartArcGISPro_measurementState");
         }
       }
     }

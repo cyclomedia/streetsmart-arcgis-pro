@@ -29,7 +29,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
   {
     #region Constants
 
-    private const string DockPaneId = "StreetSmartArcGISPro_ImageIdSearch";
+    private const string DockPaneId = "streetSmartArcGISPro_ImageIdSearch";
 
     #endregion
 

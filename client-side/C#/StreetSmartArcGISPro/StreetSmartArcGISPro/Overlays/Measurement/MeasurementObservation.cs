@@ -28,7 +28,9 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+
 using GlobeSpotterAPI;
+
 using StreetSmartArcGISPro.AddIns.Modules;
 
 using ApiPoint = GlobeSpotterAPI.MeasurementPoint;

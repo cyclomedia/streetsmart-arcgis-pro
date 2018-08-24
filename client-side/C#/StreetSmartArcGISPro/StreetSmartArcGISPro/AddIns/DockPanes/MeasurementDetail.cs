@@ -35,7 +35,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
   {
     #region Constants
 
-    private const string DockPaneId = "StreetSmartArcGISPro_MeasurementDetail";
+    private const string DockPaneId = "streetSmartArcGISPro_MeasurementDetail";
 
     #endregion
 

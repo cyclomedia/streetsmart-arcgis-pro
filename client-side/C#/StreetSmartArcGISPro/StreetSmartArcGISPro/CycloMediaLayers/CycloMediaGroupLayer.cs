@@ -157,11 +157,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           await thisLayer.AddToLayersAsync(mapView);
           // ReSharper disable once ExplicitCallerInfoArgument
           NotifyPropertyChanged(nameof(Count));
-          FrameworkApplication.State.Activate("StreetSmartArcGISPro_recordingLayerEnabledState");
+          FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
 
           if (thisLayer.UseDateRange)
           {
-            FrameworkApplication.State.Activate("StreetSmartArcGISPro_historicalLayerEnabledState");
+            FrameworkApplication.State.Activate("streetSmartArcGISPro_historicalLayerEnabledState");
           }          
         }
       }
@@ -183,12 +183,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         if (Count == 0)
         {
-          FrameworkApplication.State.Deactivate("StreetSmartArcGISPro_recordingLayerEnabledState");
+          FrameworkApplication.State.Deactivate("streetSmartArcGISPro_recordingLayerEnabledState");
         }
 
         if (layer.UseDateRange)
         {
-          FrameworkApplication.State.Deactivate("StreetSmartArcGISPro_historicalLayerEnabledState");
+          FrameworkApplication.State.Deactivate("streetSmartArcGISPro_historicalLayerEnabledState");
         }
       }
     }
