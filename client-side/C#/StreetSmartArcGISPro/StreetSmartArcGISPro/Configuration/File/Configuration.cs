@@ -41,11 +41,11 @@ namespace StreetSmartArcGISPro.Configuration.File
     private static readonly XmlSerializer XmlConfiguration;
     private static Configuration _configuration;
 
-    private bool _useDefaultSwfUrl;
-    private string _swfLocation;
+    private bool _useDefaultStreetSmartUrl;
+    private string _streetSmartLocation;
 
-    private bool _useDefaultBaseUrl;
-    private string _baseUrlLocation;
+    private bool _useDefaultConfigurationUrl;
+    private string _configurationUrlLocation;
 
     #endregion
 
@@ -63,27 +63,27 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// <summary>
     /// Base url
     /// </summary>
-    public bool UseDefaultBaseUrl
+    public bool UseDefaultConfigurationUrl
     {
-      get => _useDefaultBaseUrl;
+      get => _useDefaultConfigurationUrl;
       set
       {
-        if (_useDefaultBaseUrl != value)
+        if (_useDefaultConfigurationUrl != value)
         {
-          _useDefaultBaseUrl = value;
+          _useDefaultConfigurationUrl = value;
           OnPropertyChanged();
         }
       }
     }
 
-    public string BaseUrlLocation
+    public string ConfigurationUrlLocation
     {
-      get => _baseUrlLocation;
+      get => _configurationUrlLocation;
       set
       {
-        if (_baseUrlLocation != value)
+        if (_configurationUrlLocation != value)
         {
-          _baseUrlLocation = value;
+          _configurationUrlLocation = value;
           OnPropertyChanged();
         }
       }
@@ -92,27 +92,27 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// <summary>
     /// Swf url
     /// </summary>
-    public bool UseDefaultSwfUrl
+    public bool UseDefaultStreetSmartUrl
     {
-      get => _useDefaultSwfUrl;
+      get => _useDefaultStreetSmartUrl;
       set
       {
-        if (_useDefaultSwfUrl != value)
+        if (_useDefaultStreetSmartUrl != value)
         {
-          _useDefaultSwfUrl = value;
+          _useDefaultStreetSmartUrl = value;
           OnPropertyChanged();
         }
       }
     }
 
-    public string SwfLocation
+    public string StreetSmartLocation
     {
-      get => _swfLocation;
+      get => _streetSmartLocation;
       set
       {
-        if (_swfLocation != value)
+        if (_streetSmartLocation != value)
         {
-          _swfLocation = value;
+          _streetSmartLocation = value;
           OnPropertyChanged();
         }
       }
@@ -182,10 +182,10 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new Configuration
       {
-        _useDefaultBaseUrl = true,
-        _baseUrlLocation = string.Empty,
-        _useDefaultSwfUrl = true,
-        _swfLocation = string.Empty,
+        _useDefaultConfigurationUrl = true,
+        _configurationUrlLocation = string.Empty,
+        _useDefaultStreetSmartUrl = true,
+        _streetSmartLocation = string.Empty,
         UseProxyServer = false,
         ProxyAddress = string.Empty,
         ProxyPort = 80,

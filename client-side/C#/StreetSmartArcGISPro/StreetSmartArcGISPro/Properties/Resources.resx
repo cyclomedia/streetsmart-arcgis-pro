@@ -124,8 +124,8 @@
   <data name="streetSmart_ArcGISPro_Error_" xml:space="preserve">
     <value>streetSmart ArcGISPro Addin Error.</value>
   </data>
-  <data name="streetSmart_OnAPIFailed_Initialize_" xml:space="preserve">
-    <value>Initialize API failed</value>
+  <data name="StreetSmartOnLoginFailed" xml:space="preserve">
+    <value>Can not login the API</value>
   </data>
   <data name="streetSmart_OnMaxViewers_Failed" xml:space="preserve">
     <value>Unable to open the new Cyclorama viewer. Max number of Cyclorama viewers reached.</value>
@@ -144,5 +144,8 @@
   </data>
   <data name="UserTrash16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\UserTrash16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StreetSmartCanNotOpenImage" xml:space="preserve">
+    <value>Can not open image</value>
   </data>
 </root>

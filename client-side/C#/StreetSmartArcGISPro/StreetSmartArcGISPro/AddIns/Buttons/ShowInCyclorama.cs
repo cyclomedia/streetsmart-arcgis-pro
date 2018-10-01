@@ -21,9 +21,10 @@ using System.Collections.Generic;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
 
-using StreetSmartArcGISPro.AddIns.Modules;
 using StreetSmartArcGISPro.CycloMediaLayers;
 using StreetSmartArcGISPro.VectorLayers;
+
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
@@ -61,7 +62,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
       if (layers?.Count == 1)
       {
         Layer layer = layers[0];
-        StreetSmart streetSmart = StreetSmart.Current;
+        ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
 
         CycloMediaGroupLayer groupLayer = streetSmart.CycloMediaGroupLayer;
         _cycloMediaLayer = groupLayer?.GetLayer(layer);

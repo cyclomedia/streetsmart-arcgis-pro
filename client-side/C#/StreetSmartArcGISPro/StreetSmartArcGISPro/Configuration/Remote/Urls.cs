@@ -29,10 +29,10 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     // ReSharper disable InconsistentNaming
     private const string baseUrl = "https://atlas.cyclomedia.com";
-    private const string apiUrl = "https://globeSpotter.cyclomedia.com/v31/api";
+    private const string apiUrl = "https://streetsmart.cyclomedia.com/api/v18.10";
     private const string configurationRequest = "{0}/configuration/configuration/API";
-    private const string apiSwf = "/viewer_api.swf";
-    private const string spatialReferencesXml = "/config/srs/globespotterspatialreferences.xml";
+    private const string apiPage = "/api-dotnet.html";
+    private const string spatialReferencesXml = "/assets/srs/SpatialReference.xml";
     private const string recordingRequest =
       "{0}?service=WFS&version=1.1.0&request=GetFeature&srsname={1}&featureid={2}&TYPENAME=atlas:Recording";
     // ReSharper restore InconsistentNaming
@@ -59,7 +59,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote
     /// <summary>
     /// Base url
     /// </summary>
-    private string BaseUrl => Configuration.UseDefaultBaseUrl ? baseUrl : Configuration.BaseUrlLocation;
+    private string BaseUrl => Configuration.UseDefaultConfigurationUrl
+      ? baseUrl
+      : Configuration.ConfigurationUrlLocation.Replace(@"/configuration", string.Empty);
 
     /// <summary>
     /// Configuration URL
@@ -69,9 +71,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote
     /// <summary>
     /// Spatialreferences URL
     /// </summary>
-    protected string SpatialReferenceUrl => Configuration.UseDefaultSwfUrl
+    protected string SpatialReferenceUrl => Configuration.UseDefaultStreetSmartUrl
       ? string.Concat(apiUrl, spatialReferencesXml)
-      : Configuration.SwfLocation.Replace(apiSwf, spatialReferencesXml);
+      : Configuration.StreetSmartLocation.Replace(apiPage, spatialReferencesXml);
 
     /// <summary>
     /// Recordings URL

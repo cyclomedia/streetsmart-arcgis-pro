@@ -101,9 +101,9 @@ namespace StreetSmartArcGISPro.Utilities
     {
       Settings settings = Settings.Instance;
       MySpatialReference recordingSpatialReference = settings.RecordingLayerCoordinateSystem;
-      string epsgCode = (spatialReference == null)
-        ? ((recordingSpatialReference == null)
-          ? ($"EPSG:{MapView.Active?.Map?.SpatialReference.Wkid ?? 0}")
+      string epsgCode = spatialReference == null
+        ? (recordingSpatialReference == null
+          ? $"EPSG:{MapView.Active?.Map?.SpatialReference.Wkid ?? 0}"
           : recordingSpatialReference.SRSName)
         : spatialReference.SRSName;
 
@@ -111,9 +111,9 @@ namespace StreetSmartArcGISPro.Utilities
       {
         MySpatialReferenceList spatialReferences = MySpatialReferenceList.Instance;
         spatialReference = spatialReferences.GetItem(epsgCode) ??
-                           (spatialReferences.Aggregate<MySpatialReference, MySpatialReference>(null,
+                           spatialReferences.Aggregate<MySpatialReference, MySpatialReference>(null,
                              (current, spatialReferenceComp) =>
-                               (spatialReferenceComp.ArcGisSpatialReference != null) ? spatialReferenceComp : current));
+                               spatialReferenceComp.ArcGisSpatialReference != null ? spatialReferenceComp : current);
 
         if (spatialReference != null)
         {

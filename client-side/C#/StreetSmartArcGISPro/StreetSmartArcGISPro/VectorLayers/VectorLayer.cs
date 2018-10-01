@@ -33,9 +33,7 @@ using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-using GlobeSpotterAPI;
 
-using StreetSmartArcGISPro.AddIns.Modules;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.File.Layers;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
@@ -95,7 +93,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       _selection = null;
       _updateMeasurements = false;
 
-      StreetSmart streetSmart = StreetSmart.Current;
+      AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
       _viewerList = streetSmart.ViewerList;
       _measurementList = streetSmart.MeasurementList;
       _ci = CultureInfo.InvariantCulture;
@@ -123,9 +121,9 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public bool GmlChanged { get; private set; }
 
-    public string Name => (Layer?.Name ?? string.Empty);
+    public string Name => Layer?.Name ?? string.Empty;
 
-    public bool IsVisible => (Layer != null) && Layer.IsVisible;
+    public bool IsVisible => Layer != null && Layer.IsVisible;
 
     public bool IsVisibleInstreetSmart
     {
@@ -154,7 +152,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<bool> InitializeEventsAsync()
     {
-      bool result = (Layer.ConnectionStatus == ConnectionStatus.Connected);
+      bool result = Layer.ConnectionStatus == ConnectionStatus.Connected;
 
       if (result)
       {
@@ -199,8 +197,11 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         foreach (var viewer in viewers)
         {
-          double distance = viewer.OverlayDrawDistance;
-          RecordingLocation recordingLocation = viewer.Location;
+          ConstantsViewer constants = ConstantsViewer.Instance;
+          double distance = constants.OverlayDrawDistance;
+
+          // Todo: get the recording location from the viewer location
+          object recordingLocation = viewer.Coordinate;
 
           if (recordingLocation != null)
           {
@@ -213,8 +214,9 @@ namespace StreetSmartArcGISPro.VectorLayers
               distance = distance/factor;
             }
 
-            double x = recordingLocation.X;
-            double y = recordingLocation.Y;
+            // Todo: get the x and the y location from the recording location
+            double x = 0.0;
+            double y = 0.0;
             double xMin = x - distance;
             double xMax = x + distance;
             double yMin = y - distance;
@@ -269,7 +271,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               Row row = existsResult.Current;
               long objectId = row.GetObjectID();
 
-              if ((_selection == null) || (!_selection.Contains(objectId)))
+              if (_selection == null || !_selection.Contains(objectId))
               {
                 Feature feature = row as Feature;
                 var fieldvalues = new Dictionary<string, string> {{FieldUri, uri}, {FieldObjectId, objectId.ToString()}};
@@ -278,7 +280,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
                 Geometry copyGeometry = geometry;
 
-                if ((geometry != null) && (layerSpatRef.Wkid != 0))
+                if (geometry != null && layerSpatRef.Wkid != 0)
                 {
                   ProjectionTransformation projection = ProjectionTransformation.Create(layerSpatRef, cyclSpatRef);
                   copyGeometry = GeometryEngine.Instance.ProjectEx(geometry, projection);
@@ -395,18 +397,18 @@ namespace StreetSmartArcGISPro.VectorLayers
         CIMColor cimColor = symbol?.GetColor();
         double[] colorValues = cimColor?.Values;
 
-        int red = ((colorValues != null) && (colorValues.Length >= 1)) ? ((int) colorValues[0]) : 255;
-        int green = ((colorValues != null) && (colorValues.Length >= 2)) ? ((int) colorValues[1]) : 255;
-        int blue = ((colorValues != null) && (colorValues.Length >= 3)) ? ((int) colorValues[2]) : 255;
-        int alpha = ((colorValues != null) && (colorValues.Length >= 4)) ? ((int) colorValues[3]) : 255;
+        int red = colorValues != null && colorValues.Length >= 1 ? (int) colorValues[0] : 255;
+        int green = colorValues != null && colorValues.Length >= 2 ? (int) colorValues[1] : 255;
+        int blue = colorValues != null && colorValues.Length >= 3 ? (int) colorValues[2] : 255;
+        int alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
         color = Color.FromArgb(alpha, red, green, blue);
       });
 
       GmlChanged = (Color != color);
       Color = color;
       string newGml = $"{result}</wfs:FeatureCollection>";
-      GmlChanged = ((newGml != Gml) || GmlChanged);
-      return (Gml = newGml);
+      GmlChanged = newGml != Gml || GmlChanged;
+      return Gml = newGml;
     }
 
     public async Task<double> GetOffsetZAsync()
@@ -512,9 +514,9 @@ namespace StreetSmartArcGISPro.VectorLayers
               Geometry geometry = feature?.GetShape();
               long objectId = feature?.GetObjectID() ?? -1;
 
-              if ((geometry != null) && (objectId != -1))
+              if (geometry != null && objectId != -1)
               {
-                Measurement measurement = _measurementList.Get(objectId) ?? (await _measurementList.GetAsync(geometry));
+                Measurement measurement = _measurementList.Get(objectId) ?? await _measurementList.GetAsync(geometry);
                 thisMeasurement = true;
                 _measurementList.DrawPoint = false;
                 EditTools editTool = _vectorLayerList.EditTool;
@@ -586,7 +588,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
       }
 
-      if ((!contains) && (_selection != null))
+      if (!contains && _selection != null)
       {
         Measurements = null;
         _selection = null;

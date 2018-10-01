@@ -23,8 +23,6 @@ using System.Windows.Data;
 
 using StreetSmartArcGISPro.Utilities;
 
-using ApiMeasurementPoint = GlobeSpotterAPI.MeasurementPoint;
-
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
   class MeasurementRelEst : IValueConverter
@@ -33,10 +31,13 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      ApiMeasurementPoint point = value as ApiMeasurementPoint;
-      bool reliableEstimate = point?.reliableEstimate ?? false;
-      bool stdef = point != null && !double.IsNaN(point.Std_x) && !double.IsNaN(point.Std_y) &&
-                   !double.IsNaN(point.Std_z);      
+      // Todo: parse value, to measurementPoint to reliableStimate
+      object point = value;
+      bool reliableEstimatea = true;
+      double stdx = 0, stdy = 0, stdz = 0;
+      bool reliableEstimate = reliableEstimatea;
+      bool stdef = point != null && !double.IsNaN(stdx) && !double.IsNaN(stdy) &&
+                   !double.IsNaN(stdz);      
       var circle = new Bitmap(18, 18);
 
       using (var ga = Graphics.FromImage(circle))

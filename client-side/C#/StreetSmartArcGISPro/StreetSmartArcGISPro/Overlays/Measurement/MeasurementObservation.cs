@@ -28,12 +28,8 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
-using GlobeSpotterAPI;
-
-using StreetSmartArcGISPro.AddIns.Modules;
-
-using ApiPoint = GlobeSpotterAPI.MeasurementPoint;
+using StreetSmart.Common.Factories;
+using StreetSmart.Common.Interfaces.Data;
 using DockPanestreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using Point = System.Windows.Point;
 
@@ -75,7 +71,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public string ImageId
     {
-      get { return _imageId; }
+      get => _imageId;
       set
       {
         _imageId = value;
@@ -130,10 +126,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       _measurementPoint = measurementPoint;
       ImageId = imageId;
       Point = observationPoint;
-      Match = match;      
-      StreetSmart streetSmart = StreetSmart.Current;
+      Match = match;
+      AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
       ViewerList viewerList = streetSmart.ViewerList;
-      Viewer = viewerList.Get(imageId);
+      Viewer = viewerList.GetImageId(imageId);
 
       // event listeners
       _measurementPoint.PropertyChanged += OnPropertyMeasurementPointChanged;
@@ -153,7 +149,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       _disposeInnerLine?.Dispose();
       _disposeOuterLine?.Dispose();
       Viewer = null;
-      StreetSmart streetSmart = StreetSmart.Current;
+      AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
       ViewerList viewerList = streetSmart.ViewerList;
 
       // event listeners
@@ -172,8 +168,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public void LookAtMe()
     {
-      ApiPoint point = _measurementPoint.ApiPoint;
-      Point3D coord = new Point3D(point.x, point.y, point.z);
+      // Todo: add apipoint from measurement point, add the coordinates x, y and z to the coord object
+      ICoordinate coord = null;
       DockPanestreetSmart streetSmart = DockPanestreetSmart.Show();
 
       if (streetSmart != null)

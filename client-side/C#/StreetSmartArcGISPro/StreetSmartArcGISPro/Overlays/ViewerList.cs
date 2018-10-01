@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using StreetSmart.Common.Interfaces.API;
 
 namespace StreetSmartArcGISPro.Overlays
 {
@@ -28,7 +29,7 @@ namespace StreetSmartArcGISPro.Overlays
 
   #endregion
 
-  public class ViewerList : Dictionary<uint, Viewer>
+  public class ViewerList : Dictionary<IPanoramaViewer, Viewer>
   {
     #region Events
 
@@ -53,32 +54,32 @@ namespace StreetSmartArcGISPro.Overlays
       Clear();
     }
 
-    public Viewer Get(uint viewerId)
+    public Viewer GetViewer(IPanoramaViewer panoramaViewer)
     {
-      return ContainsKey(viewerId) ? this[viewerId] : null;
+      return ContainsKey(panoramaViewer) ? this[panoramaViewer] : null;
     }
 
-    public Viewer Get(string imageId)
+    public Viewer GetImageId(string imageId)
     {
-      return Viewers.Aggregate<Viewer, Viewer>(null, (current, viewer) => (viewer.ImageId == imageId) ? viewer : current);
+      return Viewers.Aggregate<Viewer, Viewer>(null, (current, viewer) => viewer.ImageId == imageId ? viewer : current);
     }
 
-    public void Add(uint viewerId, string imageId, double overlayDrawDistance)
+    public void Add(IPanoramaViewer panoramaViewer, string imageId)
     {
-      Viewer viewer = new Viewer(viewerId, imageId, overlayDrawDistance);
+      Viewer viewer = new Viewer(imageId);
       viewer.PropertyChanged += OnViewerPropertyChanged;
-      Add(viewerId, viewer);
+      Add(panoramaViewer, viewer);
       ViewerAdded?.Invoke(viewer);
     }
 
-    public void Delete(uint viewerId)
+    public void Delete(IPanoramaViewer panoramaViewer)
     {
-      if (ContainsKey(viewerId))
+      if (ContainsKey(panoramaViewer))
       {
-        Viewer viewer = this[viewerId];
+        Viewer viewer = this[panoramaViewer];
         viewer.PropertyChanged -= OnViewerPropertyChanged;
         viewer.Dispose();
-        Remove(viewerId);
+        Remove(panoramaViewer);
         ViewerRemoved?.Invoke(viewer);
       }
     }

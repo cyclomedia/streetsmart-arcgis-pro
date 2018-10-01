@@ -30,7 +30,6 @@ using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-using StreetSmartArcGISPro.AddIns.Modules;
 using StreetSmartArcGISPro.CycloMediaLayers;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
@@ -75,7 +74,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       _updateHeight = false;
       _currentToolId = string.Empty;
-      StreetSmart modulestreetSmart = StreetSmart.Current;
+      AddIns.Modules.StreetSmart modulestreetSmart = AddIns.Modules.StreetSmart.Current;
       _measurementList = modulestreetSmart.MeasurementList;
       _cycloMediaGroupLayer = modulestreetSmart.CycloMediaGroupLayer;
       EditTool = EditTools.NoEditTool;
@@ -130,12 +129,12 @@ namespace StreetSmartArcGISPro.VectorLayers
     private async Task AddLayerAsync(Layer layer)
     {
       FeatureLayer featureLayer = layer as FeatureLayer;
-      StreetSmart streetSmart = StreetSmart.Current;
+      AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
       CycloMediaGroupLayer cycloGrouplayer = streetSmart?.CycloMediaGroupLayer;
 
-      if ((featureLayer != null) && (cycloGrouplayer != null) && (!cycloGrouplayer.IsKnownName(featureLayer.Name)))
+      if (featureLayer != null && cycloGrouplayer != null && !cycloGrouplayer.IsKnownName(featureLayer.Name))
       {
-        if (!this.Aggregate(false, (current, vecLayer) => (vecLayer.Layer == layer) || current))
+        if (!this.Aggregate(false, (current, vecLayer) => vecLayer.Layer == layer || current))
         {
           var vectorLayer = new VectorLayer(featureLayer, this);
           bool initialized = await vectorLayer.InitializeEventsAsync();

@@ -211,7 +211,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           Map map = MapView.Active?.Map;
 
-          if ((map != null) && GroupLayer != null)
+          if (map != null && GroupLayer != null)
           {
             map.RemoveLayer(GroupLayer);
           }

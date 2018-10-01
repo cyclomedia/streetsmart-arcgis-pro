@@ -21,8 +21,9 @@ using System.Linq;
 
 using ArcGIS.Desktop.Framework.Contracts;
 
-using StreetSmartArcGISPro.AddIns.Modules;
 using StreetSmartArcGISPro.CycloMediaLayers;
+
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
@@ -39,7 +40,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     protected RecentRecordingLayer()
     {
       IsChecked = false;
-      StreetSmart streetSmart = StreetSmart.Current;
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       CycloMediaGroupLayer groupLayer = streetSmart.CycloMediaGroupLayer;
 
       if (groupLayer != null)
@@ -67,7 +68,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     protected override async void OnClick()
     {
       OnUpdate();
-      StreetSmart streetSmart = StreetSmart.Current;
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
 
       if (IsChecked)
       {

@@ -26,15 +26,12 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 
-using GlobeSpotterAPI;
-
 using StreetSmartArcGISPro.AddIns.DockPanes;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using ApiMeasurementPoint = GlobeSpotterAPI.MeasurementPoint;
 using streetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
@@ -46,7 +43,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private readonly GeometryType _geometryType;
     private readonly Settings _settings;
     private readonly MeasurementList _measurementList;
-    private readonly API _api;
+    private readonly object _api;
     private readonly MeasurementDetail _detailPane;
     private readonly CultureInfo _ci;
 
@@ -76,7 +73,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Constructor
 
-    public Measurement(int entityId, string entityType, bool drawPoint, API api)
+    public Measurement(int entityId, string entityType, bool drawPoint, object api)
     {
       _detailPane = MeasurementDetail.Get();
       streetSmart streetSmart = streetSmart.Current;
@@ -196,7 +193,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _api?.OpenMeasurementPoint(EntityId, pointId);
+        // Todo: open measurement point, EntityId, pointId
       }
     }
 
@@ -204,7 +201,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _api.RemoveMeasurementPointObservation(EntityId, pointId, imageId);
+        // Todo: remove measurement point, EntityId, pointId, imageId
       }
     }
 
@@ -212,7 +209,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _api?.CloseMeasurementPoint(EntityId, pointId);
+        // Todo: close measurement point, EntityId, pointId
       }
     }
 
@@ -222,7 +219,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         (null, (current, value) => value.IsSame(point) ? value : current);
     }
 
-    public async Task UpdatePointAsync(int pointId, ApiMeasurementPoint apiMeasurementPoint, int index)
+    public async Task UpdatePointAsync(int pointId, object apiMeasurementPoint, int index)
     {
       if (!ContainsKey(pointId))
       {
@@ -241,7 +238,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (IsOpen && GlobeSpotterConfiguration.MeasurePermissions)
       {
         _measurementList.Open = null;
-        _api?.CloseMeasurement(EntityId);
+        // ToDo: Close measurement, EntityId
       }
     }
 
@@ -266,7 +263,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       if (IsPointMeasurement && GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _api?.SetFocusEntity(EntityId);
+        // Todo: set focus EntityId
         _measurementList.AddMeasurementPoint(EntityId);
       }
     }
@@ -280,7 +277,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _api?.RemoveEntity(EntityId);
+        // Todo: remove EntityId
       }
 
       Dispose();
@@ -384,20 +381,21 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public int GetMeasurementPointIndex(int pointId)
     {
-      return GlobeSpotterConfiguration.MeasurePermissions ? (_api?.GetMeasurementPointIndex(EntityId, pointId) ?? 0) : 0;
+      // Todo: get measurement point index (EntityId, pointId)
+      return GlobeSpotterConfiguration.MeasurePermissions ? 0 : 0;
     }
 
-    public ApiMeasurementPoint GetApiPoint(int pointId)
+    public object GetApiPoint(int pointId)
     {
-      PointMeasurementData measurementData = _api.GetMeasurementPointData(EntityId, pointId);
-      return measurementData.measurementPoint;
+      // toDo: get point measurement data, pointId
+      return null;
     }
 
     public void RemoveMeasurementPoint(int pointId)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _api?.RemoveMeasurementPoint(EntityId, pointId);
+        // Todo: remove measurement point: EntityId, pointId
       }
     }
 
@@ -406,25 +404,28 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       _measurementList.AddMeasurementPoint(EntityId);
     }
 
-    public void OpenNearestImage(ApiMeasurementPoint apiPoint)
+    public void OpenNearestImage(object apiPoint)
     {
-      double x = apiPoint.x;
-      double y = apiPoint.y;
-      double z = apiPoint.z;
+      // Todo: get apipoint x, y, z
+      double x = 0; // apiPoint.x;
+      double y = 0; // apiPoint.y;
+      double z = 0; // apiPoint.z;
       string coordinate = string.Format(_ci, "{0:#0.#},{1:#0.#},{2:#0.#}", x, y, z);
-      _api?.OpenNearestImage(coordinate, 1);
+      // Todo: open nearest image: coordinate, 1
     }
 
-    public void LookAtMeasurement(ApiMeasurementPoint apiPoint)
+    public void LookAtMeasurement(object apiPoint)
     {
-      double x = apiPoint.x;
-      double y = apiPoint.y;
-      double z = apiPoint.z;
-      int[] viewerIds = _api?.GetViewerIDs() ?? new int[0];
+      // Todo: get apipoint x, y, z
+      // double x = 0; // apiPoint.x;
+      // double y = 0; // apiPoint.y;
+      // double z = 0; // apiPoint.z;
+      // Todo: get the viewerIds
+      int[] viewerIds = new int[0];
 
       foreach (var viewerId in viewerIds)
       {
-        _api?.LookAtCoordinate((uint) viewerId, x, y, z);
+        // Todo: for every viewer, look to the coordinate of the measurement: viewerId, x, y, z
       }
     }
 
@@ -432,8 +433,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions && point != null)
       {
-        var point3D = new Point3D(point.X, point.Y, point.Z);
-        _api?.CreateMeasurementPoint(EntityId, point3D);
+        // Todo: create measurement point: point.X, point.Y, point.Z, EntityId
       }
     }
 
@@ -500,7 +500,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               {
                 MeasurementPoint msPoint = elem.Key;
                 int pointId = msPoint.PointId;
-                _api?.RemoveMeasurementPoint(EntityId, pointId);
+                // Todo: Remove measurement point: EntityId, pointId
               }
             }
 

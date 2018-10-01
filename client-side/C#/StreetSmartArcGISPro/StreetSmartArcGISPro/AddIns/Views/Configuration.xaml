@@ -43,30 +43,30 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <StackPanel Grid.Row="0" Margin="5,10,5,0">
-      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="Base url" />
-      <CheckBox Content="Use default" HorizontalAlignment="Stretch" IsChecked="{Binding UseDefaultBaseUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="Configuration url" />
+      <CheckBox Content="Use default" HorizontalAlignment="Stretch" IsChecked="{Binding UseDefaultConfigurationUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
       <DockPanel Margin="5,5,5,0">
         <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" Text="Location" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
-        <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseDefaultBaseUrl, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
+        <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseDefaultConfigurationUrl, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
           <TextBox.Text>
             <MultiBinding Converter="{StaticResource ConfigurationServiceConverter}">
-              <Binding Path="BaseUrlLocation" />
-              <Binding Path="UseDefaultBaseUrl" Converter="{StaticResource InverseBooleanConverter}"/>
+              <Binding Path="ConfigurationUrlLocation" />
+              <Binding Path="UseDefaultConfigurationUrl" Converter="{StaticResource InverseBooleanConverter}"/>
             </MultiBinding>
           </TextBox.Text>
         </TextBox>
       </DockPanel>
     </StackPanel>
     <StackPanel Grid.Row="1" Margin="5,10,5,0">
-      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="swf" />
-      <CheckBox Content="Use default" HorizontalAlignment="Stretch" IsChecked="{Binding UseDefaultSwfUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="Street Smart location" />
+      <CheckBox Content="Use default" HorizontalAlignment="Stretch" IsChecked="{Binding UseDefaultStreetSmartUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
       <DockPanel Margin="5,5,5,0">
         <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" Text="Location" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
-        <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseDefaultSwfUrl, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
+        <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseDefaultStreetSmartUrl, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
           <TextBox.Text>
             <MultiBinding Converter="{StaticResource ConfigurationServiceConverter}">
-              <Binding Path="SwfLocation" />
-              <Binding Path="UseDefaultSwfUrl" Converter="{StaticResource InverseBooleanConverter}"/>
+              <Binding Path="StreetSmartLocation" />
+              <Binding Path="UseDefaultStreetSmartUrl" Converter="{StaticResource InverseBooleanConverter}"/>
             </MultiBinding>
           </TextBox.Text>
         </TextBox>

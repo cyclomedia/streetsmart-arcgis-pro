@@ -21,18 +21,21 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
+
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-using GlobeSpotterAPI;
-using StreetSmartArcGISPro.AddIns.Modules;
+
+using StreetSmart.Common.Interfaces.Data;
+
 using StreetSmartArcGISPro.Configuration.File;
 
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+
 using WinPoint = System.Windows.Point;
 using SystCol = System.Drawing.Color;
 
@@ -42,12 +45,8 @@ namespace StreetSmartArcGISPro.Overlays
   {
     #region Constants
 
-    private const double BorderSize = 1.5;
-    private const double BorderSizeBlinking = 2.5;
     private const double Size = 96.0;
-    private const byte BlinkAlpha = 255;
-    private const byte NormalAlpha = 128;
-    private const int BlinkTime = 300;
+    private const byte Alpha = 192;
 
     #endregion
 
@@ -57,30 +56,25 @@ namespace StreetSmartArcGISPro.Overlays
 
     #endregion
 
-    #region Constructor
-
-    protected ViewingCone()
-    {
-      _active = false;
-      _blinking = false;
-    }
-
-    #endregion
-
     #region Members
 
+    private ICoordinate _coordinate;
     private MapPoint _mapPoint;
-    private double _angle;
-    private double _hFov;
-    private bool _blinking;
-    private Timer _blinkTimer;
-    private bool _active;
+    private IOrientation _orientation;
     private bool _isInitialized;
     private IDisposable _disposePolygon;
-    private IDisposable _disposePolyLine;
     private SystCol? _color;
 
     #endregion Members
+
+    #region Constructors
+
+    public ViewingCone()
+    {
+      Coordinate = null;
+    }
+
+    #endregion
 
     #region Properties
 
@@ -94,19 +88,29 @@ namespace StreetSmartArcGISPro.Overlays
       }
     }
 
+    public ICoordinate Coordinate
+    {
+      get => _coordinate;
+      private set
+      {
+        _coordinate = value;
+        OnPropertyChanged();
+      }
+    }
+
     #endregion
 
     #region Functions
 
-    protected async Task InitializeAsync(RecordingLocation location, double angle, double hFov, Color color)
+    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, Color color)
     {
-      _angle = angle;
-      _hFov = hFov;
+      Coordinate = coordinate;
+      _orientation = orientation;
       Color = color;
       _isInitialized = true;
 
-      double x = location.X;
-      double y = location.Y;
+      double x = coordinate.X ?? 0.0;
+      double y = coordinate.Y ?? 0.0;
       Settings settings = Settings.Instance;
       MySpatialReference spatRel = settings.CycloramaViewerCoordinateSystem;
 
@@ -117,7 +121,7 @@ namespace StreetSmartArcGISPro.Overlays
         SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
         MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
 
-        if ((mapSpatialReference != null) && spatialReference.Wkid != mapSpatialReference.Wkid)
+        if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)
         {
           ProjectionTransformation projection = ProjectionTransformation.Create(spatialReference, mapSpatialReference);
           _mapPoint = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
@@ -135,7 +139,6 @@ namespace StreetSmartArcGISPro.Overlays
     public void Dispose()
     {
       _disposePolygon?.Dispose();
-      _disposePolyLine?.Dispose();
       Color = null;
 
       if (_isInitialized)
@@ -145,30 +148,22 @@ namespace StreetSmartArcGISPro.Overlays
       }
     }
 
-    public async Task UpdateAsync(double angle, double hFov)
+    public async Task UpdateAsync(IOrientation orientation)
     {
       if (_isInitialized)
       {
         const double epsilon = 1.0;
-        bool update = (!(Math.Abs(_angle - angle) < epsilon)) || (!(Math.Abs(_hFov - hFov) < epsilon));
+        double angle = orientation.Yaw ?? 0.0;
+        double hFov = orientation.HFov ?? 0.0;
+        double thisAngle = _orientation.Yaw ?? 0.0;
+        double thishFov = _orientation.HFov ?? 0.0;
+        bool update = !(Math.Abs(thisAngle - angle) < epsilon) || !(Math.Abs(thishFov - hFov) < epsilon);
 
         if (update)
         {
-          _hFov = hFov;
-          _angle = angle;
+          _orientation = orientation;
           await RedrawConeAsync();
         }
-      }
-    }
-
-    public async Task SetActiveAsync(bool active)
-    {
-      _blinking = active;
-      _active = active;
-
-      if (_isInitialized)
-      {
-        await RedrawConeAsync();
       }
     }
 
@@ -176,7 +171,7 @@ namespace StreetSmartArcGISPro.Overlays
     {
       await QueuedTask.Run(() =>
       {
-        StreetSmart streetSmart = StreetSmart.Current;
+        StreetSmartModule streetSmart = StreetSmartModule.Current;
 
         if (streetSmart.InsideScale() && !_mapPoint.IsEmpty && Color != null)
         {
@@ -189,16 +184,16 @@ namespace StreetSmartArcGISPro.Overlays
           _mapPoint = GeometryEngine.Instance.ProjectEx(_mapPoint, projection) as MapPoint;
 
           WinPoint point = thisView.MapToScreen(_mapPoint);
-          double angleh = (_hFov*Math.PI)/360;
-          double angle = (((270 + _angle)%360)*Math.PI)/180;
+          double angleh = (_orientation.HFov ?? 0.0) * Math.PI / 360;
+          double angle = (270 + (_orientation.Yaw ?? 0.0)) % 360 * Math.PI / 180;
           double angle1 = angle - angleh;
           double angle2 = angle + angleh;
           double x = point.X;
           double y = point.Y;
-          double size = Size/2;
+          double size = Size / 2;
 
-          WinPoint screenPoint1 = new WinPoint(x + size*Math.Cos(angle1), y + size*Math.Sin(angle1));
-          WinPoint screenPoint2 = new WinPoint(x + size*Math.Cos(angle2), y + size*Math.Sin(angle2));
+          WinPoint screenPoint1 = new WinPoint(x + size * Math.Cos(angle1), y + size * Math.Sin(angle1));
+          WinPoint screenPoint2 = new WinPoint(x + size * Math.Cos(angle2), y + size * Math.Sin(angle2));
           MapPoint point1 = thisView.ScreenToMap(screenPoint1);
           MapPoint point2 = thisView.ScreenToMap(screenPoint2);
 
@@ -209,7 +204,7 @@ namespace StreetSmartArcGISPro.Overlays
           polygonPointList.Add(_mapPoint);
           Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
 
-          Color colorPolygon = SystCol.FromArgb(_blinking ? BlinkAlpha : NormalAlpha, thisColor);
+          Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
           CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
           CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
           polygonSymbol.SetColor(cimColorPolygon);
@@ -217,48 +212,14 @@ namespace StreetSmartArcGISPro.Overlays
           CIMSymbolReference polygonSymbolReference = polygonSymbol.MakeSymbolReference();
           IDisposable disposePolygon = thisView.AddOverlay(polygon, polygonSymbolReference);
 
-          IList<MapPoint> linePointList = new List<MapPoint>();
-          linePointList.Add(point1);
-          linePointList.Add(_mapPoint);
-          linePointList.Add(point2);
-          Polyline polyline = PolylineBuilder.CreatePolyline(linePointList);
-
-          Color colorLine = _active ? SystCol.Yellow : SystCol.Gray;
-          CIMColor cimColorLine = ColorFactory.Instance.CreateColor(colorLine);
-          CIMLineSymbol cimLineSymbol = SymbolFactory.Instance.DefaultLineSymbol;
-          cimLineSymbol.SetColor(cimColorLine);
-          cimLineSymbol.SetSize(_blinking ? BorderSizeBlinking : BorderSize);
-          CIMSymbolReference lineSymbolReference = cimLineSymbol.MakeSymbolReference();
-          IDisposable disposePolyLine = thisView.AddOverlay(polyline, lineSymbolReference);
-
           _disposePolygon?.Dispose();
           _disposePolygon = disposePolygon;
-          _disposePolyLine?.Dispose();
-          _disposePolyLine = disposePolyLine;
-
-          if (_blinking)
-          {
-            var blinkEvent = new AutoResetEvent(true);
-            var blinkTimerCallBack = new TimerCallback(ResetBlinking);
-            _blinkTimer = new Timer(blinkTimerCallBack, blinkEvent, BlinkTime, -1);
-          }
         }
         else
         {
           _disposePolygon?.Dispose();
-          _disposePolyLine?.Dispose();
         }
       });
-    }
-
-    #endregion
-
-    #region Thread functions
-
-    private async void ResetBlinking(object args)
-    {
-      _blinking = false;
-      await RedrawConeAsync();
     }
 
     #endregion

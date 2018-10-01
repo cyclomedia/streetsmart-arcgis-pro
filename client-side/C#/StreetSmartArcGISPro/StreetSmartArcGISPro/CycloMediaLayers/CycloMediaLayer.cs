@@ -316,11 +316,15 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     private async Task UpdateSpatialReferenceSettings()
     {
       SpatialReference spatialReference = await GetSpatialReferenceAsync();
-      MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
-      MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
-      Settings settings = Settings.Instance;
-      settings.RecordingLayerCoordinateSystem = mySpatialReference;
-      settings.Save();
+
+      if (spatialReference != null)
+      {
+        MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
+        MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
+        Settings settings = Settings.Instance;
+        settings.RecordingLayerCoordinateSystem = mySpatialReference;
+        settings.Save();
+      }
     }
 
     private async Task<FeatureLayer> CreateLayerAsync(Project project, string fcName, ILayerContainerEdit layerContainer)

@@ -40,11 +40,11 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly FileConfiguration _configuration;
     private readonly FileLogin _login;
 
-    private readonly bool _useDefaultBaseUrl;
-    private readonly string _baseUrlLocation;
+    private readonly bool _useDefaultConfigurationUrl;
+    private readonly string _configurationUrlLocation;
 
-    private readonly bool _useDefaultSwfUrl;
-    private readonly string _swfLocation;
+    private readonly bool _useDefaultStreetSmartUrl;
+    private readonly string _streetSmartLocation;
 
     private readonly bool _useProxyServer;
     private readonly string _proxyAddress;
@@ -64,11 +64,11 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _configuration = FileConfiguration.Instance;
       _login = FileLogin.Instance;
 
-      _useDefaultBaseUrl = _configuration.UseDefaultBaseUrl;
-      _baseUrlLocation = _configuration.BaseUrlLocation;
+      _useDefaultConfigurationUrl = _configuration.UseDefaultConfigurationUrl;
+      _configurationUrlLocation = _configuration.ConfigurationUrlLocation;
 
-      _useDefaultSwfUrl = _configuration.UseDefaultSwfUrl;
-      _swfLocation = _configuration.SwfLocation;
+      _useDefaultStreetSmartUrl = _configuration.UseDefaultStreetSmartUrl;
+      _streetSmartLocation = _configuration.StreetSmartLocation;
 
       _useProxyServer = _configuration.UseProxyServer;
       _proxyAddress = _configuration.ProxyAddress;
@@ -87,29 +87,29 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     /// <summary>
     /// Base url
     /// </summary>
-    public bool UseDefaultBaseUrl
+    public bool UseDefaultConfigurationUrl
     {
-      get => _configuration.UseDefaultBaseUrl;
+      get => _configuration.UseDefaultConfigurationUrl;
       set
       {
-        if (_configuration.UseDefaultBaseUrl != value)
+        if (_configuration.UseDefaultConfigurationUrl != value)
         {
           IsModified = true;
-          _configuration.UseDefaultBaseUrl = value;
+          _configuration.UseDefaultConfigurationUrl = value;
           NotifyPropertyChanged();
         }
       }
     }
 
-    public string BaseUrlLocation
+    public string ConfigurationUrlLocation
     {
-      get => _configuration.BaseUrlLocation;
+      get => _configuration.ConfigurationUrlLocation;
       set
       {
-        if (_configuration.BaseUrlLocation != value)
+        if (_configuration.ConfigurationUrlLocation != value)
         {
           IsModified = true;
-          _configuration.BaseUrlLocation = value;
+          _configuration.ConfigurationUrlLocation = value;
           NotifyPropertyChanged();
         }
       }
@@ -118,29 +118,29 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     /// <summary>
     /// Swf url
     /// </summary>
-    public bool UseDefaultSwfUrl
+    public bool UseDefaultStreetSmartUrl
     {
-      get => _configuration.UseDefaultSwfUrl;
+      get => _configuration.UseDefaultStreetSmartUrl;
       set
       {
-        if (_configuration.UseDefaultSwfUrl != value)
+        if (_configuration.UseDefaultStreetSmartUrl != value)
         {
           IsModified = true;
-          _configuration.UseDefaultSwfUrl = value;
+          _configuration.UseDefaultStreetSmartUrl = value;
           NotifyPropertyChanged();
         }
       }
     }
 
-    public string SwfLocation
+    public string StreetSmartLocation
     {
-      get => _configuration.SwfLocation;
+      get => _configuration.StreetSmartLocation;
       set
       {
-        if (_configuration.SwfLocation != value)
+        if (_configuration.StreetSmartLocation != value)
         {
           IsModified = true;
-          _configuration.SwfLocation = value;
+          _configuration.StreetSmartLocation = value;
           NotifyPropertyChanged();
         }
       }
@@ -273,11 +273,11 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     protected override Task CancelAsync()
     {
-      _configuration.UseDefaultBaseUrl = _useDefaultBaseUrl;
-      _configuration.BaseUrlLocation = _baseUrlLocation;
+      _configuration.UseDefaultConfigurationUrl = _useDefaultConfigurationUrl;
+      _configuration.ConfigurationUrlLocation = _configurationUrlLocation;
 
-      _configuration.UseDefaultSwfUrl = _useDefaultSwfUrl;
-      _configuration.SwfLocation = _swfLocation;
+      _configuration.UseDefaultStreetSmartUrl = _useDefaultStreetSmartUrl;
+      _configuration.StreetSmartLocation = _streetSmartLocation;
 
       _configuration.UseProxyServer = _useProxyServer;
       _configuration.ProxyAddress = _proxyAddress;

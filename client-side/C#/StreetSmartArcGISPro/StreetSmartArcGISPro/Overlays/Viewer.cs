@@ -18,7 +18,8 @@
 
 using System.Drawing;
 using System.Threading.Tasks;
-using GlobeSpotterAPI;
+
+using StreetSmart.Common.Interfaces.Data;
 
 namespace StreetSmartArcGISPro.Overlays
 {
@@ -26,22 +27,11 @@ namespace StreetSmartArcGISPro.Overlays
   {
     #region Members
 
-    private RecordingLocation _location;
     private string _imageId;
 
     #endregion
 
     #region Properties
-
-    public RecordingLocation Location
-    {
-      get => _location;
-      private set
-      {
-        _location = value;
-        OnPropertyChanged();
-      }
-    }
 
     public string ImageId
     {
@@ -53,22 +43,15 @@ namespace StreetSmartArcGISPro.Overlays
       }
     }
 
-    public uint ViewerId { get; }
-
-    public double OverlayDrawDistance { get; set; }
-
     public bool HasMarker { get; set; }
 
     #endregion
 
     #region Constructors
 
-    public Viewer(uint viewerId, string imageId, double overlayDrawDistance)
+    public Viewer(string imageId)
     {
-      Location = null;
-      ViewerId = viewerId;
       ImageId = imageId;
-      OverlayDrawDistance = overlayDrawDistance;
       HasMarker = false;
     }
 
@@ -76,11 +59,10 @@ namespace StreetSmartArcGISPro.Overlays
 
     #region Functions
 
-    public async Task SetAsync(RecordingLocation location, double angle, double hFov, Color color)
+    public async Task SetAsync(ICoordinate coordinate, IOrientation orientation, Color color)
     {
       Dispose();
-      Location = location;
-      await InitializeAsync(location, angle, hFov, color);
+      await InitializeAsync(coordinate, orientation, color);
     }
 
     #endregion

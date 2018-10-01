@@ -66,6 +66,11 @@ namespace StreetSmartArcGISPro.Configuration.File
     public string AddressLanguageCode { get; set; }
 
     /// <summary>
+    /// Address Database
+    /// </summary>
+    public string AddressDatabase { get; set; }
+
+    /// <summary>
     /// Size of the Cross Check
     /// </summary>
     public double CrossCheckSize { get; set; }
@@ -129,6 +134,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         MaxViewers = 4,
         OverlayDrawDistance = 30.0,
         AddressLanguageCode = "nl",
+        AddressDatabase = "CMDatabase",
         CrossCheckSize = 10.0,
         MeasurementPointSize = 5.0,
         MeasurementFontSize = 8.0f,

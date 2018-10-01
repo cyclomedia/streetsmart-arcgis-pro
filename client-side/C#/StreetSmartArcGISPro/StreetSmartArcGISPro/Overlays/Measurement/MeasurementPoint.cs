@@ -34,8 +34,6 @@ using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Utilities;
 
-using ApiObservation = GlobeSpotterAPI.MeasurementObservation;
-using ApiMeasurementPoint = GlobeSpotterAPI.MeasurementPoint;
 using streetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Point = System.Windows.Point;
 
@@ -61,7 +59,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private bool _open;
     private IDisposable _disposeText;
     private readonly IDictionary<string, MeasurementObservation> _observations;
-    private ApiMeasurementPoint _apiMeasurementPoint;
+    private object _apiMeasurementPoint;
     private bool _updatePoint;
     private bool _isDisposed;
 
@@ -95,12 +93,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public ApiMeasurementPoint ApiPoint
+    public object ApiPoint
     {
       get
       {
-        if (_apiMeasurementPoint != null && double.IsNaN(_apiMeasurementPoint.x) &&
-            double.IsNaN(_apiMeasurementPoint.y) && double.IsNaN(_apiMeasurementPoint.z))
+        // Todo: _apiMeasurementPoint x, y, z
+        if (_apiMeasurementPoint != null && double.IsNaN(0.0) &&
+            double.IsNaN(0.0) && double.IsNaN(0.0))
         {
           _apiMeasurementPoint = Measurement.GetApiPoint(PointId);
         }
@@ -174,14 +173,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Functions
 
-    public async Task UpdateObservationAsync(ApiObservation observation, Bitmap match)
+    public async Task UpdateObservationAsync(object observation, Bitmap match)
     {
-      string imageId = observation.imageId;
-      double x = observation.x;
-      double y = observation.y;
-      double z = observation.z;
-      double xDir = observation.Dir_x;
-      double yDir = observation.Dir_y;
+      // Todo: get observation data
+      string imageId = string.Empty; // observation.imageId;
+      double x = 0; // observation.x;
+      double y = 0; // observation.y;
+      double z = 0; // observation.z;
+      double xDir = 0.0; // observation.Dir_x;
+      double yDir = 0.0; // observation.Dir_y;
       MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
 
       if (_observations.ContainsKey(imageId))
@@ -281,17 +281,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public async Task UpdatePointAsync(ApiMeasurementPoint measurementPoint, int index)
+    public async Task UpdatePointAsync(object measurementPoint, int index)
     {
       if (!_updatePoint)
       {
         _updatePoint = true;
         Index = index;
 
-        ApiPoint = measurementPoint;
-        double x = measurementPoint.x;
-        double y = measurementPoint.y;
-        double z = measurementPoint.z;
+        ApiPoint = null;
+        // Todo: get measurementPoint x, y, z
+        double x = 0; // measurementPoint.x;
+        double y = 0; // measurementPoint.y;
+        double z = 0; // measurementPoint.z;
         Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
         LastPoint = LastPoint ?? Point;
 
@@ -324,7 +325,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     ptColl[_intId - 1] = point;
 
-                    if ((_intId == 1) && ((nrPoints + 1) == ptColl.Count))
+                    if (_intId == 1 && nrPoints + 1 == ptColl.Count)
                     {
                       ptColl[ptColl.Count - 1] = point;
                     }
@@ -373,7 +374,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   default:
                     if (_intId <= (nrPoints + 1))
                     {
-                      if ((_intId - 1) != nrPoints2)
+                      if (_intId - 1 != nrPoints2)
                       {
                         ptColl.Insert((_intId - 1), point);
                       }
@@ -399,7 +400,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
                   geometry = PolylineBuilder.CreatePolyline(ptColl, geometry.SpatialReference);
                 }
-                else if ((Measurement.IsPointMeasurement) && (ptColl.Count == 1))
+                else if (Measurement.IsPointMeasurement && ptColl.Count == 1)
                 {
                   geometry = ptColl[0];
                 }

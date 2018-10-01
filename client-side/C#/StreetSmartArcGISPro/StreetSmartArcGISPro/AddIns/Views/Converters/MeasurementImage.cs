@@ -49,7 +49,7 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
 
         ModulestreetSmart streetSmart = ModulestreetSmart.Current;
         ViewerList viewerList = streetSmart.ViewerList;
-        Viewer thisViewer = viewerList.Get(imageId);
+        Viewer thisViewer = viewerList.GetImageId(imageId);
         Color color = thisViewer?.Color ?? Color.Gray;
         Brush brush = new SolidBrush(Color.FromArgb(255, color));
 

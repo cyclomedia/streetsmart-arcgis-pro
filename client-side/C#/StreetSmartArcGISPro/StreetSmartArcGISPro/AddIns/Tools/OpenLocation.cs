@@ -27,7 +27,6 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 
-using StreetSmartArcGISPro.AddIns.Modules;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
@@ -35,6 +34,8 @@ using StreetSmartArcGISPro.CycloMediaLayers;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using WinPoint = System.Windows.Point;
+
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
@@ -160,7 +161,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           Envelope envelope = EnvelopeBuilder.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
           var features = activeView.GetFeatures(envelope);
 
-          StreetSmart streetSmart = StreetSmart.Current;
+          ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
           CycloMediaGroupLayer groupLayer = streetSmart?.CycloMediaGroupLayer;
 
           if (features != null && groupLayer != null)

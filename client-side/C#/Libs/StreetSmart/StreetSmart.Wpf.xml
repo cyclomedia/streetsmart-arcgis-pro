@@ -1,0 +1,2792 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StreetSmart.Wpf</name>
+    </assembly>
+    <members>
+        <member name="T:StreetSmart.Common.Exceptions.StreetSmartCloseViewerException">
+            <inheritdoc />
+            <summary>
+            This exception is thrown when there was an exception while closing a viewer
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Exceptions.StreetSmartImageNotFoundException">
+             <inheritdoc />
+             <summary>
+             This exception is thrown when no images can be found.
+             </summary>
+             <example>
+             This sample shows how to use the <see cref="T:StreetSmart.Common.Exceptions.StreetSmartImageNotFoundException"/> Exception.
+             <code>
+             using System;
+             using System.Collections.Generic;
+             using StreetSmart.Common.Exceptions;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private async void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", element);
+            
+                   // Initialize the api.
+                   await _api.Init(options);
+             
+                   // The open viewer options for open a new panorama viewer in EPSG:28992.
+                   IViewerOptions viewerOpt = ViewerOptionsFactory.Create(new List&lt;ViewerType&gt; {ViewerType.Panorama}, "EPSG:28992");
+            
+                   try
+                   {
+                     IList&lt;IViewer&gt; viewers = await _api.Open("Lange Haven 145, Schiedam", viewerOpt);
+                     // Todo: add functionality
+                   }
+                   catch (StreetSmartImageNotFoundException ex)
+                   {
+                     // image not found exception (ex)
+                   }
+                 }
+               }
+             }
+             </code>
+             </example>
+        </member>
+        <member name="T:StreetSmart.Common.Exceptions.StreetSmartLoginFailedException">
+             <inheritdoc />
+             <summary>
+             This exception is thrown when loggin fails.
+             </summary>
+             <example>
+             This sample shows how to use the <see cref="T:StreetSmart.Common.Exceptions.StreetSmartLoginFailedException"/> Exception.
+             <code>
+             using System;
+             using StreetSmart.Common.Exceptions;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private async void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api.
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", element);
+            
+                   try
+                   {
+                     // Initialize the api.
+                     await _api.Init(options);
+                     // Todo: add functionality
+                   }
+                   catch (StreetSmartLoginFailedException ex)
+                   {
+                     // login failed exception (ex)
+                   }
+                 }
+               }
+             }
+             </code>
+             </example>
+        </member>
+        <member name="T:StreetSmart.Common.Exceptions.StreetSmartViewerDoesNotExistException">
+            <inheritdoc />
+            <summary>
+            This exception is thrown when the image viewer no longer exists
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.AddressSettingsFactory">
+             <summary>
+             Factory for create address settings to use for address searches
+             </summary>
+             <example> 
+             This sample shows how to use the <see cref="T:StreetSmart.Common.Factories.AddressSettingsFactory"/>.
+             <code>
+             using System;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel _plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // Create a address settings that are used in the application
+                   string locale = "nl";
+                   string database = "CMDatabase";
+                   IAddressSettings addressSettings = AddressSettingsFactory.Create(locale, database);
+            
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api
+                   // The address settings are used in the initialization of the api.
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", addressSettings, element, 1);
+            
+                   // Initialize the api.
+                   await _api.Init(options);
+                 }
+               }
+             }
+             </code>
+             </example>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.AddressSettingsFactory.Create(System.String)">
+            <summary>
+            Create address settings to use for address searches, based on the current culture settings and the address database.
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.AddressSettingsFactory.Create(System.String)"/> method.
+            <code>
+            // Create an address settings that are used in the application
+            string database = "CMDatabase";
+            IAddressSettings addressSettings = AddressSettingsFactory.Create(database);
+            </code>
+            </example>
+            <param name="database">The name of the database. e.g. 'CMDatabase'</param>
+            <returns>The address settings interface to use for address searches</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.AddressSettingsFactory.Create(System.String,System.String)">
+            <summary>
+            Create address settings to use for address searches, based on the locale string and the address database.
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.AddressSettingsFactory.Create(System.String,System.String)"/> method.
+            <code>
+            // Create an address settings that are used in the application
+            string locale = "nl";
+            string database = "CMDatabase";
+            IAddressSettings addressSettings = AddressSettingsFactory.Create(locale, database);
+            </code>
+            </example>
+            <param name="locale">The locale to use. e.g. 'nl'</param>
+            <param name="database">The name of the database. e.g. 'CMDatabase'</param>
+            <returns>The address settings interface to use for address searches</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.AddressSettingsFactory.Create(System.Globalization.CultureInfo,System.String)">
+            <summary>
+            Create address settings to use for address searches, based on the locale culture and the address database.
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.AddressSettingsFactory.Create(System.Globalization.CultureInfo,System.String)"/> method.
+            <code>
+            // Create an address settings that are used in the application
+            CultureInfo ci = new CultureInfo("en-US");
+            string database = "CMDatabase";
+            IAddressSettings addressSettings = AddressSettingsFactory.Create(ci, database);
+            </code>
+            </example>
+            <param name="locale">The locale to use. e.g. 'nl'</param>
+            <param name="database">The name of the database. e.g. 'CMDatabase'</param>
+            <returns>The address settings interface to use for address searches</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.CoordinateFactory">
+             <summary>
+             Factory for create coordinate objects which are used in the api
+             </summary>
+             <example>
+             This sample shows how to use the <see cref="T:StreetSmart.Common.Factories.CoordinateFactory"/>.
+             <code>
+             using System;
+             using System.Collections.Generic;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel _plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", element);
+            
+                   // Initialize the api.
+                   await _api.Init(options);
+             
+                   // The open viewer options for open a new panorama viewer in EPSG:28992.
+                   IViewerOptions viewerOpt = ViewerOptionsFactory.Create(new List&lt;ViewerType&gt; { ViewerType.Panorama }, "EPSG:28992");
+             
+                   // open a panorama viewer
+                   IList&lt;IViewer&gt; viewers = await _api.Open("Boschdijk 7, Eindhoven", viewerOpt);
+            
+                   if (viewers.Count == 1)
+                   {
+                     // Get the panorama viewer object
+                     IPanoramaViewer viewer = (IPanoramaViewer) viewers[0];
+            
+                     // The look at coordinate
+                     double x = 160850.585;
+                     double y = 383923.326;
+                     ICoordinate coordinate = CoordinateFactory.Create(x, y);
+            
+                     // let the viewer know where to look at
+                     viewer.LookAtCoordinate(coordinate);
+                   }
+                 }
+               }
+             }
+             </code>
+             </example>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.CoordinateFactory.Create(System.Double,System.Double)">
+            <summary>
+            Create coordinates based on x and y
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.CoordinateFactory.Create(System.Double,System.Double)"/> method.
+            <code>
+            // Create a x and y coordinate
+            double x = 160850.585;
+            double y = 383923.326;
+            ICoordinate coordinate = CoordinateFactory.Create(x, y);
+            </code>
+            </example>
+            <param name="x">X value of the coordinate</param>
+            <param name="y">Y value of the coordinate</param>
+            <returns>Coordinate definition</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.CoordinateFactory.Create(System.Double,System.Double,System.Double)">
+            <summary>
+            Create coordinates based on x, y and z
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.CoordinateFactory.Create(System.Double,System.Double,System.Double)"/> method.
+            <code>
+            // Create a x, y and z coordinate
+            double x = 160850.585;
+            double y = 383923.326;
+            double z = 2.5;
+            ICoordinate coordinate = CoordinateFactory.Create(x, y, z);
+            </code>
+            </example>
+            <param name="x">X value of the coordinate</param>
+            <param name="y">Y value of the coordinate</param>
+            <param name="z">Z value of the coordinate</param>
+            <returns>Coordinate definition</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.DomElementFactory">
+             <summary>
+             Factory that creates a dom element where inside the api runs.
+             </summary>
+             <example>
+             This sample shows how to use the <see cref="T:StreetSmart.Common.Factories.DomElementFactory"/>.
+             <code>
+             using System;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private async void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api.
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", element);
+             
+                   // Initialize the api.
+                   await _api.Init(options);
+                 }
+               }
+             }
+             </code>
+             </example>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.DomElementFactory.Create">
+            <summary>
+            Creates a default dom element
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.DomElementFactory.Create"/> method.
+            <code>
+            // Create a dom element
+            IDomElement element = DomElementFactory.Create();
+            </code>
+            </example>
+            <returns>Represents a dom element.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.DomElementFactory.Create(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Creates a dom element with a width and height in percents and a top and a left in pixels
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.DomElementFactory.Create(System.Int32,System.Int32,System.Int32,System.Int32)"/> method.
+            <code>
+            // Create a dom element
+            int width = 75; // width in percents
+            int height = 75; // height in percents
+            int top = 50; // 50 pixels from top
+            int left = 50; // 50 pixels from left
+            IDomElement element = DomElementFactory.Create(width, height, top, left);
+            </code>
+            </example>
+            <param name="width">Width in percent</param>
+            <param name="height">Height in percent</param>
+            <param name="top">Top in pixels</param>
+            <param name="left">Left in pixels</param>
+            <returns>Represents a dom element.</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.JsonFactory">
+            <summary>
+            Factory for create Json objects
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.JsonFactory.Create(System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            returns JSon object, which contains the specified properties
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.JsonFactory.Create">
+            <summary>
+            returns JSon object
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.MeasurementOptionsFactory">
+             <summary>
+             Factory for create measurement options which are used to create a measurement. We need the measurement options object to create a measurement.
+             </summary>
+             <example>
+             This sample uses the <see cref="T:StreetSmart.Common.Factories.MeasurementOptionsFactory"/>, to show how you can start a line measurement in a cyclorama.
+             <code>
+             using System.Collections.Generic;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 // Todo: Add a function to initialize the api.
+            
+                 private async void OpenImageAndStartMeasurement()
+                 {
+                   // The open viewer options for open a new panorama viewer in EPSG:28992.
+                   IViewerOptions viewerOpt = ViewerOptionsFactory.Create(new List&lt;ViewerType&gt; { ViewerType.Panorama }, "EPSG:28992");
+            
+                   // open a panorama viewer
+                   IList&lt;IViewer&gt; viewers = await _api.Open("Boschdijk 7, Eindhoven", viewerOpt);
+            
+                   if (viewers.Count == 1)
+                   {
+                     // Get the panorama viewer object
+                     IPanoramaViewer viewer = (IPanoramaViewer)viewers[0];
+            
+                     // The geometry type of the measurement
+                     MeasurementGeometryType geometryType = MeasurementGeometryType.LineString;
+            
+                     // Create a measurement options object
+                     IMeasurementOptions measurementOptions = MeasurementOptionsFactory.Create(geometryType);
+            
+                     // Start line measurement in the opened viewer
+                     _api.StartMeasurementMode(viewer, measurementOptions);
+                   }
+                 }
+               }
+             }
+             </code>
+             </example>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.MeasurementOptionsFactory.Create">
+            <summary>
+            Create a default measurement options object.
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.MeasurementOptionsFactory.Create"/> method.
+            <code>
+            // Create a measurement options object
+            IMeasurementOptions measurementOptions = MeasurementOptionsFactory.Create();
+            </code>
+            </example>
+            <returns>The measurement options object that is needed to make a measurement</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.MeasurementOptionsFactory.Create(StreetSmart.Common.Interfaces.Data.MeasurementGeometryType)">
+            <summary>
+            Create a measurement options object with a specific geometry type.
+            </summary>
+            <example> 
+            This sample shows how to use the <see cref="M:StreetSmart.Common.Factories.MeasurementOptionsFactory.Create(StreetSmart.Common.Interfaces.Data.MeasurementGeometryType)"/> method.
+            <code>
+            // Create a measurement options object which can be used for start a surface measurement
+            MeasurementGeometryType geometryType = MeasurementGeometryType.Polygon;
+            IMeasurementOptions measurementOptions = MeasurementOptionsFactory.Create(geometryType);
+            </code>
+            </example>
+            <param name="geometryType">The <c>MeasurementGeometryType</c> of the measurement</param>
+            <returns>The measurement options object that is needed to make a measurement</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory">
+            <summary>
+            Factory for create Options which are used to initialize the oblique viewer
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory.CreateClosable(System.Boolean)">
+            <summary>
+            Create options to initialize the oblique viewer with
+            </summary>
+            <param name="closable">If the oblique viewer should be closable</param>
+            <returns>Options to initialize the oblique viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory.CreateMaximizable(System.Boolean)">
+            <summary>
+            Create options to initialize the oblique viewer with
+            </summary>
+            <param name="maximizable">If the oblique viewer should be maximizable</param>
+            <returns>Options to initialize the oblique viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory.CreateTimeTravelVisible(System.Boolean)">
+            <summary>
+            Create options to initialize the oblique viewer with
+            </summary>
+            <param name="timeTravelVisible">If time travel is enabled</param>
+            <returns>Options to initialize the oblique viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory.CreateNavBarVisible(System.Boolean)">
+            <summary>
+            Create options to initialize the oblique viewer with
+            </summary>
+            <param name="navBarVisible">If navbar is enabled</param>
+            <returns>Options to initialize the oblique viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory.Create">
+            <summary>
+            Create options to initialize the oblique viewer with
+            </summary>
+            <returns>Options to initialize the oblique viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ObliqueViewerOptionsFactory.Create(System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Create options to initialize the oblique viewer with
+            </summary>
+            <param name="closable">If the panorama viewer is closable</param>
+            <param name="maximizable">If the panorama viewer is maximizable</param>
+            <param name="timeTravelVisible">If time travel is enabled</param>
+            <param name="navBarVisible">If nav bar is enabled</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.OptionsFactory">
+            <summary>
+            Factory for create a object which containing the options used for initializing the API
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OptionsFactory.Create(System.String,System.String,System.String,System.String,StreetSmart.Common.Interfaces.DomElement.IDomElement)">
+            <summary>
+            Create the options object which used for initializing the API
+            </summary>
+            <param name="userName">Username of the user.</param>
+            <param name="password">Password of the user.</param>
+            <param name="apiKey">ApiKey given to the user.</param>
+            <param name="srs">Coordinate system used in the API. E.g. "EPSG:29882".</param>
+            <param name="element">The Domelement where in the panoramic image is rendered.</param>
+            <returns>Object containing the options used for initializing the API</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OptionsFactory.Create(System.String,System.String,System.String,System.String,StreetSmart.Common.Interfaces.Data.IAddressSettings,StreetSmart.Common.Interfaces.DomElement.IDomElement)">
+            <summary>
+            Create the options object which used for initializing the API
+            </summary>
+            <param name="userName">Username of the user.</param>
+            <param name="password">Password of the user.</param>
+            <param name="apiKey">ApiKey given to the user.</param>
+            <param name="srs">Coordinate system used in the API. E.g. "EPSG:29882".</param>
+            <param name="addressSettings">The address settings to use for address searches.</param>
+            <param name="element">The Domelement where in the panoramic image is rendered.</param>
+            <returns>Object containing the options used for initializing the API</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OptionsFactory.Create(System.String,System.String,System.String,System.String,System.String,StreetSmart.Common.Interfaces.Data.IAddressSettings,StreetSmart.Common.Interfaces.DomElement.IDomElement)">
+            <summary>
+            Create the options object which used for initializing the API
+            </summary>
+            <param name="userName">Username of the user.</param>
+            <param name="password">Password of the user.</param>
+            <param name="apiKey">ApiKey given to the user.</param>
+            <param name="srs">Coordinate system used in the API. E.g. "EPSG:29882".</param>
+            <param name="locale">Language used as default in the API.</param>
+            <param name="addressSettings">The address settings to use for address searches.</param>
+            <param name="element">The Domelement where in the panoramic image is rendered.</param>
+            <returns>Object containing the options used for initializing the API</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OptionsFactory.Create(System.String,System.String,System.String,System.String,System.Globalization.CultureInfo,StreetSmart.Common.Interfaces.Data.IAddressSettings,StreetSmart.Common.Interfaces.DomElement.IDomElement)">
+            <summary>
+            Create the options object which used for initializing the API
+            </summary>
+            <param name="userName">Username of the user.</param>
+            <param name="password">Password of the user.</param>
+            <param name="apiKey">ApiKey given to the user.</param>
+            <param name="srs">Coordinate system used in the API. E.g. "EPSG:29882".</param>
+            <param name="locale">Language used as default in the API.</param>
+            <param name="addressSettings">The address settings to use for address searches.</param>
+            <param name="element">The Domelement where in the panoramic image is rendered.</param>
+            <returns>Object containing the options used for initializing the API</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OptionsFactory.Create(System.String,System.String,System.String,System.String,System.String,System.String,StreetSmart.Common.Interfaces.Data.IAddressSettings,StreetSmart.Common.Interfaces.DomElement.IDomElement)">
+            <summary>
+            Create the options object which used for initializing the API
+            </summary>
+            <param name="userName">Username of the user.</param>
+            <param name="password">Password of the user.</param>
+            <param name="apiKey">ApiKey given to the user.</param>
+            <param name="srs">Coordinate system used in the API. E.g. "EPSG:29882".</param>
+            <param name="locale">Language used as default in the API.</param>
+            <param name="configurationURL">Alternate configuration url to use for all configuration services.</param>
+            <param name="addressSettings">The address settings to use for address searches.</param>
+            <param name="element">The Domelement where in the panoramic image is rendered.</param>
+            <returns>Object containing the options used for initializing the API</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OptionsFactory.Create(System.String,System.String,System.String,System.String,System.Globalization.CultureInfo,System.String,StreetSmart.Common.Interfaces.Data.IAddressSettings,StreetSmart.Common.Interfaces.DomElement.IDomElement)">
+            <summary>
+            Create the options object which used for initializing the API
+            </summary>
+            <param name="userName">Username of the user.</param>
+            <param name="password">Password of the user.</param>
+            <param name="apiKey">ApiKey given to the user.</param>
+            <param name="srs">Coordinate system used in the API. E.g. "EPSG:29882".</param>
+            <param name="locale">Language used as default in the API.</param>
+            <param name="configurationURL">Alternate configuration url to use for all configuration services.</param>
+            <param name="addressSettings">The address settings to use for address searches.</param>
+            <param name="element">The Domelement where in the panoramic image is rendered.</param>
+            <returns>Object containing the options used for initializing the API</returns>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.OrientationFactory">
+            <summary>
+            Factory for create a orientation object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OrientationFactory.CreatehFov(System.Double)">
+            <summary>
+            Create the orientation Object
+            </summary>
+            <param name="hFov">Value of the hFov.</param>
+            <returns>Orientation Object that contains values.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OrientationFactory.CreatePitch(System.Double)">
+            <summary>
+            Create the orientation Object
+            </summary>
+            <param name="pitch">Value of the pitch.</param>
+            <returns>Orientation Object that contains values.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OrientationFactory.CreateYaw(System.Double)">
+            <summary>
+            Create the orientation Object
+            </summary>
+            <param name="yaw">Value of the yaw.</param>
+            <returns>Orientation Object that contains values.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OrientationFactory.Create(System.Nullable{System.Double},System.Nullable{System.Double},System.Nullable{System.Double})">
+            <summary>
+            Create the orientation Object
+            </summary>
+            <param name="yaw">Value of the yaw.</param>
+            <param name="pitch">Value of the pitch.</param>
+            <param name="hFov">Value of the hFov.</param>
+            <returns>Orientation Object that contains values.</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.OverlayFactory">
+            <summary>
+            Factory for create a overlay
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OverlayFactory.Create(System.String,System.String)">
+            <summary>
+            Create the overlay object
+            </summary>
+            <param name="geoJson">GeoJSON object containing the layer data</param>
+            <param name="name">Name of the layer.</param>
+            <returns>Overlay object</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OverlayFactory.Create(System.String,System.String,System.String)">
+            <summary>
+            Create the overlay object
+            </summary>
+            <param name="geoJson">GeoJSON object containing the layer data</param>
+            <param name="name">Name of the layer.</param>
+            <param name="srs">EPSG code (srs) for the source GeoJSON</param>
+            <returns>Overlay object</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OverlayFactory.Create(System.String,System.String,System.String,System.String)">
+            <summary>
+            Create the overlay object
+            </summary>
+            <param name="geoJson">GeoJSON object containing the layer data</param>
+            <param name="name">Name of the layer.</param>
+            <param name="srs">Optional EPSG code (srs) for the source GeoJSON, if not provided, srs of API initialisation is used.</param>
+            <param name="sld">Optional XML string for Styled Layer Descriptor</param>
+            <returns>Overlay object</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory">
+            <summary>
+            Factory for create Options which are used to initialize the panorama viewer
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.CreateClosable(System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="closable">If the panorama viewer should be closable</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.CreateMaximizable(System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="maximizable">If the panorama viewer should be maximizable</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.CreateTimeTravelVisible(System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="timeTravelVisible">If time travel is enabled</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.CreateNavBarVisible(System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="navBarVisible">If navbar is enabled</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.CreateReplace(System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="replace">Replace the panorama viewer</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.CreateRecordingsVisible(System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="recordingsVisible">If recordings should be visible</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.Create">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory.Create(System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Create options to initialize the panorama viewer with
+            </summary>
+            <param name="closable">If the panorama viewer is closable</param>
+            <param name="maximizable">If the panorama viewer is maximizable</param>
+            <param name="timeTravelVisible">If time travel is enabled</param>
+            <param name="navBarVisible">If nav bar is enabled</param>
+            <param name="replace">Replace the panorama viewer</param>
+            <param name="recordingsVisible">If recordings should be visible</param>
+            <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.StreetSmartAPIFactory">
+            <summary>
+            Factory for creates a new instance of the API. API used to use and modify various StreetSmart components.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.StreetSmartAPIFactory.Create">
+            <summary>
+            Creates a new instance of the API. API used to use and modify various StreetSmart components.
+            </summary>
+            <returns>API used to use and modify various StreetSmart components.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.StreetSmartAPIFactory.Create(System.String)">
+            <summary>
+            Creates a new instance of the API. API used to use and modify various StreetSmart components.
+            </summary>
+            <param name="streetSmartLocation">The location Uri of StreetSmart</param>
+            <returns>API used to use and modify various StreetSmart components.</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.ViewerOptionsFactory">
+            <summary>
+            Factory for the viewer options which are used as options when a cyclorama viewer is opened.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ViewerOptionsFactory.Create(System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ViewerType},System.String)">
+            <summary>
+            Creates a viewer options object
+            </summary>
+            <param name="viewerType">An collection of viewerTypes</param>
+            <param name="srs">The SRS of the viewer</param>
+            <returns>The viewer options used for open viewers</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ViewerOptionsFactory.Create(System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ViewerType},System.String,StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions)">
+            <summary>
+            Creates a viewer options object
+            </summary>
+            <param name="viewerType">An collection of viewerTypes</param>
+            <param name="srs">The SRS of the viewer</param>
+            <param name="panoramaViewer">The panorama viewer options</param>
+            <returns>The viewer options used for open the viewers</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.ViewerOptionsFactory.Create(System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ViewerType},System.String,StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions,StreetSmart.Common.Interfaces.Data.IObliqueViewerOptions)">
+            <summary>
+            Creates a viewer options object
+            </summary>
+            <param name="viewerType">An collection of viewerTypes</param>
+            <param name="srs">The SRS of the viewer</param>
+            <param name="panoramaViewer">The panorama viewer options</param>
+            <param name="obliqueViewer">The oblique viewer options</param>
+            <returns>The viewer options used for open the viewers</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.IObliqueViewer">
+            <inheritdoc />
+            <summary>
+            ObliqueViewer component. Gets created by the StreetSmartAPI.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IObliqueViewer.GetButtonEnabled(StreetSmart.Common.Interfaces.API.ObliqueViewerButtons)">
+            <summary>
+            Get the visibility of a button
+            </summary>
+            <param name="buttonId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IObliqueViewer.ToggleButtonEnabled(StreetSmart.Common.Interfaces.API.ObliqueViewerButtons,System.Boolean)">
+            <summary>
+            Toggle the visibility of a button.
+            </summary>
+            <param name="buttonId"></param>
+            <param name="enabled">if available, sets enabled to this value</param>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.IPanoramaViewer">
+            <inheritdoc />
+            <summary>
+            PanoramaViewer component. Gets created by the StreetSmartAPI.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ElevationChange">
+            <summary>
+            Triggers when the elevation is changed
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ImageChange">
+            <summary>
+            Triggers when the loaded panorama is altered.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.RecordingClick">
+            <summary>
+            Triggers when a recording is clicked inside the PanoramaViewer.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.SurfaceCursorChange">
+            <summary>
+            Triggers when the surface cursor is changed
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.TileLoadError">
+            <summary>
+            Triggers when one or more tiles could not be loaded.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.TimeTravelChange">
+            <summary>
+            Triggers when time travel date is changed
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ViewChange">
+            <summary>
+            Triggers when the view (pitch, hFov or yaw) of the panorama is altered.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ViewLoadEnd">
+            <summary>
+            Triggers when everything that is needed for the view to dislay correctly is loaded.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ViewLoadStart">
+            <summary>
+            Triggers when the view is altered and needs to be (partly) reloaded.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.Get3DCursorVisible">
+            <summary>
+            Returns whether the 3D cursor is visible
+            This is an asynchronous function.
+            </summary>
+            <returns>The 3D cursor visible state.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.GetButtonEnabled(StreetSmart.Common.Interfaces.API.PanoramaViewerButtons)">
+            <summary>
+            Get the visibility of a button
+            </summary>
+            <param name="buttonId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.GetOrientation">
+            <summary>
+            Returns the orientation in degrees (yaw, pitch, hFov) for this CycloramaViewer.
+            This is an asynchronous function.
+            </summary>
+            <returns>The orientation in degrees (yaw, pitch, hFov) for this CycloramaViewer.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.GetRecording">
+            <summary>
+            Gets the current active recording of the PanoramaViewer.
+            This is an asynchronous function.
+            </summary>
+            <returns>The current active recording of the PanoramaViewer.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.GetRecordingsVisible">
+            <summary>
+            Returns whether recordings are visible.
+            This is an asynchronous function.
+            </summary>
+            <returns>Whether recordings are visible.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.GetViewerColor">
+            <summary>
+            Gets the viewer color.
+            This is an asynchronous function.
+            </summary>
+            <returns>The current viewer color.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.LookAtCoordinate(StreetSmart.Common.Interfaces.Data.ICoordinate,System.String)">
+            <summary>
+            Sets the orientation of the PanoramaViewer to look at a certain coordinate.
+            </summary>
+            <param name="coordinate">Coordinate to look to.</param>
+            <param name="srs">(optional) Will use to convert coordinate to viewer srs.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.OpenByAddress(System.String,System.String)">
+            <summary>
+            Opens a panorama closest to the given address.
+            </summary>
+            <param name="query">Address you want to search.</param>
+            <param name="srs">(optional) Coordinate system in which the panorama will be opened.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.OpenByCoordinate(StreetSmart.Common.Interfaces.Data.ICoordinate,System.String)">
+            <summary>
+            Opens an image by coordinates and accompanying coordinate system.
+            </summary>
+            <param name="coordinate">Coordinate of location to open a panorama.</param>
+            <param name="srs">(optional) Will use to convert coordinate to viewer srs.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.OpenByImageId(System.String,System.String)">
+            <summary>
+            Opens an image by imageId.
+            </summary>
+            <param name="imageId">ID of the image that needs to be opened.</param>
+            <param name="srs">(optional) Coordinate system in which the panorama will be opened.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.RotateDown(System.Double)">
+            <summary>
+            Rotates the panorama vertically by a certain amount, as if the camera is turning to the ground.
+            </summary>
+            <param name="deltaPitch">Amount to rotate the image, in degrees.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.RotateLeft(System.Double)">
+            <summary>
+            Rotates the panorama horizontally by a certain amount, as if the camera is turning to the left.
+            </summary>
+            <param name="deltaYaw">Amount to rotate the image, in degrees.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.RotateRight(System.Double)">
+            <summary>
+            Rotates the panorama horizontally by a certain amount, as if the camera is turning to the right.
+            </summary>
+            <param name="deltaYaw">Amount to rotate the image, in degrees.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.RotateUp(System.Double)">
+            <summary>
+            Rotates the panorama vertically by a certain amount, as if the camera is turning to the sky.
+            </summary>
+            <param name="deltaPitch">Amount to rotate the image, in degrees.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.SetOrientation(StreetSmart.Common.Interfaces.Data.IOrientation)">
+            <summary>
+            Sets the orientation {yaw, pitch, hFov} of the PanoramaViewer to specific values all at once.
+            </summary>
+            <param name="orientation">Orientation object that contains values to change.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.SetSelectedFeatureByProperties(StreetSmart.Common.Interfaces.Data.IJson,System.String)">
+            <summary>
+            Sets the selected feature using the given properties. The selected feature can only be selected
+            if the feature is in sight on the panorama viewer.
+            </summary>
+            <param name="properties">The properties by which the feature should be determined</param>
+            <param name="layerId">The layerId to which the feature is selected</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.Toggle3DCursor(System.Boolean)">
+            <summary>
+            Toggles the visibility of the 3D cursor in the PanoramaViewer
+            </summary>
+            <param name="visible">If available, sets visibility to this value.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ToggleButtonEnabled(StreetSmart.Common.Interfaces.API.PanoramaViewerButtons,System.Boolean)">
+            <summary>
+            Toggle the visibility of a button.
+            </summary>
+            <param name="buttonId"></param>
+            <param name="enabled">if available, sets enabled to this value</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ToggleRecordingsVisible(System.Boolean)">
+            <summary>
+            Toggles the visibility of the recording features in the PanoramaViewer.
+            </summary>
+            <param name="visible">Sets visibility to this value.</param>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.IStreetSmartAPI">
+            <summary>
+            API used to use and modify various StreetSmart components.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.APIReady">
+            <summary>
+            Triggers when the frame is loaded.
+            After this trigger, you can login in the the API.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.MeasurementChanged">
+            <summary>
+            Measurement changed or added.
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.ViewerAdded">
+            <summary>
+            Viewer is added (panoramic or oblique)
+            </summary>
+        </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.ViewerRemoved">
+            <summary>
+            Viewer is removed (panoramic of oblique)
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.ShowDevTools">
+            <summary>
+            Show the developer tools
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.CloseDevTools">
+            <summary>
+            Close the developer tools
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.AddOverlay(StreetSmart.Common.Interfaces.Data.IOverlay)">
+            <summary>
+            Add a GeoJSON overlay to the panorama viewer. SRS of API initialisation is used.
+            Use overload with sourceSrs parameter if provided GeoJSON is in a different coordinate system.
+            </summary>
+            <param name="overlay">The overlay to add</param>
+            <returns>the overlay object</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.CloseViewer(System.String)">
+            <summary>
+            Close a panorama or oblique viewer.
+            </summary>
+            <param name="viewerId">The viewer to remove</param>
+            <returns>Returns an array with references to all viewers of type PanoramaViewer and/or ObliqueViewer</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.Destroy(StreetSmart.Common.Interfaces.Data.IOptions)">
+            <summary>
+            Destroys the API. Cleans up its event handlers and makes used memory available for garbage collection.
+            </summary>
+            <param name="options">Object containing the options used for destroying the API.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetActiveMeasurement">
+            <summary>
+            Returns the active measurement in GeoJSON format
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetAddressSettings">
+            <summary>
+            Returns the object containing the address search settings
+            </summary>
+            <returns>Object containing the address settings</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetApiReadyState">
+            <summary>
+            Returns the current 'ready'-state of the API.
+            This is an asynchronous function.
+            </summary>
+            <returns>The current 'ready'-state of the API.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetApplicationName">
+            <summary>
+            Returns the application name of the API.
+            This is an asynchronous function.
+            </summary>
+            <returns>The application name of the API.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetApplicationVersion">
+            <summary>
+            Returns the used version of the API.
+            This is an asynchronous function.
+            </summary>
+            <returns>API version number.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetDebugLogs">
+            <summary>
+            Returns all logs, including ones invisible to integrators.
+            </summary>
+            <returns>Array of console logs.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetPermissions">
+            <summary>
+            Returns the object containing functionalities that are currently permitted to use by the user.
+            This is an asynchronous function.
+            </summary>
+            <returns>Array containing the permissions</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.GetViewers">
+            <summary>
+            Return an array with references to all viewers.
+            </summary>
+            <returns>Returns an array with references to all viewers of type PanoramaViewer and/or ObliqueViewer</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.Init(StreetSmart.Common.Interfaces.Data.IOptions)">
+             <summary>
+             Initializes the API using the inserted values. Required to use functional PanoramaViewers.
+             </summary>
+             <example>
+             This sample shows how to use the <see cref="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.Init(StreetSmart.Common.Interfaces.Data.IOptions)"/> function.
+             <code>
+             using System;
+             using StreetSmart.Common.Exceptions;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private async void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api.
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", element);
+            
+                   try
+                   {
+                     // Initialize the api.
+                     await _api.Init(options);
+                     // Todo: add functionality
+                   }
+                   catch (StreetSmartLoginFailedException ex)
+                   {
+                     // login failed exception (ex)
+                   }
+                 }
+               }
+             }
+             </code>
+             </example>
+             <param name="options">Object containing the options used for initializing the API.</param>
+             <exception cref="T:StreetSmart.Common.Exceptions.StreetSmartLoginFailedException">Thrown when the login is failed</exception>
+             <returns>Asynchronous function</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.Open(System.String,StreetSmart.Common.Interfaces.Data.IViewerOptions)">
+             <summary>
+             Open a panorama and/or oblique viewer using a query. The query can be a coordinate,
+             an extent, an address or a panorama/oblique ID.
+             </summary>
+             <example>
+             This sample shows how to use the <see cref="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.Open(System.String,StreetSmart.Common.Interfaces.Data.IViewerOptions)"/> function.
+             <code>
+             using System;
+             using System.Collections.Generic;
+             using StreetSmart.Common.Exceptions;
+             using StreetSmart.Common.Factories;
+             using StreetSmart.Common.Interfaces;
+            
+             namespace Demo
+             {
+               public class Example
+               {
+                 private IStreetSmartAPI _api;
+                 private System.Windows.Forms.Panel plStreetSmart = new System.Windows.Forms.Panel();
+            
+                 public void StartAPI()
+                 {
+                   _api = StreetSmartAPIFactory.Create();
+                   _api.APIReady += OnAPIReady;
+                   plStreetSmart.Controls.Add(_api.GUI);
+                 }
+            
+                 private async void OnAPIReady(object sender, EventArgs args)
+                 {
+                   // The dom element within the api must be rendered.
+                   IDomElement element = DomElementFactory.Create();
+            
+                   // The initialisation options of the api
+                   IOptions options = OptionsFactory.Create("myUsername", "myPassword", "myAPIKey", "EPSG:28992", element);
+            
+                   // Initialize the api.
+                   await _api.Init(options);
+             
+                   // The open viewer options for open a new panorama viewer in EPSG:28992.
+                   IViewerOptions viewerOpt = ViewerOptionsFactory.Create(new List&lt;ViewerType&gt; {ViewerType.Panorama}, "EPSG:28992");
+            
+                   try
+                   {
+                     IList&lt;IViewer&gt; viewers = await _api.Open("Lange Haven 145, Schiedam", viewerOpt);
+                     // Todo: add functionality
+                   }
+                   catch (StreetSmartImageNotFoundException ex)
+                   {
+                     // image not found exception (ex)
+                   }
+                 }
+               }
+             }
+             </code>
+             </example>
+             <param name="query">query for open a panoramic image</param>
+             <param name="options">viewer options for open the panoramic image</param>
+             <exception cref="T:StreetSmart.Common.Exceptions.StreetSmartImageNotFoundException">Thrown when no image is found</exception>
+             <returns>Asynchronous function, A list of opened viewers</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.RemoveOverlay(System.String)">
+            <summary>
+            Removes a GeoJSON overlay from the panorama viewer.
+            </summary>
+            <param name="id">The id of the overlay</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.SetActiveMeasurement(System.String)">
+            <summary>
+            Set the active measurement in GeoJSON format
+            </summary>
+            <param name="measurement">The measurement in GeoJSON format</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.SetOverlayDrawDistance(System.Int32)">
+            <summary>
+            Set overlay draw distance
+            </summary>
+            <param name="distance">The overlay draw distance</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.StartMeasurementMode(StreetSmart.Common.Interfaces.API.IPanoramaViewer,StreetSmart.Common.Interfaces.Data.IMeasurementOptions)">
+            <summary>
+            Starts the measurement
+            </summary>
+            <param name="viewer">Panorama viewer for start the measurement inside</param>
+            <param name="options">Measurement options</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.StopMeasurementMode">
+            <summary>
+            Stops the measurement
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.IViewer">
+            <summary>
+            The vewer interface
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetId">
+            <summary>
+            Returns the viewerId of the viewer
+            </summary>
+            <returns> The viewerId.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetNavbarExpanded">
+            <summary>
+            Returns the navbarExpanded state.
+            This is an asynchronous function.
+            </summary>
+            <returns> The navbarExpanded state.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetNavbarVisible">
+            <summary>
+            Returns the visibility state of the navbar.
+            This is an asynchronous function.
+            </summary>
+            <returns>The visibility state of the navbar.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetTimeTravelExpanded">
+            <summary>
+            Returns whether the timetravel component is visible or hidden.
+            This is an asynchronous function.
+            </summary>
+            <returns>Whether the timetravel component is visible or hidden.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetTimeTravelVisible">
+            <summary>
+            Returns whether timetravel is enabled for the viewer.
+            This is an asynchronous function.
+            </summary>
+            <returns>Whether timetravel is enabled for the viewer.</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.SetBrightness(System.Double)">
+            <summary>
+            Set the brightness of the viewer.
+            </summary>
+            <param name="value">Set brightness to a positive number</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.SetContrast(System.Double)">
+            <summary>
+            Set the contrast of the viewer.
+            </summary>
+            <param name="value">Set contrast to a positive number</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ToggleNavbarExpanded(System.Boolean)">
+            <summary>
+            Modify the state of navbar expanded in the panorama viewer store.
+            </summary>
+            <param name="expanded">Sets expanded to this value.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ToggleNavbarVisible(System.Boolean)">
+            <summary>
+            Toggles the visibility of the navbar in the PanoramaViewer.
+            </summary>
+            <param name="visible">Sets visibility to this value.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ToggleTimeTravelExpanded(System.Boolean)">
+            <summary>
+            Expands or hides the timetravel components.
+            </summary>
+            <param name="expanded">Value for expanding or hiding time travel.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ToggleTimeTravelVisible(System.Boolean)">
+            <summary>
+            Enables or disables timeTravel in the viewer.
+            </summary>
+            <param name="visible">Value for enabling or disablingtoggles time travel.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ZoomIn">
+            <summary>
+            Zoom in in the Panorama. This will alter the hFov.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ZoomOut">
+            <summary>
+            Zoom out in the Panorama. This will alter the hFov.
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons">
+            <summary>
+            Defines the oblique viewer buttons
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.Overlays">
+            <summary>
+            overlays
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.CenterMap">
+            <summary>
+            center map
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.ImageInformation">
+            <summary>
+            image information
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.ZoomIn">
+            <summary>
+            zoom in
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.ZoomOut">
+            <summary>
+            zoom out
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.SwitchDirection">
+            <summary>
+            switch direction
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.ToggleNadir">
+            <summary>
+            toggle nadir
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons">
+            <summary>
+            Defines the panorama viewer buttons
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.Elevation">
+            <summary>
+            elevation
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.Overlays">
+            <summary>
+            overlays
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.OpenOblique">
+            <summary>
+            open oblique
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.OpenPointCloud">
+            <summary>
+            open pointcloud
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ReportBlurring">
+            <summary>
+            report blurring
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.Measure">
+            <summary>
+            measure
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.PlayList">
+            <summary>
+            play list
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.CenterMap">
+            <summary>
+            center map
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ImageInformation">
+            <summary>
+            image information
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ZoomIn">
+            <summary>
+            zoom in
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ZoomOut">
+            <summary>
+            zoom out
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IAddressSettings">
+            <summary>
+            The address settings to use for address searches
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IAddressSettings.Locale">
+            <summary>
+            The locale to use. e.g. 'nl'
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IAddressSettings.Database">
+            <summary>
+            The name of the database. e.g. 'CMDatabase'
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IBaseViewerOptions">
+            <summary>
+            Options to initialize the viewer with
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IBaseViewerOptions.Closable">
+            <summary>
+            Whether the viewer window should be closable.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IBaseViewerOptions.Maximizable">
+            <summary>
+            Whether the viewer window should be maximizable.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IBaseViewerOptions.TimeTravelVisible">
+            <summary>
+            If time travel is enabled
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IBaseViewerOptions.NavbarVisible">
+            <summary>
+            If navbar is enabled
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.ICoordinate">
+            <summary>
+            Coordinate definition
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.ICoordinate.X">
+            <summary>
+             X value of the coordinate
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.ICoordinate.Y">
+            <summary>
+            Y value of the coordinate
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.ICoordinate.Z">
+            <summary>
+            Z value of the coordinate
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IDepthInfo">
+            <summary>
+            Triggers when the depth info is changed
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IDepthInfo.Depth">
+            <summary>
+            Depth info
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IDepthInfo.DepthInMeters">
+            <summary>
+            Depth in meters
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IDepthInfo.XYZ">
+            <summary>
+            Coordinate
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IDepthInfo.SRS">
+            <summary>
+            Coordinate system
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IElevationInfo">
+            <summary>
+            Elevation info
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IElevationInfo.Level">
+            <summary>
+            Level of elevation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IElevationInfo.HeightUnit">
+            <summary>
+            Height unit
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IElevationInfo.GroundLevel">
+            <summary>
+            Level of ground
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IJson">
+            <summary>
+            JSon object which contains the properties in a key and value pair format
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IMeasurementOptions">
+            <summary>
+            Measurement options for start the measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IMeasurementOptions.GeometryType">
+            <summary>
+            The Geometry type of the measurement
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IObliqueViewerOptions">
+            <summary>
+            Options to initialize the oblique viewer with
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IOptions">
+            <summary>
+            Object containing the options used for initializing the API
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.Username">
+            <summary>
+            Username of the user.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.Password">
+            <summary>
+            Password of the user.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.APIKey">
+            <summary>
+            ApiKey given to the user.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.SRS">
+            <summary>
+            Coordinate system used in the API. E.g. "EPSG:29882".
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.Locale">
+            <summary>
+            Language used as default in the API.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.ConfigurationURL">
+            <summary>
+            Alternate configuration url to use for all configuration services
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.AddressSettings">
+            <summary>
+            The address settings to use for address searches.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOptions.Element">
+            <summary>
+            DomElement where in the panoramic viewer is rendered
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IOrientation">
+            <summary>
+            Orientation Object that contains values.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOrientation.Yaw">
+            <summary>
+            Optional value of the yaw.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOrientation.Pitch">
+            <summary>
+            Optional value of the pitch.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOrientation.HFov">
+            <summary>
+            Optional value of the hFov.
+            </summary>    
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IOverlay">
+            <summary>
+            Information about the overlay
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOverlay.Id">
+            <summary>
+            Id of the overlay
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOverlay.Name">
+            <summary>
+            Name of the layer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOverlay.GeoJson">
+            <summary>
+            GeoJSON object containing the layer data
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOverlay.Srs">
+            <summary>
+            Optional EPSG code (srs) for the source GeoJSON, if not provided, srs of API initialisation is used.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOverlay.Sld">
+            <summary>
+            Optional XML string for Styled Layer Descriptor.
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions">
+            <summary>
+            Options to initialize the panorama viewer with
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions.Replace">
+            <summary>
+            Whether the panorama viewer window should be replace.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions.RecordingsVisible">
+            <summary>
+            If recordings should be visible
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IRecording">
+            <summary>
+            Information about the Recording
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.GroundLevelOffset">
+            <summary>
+            Ground level offset
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.RecorderDirection">
+            <summary>
+            Recorder direction
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.Orientation">
+            <summary>
+            Orientation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.RecordedAt">
+            <summary>
+            RecordedAt
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.Id">
+            <summary>
+            ImageId
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.XYZ">
+            <summary>
+            xyz coordinate
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.SRS">
+            <summary>
+            Coordinate system
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.OrientationPrecision">
+            <summary>
+            Orientation precision
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.TileSchema">
+            <summary>
+            Tile schema
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.LongitudePrecision">
+            <summary>
+            Longitude precision
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.LatitudePrecision">
+            <summary>
+            Latitiude precision
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.HeightPrecision">
+            <summary>
+            Height precision
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.ProductType">
+            <summary>
+            Product type
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.HeightSystem">
+            <summary>
+            Height coordiate system
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecording.ExpiredAt">
+            <summary>
+            Expired at date
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IRecordingClickInfo">
+            <summary>
+            Triggers when a recording is clicked inside the PanoramaViewer.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecordingClickInfo.Recording">
+            <summary>
+            The Recording clicked
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecordingClickInfo.CtrlKey">
+            <summary>
+            If ctrl-key is pressed
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecordingClickInfo.ShiftKey">
+            <summary>
+            If shift-key is pressed
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IRecordingClickInfo.AltKey">
+            <summary>
+            If alt-key is pressed
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.ITimeTravelInfo">
+            <summary>
+            Timetravel info
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.ITimeTravelInfo.Date">
+            <summary>
+            Date that was selected for time travel
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IViewerOptions">
+            <summary>
+            The address settings to use for address searches
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IViewerOptions.ViewerTypes">
+            <summary>
+            The viewerType
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IViewerOptions.Srs">
+            <summary>
+            The Srs of the open viewer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IViewerOptions.PanoramaViewer">
+            <summary>
+            Options to initialize the panorama viewer with
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IViewerOptions.ObliqueViewer">
+            <summary>
+            Options to initialize the oblique viewer with
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IViewerTypes">
+            <summary>
+            Contains the viewerTypes of the open viewers
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.Data.IViewerTypes.GetTypes">
+            <summary>
+            Get the viewertypes
+            </summary>
+            <returns>List of viewerTypes</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.Data.IViewerTypes.AddType(StreetSmart.Common.Interfaces.Data.ViewerType)">
+            <summary>
+            Add the viewerType
+            </summary>
+            <param name="type"></param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.Data.IViewerTypes.RemoveType(StreetSmart.Common.Interfaces.Data.ViewerType)">
+            <summary>
+            Remove the viewerType
+            </summary>
+            <param name="type"></param>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.MeasurementGeometryType">
+            <summary>
+            Defines the geometryTypes of the API
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.MeasurementGeometryType.Unknown">
+            <summary>
+            anything else
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.MeasurementGeometryType.Point">
+            <summary>
+            geometry point
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.MeasurementGeometryType.LineString">
+            <summary>
+            geometry linestring
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.MeasurementGeometryType.Polygon">
+            <summary>
+            geometry polygon
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.ProductType">
+            <summary>
+            ProductType of the recording.
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.ProductType.Cyclorama">
+            <summary>
+            Cyclorama
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.ProductType.Aquarama">
+            <summary>
+            Aquarama
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.ProductType.Aerial">
+            <summary>
+            Aerial
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.ProductType.Aerorama">
+            <summary>
+            Aerorama
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.TileSchema">
+            <summary>
+            TileSchema of the recording.
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.TileSchema.NoTiling">
+            <summary>
+            No tiling
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.TileSchema.Dcr9Tiling">
+            <summary>
+            DCR9 Tiling.
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.TileSchema.Dcr10Tiling">
+            <summary>
+            DCR10 Tiling
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.Unit">
+            <summary>
+            Units of measurements / elevation
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.Unit.Unknown">
+            <summary>
+            anything else
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.Unit.Meters">
+            <summary>
+            Meters
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.Unit.Feet">
+            <summary>
+            Feet
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.Unit.UsFeet">
+            <summary>
+            UsFeet
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.Unit.Degrees">
+            <summary>
+            Degrees
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.ViewerType">
+            <summary>
+            Defines the viewerTypes of the API
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.ViewerType.Panorama">
+            <summary>
+            Panoramic image
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.Data.ViewerType.Oblique">
+            <summary>
+            Oblique image
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.DomElement.IDomElement">
+            <summary>
+            Represents an object which takes a panorama viewer.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.DomElement.IDomElement.Id">
+            <summary>
+            The Id of the element
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.DomElement.IDomElement.Style">
+            <summary>
+            The Style of the element
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.DomElement.IDomElement.Name">
+            <summary>
+            The name of the element
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.DomElement.IStyle">
+            <summary>
+            Style element of the domElement
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.DomElement.IStyle.AddStyle(StreetSmart.Common.Interfaces.DomElement.StyleElementName,System.String)">
+            <summary>
+            Add a style element
+            </summary>
+            <param name="name">Name of the style element</param>
+            <param name="value">Value of the style element</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.DomElement.IStyle.AddStyle(StreetSmart.Common.Interfaces.DomElement.StyleElementName,System.Int32,StreetSmart.Common.Interfaces.DomElement.StyleElementNumberType)">
+            <summary>
+            Add a style element
+            </summary>
+            <param name="name">Name of the style element</param>
+            <param name="value">Value of the style element</param>
+            <param name="type">Type of the style element</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.DomElement.IStyle.RemoveStyle(StreetSmart.Common.Interfaces.DomElement.StyleElementName)">
+            <summary>
+            Remove a style element
+            </summary>
+            <param name="name">Name of the style element</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.DomElement.IStyle.UpdateStyle(StreetSmart.Common.Interfaces.DomElement.StyleElementName,System.String)">
+            <summary>
+            Update a style element
+            </summary>
+            <param name="name">Name of the style element</param>
+            <param name="value">Value of the style element</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.DomElement.IStyle.UpdateStyle(StreetSmart.Common.Interfaces.DomElement.StyleElementName,System.Int32,StreetSmart.Common.Interfaces.DomElement.StyleElementNumberType)">
+            <summary>
+            Update a style element
+            </summary>
+            <param name="name">Name of the style element</param>
+            <param name="value">Value of the style element</param>
+            <param name="type">Type of the style element</param>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.DomElement.StyleElementName">
+            <summary>
+            Name of the style element
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementName.Width">
+            <summary>
+            Width valueof the style element
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementName.Height">
+            <summary>
+            Height value of the style element
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementName.Position">
+            <summary>
+            Position of the style element
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementName.Top">
+            <summary>
+            Top value of the style element
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementName.Left">
+            <summary>
+            Left value of the style element
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.DomElement.StyleElementNumberType">
+            <summary>
+            Type of the style element number
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementNumberType.Percent">
+            <summary>
+            The number in percent
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.DomElement.StyleElementNumberType.Pixels">
+            <summary>
+            The number in pixels
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Events.IEventArgs`1">
+            <summary>
+            Generic event implementation
+            </summary>
+            <typeparam name="T">Event type</typeparam>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Events.IEventArgs`1.Value">
+            <summary>
+            The event value
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.CRSType">
+            <summary>
+            The CRS type
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CRSType.NotDefined">
+            <summary>
+            Not defined
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CRSType.Epsg">
+            <summary>
+            EPSG type
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CRSType.Name">
+            <summary>
+            Name type
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType">
+            <summary>
+            Custom geometry type
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.NotDefined">
+            <summary>
+            Not defined
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.Circle">
+            <summary>
+            Circle
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.Orthogonal">
+            <summary>
+            Orthogonal
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.Height">
+            <summary>
+            Height
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.Rectangle">
+            <summary>
+            Rectangle
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.FeatureType">
+            <summary>
+            The feature types of a feature
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.FeatureType.Unknown">
+            <summary>
+            anything else
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.FeatureType.FeatureCollection">
+            <summary>
+            Feature collection
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.FeatureType.Feature">
+            <summary>
+            Feature
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.ICRS">
+            <summary>
+            Spatial reference system of the geoJson feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.ICRS.Type">
+            <summary>
+            Type of the CRS
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.ICRS.Properties">
+            <summary>
+            Properties of the CRS
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDerivedData">
+            <summary>
+            Derived data which contains the calculated data from the measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedData.Unit">
+            <summary>
+            The unit of the measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedData.Precision">
+            <summary>
+            Precision
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString">
+            <summary>
+            Derived data which contains the calculated data of a line measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.CoordinateStdev">
+            <summary>
+            Standard deviations of the points
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.TotalLength">
+            <summary>
+            The total lenght
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentLengths">
+            <summary>
+            Segment lengths
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentsDeltaXY">
+            <summary>
+            Segments delta XY
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentsDeltaZ">
+            <summary>
+            Segments delta Z
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentSlopePercentage">
+            <summary>
+            Segments slope percentage
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentsSlopeAngle">
+            <summary>
+            Segments slope angle
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.DeltaXY">
+            <summary>
+            Delta XY
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.DeltaZ">
+            <summary>
+            Delta Z
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPoint">
+            <summary>
+            Derived data which contains the calculated data of a point measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPoint.Position">
+            <summary>
+            position with the standard deviation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPoint.PositionXY">
+            <summary>
+            The position XY with the standard deviation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPoint.PositionZ">
+            <summary>
+            The position Z with the standard deviation
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPolygon">
+            <summary>
+            Derived data which contains the calculated data of a polygon measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPolygon.Triangles">
+            <summary>
+            The polygon splited in triangles
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataPolygon.Area">
+            <summary>
+            The area of the polygon
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDetails">
+            <summary>
+            Details
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDetailsDepth">
+            <summary>
+            Depth details
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsDepth.Position">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsDepth.Direction">
+            <summary>
+            Direction
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsDepth.DepthInMeters">
+            <summary>
+            Depth in meters
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsDepth.Depth">
+            <summary>
+            Depth
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsDepth.RecordingInfo">
+            <summary>
+            Recording info
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDetailsForwardIntersection">
+            <summary>
+            Smart click / Forward intersection Details
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsForwardIntersection.Position">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsForwardIntersection.ResultDirections">
+            <summary>
+            List of the observations
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDetailsSmartClick">
+            <summary>
+            Smart click / Forward intersection Details
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsSmartClick.Confidence">
+            <summary>
+            Undocumented SmartClick behavior:
+            If no result could be found, Confidence is -1 and ResultDirections contains a single 'i:nil' attribute with a value of true.
+            Test location: corner of West-Kruiskade / Schouwburgplein and Mauritsweg, Rotterdam (January 2017, photo from 08/08/2016)
+            https://streetsmart.cyclomedia.com/streetsmart?q=5D4FMDNX&amp;imageParams=11;18;30
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDetailsSmartClick.Depth">
+            <summary>
+            Depth
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IDirection">
+            <summary>
+            Direction
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IFeature">
+            <summary>
+            GeoJson Feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IFeature.Type">
+            <summary>
+            Type of the feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IFeature.Geometry">
+            <summary>
+            Geometry of the feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IFeature.Properties">
+            <summary>
+            Properties of the coordinate
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection">
+            <summary>
+            GeoJson feature collection
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection.Type">
+            <summary>
+            Feature type
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection.Features">
+            <summary>
+            Collection of features
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection.CRS">
+            <summary>
+            CRS
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IGeometry">
+            <summary>
+            Geometry type
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IGeometry.Type">
+            <summary>
+            Geometry type
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.ILineString">
+            <summary>
+            Line string geometry type
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails">
+            <summary>
+            GeoJson Feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails.MeasureMethod">
+            <summary>
+            Measure method
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails.Details">
+            <summary>
+            Details
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails.PointProblems">
+            <summary>
+            Point problems
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails.PointReliability">
+            <summary>
+            Point reliability
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IObservationLines">
+            <summary>
+            Observation lines
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IObservationLines.ActiveObservation">
+            <summary>
+            Active observation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IObservationLines.RecordingId">
+            <summary>
+            RecordingId
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IObservationLines.Color">
+            <summary>
+            Color
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IObservationLines.SelectedMeasureMethod">
+            <summary>
+            Selected measure method
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IPoint">
+            <summary>
+            Point geometry type
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IPolygon">
+            <summary>
+            Polygon geometry type
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IPosition">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IPositionStdev">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IPositionStdev.StdDev">
+            <summary>
+            Std dev
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IPositionXY">
+            <summary>
+            Contains the XY position and the stdDev
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IPositionXY.X">
+            <summary>
+            The X value
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IPositionXY.Y">
+            <summary>
+            The Y value
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IPositionXY.Stdev">
+            <summary>
+            The standard deviation of the XY position
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IPositionXYZ">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IPositionXYZ.XYZ">
+            <summary>
+            XYZ
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IProperties">
+            <summary>
+            GeoJson Feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Group">
+            <summary>
+            Group
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.MeasureDetails">
+            <summary>
+            Measure details
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Dimension">
+            <summary>
+            Dimension
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.CustomGeometryType">
+            <summary>
+            Custom geometry type
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.DerivedData">
+            <summary>
+            Derived data which contains the calculated data from the measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.MeasureReliability">
+            <summary>
+            Measure reliability
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.PointsWithErrors">
+            <summary>
+            Points with errors
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.ValidGeometry">
+            <summary>
+            Valid Geometry
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.ObservationLines">
+            <summary>
+            Observation lines
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IProperty">
+            <summary>
+            Contains the value and the stdDev
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperty.Value">
+            <summary>
+            The value of the property
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperty.Stdev">
+            <summary>
+            The standard deviation of the value
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IRecordingInfo">
+            <summary>
+            Recording info
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IRecordingInfo.Id">
+            <summary>
+            ImageId
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IRecordingInfo.Position">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IRecordingInfo.SRS">
+            <summary>
+            Coordinate system
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IRecordingInfo.Yaw">
+            <summary>
+            Yaw
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IRecordingInfo.DepthStdev">
+            <summary>
+            Depth std dev
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IResultDirection">
+            <summary>
+            Result direction of the observation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.Direction">
+            <summary>
+            Direction
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.GroundLevelOffset">
+            <summary>
+            GroundLevel offset
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.Id">
+            <summary>
+            ImageId
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.MatchImage">
+            <summary>
+            match image
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.Orientation">
+            <summary>
+            Orientation
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.Position">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.RecordedAt">
+            <summary>
+            RecordedAt
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IStdev">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.ITriangle">
+            <summary>
+            Contains a triangle of a polygon
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.ITriangle.Points">
+            <summary>
+            Triangle
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod">
+            <summary>
+            Measure method
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.NotDefined">
+            <summary>
+            Not defined
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.DepthMap">
+            <summary>
+             Measure using depth map (in marketing terms: Measure Smart)
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.SmartClick">
+             <summary>
+            Measure using Smart Click
+             </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.AutoFocus">
+            <summary>
+            Measure using Auto Focus
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.ForwardIntersection">
+            <summary>
+            Measure using manual forward intersection
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.PointProblems">
+            <summary>
+            Point problems
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.PointProblems.OneObservation">
+            <summary>
+            oneObservation
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.PointProblems.TooFewRecordings">
+            <summary>
+            Too few recordings
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.PointProblems.InvalidAngle">
+            <summary>
+            Invalid angle
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.PointProblems.PointTooFar">
+            <summary>
+            Point too far
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.PointProblems.StandardDeviation">
+            <summary>
+            Standard deviation
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.Reliability">
+            <summary>
+            Reliability
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.Reliability.NotDefined">
+            <summary>
+            Not defined
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.Reliability.Reliable">
+            <summary>
+            Good reliablity
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.Reliability.Acceptable">
+            <summary>
+            Acceptable reliability
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.Reliability.Unreliable">
+            <summary>
+            Bad reliability
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Wpf.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.BrowserSubprocess">
+            <summary>
+              Looks up a localized string similar to CefSharp.BrowserSubprocess.exe.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.JsApi">
+            <summary>
+              Looks up a localized string similar to StreetSmartApi.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.StreetSmartLocation">
+            <summary>
+              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v18.11/api-dotnet.html.
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Wpf.StreetSmartGUI">
+            <summary>
+            Interaction logic for StreetSmartGUI.xaml
+            </summary>
+            <summary>
+            StreetSmartGUI
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Wpf.StreetSmartGUI.ApiProperty">
+            <summary>
+            Dependency property of the api
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Wpf.StreetSmartGUI.OnApiChanged(System.Windows.DependencyObject,System.Windows.DependencyPropertyChangedEventArgs)">
+            <summary>
+            Changed the api
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.StreetSmartGUI.Api">
+            <summary>
+            The StreetSmart API
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Wpf.StreetSmartGUI.#ctor">
+            <summary>
+            Constructor of the StreetSmartGUI
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Wpf.StreetSmartGUI.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+    </members>
+</doc>

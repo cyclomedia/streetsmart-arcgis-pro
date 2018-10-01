@@ -87,7 +87,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
     public SpatialReference GetItem(string srsName)
     {
       return this.Aggregate<SpatialReference, SpatialReference>
-        (null, (current, spatialReference) => (spatialReference.SRSName == srsName) ? spatialReference : current);
+        (null, (current, spatialReference) => spatialReference.SRSName == srsName ? spatialReference : current);
     }
 
     public SpatialReference GetCompatibleSrsNameItem(string srsName)

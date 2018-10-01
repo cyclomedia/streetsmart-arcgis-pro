@@ -20,8 +20,6 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-using ApiMeasurementPoint = GlobeSpotterAPI.MeasurementPoint;
-
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
   class MeasurementPositionStd : IValueConverter
@@ -31,11 +29,13 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
       CultureInfo ci = CultureInfo.InvariantCulture;
-      ApiMeasurementPoint apiPoint = value as ApiMeasurementPoint;
+      // Todo: Convert api measurement point
+      object apiPoint = value;
+      double axStd = 0, ayStd = 0, azStd = 0;
 
-      string stdx = apiPoint == null || double.IsNaN(apiPoint.Std_x) ? "---" : apiPoint.Std_x.ToString("#0.00", ci);
-      string stdy = apiPoint == null || double.IsNaN(apiPoint.Std_y) ? "---" : apiPoint.Std_y.ToString("#0.00", ci);
-      string stdz = apiPoint == null || double.IsNaN(apiPoint.Std_z) ? "---" : apiPoint.Std_z.ToString("#0.00", ci);
+      string stdx = apiPoint == null || double.IsNaN(axStd) ? "---" : axStd.ToString("#0.00", ci);
+      string stdy = apiPoint == null || double.IsNaN(ayStd) ? "---" : ayStd.ToString("#0.00", ci);
+      string stdz = apiPoint == null || double.IsNaN(azStd) ? "---" : azStd.ToString("#0.00", ci);
       return string.Format(ci, "{0}, {1}, {2}", stdx, stdy, stdz);
     }
 

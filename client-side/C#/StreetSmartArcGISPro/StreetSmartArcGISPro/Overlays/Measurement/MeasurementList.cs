@@ -21,17 +21,14 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
-using GlobeSpotterAPI;
+
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
-using ApiMeasurementObservation = GlobeSpotterAPI.MeasurementObservation;
-using ApiMeasurementPoint = GlobeSpotterAPI.MeasurementPoint;
-
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
-  class MeasurementList : Dictionary<int, Measurement>, IAPIClient
+  class MeasurementList : Dictionary<int, Measurement>
   {
     #region Members
 
@@ -47,7 +44,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public Measurement Sketch { get; set; }
     public Measurement Open { get; set; }
-    public API Api { private get; set; }
+    public object Api { private get; set; }
     public bool DrawPoint { private get; set; }
 
     #endregion
@@ -185,7 +182,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        Api?.SetMeasurementSeriesModeEnabled(false);
+        // Todo: disable measurement series mode
       }
     }
 
@@ -193,8 +190,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        Api?.NextMeasurementSeries(entityId);
-        Api?.SetMeasurementSeriesModeEnabled(true);
+        // Todo: enable measurement series
       }
     }
 
@@ -202,8 +198,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        Api?.OpenMeasurement(entityId);
-        Api?.SetFocusEntity(entityId);
+        // Todo: open measurement en set focus
       }
     }
 
@@ -211,7 +206,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        Api?.AddMeasurementPoint(entityId);
+        // Todo: add measurement point
       }
     }
 
@@ -227,7 +222,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           case GeometryType.Point:
             if (GlobeSpotterConfiguration.MeasurePoint)
             {
-              entityId = Api.AddPointMeasurement($"Point_{measurementName}_{objectId}");
+              // todo: entityId = add point measurement
+              entityId = 0;
               OpenMeasurement(entityId);
               DisableMeasurementSeries();
               AddMeasurementPoint(entityId);
@@ -237,7 +233,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           case GeometryType.Polyline:
             if (GlobeSpotterConfiguration.MeasureLine)
             {
-              entityId = Api.AddLineMeasurement($"Line_{measurementName}_{objectId}");
+              // todo: entityId = add line measurement
               OpenMeasurement(entityId);
               EnableMeasurementSeries(entityId);
             }
@@ -246,8 +242,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           case GeometryType.Polygon:
             if (GlobeSpotterConfiguration.MeasurePolygon)
             {
-              entityId = Api.AddSurfaceMeasurement($"Polygon_{measurementName}_{objectId}");
-              Api.SetMeasurementExtrusionEnabled(entityId, false);
+              // todo: entityId = add surface measurement
               OpenMeasurement(entityId);
               EnableMeasurementSeries(entityId);
             }
@@ -270,13 +265,14 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         _screenPointAdded = !_mapPointAdded;
 
-        PointMeasurementData measurementData = Api.GetMeasurementPointData(entityId, pointId);
-        ApiMeasurementPoint measurementPoint = measurementData.measurementPoint;
+        // Todo: get measurement point data measurementPoint = : entityId, pointId
+        object measurementPoint = null;
         Measurement measurement = Get(entityId);
 
         if (measurement != null)
         {
-          int index = (int) Api?.GetMeasurementPointIndex(entityId, pointId);
+          // Todo: get measurement point index = : entityId, pointId
+          int index = 0;
           await measurement.UpdatePointAsync(pointId, measurementPoint, index);
         }
 
@@ -302,7 +298,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         if (geometry != null)
         {
-          if (((!_drawingSketch) && (!geometry.IsEmpty)) || (measurement == null))
+          if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
           {
             _drawingSketch = true;
             measurement = StartMeasurement(geometry, measurement, true, null, vectorLayer);
@@ -326,7 +322,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
 
         if (geometryType == GeometryType.Point || geometryType == GeometryType.Polygon ||
-            (geometryType == GeometryType.Polyline))
+            geometryType == GeometryType.Polyline)
         {
           if (measurement?.IsGeometryType(geometryType) ?? false)
           {
@@ -372,63 +368,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region streetSmart events
 
-    public void OnComponentReady() { }
-
-    public void OnAPIReady() { }
-
-    public void OnAPIFailed() { }
-
-    public void OnOpenImageFailed(string input) { }
-
-    public void OnOpenImageResult(string input, bool opened, string imageId) { }
-
-    public void OnOpenNearestImageResult(string input, bool opened, string imageId, Point3D position) { }
-
-    public void OnImageChanged(uint viewerId) { }
-
-    public void OnImagePreviewCompleted(uint viewerId) { }
-
-    public void OnImageSegmentLoaded(uint viewerId) { }
-
-    public void OnImageCompleted(uint viewerId) { }
-
-    public void OnImageFailed(uint viewerId) { }
-
-    public void OnViewLoaded(uint viewerId) { }
-
-    public void OnImageDistanceSliderChanged(uint viewerId, double distance) { }
-
-    public void OnViewChanged(uint viewerId, double yaw, double pitch, double hFov) { }
-
-    public void OnViewClicked(uint viewerId, double[] mouseCoords) { }
-
-    public void OnMarkerClicked(uint viewerId, uint drawingId, double[] markerCoords) { }
-
-    public void OnEntityDataChanged(int entityId, EntityData data) { }
-
-    public void OnEntityFocusChanged(int entityId) { }
-
-    public void OnFocusPointChanged(double x, double y, double z) { }
-
-    public void OnFeatureClicked(Dictionary<string, string> feature) { }
-
-    public void OnViewerAdded(uint viewerId) { }
-
-    public void OnViewerRemoved(uint viewerId) { }
-
-    public void OnViewerActive(uint viewerId) { }
-
-    public void OnViewerInactive(uint viewerId) { }
-
-    public void OnMaxViewers() { }
-
     public void OnMeasurementCreated(int entityId, string entityType)
     {
       Measurement measurement = new Measurement(entityId, entityType, DrawPoint, Api);
       Add(entityId, measurement);
     }
 
-    public async void OnMeasurementClosed(int entityId, EntityData data)
+    public async void OnMeasurementClosed(int entityId, object data)
     {
       Measurement measurement = Get(entityId);
 
@@ -438,15 +384,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public void OnMeasurementOpened(int entityId, EntityData data)
+    public void OnMeasurementOpened(int entityId, object data)
     {
       Measurement measurement = Get(entityId);
       measurement?.Open();
     }
-
-    public void OnMeasurementCanceled(int entityId) { }
-
-    public void OnMeasurementModeChanged(bool mode) { }
 
     public async void OnMeasurementPointAdded(int entityId, int pointId)
     {
@@ -454,7 +396,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       measurement?.AddPoint(pointId);
       _pointAdded = true;
 
-      if ((!(Api?.GetMeasurementSeriesModeEnabled() ?? true)) || (measurement?.IsPointMeasurement ?? false))
+      // Todo: get measurement series enabled?
+      if (true || (measurement?.IsPointMeasurement ?? false))
       {
         await UpdateMeasurementPointAsync(entityId, pointId);
       }
@@ -480,7 +423,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         MeasurementPoint point = measurement[pointId];
         point.Opened();
 
-        if ((!measurement.IsPointMeasurement) && (_pointAdded))
+        if (!measurement.IsPointMeasurement && _pointAdded)
         {
           point.Closed();
         }
@@ -502,8 +445,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementPointObservationAdded(int entityId, int pointId, string imageId, Bitmap match)
     {
-      ObservationMeasurementData observation = Api.GetMeasurementPointObservationData(entityId, pointId, imageId);
-      ApiMeasurementObservation measurementObservation = observation.measurementObservation;
+      // Todo: get measurement observation data (entityId, pointId, imageId);
+      object measurementObservation = null;
       Measurement measurement = Get(entityId);
 
       if (measurement?.ContainsKey(pointId) ?? false)
@@ -515,8 +458,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementPointObservationUpdated(int entityId, int pointId, string imageId)
     {
-      ObservationMeasurementData observation = Api.GetMeasurementPointObservationData(entityId, pointId, imageId);
-      ApiMeasurementObservation measurementObservation = observation.measurementObservation;
+      // Todo: get measurement observation data (entityId, pointId, imageId);
+      object measurementObservation = null;
       Measurement measurement = Get(entityId);
 
       if (measurement?.ContainsKey(pointId) ?? false)
@@ -536,30 +479,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         measurementPoint.RemoveObservation(imageId);
       }
     }
-
-    public void OnDividerPositionChanged(double position) { }
-
-    public void OnMapClicked(Point2D point) { }
-
-    public void OnMapExtentChanged(MapExtent extent, Point2D mapCenter, uint zoomLevel) { }
-
-    public void OnAutoCompleteResult(string request, string[] results) { }
-
-    public void OnMapInitialized() { }
-
-    public void OnShowLocationRequested(uint viewerId, Point3D point3D) { }
-
-    public void OnDetailImagesVisibilityChanged(bool value) { }
-
-    public void OnMeasurementHeightLevelChanged(int entityId, double level) { }
-
-    public void OnMeasurementPointHeightLevelChanged(int entityId, int pointId, double level) { }
-
-    public void OnMapBrightnessChanged(double value) { }
-
-    public void OnMapContrastChanged(double value) { }
-
-    public void OnObliqueImageChanged() { }
 
     #endregion
   }
