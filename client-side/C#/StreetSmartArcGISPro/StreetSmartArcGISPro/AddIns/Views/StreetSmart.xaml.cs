@@ -59,7 +59,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
     private readonly FileConfiguration _configuration;
     private readonly ConstantsViewer _constants;
     private readonly FileLogin _login;
-    private readonly HistoricalRecordings _historicalRecordings;
     private readonly List<string> _openNearest;
     private readonly List<CycloMediaLayer> _layers;
     private readonly ViewerList _viewerList;
@@ -80,7 +79,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       InitializeComponent();
       _settings = FileSettings.Instance;
       _constants = ConstantsViewer.Instance;
-      _historicalRecordings = HistoricalRecordings.Instance;
 
       _login = FileLogin.Instance;
 
@@ -130,7 +128,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
         if (!_layers.Contains(layer))
         {
           _layers.Add(layer);
-          UpdateRecordingLayer(layer);
           layer.PropertyChanged += OnLayerPropertyChanged;
         }
       }
@@ -191,8 +188,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
           // ToDo: set overlay draw distance to api
         }
       }
-
-      await MoveToLocationAsync(panoramaViewer);
     }
 
     public void OnFeatureClicked(Dictionary<string, string> feature)
@@ -295,7 +290,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
         {
           case "Visible":
           case "IsVisibleInstreetSmart":
-            UpdateRecordingLayer(layer);
+            // Todo about update
             break;
         }
       }

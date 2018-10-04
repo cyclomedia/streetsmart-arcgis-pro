@@ -71,16 +71,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// </summary>
     public string RecordingLayerFeatureClassName { get; set; }
 
-    /// <summary>
-    /// Recording layer name
-    /// </summary>
-    public string HistoricalRecordingLayerName { get; set; }
-
-    /// <summary>
-    /// Recording feature class name
-    /// </summary>
-    public string HistoricalRecordingLayerFeatureClassName { get; set; }
-
     public static ConstantsRecordingLayer Instance
     {
       get
@@ -125,9 +115,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         SizeLayer = 7.0,
         MinimumScale = 2000.0,
         RecordingLayerName = "Recent Recordings",
-        RecordingLayerFeatureClassName = "FCRecentRecordings",
-        HistoricalRecordingLayerName = "Historical Recordings",
-        HistoricalRecordingLayerFeatureClassName = "FCHistoricalRecordings"
+        RecordingLayerFeatureClassName = "FCRecentRecordings"
       };
 
       result.Save();

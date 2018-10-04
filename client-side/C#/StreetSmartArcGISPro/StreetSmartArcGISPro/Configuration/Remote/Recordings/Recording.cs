@@ -51,6 +51,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
     public const string FieldPip1Yaw = "PIP1Yaw";                  // "PIP1Yaw"
     public const string FieldPip2Yaw = "PIP2Yaw";                  // "PIP2Yaw"
     public const string FieldShape = "Shape";                      // "Shape"
+    public const string FieldHasDepthMap = "HasDepthMa";           // "HasDepthMap"
 
     #endregion
 
@@ -108,6 +109,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
     [XmlElement("tileSchema", Namespace = "http://www.cyclomedia.com/atlas")]
     public TileSchema TileSchema { get; set; }
 
+    [XmlElement("hasDepthMap", Namespace = "http://www.cyclomedia.com/atlas")]
+    public bool? HasDepthMap { get; set; }
+
     public static Dictionary<string, FieldType> Fields => new Dictionary<string, FieldType>
     {
       {FieldId, FieldType.String},
@@ -127,7 +131,8 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
       {FieldYear, FieldType.Integer},
       {FieldPip, FieldType.String},
       {FieldPip1Yaw, FieldType.Double},
-      {FieldPip2Yaw, FieldType.Double}
+      {FieldPip2Yaw, FieldType.Double},
+      {FieldHasDepthMap, FieldType.String}
     };
 
     #endregion
@@ -198,6 +203,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
         case FieldPip2Yaw:
           result = (Images.Image.Length >= 2) ? Images.Image[1].Yaw : null;
           break;
+        case FieldHasDepthMap:
+          result = HasDepthMap.ToString();
+          break;
       }
 
       return result;
@@ -260,7 +268,6 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           case FieldPip2Yaw:
             break;
           case FieldShape:
-
             if (item is MapPoint mapPoint)
             {
               Location = new Location
@@ -274,6 +281,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
               };
             }
 
+            break;
+          case FieldHasDepthMap:
+            HasDepthMap = bool.Parse((string) item);
             break;
         }
       }

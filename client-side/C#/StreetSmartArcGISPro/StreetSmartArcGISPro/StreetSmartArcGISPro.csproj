@@ -102,8 +102,6 @@
     <Compile Include="AddIns\Buttons\Help.cs" />
     <Compile Include="AddIns\Buttons\MeasurementDetail.cs" />
     <Compile Include="AddIns\Buttons\ImageIdSearch.cs" />
-    <Compile Include="AddIns\Buttons\HistoricalRecordingLayer.cs" />
-    <Compile Include="AddIns\Buttons\ShowInCyclorama.cs" />
     <Compile Include="AddIns\Buttons\RecentRecordingLayer.cs" />
     <Compile Include="AddIns\DockPanes\MeasurementDetail.cs" />
     <Compile Include="AddIns\Pages\Agreement.cs" />
@@ -157,7 +155,6 @@
     <Compile Include="AddIns\Views\Converters\InverseBoolean.cs" />
     <Compile Include="Configuration\File\Agreement.cs" />
     <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
-    <Compile Include="Configuration\File\HistoricalRecordings.cs" />
     <Compile Include="Configuration\File\ConstantsViewer.cs" />
     <Compile Include="Configuration\File\Layers\StoredLayer.cs" />
     <Compile Include="Configuration\File\Layers\StoredLayerList.cs" />
@@ -201,7 +198,6 @@
     <Compile Include="VectorLayers\VectorLayer.cs" />
     <Compile Include="CycloMediaLayers\CycloMediaGroupLayer.cs" />
     <Compile Include="CycloMediaLayers\CycloMediaLayer.cs" />
-    <Compile Include="CycloMediaLayers\HistoricalLayer.cs" />
     <Compile Include="CycloMediaLayers\RecordingLayer.cs" />
     <Compile Include="Overlays\Viewer.cs" />
     <Compile Include="Overlays\CrossCheck.cs" />
@@ -279,7 +275,6 @@
     <Content Include="..\..\Doc\ToDo.txt">
       <Link>ToDo.txt</Link>
     </Content>
-    <AddInContent Include="Images\HistoricalRecordingLayer32.png" />
     <AddInContent Include="Images\ImageIdSearch32.png" />
     <AddInContent Include="Images\MeasurementDetail32.png" />
     <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.BrowserSubprocess.Core.dll">

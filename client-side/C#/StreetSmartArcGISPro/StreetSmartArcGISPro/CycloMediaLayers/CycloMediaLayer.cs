@@ -68,30 +68,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     private bool _isVisibleInstreetSmart;
     private bool _visible;
 
-    private readonly IList<Color> _colors = new List<Color>
-    {
-      Color.FromArgb(255, Color.FromArgb(0x80B3FF)),
-      Color.FromArgb(255, Color.FromArgb(0x0067FF)),
-      Color.FromArgb(255, Color.FromArgb(0x405980)),
-      Color.FromArgb(255, Color.FromArgb(0x001F4D)),
-      Color.FromArgb(255, Color.FromArgb(0xFFD080)),
-      Color.FromArgb(255, Color.FromArgb(0xFFA100)),
-      Color.FromArgb(255, Color.FromArgb(0x806840)),
-      Color.FromArgb(255, Color.FromArgb(0x4D3000)),
-      Color.FromArgb(255, Color.FromArgb(0xDDFF80)),
-      Color.FromArgb(255, Color.FromArgb(0xBBFF00)),
-      Color.FromArgb(255, Color.FromArgb(0x6F8040)),
-      Color.FromArgb(255, Color.FromArgb(0x384D00)),
-      Color.FromArgb(255, Color.FromArgb(0xFF80D9)),
-      Color.FromArgb(255, Color.FromArgb(0xFF00B2)),
-      Color.FromArgb(255, Color.FromArgb(0x80406C)),
-      Color.FromArgb(255, Color.FromArgb(0x4D0035)),
-      Color.FromArgb(255, Color.FromArgb(0xF2F2F2)),
-      Color.FromArgb(255, Color.FromArgb(0xBFBFBF)),
-      Color.FromArgb(255, Color.FromArgb(0x404040)),
-      Color.FromArgb(255, Color.FromArgb(0x000000))
-    };
-
     #endregion
 
     #region Properties
@@ -179,16 +155,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         await RefreshAsync();
       }
-    }
-
-    protected Color GetCol(int year)
-    {
-      DateTime now = DateTime.Now;
-      int nowYear = now.Year;
-      int yearDiff = nowYear - year;
-      int nrColors = _colors.Count;
-      int index = Math.Min(yearDiff, (nrColors - 1));
-      return _colors[index];
     }
 
     public async Task<SpatialReference> GetSpatialReferenceAsync()
@@ -559,9 +525,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        string[] fieldNames = {Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized};
-        var uniqueValueRendererDefinition = new UniqueValueRendererDefinition(fieldNames);
+        string[] fieldNames = {Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap};
+        var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
         var uniqueValueRenderer = (CIMUniqueValueRenderer) Layer.CreateRenderer(uniqueValueRendererDefinition);
+        uniqueValueRenderer.Fields = fieldNames;
         uniqueValueRenderer.DefaultLabel = string.Empty;
         uniqueValueRenderer.DefaultSymbol = null;
         uniqueValueRenderer.Groups = null;
@@ -678,7 +645,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           ShowModalMessageAfterFailure = false
         };
 
-        if ((featureCollection != null) && (featureCollection.NumberOfFeatures >= 1))
+        if (featureCollection != null && featureCollection.NumberOfFeatures >= 1)
         {
           FeatureMembers featureMembers = featureCollection.FeatureMembers;
           Recording[] recordings = featureMembers?.Recordings;

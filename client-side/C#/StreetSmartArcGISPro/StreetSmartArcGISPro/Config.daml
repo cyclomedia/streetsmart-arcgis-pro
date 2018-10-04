@@ -58,8 +58,6 @@
                keytip="GL">
           <button refID="streetSmartArcGISPro_recentRecordingLayerButton"
                   size="large" />
-          <button refID="streetSmartArcGISPro_historicalRecordingLayerButton"
-                  size="large" />
         </group>
         <group id="streetSmartArcGISPro_inquiryGroup"
                caption="Inquiry"
@@ -118,29 +116,6 @@
                 keytip="GR">
           <tooltip heading="Recent Recording Layer">
             Add recent cyclorama layer to the map
-            <disabledText />
-          </tooltip>
-        </button>
-        <button id="streetSmartArcGISPro_historicalRecordingLayerButton"
-                caption="Historical Recording Layer"
-                className="AddIns.Buttons.HistoricalRecordingLayer"
-                loadOnClick="false"
-                largeImage="Images\HistoricalRecordingLayer32.png"
-                condition="streetSmartArcGISPro_recordingsReadyCondition"
-                keytip="GH">
-          <tooltip heading="Historical Recording Layer">
-            Add historical cyclorama layer to the map
-            <disabledText />
-          </tooltip>
-        </button>
-        <button id="streetSmartArcGISPro_showInCycloramaButton"
-                caption="Show in Cyclorama"
-                className="AddIns.Buttons.ShowInCyclorama"
-                loadOnClick="false"
-                condition="streetSmartArcGISPro_recordingsReadyCondition"
-                keytip="GS">
-          <tooltip heading="Show in Cyclorama">
-            Show layer in the cyclorama
             <disabledText />
           </tooltip>
         </button>
@@ -207,12 +182,6 @@
       </dockPanes>
     </insertModule>
     <updateModule refID="esri_mapping">
-      <menus>
-        <updateMenu refID="esri_mapping_layerContextMenu">
-          <insertButton refID="streetSmartArcGISPro_showInCycloramaButton"
-                        insert="before" />
-        </updateMenu>
-      </menus>
       <groups>
         <updateGroup refID="esri_mapping_navigateGroup">
           <insertButton refID="streetSmartArcGISPro_openImageTool"
@@ -278,15 +247,6 @@
         <state id="streetSmartArcGISPro_agreementAcceptedState" />
         <state id="streetSmartArcGISPro_loginSuccessfullyState" />
         <state id="streetSmartArcGISPro_recordingLayerEnabledState" />
-        <state id="esri_mapping_mapPane" />
-      </and>
-    </insertCondition>
-    <insertCondition id="streetSmartArcGISPro_historicalLayerReadyCondition"
-                     caption="The historical layer is ready.">
-      <and>
-        <state id="streetSmartArcGISPro_agreementAcceptedState" />
-        <state id="streetSmartArcGISPro_historicalLayerEnabledState" />
-        <state id="streetSmartArcGISPro_loginSuccessfullyState" />
         <state id="esri_mapping_mapPane" />
       </and>
     </insertCondition>

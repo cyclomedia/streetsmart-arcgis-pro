@@ -58,7 +58,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     public IList<CycloMediaLayer> AllLayers => _allLayers ?? (_allLayers = new List<CycloMediaLayer>
     {
       new RecordingLayer(this, InitialExtent),
-      new HistoricalLayer(this, InitialExtent)
     });
 
     public bool ContainsLayers => Count != 0;
