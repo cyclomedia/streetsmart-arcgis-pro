@@ -212,7 +212,17 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
           if (map != null && GroupLayer != null)
           {
-            map.RemoveLayer(GroupLayer);
+            bool exists = false;
+
+            foreach (Layer layer in map.Layers)
+            {
+              exists = layer == GroupLayer || exists;
+            }
+
+            if (exists)
+            {
+              map.RemoveLayer(GroupLayer);
+            }
           }
         });
       }

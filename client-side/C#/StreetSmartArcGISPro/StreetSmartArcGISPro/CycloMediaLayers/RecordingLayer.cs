@@ -179,8 +179,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                       }
                     }
 
-                    object depthMapValue = row?.GetOriginalValue(hasDepthMapId);
-                    bool depthMap = bool.Parse((string) (depthMapValue ?? false.ToString()));
+                    string depthMapValue = row?.GetOriginalValue(hasDepthMapId) as string;
+                    bool depthMap = bool.Parse(string.IsNullOrEmpty(depthMapValue) ? false.ToString() : depthMapValue);
                     hasDepthMap = depthMap || hasDepthMap;
                     hasNoDepthMap = !depthMap || hasNoDepthMap;
                   }
