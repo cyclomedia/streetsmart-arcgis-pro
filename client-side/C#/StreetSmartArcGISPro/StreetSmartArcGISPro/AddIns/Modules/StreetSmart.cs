@@ -46,6 +46,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     private ViewerList _viewerList;
     private MeasurementList _measurementList;
     private readonly Agreement _agreement;
+    private readonly ConstantsRecordingLayer _constantsRecordingLayer;
 
     #endregion
 
@@ -84,6 +85,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     public StreetSmart()
     {
       _agreement = Agreement.Instance;
+      _constantsRecordingLayer = ConstantsRecordingLayer.Instance;
 
       if (_agreement.Value)
       {
@@ -128,10 +130,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private bool ContainsCycloMediaLayer(MapView mapView = null)
     {
-      return
-        (mapView ?? MapView.Active)?.Map?.Layers.Aggregate(false,
-          (current, layer) => (CycloMediaGroupLayer?.IsKnownName(layer.Name) ?? layer.Name == "CycloMedia") || current) ??
-        false;
+      return (mapView ?? MapView.Active)?.Map?.Layers.Aggregate(false, (current, layer) =>
+                 (CycloMediaGroupLayer?.IsKnownName(layer.Name) ??
+                  layer.Name == _constantsRecordingLayer.CycloMediaLayerName) || current) ?? false;
     }
 
     private async Task CloseCycloMediaLayerAsync(bool closeMap)

@@ -111,11 +111,11 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new ConstantsRecordingLayer
       {
-        CycloMediaLayerName = "CycloMedia",
-        SizeLayer = 7.0,
+        CycloMediaLayerName = "Street Smart",
+        SizeLayer = 8.0,
         MinimumScale = 2000.0,
-        RecordingLayerName = "Recent Recordings",
-        RecordingLayerFeatureClassName = "FCRecentRecordings"
+        RecordingLayerName = "Recordings",
+        RecordingLayerFeatureClassName = "FCStreetSmartRecordings"
       };
 
       result.Save();

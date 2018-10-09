@@ -28,7 +28,6 @@
 -->
   <UserControl.Resources>
     <ResourceDictionary>
-      <converters:RecentHistorical x:Key="RecentHistoricalConverter"/>
       <converters:ImageIdInput x:Key="ImageIdInputConverter"/>
       <converters:DateTimeToDate x:Key="DateTimeToDateConverter"/>
       <converters:DateTimeToTime x:Key="DateTimeToTimeConverter"/>
@@ -55,7 +54,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
               </Grid.RowDefinitions>
-              <TextBlock Grid.Row="0" Text="{Binding ExpiredAt, Converter={StaticResource RecentHistoricalConverter}}"/>
               <DockPanel Grid.Row="1" Margin="15,0,0,0">
                 <Grid>
                   <Grid.RowDefinitions>

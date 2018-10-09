@@ -102,7 +102,7 @@
     <Compile Include="AddIns\Buttons\Help.cs" />
     <Compile Include="AddIns\Buttons\MeasurementDetail.cs" />
     <Compile Include="AddIns\Buttons\ImageIdSearch.cs" />
-    <Compile Include="AddIns\Buttons\RecentRecordingLayer.cs" />
+    <Compile Include="AddIns\Buttons\RecordingLayer.cs" />
     <Compile Include="AddIns\DockPanes\MeasurementDetail.cs" />
     <Compile Include="AddIns\Pages\Agreement.cs" />
     <Compile Include="AddIns\Pages\Configuration.cs" />
@@ -120,7 +120,6 @@
     </Compile>
     <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
     <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
-    <Compile Include="AddIns\Views\Converters\RecentHistorical.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
     <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
@@ -259,7 +258,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <AddInContent Include="Images\RecentRecordingLayer32.png" />
+    <AddInContent Include="Images\RecordingLayer32.png" />
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\StreetSmart32.png" />

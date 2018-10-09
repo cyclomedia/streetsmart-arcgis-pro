@@ -18,19 +18,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
-using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
+
+using Color = System.Drawing.Color;
+using Envelope = ArcGIS.Core.Geometry.Envelope;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
@@ -198,11 +199,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           {
             if (hasNoDepthMap)
             {
-              Color color = Color.FromArgb(255, Color.FromArgb(0x80B0FF));
-              CIMColor cimColor = ColorFactory.Instance.CreateColor(color);
-              var pointSymbol =
-                SymbolFactory.Instance.ConstructPointSymbol(cimColor, Constants.SizeLayer, SimpleMarkerStyle.Circle);
-              var pointSymbolReference = pointSymbol.MakeSymbolReference();
+              CIMColor cimColor = CIMColor.CreateRGBColor(128, 176, 255);
+              CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
 
               CIMUniqueValue uniqueValue = new CIMUniqueValue
               {
@@ -232,11 +230,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
             if (hasDepthMap)
             {
-              Color color = Color.FromArgb(255, Color.FromArgb(0x98C23C));
-              CIMColor cimColor = ColorFactory.Instance.CreateColor(color);
-              var pointSymbol =
-                SymbolFactory.Instance.ConstructPointSymbol(cimColor, Constants.SizeLayer, SimpleMarkerStyle.Circle);
-              var pointSymbolReference = pointSymbol.MakeSymbolReference();
+              CIMColor cimColor = CIMColor.CreateRGBColor(152, 194, 60);
+              CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
 
               CIMUniqueValue uniqueValue = new CIMUniqueValue
               {
@@ -343,6 +338,21 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           }
         }
       });
+    }
+
+    private CIMSymbolReference MakePointSymbol(CIMColor cimColor)
+    {
+      var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(cimColor, Constants.SizeLayer, SimpleMarkerStyle.Circle);
+      CIMMarkerGraphic[] markerGraphics = (pointSymbol.SymbolLayers[0] as CIMVectorMarker)?.MarkerGraphics;
+      CIMPolygonSymbol polygonSymbol = markerGraphics?[0].Symbol as CIMPolygonSymbol;
+
+      if (polygonSymbol?.SymbolLayers[0] is CIMSolidStroke solidStroke)
+      {
+        CIMColor cimStrokeColor = CIMColor.CreateRGBColor(255, 255, 255);
+        solidStroke.Color = cimStrokeColor;
+      }
+
+      return pointSymbol.MakeSymbolReference();
     }
 
     protected override void Remove()

@@ -56,7 +56,7 @@
                caption="Layer"
                appearsOnAddInTab="false"
                keytip="GL">
-          <button refID="streetSmartArcGISPro_recentRecordingLayerButton"
+          <button refID="streetSmartArcGISPro_recordingLayerButton"
                   size="large" />
         </group>
         <group id="streetSmartArcGISPro_inquiryGroup"
@@ -107,15 +107,15 @@
             <disabledText />
           </tooltip>
         </button>
-        <button id="streetSmartArcGISPro_recentRecordingLayerButton"
-                caption="Recent Recording Layer"
-                className="AddIns.Buttons.RecentRecordingLayer"
+        <button id="streetSmartArcGISPro_recordingLayerButton"
+                caption="Recording Layer"
+                className="AddIns.Buttons.RecordingLayer"
                 loadOnClick="false"
-                largeImage="Images\RecentRecordingLayer32.png"
+                largeImage="Images\RecordingLayer32.png"
                 condition="streetSmartArcGISPro_recordingsReadyCondition"
                 keytip="GR">
-          <tooltip heading="Recent Recording Layer">
-            Add recent cyclorama layer to the map
+          <tooltip heading="Recording Layer">
+            Add recording layer to the map
             <disabledText />
           </tooltip>
         </button>
