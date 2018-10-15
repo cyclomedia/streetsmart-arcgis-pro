@@ -18,6 +18,7 @@
 
 using System.IO;
 using System.Xml.Serialization;
+
 using StreetSmartArcGISPro.Utilities;
 
 using SystemIOFile = System.IO.File;
@@ -46,19 +47,9 @@ namespace StreetSmartArcGISPro.Configuration.File
     #region Properties
 
     /// <summary>
-    /// Max viewers
-    /// </summary>
-    public int MaxViewers { get; set; }
-
-    /// <summary>
     /// Overlay draw distance
     /// </summary>
     public double OverlayDrawDistance { get; set; }
-
-    /// <summary>
-    /// Min vectorlayer zoomlevel
-    /// </summary>
-    public int MinVectorLayerZoomLevel { get; set; }
 
     /// <summary>
     /// Address language code
@@ -130,8 +121,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new ConstantsViewer
       {
-        MinVectorLayerZoomLevel = 7,
-        MaxViewers = 4,
         OverlayDrawDistance = 30.0,
         AddressLanguageCode = "nl",
         AddressDatabase = "CMDatabase",

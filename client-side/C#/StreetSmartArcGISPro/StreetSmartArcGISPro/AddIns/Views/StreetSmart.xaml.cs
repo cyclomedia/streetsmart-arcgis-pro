@@ -132,15 +132,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
         }
       }
 
-      _vectorLayerList.LayerAdded += OnAddVectorLayer;
-      _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
-      _vectorLayerList.LayerUpdated += OnUpdateVectorLayer;
-
-      foreach (var vectorLayer in _vectorLayerList)
-      {
-        vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
-      }
-
       await _vectorLayerList.LoadMeasurementsAsync();
     }
 
@@ -192,6 +183,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
     public void OnFeatureClicked(Dictionary<string, string> feature)
     {
+      /*
       MapView mapView = MapView.Active;
       Map map = mapView?.Map;
 
@@ -202,6 +194,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
       long objectId = long.Parse(objectIdStr);
       mapView?.FlashFeature(layer, objectId);
       mapView?.ShowPopup(layer, objectId);
+      */
     }
 
     public async void OnImageDistanceSliderChanged(IPanoramaViewer panoramaViewer, double distance)
@@ -322,36 +315,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
     }
 
-    private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {
-      if (GlobeSpotterConfiguration.AddLayerWfs)
-      {
-        VectorLayer vectorLayer = sender as VectorLayer;
-
-        if (vectorLayer?.IsVisibleInstreetSmart ?? false)
-        {
-          switch (args.PropertyName)
-          {
-            case "IsVisibleInstreetSmart":
-              await vectorLayer.GenerateGmlAsync();
-              break;
-            case "Gml":
-              if (vectorLayer.LayerId == null || vectorLayer.GmlChanged)
-              {
-                RemoveVectorLayer(vectorLayer);
-                AddVectorLayer(vectorLayer);
-              }
-
-              break;
-          }
-        }
-        else
-        {
-          RemoveVectorLayer(vectorLayer);
-        }
-      }
-    }
-
     #endregion
 
     #region Functions
@@ -374,26 +337,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       _settings.PropertyChanged -= OnSettingsPropertyChanged;
       _cycloMediaGroupLayer.PropertyChanged -= OnGroupLayerPropertyChanged;
       _measurementList.RemoveAll();
-
-      _vectorLayerList.LayerAdded -= OnAddVectorLayer;
-      _vectorLayerList.LayerRemoved -= OnRemoveVectorLayer;
-      _vectorLayerList.LayerUpdated -= OnUpdateVectorLayer;
-
-      foreach (var vectorLayer in _vectorLayerList)
-      {
-        vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-      }
-
-      foreach (var vectorLayer in _vectorLayerList)
-      {
-        uint? vectorLayerId = vectorLayer.LayerId;
-
-        if (vectorLayerId != null)
-        {
-          // Todo: Remove layer api vector: vectorLayerId
-          vectorLayer.LayerId = null;
-        }
-      }
 
       _viewerList.RemoveViewers();
 
@@ -421,24 +364,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
     }
 
-    private async void OnAddVectorLayer(VectorLayer vectorLayer)
-    {
-      if (GlobeSpotterConfiguration.AddLayerWfs)
-      {
-        vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
-        await UpdateVectorLayerAsync(vectorLayer);
-      }
-    }
-
-    private void OnRemoveVectorLayer(VectorLayer vectorLayer)
-    {
-      if (GlobeSpotterConfiguration.AddLayerWfs)
-      {
-        vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-        RemoveVectorLayer(vectorLayer);
-      }
-    }
-
     #endregion
 
     #region vector layer functions
@@ -455,41 +380,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
     private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
     {
-      if (vectorLayer.IsVisibleInstreetSmart)
-      {
-        await vectorLayer.GenerateGmlAsync();
-      }
-      else
-      {
-        RemoveVectorLayer(vectorLayer);
-      }
-    }
-
-    private void AddVectorLayer(VectorLayer vectorLayer)
-    {
-      int minZoomLevel = _constants.MinVectorLayerZoomLevel;
-
-      MySpatialReference cyclSpatRel = _settings.CycloramaViewerCoordinateSystem;
-      string srsName = cyclSpatRel.SRSName;
-
-      string layerName = vectorLayer.Name;
-      string gml = vectorLayer.Gml;
-      Color color = vectorLayer.Color;
-
-      uint? layerId = 0;
-      // ToDo: Add GML layer: _api?.AddGMLLayer(layerName, gml, srsName, color, true, false, minZoomLevel);
-      vectorLayer.LayerId = layerId;
-    }
-
-    private void RemoveVectorLayer(VectorLayer vectorLayer)
-    {
-      uint? layerId = vectorLayer?.LayerId;
-
-      if (layerId != null)
-      {
-        // Todo: Remove vector layer, layerId
-        vectorLayer.LayerId = null;
-      }
+      await vectorLayer.GenerateJsonAsync();
     }
 
     #endregion

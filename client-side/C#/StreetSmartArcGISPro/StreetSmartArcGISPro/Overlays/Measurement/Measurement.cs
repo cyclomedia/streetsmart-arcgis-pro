@@ -139,7 +139,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       if (VectorLayer != null)
       {
-        await VectorLayer.GenerateGmlAsync();
+        await VectorLayer.GenerateJsonAsync();
       }
     }
 

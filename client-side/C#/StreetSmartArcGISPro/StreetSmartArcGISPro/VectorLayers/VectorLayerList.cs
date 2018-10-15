@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
@@ -30,9 +31,12 @@ using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+
 using StreetSmartArcGISPro.CycloMediaLayers;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
+
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -74,7 +78,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       _updateHeight = false;
       _currentToolId = string.Empty;
-      AddIns.Modules.StreetSmart modulestreetSmart = AddIns.Modules.StreetSmart.Current;
+      ModuleStreetSmart modulestreetSmart = ModuleStreetSmart.Current;
       _measurementList = modulestreetSmart.MeasurementList;
       _cycloMediaGroupLayer = modulestreetSmart.CycloMediaGroupLayer;
       EditTool = EditTools.NoEditTool;
@@ -87,7 +91,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     public VectorLayer GetLayer(Layer layer)
     {
       return this.Aggregate<VectorLayer, VectorLayer>(null,
-        (current, layerCheck) => (layerCheck?.Layer == layer) ? layerCheck : current);
+        (current, layerCheck) => layerCheck?.Layer == layer ? layerCheck : current);
     }
 
     public async Task LoadMeasurementsAsync()
@@ -129,7 +133,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     private async Task AddLayerAsync(Layer layer)
     {
       FeatureLayer featureLayer = layer as FeatureLayer;
-      AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       CycloMediaGroupLayer cycloGrouplayer = streetSmart?.CycloMediaGroupLayer;
 
       if (featureLayer != null && cycloGrouplayer != null && !cycloGrouplayer.IsKnownName(featureLayer.Name))
@@ -176,7 +180,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Layer layer = editingFeatureTemplate?.Layer;
       VectorLayer vectorLayer = GetLayer(layer);
 
-      if (vectorLayer?.IsVisibleInstreetSmart ?? false)
+      if (vectorLayer != null)
       {
         await StartMeasurementSketchAsync(vectorLayer);
       }
@@ -316,15 +320,14 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         ProjectionTransformation dstProjection = ProjectionTransformation.Create(srcSpatialReference,
           dstSpatialReference);
-        MapPoint dstPoint = GeometryEngine.Instance.ProjectEx(srcPoint, dstProjection) as MapPoint;
 
-        if (dstPoint != null)
+        if (GeometryEngine.Instance.ProjectEx(srcPoint, dstProjection) is MapPoint dstPoint)
         {
           double? height = await _cycloMediaGroupLayer.GetHeightAsync(dstPoint.X, dstPoint.Y);
 
           if (height != null)
           {
-            dstPoint = MapPointBuilder.CreateMapPoint(dstPoint.X, dstPoint.Y, ((double)height), dstSpatialReference);
+            dstPoint = MapPointBuilder.CreateMapPoint(dstPoint.X, dstPoint.Y, ((double) height), dstSpatialReference);
             ProjectionTransformation srcProjection = ProjectionTransformation.Create(dstSpatialReference,
               srcSpatialReference);
             srcPoint = GeometryEngine.Instance.ProjectEx(dstPoint, srcProjection) as MapPoint;
@@ -413,7 +416,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         measurement?.OpenMeasurement();
         measurement?.EnableMeasurementSeries();
       }
-      else if ((geometry == null) && (EditTool == EditTools.Verticles))
+      else if (geometry == null && EditTool == EditTools.Verticles)
       {
         EditTool = EditTools.ModifyFeatureImpl;
       }

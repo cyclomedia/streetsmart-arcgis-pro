@@ -393,6 +393,41 @@
             <param name="left">Left in pixels</param>
             <returns>Represents a dom element.</returns>
         </member>
+        <member name="T:StreetSmart.Common.Factories.GeoJsonFactory">
+            <summary>
+            Factory for create GeoJson objects
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreateFeatureCollection(System.Int32)">
+            <summary>
+            returns GeoJSon featureCollection object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePointFeature(System.Double,System.Double,System.Double)">
+            <summary>
+            returns GeoJson point feature object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePointFeature(System.Double,System.Double)">
+            <summary>
+            returns GeoJson point feature object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePointFeature(StreetSmart.Common.Interfaces.Data.ICoordinate)">
+            <summary>
+            returns GeoJson point feature object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreateLineFeature(System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ICoordinate})">
+            <summary>
+            returns GeoJson line string feature object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePolygonFeature(System.Collections.Generic.IList{System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ICoordinate}})">
+            <summary>
+            returns GeoJson polygon feature object
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Factories.JsonFactory">
             <summary>
             Factory for create Json objects
@@ -676,6 +711,16 @@
             Create the overlay object
             </summary>
             <param name="geoJson">GeoJSON object containing the layer data</param>
+            <param name="name">Name of the layer.</param>
+            <param name="srs">Optional EPSG code (srs) for the source GeoJSON, if not provided, srs of API initialisation is used.</param>
+            <param name="sld">Optional XML string for Styled Layer Descriptor</param>
+            <returns>Overlay object</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.OverlayFactory.Create(StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection,System.String,System.String,System.String)">
+            <summary>
+            Create the overlay object
+            </summary>
+            <param name="featureCollection">FeatureCollection object containing the layer data</param>
             <param name="name">Name of the layer.</param>
             <param name="srs">Optional EPSG code (srs) for the source GeoJSON, if not provided, srs of API initialisation is used.</param>
             <param name="sld">Optional XML string for Styled Layer Descriptor</param>
@@ -2131,6 +2176,56 @@
             Feature
             </summary>
         </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.GeometryType">
+            <summary>
+            Defines the geometryType of a GeoJson
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.Unknown">
+            <summary>
+            anything else
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.Positions">
+            <summary>
+            positions
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.Point">
+            <summary>
+            geometry point
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.MultiPoint">
+            <summary>
+            geometry multipoint
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.LineString">
+            <summary>
+            geometry lineString
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.MultiLineString">
+            <summary>
+            geometry multiLineString
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.Polygon">
+            <summary>
+            geometry polygon
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.MultiPolygon">
+            <summary>
+            geometry multipolygon
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.GeometryType.GeometryCollection">
+            <summary>
+            geometry geometrycollection
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.ICRS">
             <summary>
             Spatial reference system of the geoJson feature
@@ -2399,6 +2494,66 @@
             Point reliability
             </summary>
         </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties">
+            <summary>
+            GeoJson Feature
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.Group">
+            <summary>
+            Group
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.MeasureDetails">
+            <summary>
+            Measure details
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.Dimension">
+            <summary>
+            Dimension
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.CustomGeometryType">
+            <summary>
+            Custom geometry type
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.DerivedData">
+            <summary>
+            Derived data which contains the calculated data from the measurement
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.MeasureReliability">
+            <summary>
+            Measure reliability
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.PointsWithErrors">
+            <summary>
+            Points with errors
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.ValidGeometry">
+            <summary>
+            Valid Geometry
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.ObservationLines">
+            <summary>
+            Observation lines
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.IObservationLines">
             <summary>
             Observation lines
@@ -2482,61 +2637,6 @@
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.IProperties">
             <summary>
             GeoJson Feature
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Id">
-            <summary>
-            Id
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Name">
-            <summary>
-            Name
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Group">
-            <summary>
-            Group
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.MeasureDetails">
-            <summary>
-            Measure details
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.Dimension">
-            <summary>
-            Dimension
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.CustomGeometryType">
-            <summary>
-            Custom geometry type
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.DerivedData">
-            <summary>
-            Derived data which contains the calculated data from the measurement
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.MeasureReliability">
-            <summary>
-            Measure reliability
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.PointsWithErrors">
-            <summary>
-            Points with errors
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.ValidGeometry">
-            <summary>
-            Valid Geometry
-            </summary>
-        </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IProperties.ObservationLines">
-            <summary>
-            Observation lines
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.IProperty">

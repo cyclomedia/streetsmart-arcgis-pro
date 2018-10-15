@@ -21,9 +21,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Events;
@@ -34,25 +34,24 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
+using StreetSmart.Common.Factories;
+using StreetSmart.Common.Interfaces.Data;
+using StreetSmart.Common.Interfaces.GeoJson;
+
 using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.File.Layers;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 
+using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using Unit = ArcGIS.Core.Geometry.Unit;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
   public class VectorLayer : INotifyPropertyChanged
   {
-    #region Consts
-
-    public const string FieldUri = "URI";
-    public const string FieldObjectId = "ObjectId";
-
-    #endregion
-
     #region Events
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -62,7 +61,6 @@ namespace StreetSmartArcGISPro.VectorLayers
     #region Members
 
     private readonly Settings _settings;
-    private readonly StoredLayerList _storedLayerList;
     private readonly ViewerList _viewerList;
     private readonly MeasurementList _measurementList;
     private readonly VectorLayerList _vectorLayerList;
@@ -72,8 +70,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     private SubscriptionToken _rowDeleted;
     private SubscriptionToken _rowCreated;
 
-    private bool _isVisibleInstreetSmart;
-    private string _gml;
+    private IFeatureCollection _geoJson;
     private IList<long> _selection;
     private List<Measurement> _measurements;
     private bool _updateMeasurements;
@@ -87,13 +84,11 @@ namespace StreetSmartArcGISPro.VectorLayers
       _vectorLayerList = vectorLayerList;
       Layer = layer;
       _settings = Settings.Instance;
-      _storedLayerList = StoredLayerList.Instance;
-      _isVisibleInstreetSmart = _storedLayerList.Get(Layer?.Name ?? string.Empty);
-      LayerId = null;
+      Overlay = null;
       _selection = null;
       _updateMeasurements = false;
 
-      AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
+      StreetSmartModule streetSmart = StreetSmartModule.Current;
       _viewerList = streetSmart.ViewerList;
       _measurementList = streetSmart.MeasurementList;
       _ci = CultureInfo.InvariantCulture;
@@ -103,12 +98,12 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Properties
 
-    public string Gml
+    public IFeatureCollection GeoJson
     {
-      get => _gml;
+      get => _geoJson;
       private set
       {
-        _gml = value;
+        _geoJson = value;
         NotifyPropertyChanged();
       }
     }
@@ -117,24 +112,13 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public FeatureLayer Layer { get; }
 
-    public uint? LayerId { get; set; }
+    public IOverlay Overlay { get; set; }
 
-    public bool GmlChanged { get; private set; }
+    public bool GeoJsonChanged { get; private set; }
 
     public string Name => Layer?.Name ?? string.Empty;
 
     public bool IsVisible => Layer != null && Layer.IsVisible;
-
-    public bool IsVisibleInstreetSmart
-    {
-      get => _isVisibleInstreetSmart && IsVisible;
-      set
-      {
-        _isVisibleInstreetSmart = value;
-        _storedLayerList.Update(Name, value);
-        NotifyPropertyChanged();
-      }
-    }
 
     public List<Measurement> Measurements
     {
@@ -172,22 +156,21 @@ namespace StreetSmartArcGISPro.VectorLayers
       return result;
     }
 
-    public async Task<string> GenerateGmlAsync()
+    public async Task<IFeatureCollection> GenerateJsonAsync()
     {
       MapView mapView = MapView.Active;
       Map map = mapView?.Map;
       SpatialReference mapSpatRef = map?.SpatialReference;
       MySpatialReference myCyclSpatRef = _settings.CycloramaViewerCoordinateSystem;
 
-      SpatialReference cyclSpatRef = (myCyclSpatRef == null)
+      SpatialReference cyclSpatRef = myCyclSpatRef == null
         ? mapSpatRef
-        : (myCyclSpatRef.ArcGisSpatialReference ?? (await myCyclSpatRef.CreateArcGisSpatialReferenceAsync()));
+        : (myCyclSpatRef.ArcGisSpatialReference ?? await myCyclSpatRef.CreateArcGisSpatialReferenceAsync());
 
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
       Color color = Color.White;
-      string result =
-        "<wfs:FeatureCollection xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\">";
+      IFeatureCollection featureCollection = null;
 
       await QueuedTask.Run(async () =>
       {
@@ -199,24 +182,21 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           ConstantsViewer constants = ConstantsViewer.Instance;
           double distance = constants.OverlayDrawDistance;
+          ICoordinate coordinate = viewer.Coordinate;
 
-          // Todo: get the recording location from the viewer location
-          object recordingLocation = viewer.Coordinate;
-
-          if (recordingLocation != null)
+          if (coordinate != null)
           {
             if (cyclSpatRef?.IsGeographic ?? true)
             {
-              distance = distance*factor;
+              distance = distance * factor;
             }
             else
             {
-              distance = distance/factor;
+              distance = distance / factor;
             }
 
-            // Todo: get the x and the y location from the recording location
-            double x = 0.0;
-            double y = 0.0;
+            double x = coordinate.X ?? 0.0;
+            double y = coordinate.Y ?? 0.0;
             double xMin = x - distance;
             double xMax = x + distance;
             double yMin = y - distance;
@@ -233,30 +213,34 @@ namespace StreetSmartArcGISPro.VectorLayers
 
             Polygon copyPolygon = PolygonBuilder.CreatePolygon(copyEnvelope, layerSpatRef);
             ReadOnlyPartCollection polygonParts = copyPolygon.Parts;
-            IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator();
-            IList<Segment> segments = new List<Segment>();
 
-            while (polygonSegments.MoveNext())
+            using (IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator())
             {
-              ReadOnlySegmentCollection polygonSegment = polygonSegments.Current;
+              IList<Segment> segments = new List<Segment>();
 
-              foreach (Segment segment in polygonSegment)
+              while (polygonSegments.MoveNext())
               {
-                segments.Add(segment);
-              }
-            }
+                ReadOnlySegmentCollection polygonSegment = polygonSegments.Current;
 
-            geometries.Add(segments);
+                if (polygonSegment != null)
+                {
+                  foreach (Segment segment in polygonSegment)
+                  {
+                    segments.Add(segment);
+                  }
+                }
+              }
+
+              geometries.Add(segments);
+            }
           }
         }
 
-        GC.Collect();
         Polygon polygon = PolygonBuilder.CreatePolygon(geometries, layerSpatRef);
+        featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
 
         using (FeatureClass featureClass = Layer?.GetFeatureClass())
         {
-          string uri = Layer?.URI;
-
           SpatialQueryFilter spatialFilter = new SpatialQueryFilter
           {
             FilterGeometry = polygon,
@@ -268,13 +252,20 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             while (existsResult?.MoveNext() ?? false)
             {
-              Row row = existsResult.Current;
-              long objectId = row.GetObjectID();
-
-              if (_selection == null || !_selection.Contains(objectId))
+              // Todo: change handling about selections
+              // if (_selection == null || !_selection.Contains(objectId))
               {
+                Row row = existsResult.Current;
                 Feature feature = row as Feature;
-                var fieldvalues = new Dictionary<string, string> {{FieldUri, uri}, {FieldObjectId, objectId.ToString()}};
+                var fieldvalues = new Dictionary<string, string>();
+                IReadOnlyList<Field> fields = feature.GetFields();
+
+                foreach (Field field in fields)
+                {
+                  string name = field.Name;
+                  int fieldId = existsResult.FindField(name);
+                  fieldvalues.Add(name, feature.GetOriginalValue(fieldId).ToString());
+                }
 
                 Geometry geometry = feature?.GetShape();
                 GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
@@ -288,8 +279,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
                 if (copyGeometry != null)
                 {
-                  string gml = string.Empty;
-
                   switch (geometryType)
                   {
                     case GeometryType.Envelope:
@@ -299,77 +288,84 @@ namespace StreetSmartArcGISPro.VectorLayers
                     case GeometryType.Multipoint:
                       break;
                     case GeometryType.Point:
-
                       if (copyGeometry is MapPoint point)
                       {
-                        gml =
-                          $"<gml:Point {GmlDimension(copyGeometry)}><gml:coordinates>{await GmlPointAsync(point)}</gml:coordinates></gml:Point>";
+                        ICoordinate coordinate = await GeoJsonCoordAsync(point);
+                        featureCollection.Features.Add(GeoJsonFactory.CreatePointFeature(coordinate));
                       }
 
                       break;
                     case GeometryType.Polygon:
-
-                      if (copyGeometry is Polygon polygonGml)
+                      if (copyGeometry is Polygon polygonGeoJson)
                       {
-                        ReadOnlyPartCollection polygonParts = polygonGml.Parts;
-                        IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator();
+                        ReadOnlyPartCollection polygonParts = polygonGeoJson.Parts;
+                        IList<IList<ICoordinate>> polygonCoordinates = new List<IList<ICoordinate>>();
 
-                        while (polygonSegments.MoveNext())
+                        using (IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator())
                         {
-                          ReadOnlySegmentCollection segments = polygonSegments.Current;
-
-                          gml =
-                            $"{gml}<gml:MultiPolygon><gml:PolygonMember><gml:Polygon {GmlDimension(copyGeometry)}><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>";
-
-                          for (int i = 0; i < segments.Count; i++)
+                          while (polygonSegments.MoveNext())
                           {
-                            if (segments[i].SegmentType == SegmentType.Line)
-                            {
-                              MapPoint polygonPoint = segments[i].StartPoint;
-                              gml = $"{gml}{(i == 0 ? string.Empty : " ")}{await GmlPointAsync(polygonPoint)}";
+                            ReadOnlySegmentCollection segments = polygonSegments.Current;
+                            IList<ICoordinate> coordinates = new List<ICoordinate>();
 
-                              if (i == (segments.Count - 1))
+                            if (segments != null)
+                            {
+                              for (int i = 0; i < segments.Count; i++)
                               {
-                                polygonPoint = segments[i].EndPoint;
-                                gml = $"{gml} {await GmlPointAsync(polygonPoint)}";
+                                if (segments[i].SegmentType == SegmentType.Line)
+                                {
+                                  MapPoint polygonPoint = segments[i].StartPoint;
+                                  coordinates.Add(await GeoJsonCoordAsync(polygonPoint));
+
+                                  if (i == (segments.Count - 1))
+                                  {
+                                    polygonPoint = segments[i].EndPoint;
+                                    coordinates.Add(await GeoJsonCoordAsync(polygonPoint));
+                                  }
+                                }
                               }
                             }
-                          }
 
-                          gml =
-                            $"{gml}</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon></gml:PolygonMember></gml:MultiPolygon>";
+                            polygonCoordinates.Add(coordinates);
+                          }
                         }
+
+                        featureCollection.Features.Add(GeoJsonFactory.CreatePolygonFeature(polygonCoordinates));
                       }
+
                       break;
                     case GeometryType.Polyline:
-
-                      if (copyGeometry is Polyline polylineGml)
+                      if (copyGeometry is Polyline polylineGeoJson)
                       {
-                        ReadOnlyPartCollection polylineParts = polylineGml.Parts;
-                        IEnumerator<ReadOnlySegmentCollection> polylineSegments = polylineParts.GetEnumerator();
+                        ReadOnlyPartCollection polylineParts = polylineGeoJson.Parts;
 
-                        while (polylineSegments.MoveNext())
+                        using (IEnumerator<ReadOnlySegmentCollection> polylineSegments = polylineParts.GetEnumerator())
                         {
-                          ReadOnlySegmentCollection segments = polylineSegments.Current;
-                          gml =
-                            $"{gml}<gml:MultiLineString><gml:LineStringMember><gml:LineString {GmlDimension(copyGeometry)}><gml:coordinates>";
-
-                          for (int i = 0; i < segments.Count; i++)
+                          while (polylineSegments.MoveNext())
                           {
-                            if (segments[i].SegmentType == SegmentType.Line)
-                            {
-                              MapPoint linePoint = segments[i].StartPoint;
-                              gml = $"{gml}{((i == 0) ? string.Empty : " ")}{await GmlPointAsync(linePoint)}";
+                            ReadOnlySegmentCollection segments = polylineSegments.Current;
+                            IList<ICoordinate> coordinates = new List<ICoordinate>();
 
-                              if (i == (segments.Count - 1))
+                            if (segments != null)
+                            {
+                              for (int i = 0; i < segments.Count; i++)
                               {
-                                linePoint = segments[i].EndPoint;
-                                gml = $"{gml} {await GmlPointAsync(linePoint)}";
+                                if (segments[i].SegmentType == SegmentType.Line)
+                                {
+                                  MapPoint linePoint = segments[i].StartPoint;
+                                  coordinates.Add(await GeoJsonCoordAsync(linePoint));
+
+                                  if (i == (segments.Count - 1))
+                                  {
+                                    linePoint = segments[i].EndPoint;
+                                    coordinates.Add(await GeoJsonCoordAsync(linePoint));
+                                  }
+                                }
                               }
                             }
-                          }
 
-                          gml = $"{gml}</gml:coordinates></gml:LineString></gml:LineStringMember></gml:MultiLineString>";
+                            featureCollection.Features.Add(GeoJsonFactory.CreateLineFeature(coordinates));
+                          }
                         }
                       }
 
@@ -378,11 +374,11 @@ namespace StreetSmartArcGISPro.VectorLayers
                       break;
                   }
 
-                  string fieldValueStr = fieldvalues.Aggregate(string.Empty,
-                    (current, fieldvalue) =>
-                      string.Format("{0}<{1}>{2}</{1}>", current, fieldvalue.Key, fieldvalue.Value));
-                  result =
-                    $"{result}<gml:featureMember><xs:Geometry>{fieldValueStr}{gml}</xs:Geometry></gml:featureMember>";
+                  foreach (var fieldvalue in fieldvalues)
+                  {
+                    featureCollection.Features[featureCollection.Features.Count - 1].Properties
+                      .Add(fieldvalue.Key, fieldvalue.Value);
+                  }
                 }
               }
             }
@@ -404,11 +400,11 @@ namespace StreetSmartArcGISPro.VectorLayers
         color = Color.FromArgb(alpha, red, green, blue);
       });
 
-      GmlChanged = (Color != color);
+      GeoJsonChanged = (Color != color);
       Color = color;
-      string newGml = $"{result}</wfs:FeatureCollection>";
-      GmlChanged = newGml != Gml || GmlChanged;
-      return Gml = newGml;
+      string newJson = featureCollection?.ToString();
+      GeoJsonChanged = newJson != GeoJson?.ToString() || GeoJsonChanged;
+      return GeoJson = featureCollection;
     }
 
     public async Task<double> GetOffsetZAsync()
@@ -418,20 +414,15 @@ namespace StreetSmartArcGISPro.VectorLayers
         CIMBaseLayer cimBaseLayer = Layer?.GetDefinition();
         CIMBasicFeatureLayer cimBasicFeatureLayer = cimBaseLayer as CIMBasicFeatureLayer;
         CIMLayerElevationSurface layerElevation = cimBasicFeatureLayer?.LayerElevation;
-        return (layerElevation?.OffsetZ ?? 0.0);
+        return layerElevation?.OffsetZ ?? 0.0;
       });
     }
 
-    private async Task<string> GmlPointAsync(MapPoint point)
+    private async Task<ICoordinate> GeoJsonCoordAsync(MapPoint point)
     {
       bool hasZ = point.HasZ;
-      double z = hasZ ? (point.Z + (await GetOffsetZAsync())) : 0.0;
-      return $"{point.X.ToString(_ci)},{point.Y.ToString(_ci)}{(hasZ ? $",{z.ToString(_ci)}" : string.Empty)}";
-    }
-
-    private string GmlDimension(Geometry geometry)
-    {
-      return $"srsDimension = \"{(geometry.HasZ ? 3 : 2)}\"";
+      double z = hasZ ? point.Z + await GetOffsetZAsync() : 0.0;
+      return hasZ ? CoordinateFactory.Create(point.X, point.Y, z) : CoordinateFactory.Create(point.X, point.Y);
     }
 
     public async Task LoadMeasurementsAsync()
@@ -450,7 +441,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         if (objectId != null)
         {
-          _selection.Add((long)objectId);
+          _selection.Add((long) objectId);
         }
       }
     }
@@ -572,18 +563,15 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           _selection = selection.Value;
           contains = true;
-          await GenerateGmlAsync();
+          await GenerateJsonAsync();
 
-          if (IsVisibleInstreetSmart)
+          if (_vectorLayerList.EditTool != EditTools.SketchPointTool)
           {
-            if (_vectorLayerList.EditTool != EditTools.SketchPointTool)
-            {
-              Measurements = await ReloadSelectionAsync();
-            }
-            else
-            {
-              _updateMeasurements = true;
-            }
+            Measurements = await ReloadSelectionAsync();
+          }
+          else
+          {
+            _updateMeasurements = true;
           }
         }
       }
@@ -592,32 +580,29 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         Measurements = null;
         _selection = null;
-        await GenerateGmlAsync();
+        await GenerateJsonAsync();
       }
     }
 
     private async void OnRowChanged(RowChangedEventArgs args)
     {
-      if (IsVisibleInstreetSmart)
+      await QueuedTask.Run(async () =>
       {
-        await QueuedTask.Run(async () =>
-        {
-          Row row = args.Row;
-          Feature feature = row as Feature;
-          Geometry geometry = feature?.GetShape();
-          long objectId = feature?.GetObjectID() ?? -1;
-          Measurement measurement = _measurementList.Get(objectId);
-          _measurementList.DrawPoint = false;
-          measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
-          _measurementList.DrawPoint = true;
+        Row row = args.Row;
+        Feature feature = row as Feature;
+        Geometry geometry = feature?.GetShape();
+        long objectId = feature?.GetObjectID() ?? -1;
+        Measurement measurement = _measurementList.Get(objectId);
+        _measurementList.DrawPoint = false;
+        measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
+        _measurementList.DrawPoint = true;
 
-          if (measurement != null)
-          {
-            await measurement.UpdateMeasurementPointsAsync(geometry);
-            measurement.CloseMeasurement();
-          }
-        });
-      }
+        if (measurement != null)
+        {
+          await measurement.UpdateMeasurementPointsAsync(geometry);
+          measurement.CloseMeasurement();
+        }
+      });
     }
 
     private async void OnRowDeleted(RowChangedEventArgs args)
@@ -633,7 +618,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           _selection.Remove(objectId);
         }
 
-        if (IsVisibleInstreetSmart && GlobeSpotterConfiguration.MeasurePermissions)
+        if (GlobeSpotterConfiguration.MeasurePermissions)
         {
           Measurement measurement = _measurementList.Get(objectId);
           measurement?.RemoveMeasurement();
@@ -669,7 +654,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       if (sketchGeometry == null)
       {
-        await GenerateGmlAsync();
+        await GenerateJsonAsync();
       }
 
       if (_updateMeasurements)

@@ -155,8 +155,6 @@
     <Compile Include="Configuration\File\Agreement.cs" />
     <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
     <Compile Include="Configuration\File\ConstantsViewer.cs" />
-    <Compile Include="Configuration\File\Layers\StoredLayer.cs" />
-    <Compile Include="Configuration\File\Layers\StoredLayerList.cs" />
     <Compile Include="Configuration\File\Settings.cs" />
     <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
     <Compile Include="Configuration\Remote\Recordings\Images.cs" />
