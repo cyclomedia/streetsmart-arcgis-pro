@@ -22,7 +22,7 @@
         xmlns="http://schemas.esri.com/DADF/Registry"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-  <AddInInfo id="{0B44A52B-42BA-4A6D-9E42-72F382E0498E}"
+  <AddInInfo id="{717667D0-AF17-4096-A8F6-5EE843D2A38A}"
              version="0.1.0"
              desktopVersion="2.0">
     <Name>Street Smart for ArcGIS Pro</Name>

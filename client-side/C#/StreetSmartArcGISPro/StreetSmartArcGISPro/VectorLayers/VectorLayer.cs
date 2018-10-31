@@ -434,7 +434,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         _selection = new List<long>();
       }
 
-      foreach (KeyValuePair<int, Measurement> keyValue in _measurementList)
+      foreach (KeyValuePair<string, Measurement> keyValue in _measurementList)
       {
         Measurement measurement = keyValue.Value;
         long? objectId = measurement?.ObjectId;
@@ -515,7 +515,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 if (editTool != EditTools.SketchLineTool && editTool != EditTools.SketchPointTool &&
                     editTool != EditTools.SketchPolygonTool)
                 {
-                  measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
+                  measurement = await _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
                 }
 
                 _measurementList.DrawPoint = true;
@@ -594,7 +594,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         long objectId = feature?.GetObjectID() ?? -1;
         Measurement measurement = _measurementList.Get(objectId);
         _measurementList.DrawPoint = false;
-        measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
+        measurement = await _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
         _measurementList.DrawPoint = true;
 
         if (measurement != null)

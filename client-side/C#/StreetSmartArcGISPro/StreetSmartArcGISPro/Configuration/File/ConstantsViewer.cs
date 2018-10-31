@@ -76,11 +76,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// </summary>
     public float MeasurementFontSize { get; set; }
 
-    /// <summary>
-    /// MeasurementName
-    /// </summary>
-    public string MeasurementName { get; set; }
-
     public static ConstantsViewer Instance
     {
       get
@@ -127,7 +122,6 @@ namespace StreetSmartArcGISPro.Configuration.File
         CrossCheckSize = 10.0,
         MeasurementPointSize = 5.0,
         MeasurementFontSize = 8.0f,
-        MeasurementName = "my measurement"
       };
 
       result.Save();

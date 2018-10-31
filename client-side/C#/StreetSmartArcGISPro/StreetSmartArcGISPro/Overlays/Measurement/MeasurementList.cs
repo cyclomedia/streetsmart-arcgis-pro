@@ -16,27 +16,36 @@
  * License along with this library.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+
 using ArcGIS.Core.Geometry;
 
-using StreetSmartArcGISPro.Configuration.File;
+using StreetSmart.Common.Factories;
+using StreetSmart.Common.Interfaces.API;
+using StreetSmart.Common.Interfaces.Data;
+using StreetSmart.Common.Interfaces.Events;
+using StreetSmart.Common.Interfaces.GeoJson;
+
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
+using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
-  class MeasurementList : Dictionary<int, Measurement>
+  class MeasurementList : Dictionary<string, Measurement>
   {
     #region Members
 
-    private readonly ConstantsViewer _constants;
-    private bool _screenPointAdded;
-    private bool _mapPointAdded;
     private bool _drawingSketch;
-    private bool _pointAdded;
+    private VectorLayer _lastVectorLayer;
+    private long? _lastObjectId;
+    private bool _lastSketch;
 
     #endregion
 
@@ -44,7 +53,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public Measurement Sketch { get; set; }
     public Measurement Open { get; set; }
-    public object Api { private get; set; }
+    public IStreetSmartAPI Api { private get; set; }
     public bool DrawPoint { private get; set; }
 
     #endregion
@@ -55,12 +64,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       Open = null;
       Sketch = null;
-      _constants = ConstantsViewer.Instance;
-      _screenPointAdded = false;
-      _mapPointAdded = false;
       DrawPoint = true;
       _drawingSketch = false;
-      _pointAdded = false;
+      _lastObjectId = null;
+      _lastVectorLayer = null;
+      _lastSketch = false;
     }
 
     #endregion
@@ -72,7 +80,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Open?.CloseMeasurement();
     }
 
-    public Measurement Get(int entityId)
+    public Measurement Get(string entityId)
     {
       return ContainsKey(entityId) ? this[entityId] : null;
     }
@@ -186,7 +194,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public void EnableMeasurementSeries(int entityId)
+    public void EnableMeasurementSeries(string entityId)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
@@ -194,7 +202,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public void OpenMeasurement(int entityId)
+    public void OpenMeasurement(string entityId)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
@@ -202,7 +210,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public void AddMeasurementPoint(int entityId)
+    public void AddMeasurementPoint(string entityId)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
@@ -210,73 +218,49 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public int CreateMeasurement(GeometryType geometryType, long? objectId)
+    public async Task CreateMeasurement(ArcGISGeometryType geometryType)
     {
-      int entityId = -1;
-      string measurementName = _constants.MeasurementName;
-
       if (Api != null)
       {
+        MeasurementGeometryType measurementGeometryType = MeasurementGeometryType.Unknown;
+
         switch (geometryType)
         {
-          case GeometryType.Point:
+          case ArcGISGeometryType.Point:
             if (GlobeSpotterConfiguration.MeasurePoint)
             {
-              // todo: entityId = add point measurement
-              entityId = 0;
-              OpenMeasurement(entityId);
-              DisableMeasurementSeries();
-              AddMeasurementPoint(entityId);
+              measurementGeometryType = MeasurementGeometryType.Point;
             }
 
             break;
-          case GeometryType.Polyline:
+          case ArcGISGeometryType.Polyline:
             if (GlobeSpotterConfiguration.MeasureLine)
             {
-              // todo: entityId = add line measurement
-              OpenMeasurement(entityId);
-              EnableMeasurementSeries(entityId);
+              measurementGeometryType = MeasurementGeometryType.LineString;
             }
 
             break;
-          case GeometryType.Polygon:
+          case ArcGISGeometryType.Polygon:
             if (GlobeSpotterConfiguration.MeasurePolygon)
             {
-              // todo: entityId = add surface measurement
-              OpenMeasurement(entityId);
-              EnableMeasurementSeries(entityId);
+              measurementGeometryType = MeasurementGeometryType.Polygon;
             }
 
             break;
         }
-      }
 
-      return entityId;
-    }
-
-    private async Task UpdateMeasurementPointAsync(int entityId, int pointId)
-    {
-      await MeasurementPointUpdatedAsync(entityId, pointId);
-    }
-
-    public async Task MeasurementPointUpdatedAsync(int entityId, int pointId)
-    {
-      if (GlobeSpotterConfiguration.MeasurePermissions)
-      {
-        _screenPointAdded = !_mapPointAdded;
-
-        // Todo: get measurement point data measurementPoint = : entityId, pointId
-        object measurementPoint = null;
-        Measurement measurement = Get(entityId);
-
-        if (measurement != null)
+        if (measurementGeometryType != MeasurementGeometryType.Unknown)
         {
-          // Todo: get measurement point index = : entityId, pointId
-          int index = 0;
-          await measurement.UpdatePointAsync(pointId, measurementPoint, index);
-        }
+          IList<IViewer> viewers = await Api.GetViewers();
+          IPanoramaViewer panoramaViewer = viewers.Aggregate<IViewer, IPanoramaViewer>(null,
+            (current, viewer) => viewer is IPanoramaViewer ? (IPanoramaViewer) viewer : current);
 
-        _screenPointAdded = false;
+          if (panoramaViewer != null)
+          {
+            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
+            Api.StartMeasurementMode(panoramaViewer, options);
+          }
+        }
       }
     }
 
@@ -293,7 +277,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        _mapPointAdded = !_screenPointAdded;
         Measurement measurement = Sketch;
 
         if (geometry != null)
@@ -301,7 +284,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
           {
             _drawingSketch = true;
-            measurement = StartMeasurement(geometry, measurement, true, null, vectorLayer);
+            measurement = await StartMeasurement(geometry, measurement, true, null, vectorLayer);
           }
 
           if (measurement != null)
@@ -309,20 +292,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             await measurement.UpdateMeasurementPointsAsync(geometry);
           }
         }
-
-        _mapPointAdded = false;
       }
     }
 
-    public Measurement StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, long? objectId, VectorLayer vectorLayer)
+    public async Task<Measurement> StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, long? objectId, VectorLayer vectorLayer)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
         bool measurementExists = false;
-        GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
+        ArcGISGeometryType geometryType = geometry?.GeometryType ?? ArcGISGeometryType.Unknown;
 
-        if (geometryType == GeometryType.Point || geometryType == GeometryType.Polygon ||
-            geometryType == GeometryType.Polyline)
+        if (geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon ||
+            geometryType == ArcGISGeometryType.Polyline)
         {
           if (measurement?.IsGeometryType(geometryType) ?? false)
           {
@@ -337,21 +318,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           if (!measurementExists)
           {
             CloseOpenMeasurement();
-            int entityId = CreateMeasurement(geometryType, objectId);
-            measurement = entityId == -1 ? null : Get(entityId);
-
-            if (measurement != null)
-            {
-              measurement.ObjectId = objectId;
-              measurement.VectorLayer = vectorLayer;
-            }
-
-            measurement?.Open();
-
-            if (sketch)
-            {
-              measurement?.SetSketch();
-            }
+            _lastObjectId = objectId;
+            _lastVectorLayer = vectorLayer;
+            _lastSketch = sketch;
+            await CreateMeasurement(geometryType);
           }
         }
       }
@@ -359,87 +329,126 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       return measurement;
     }
 
-    public int GetMeasurementNumber(Measurement measurement)
-    {
-      return Keys.Aggregate(1, (current, elem) => current + ((elem < measurement.EntityId) ? 1 : 0));
-    }
-
     #endregion
 
     #region streetSmart events
 
-    public void OnMeasurementCreated(int entityId, string entityType)
+    public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {
-      Measurement measurement = new Measurement(entityId, entityType, DrawPoint, Api);
-      Add(entityId, measurement);
-    }
+      IFeatureCollection featureCollection = args.Value;
+      IStreetSmartAPI api = sender as IStreetSmartAPI;
 
-    public async void OnMeasurementClosed(int entityId, object data)
-    {
-      Measurement measurement = Get(entityId);
-
-      if (measurement != null)
+      foreach (IFeature feature in featureCollection.Features)
       {
-        await measurement.CloseAsync();
-      }
-    }
-
-    public void OnMeasurementOpened(int entityId, object data)
-    {
-      Measurement measurement = Get(entityId);
-      measurement?.Open();
-    }
-
-    public async void OnMeasurementPointAdded(int entityId, int pointId)
-    {
-      Measurement measurement = Get(entityId);
-      measurement?.AddPoint(pointId);
-      _pointAdded = true;
-
-      // Todo: get measurement series enabled?
-      if (true || (measurement?.IsPointMeasurement ?? false))
-      {
-        await UpdateMeasurementPointAsync(entityId, pointId);
-      }
-    }
-
-    public async void OnMeasurementPointUpdated(int entityId, int pointId)
-    {
-      await UpdateMeasurementPointAsync(entityId, pointId);
-    }
-
-    public void OnMeasurementPointRemoved(int entityId, int pointId)
-    {
-      Measurement measurement = Get(entityId);
-      measurement?.RemovePoint(pointId);
-    }
-
-    public void OnMeasurementPointOpened(int entityId, int pointId)
-    {
-      Measurement measurement = Get(entityId);
-
-      if (measurement?.ContainsKey(pointId) ?? false)
-      {
-        MeasurementPoint point = measurement[pointId];
-        point.Opened();
-
-        if (!measurement.IsPointMeasurement && _pointAdded)
+        if (feature.Properties is IMeasurementProperties properties)
         {
-          point.Closed();
+          if (!ContainsKey(properties.Id))
+          {
+            Measurement measurement =
+              new Measurement(properties, feature.Geometry, DrawPoint, api)
+              {
+                ObjectId = _lastObjectId,
+                VectorLayer = _lastVectorLayer
+              };
+
+            Add(properties.Id, measurement);
+            measurement.Open();
+
+            if (_lastSketch)
+            {
+              measurement.SetSketch();
+            }
+          }
+          else
+          {
+            Measurement measurement = this[properties.Id];
+            IGeometry geometry = feature.Geometry;
+            StreetSmartGeometryType geometryType = geometry.Type;
+
+            switch (geometryType)
+            {
+              case StreetSmartGeometryType.Point:
+                if (measurement.Geometry is IPoint pointSrc && geometry is IPoint pointDst)
+                {
+                  await measurement.UpdatePointAsync(0, feature);
+                  measurement.Geometry = geometry;
+                  // update point
+                }
+
+                break;
+              case StreetSmartGeometryType.LineString:
+                if (measurement.Geometry is ILineString lineSrc && geometry is ILineString lineDst)
+                {
+                  for (int i = 0; i < Math.Max(lineDst.Count, lineSrc.Count); i++)
+                  {
+                    if (lineSrc.Count > i && lineDst.Count > i)
+                    {
+                      await measurement.UpdatePointAsync(i, feature);
+                      // update point [i]
+                    }
+                    else if (lineSrc.Count <= i && lineDst.Count > i)
+                    {
+                      measurement.AddPoint(lineSrc.Count);
+                      await measurement.UpdatePointAsync(i, feature);
+                      // add point [lineSrc.Count]
+                    }
+                    else if (lineSrc.Count > i && lineDst.Count <= i)
+                    {
+                      measurement.RemovePoint(i);
+                      await measurement.UpdatePointAsync(Math.Min(i, lineDst.Count - 1), feature);
+                      // remove point [i]
+                    }
+                  }
+
+                  measurement.Geometry = geometry;
+                }
+
+                break;
+              case StreetSmartGeometryType.Polygon:
+                if (measurement.Geometry is IPolygon polySrc && geometry is IPolygon polyDst)
+                {
+                  int polySrcCount = polySrc[0].Count;
+                  int pylyDstCount = polyDst[0].Count;
+
+                  for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
+                  {
+                    if (polySrcCount > i && pylyDstCount > i)
+                    {
+                      await measurement.UpdatePointAsync(i, feature);
+                      // update point [i]
+                    }
+                    else if (polySrcCount <= i && pylyDstCount > i)
+                    {
+                      measurement.AddPoint(polySrcCount++);
+                      await measurement.UpdatePointAsync(i, feature);
+                      // add point [lineSrc.Count]
+                    }
+                    else if (polySrcCount < i && pylyDstCount <= i)
+                    {
+                      measurement.RemovePoint(i);
+                      polySrcCount--;
+                      await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
+                      // remove point [i]
+                    }
+                  }
+
+                  measurement.Geometry = geometry;
+                }
+
+                break;
+            }
+          }
         }
       }
 
-      _pointAdded = false;
-    }
-
-    public void OnMeasurementPointClosed(int entityId, int pointId)
-    {
-      Measurement measurement = Get(entityId);
-
-      if (measurement?.ContainsKey(pointId) ?? false)
+      if (featureCollection.Type == FeatureType.Unknown)
       {
-        MeasurementPoint point = measurement[pointId];
-        point.Closed();
+        if (Count == 1)
+        {
+          // Close measurement
+          Measurement measurement = this.ElementAt(0).Value;
+          await measurement.CloseAsync();
+        }
       }
     }
 

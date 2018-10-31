@@ -26,13 +26,21 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 
+using StreetSmart.Common.Interfaces.API;
+using StreetSmart.Common.Interfaces.GeoJson;
+
 using StreetSmartArcGISPro.AddIns.DockPanes;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
-using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using streetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+
+using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
+using StreetSmartSpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -40,12 +48,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Members
 
-    private readonly GeometryType _geometryType;
+    private readonly ArcGISGeometryType _geometryType;
     private readonly Settings _settings;
     private readonly MeasurementList _measurementList;
-    private readonly object _api;
+    private readonly IStreetSmartAPI _api;
     private readonly MeasurementDetail _detailPane;
     private readonly CultureInfo _ci;
+    private readonly IMeasurementProperties _properties;
 
     private bool _updateMeasurement;
 
@@ -53,7 +62,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Properties
 
-    public int EntityId { get; }
+    public IGeometry Geometry { get; set; }
 
     public VectorLayer VectorLayer { get; set; }
 
@@ -63,43 +72,48 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public long? ObjectId { get; set; }
 
-    public bool IsPointMeasurement => _geometryType == GeometryType.Point;
+    public bool IsPointMeasurement => _geometryType == ArcGISGeometryType.Point;
 
     public bool IsSketch => _measurementList.Sketch == this;
 
     public bool IsOpen => _measurementList.Open == this;
 
+    public string MeasurementName => _properties.Name;
+
+    public string EntityId => _properties.Id;
+
     #endregion
 
     #region Constructor
 
-    public Measurement(int entityId, string entityType, bool drawPoint, object api)
+    public Measurement(IMeasurementProperties properties, IGeometry geometry, bool drawPoint, IStreetSmartAPI api)
     {
       _detailPane = MeasurementDetail.Get();
-      streetSmart streetSmart = streetSmart.Current;
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       _measurementList = streetSmart.MeasurementList;
 
       _ci = CultureInfo.InvariantCulture;
       _api = api;
       _settings = Settings.Instance;
-      EntityId = entityId;
       DrawPoint = drawPoint;
+      _properties = properties;
       _updateMeasurement = false;
-      SetDetailPanePoint(null);
+      Geometry = geometry;
+      // SetDetailPanePoint(null);
 
-      switch (entityType)
+      switch (geometry.Type)
       {
-        case "pointMeasurement":
-          _geometryType = GeometryType.Point;
+        case StreetSmartGeometryType.Point:
+          _geometryType = ArcGISGeometryType.Point;
           break;
-        case "surfaceMeasurement":
-          _geometryType = GeometryType.Polygon;
+        case StreetSmartGeometryType.Polygon:
+          _geometryType = ArcGISGeometryType.Polygon;
           break;
-        case "lineMeasurement":
-          _geometryType = GeometryType.Polyline;
+        case StreetSmartGeometryType.LineString:
+          _geometryType = ArcGISGeometryType.Polyline;
           break;
         default:
-          _geometryType = GeometryType.Unknown;
+          _geometryType = ArcGISGeometryType.Unknown;
           break;
       }
     }
@@ -110,15 +124,17 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async Task MeasurementPointUpdatedAsync(int pointId)
     {
-      await _measurementList.MeasurementPointUpdatedAsync(EntityId, pointId);
+   //   await _measurementList.MeasurementPointUpdatedAsync(EntityId, pointId);
     }
 
     public void SetDetailPanePoint(MeasurementPoint setPoint, MeasurementPoint fromPoint = null)
     {
+      /*
       if ((fromPoint == null) || fromPoint == _detailPane.MeasurementPoint)
       {
         _detailPane.MeasurementPoint = setPoint;
       }
+      */
     }
 
     public async void Dispose()
@@ -143,7 +159,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public bool IsGeometryType(GeometryType geometryType)
+    public bool IsGeometryType(ArcGISGeometryType geometryType)
     {
       return _geometryType == geometryType;
     }
@@ -186,7 +202,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public void AddPoint(int pointId)
     {
-      Add(pointId, new MeasurementPoint(pointId, (Count + 1), this));
+      Add(pointId, new MeasurementPoint(pointId, this));
     }
 
     public void OpenPoint(int pointId)
@@ -219,7 +235,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         (null, (current, value) => value.IsSame(point) ? value : current);
     }
 
-    public async Task UpdatePointAsync(int pointId, object apiMeasurementPoint, int index)
+    public async Task UpdatePointAsync(int pointId, IFeature apiMeasurementPoint)
     {
       if (!ContainsKey(pointId))
       {
@@ -229,7 +245,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (ContainsKey(pointId))
       {
         MeasurementPoint measurementPoint = this[pointId];
-        await measurementPoint.UpdatePointAsync(apiMeasurementPoint, index);
+        await measurementPoint.UpdatePointAsync(apiMeasurementPoint, pointId);
       }
     }
 
@@ -295,7 +311,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         if (msPoint != null)
         {
-          msPoint.IntId = i + 1;
+          msPoint.PointId = i;
         }
       }
 
@@ -313,11 +329,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (geometry != null)
       {
         result = new List<MapPoint>();
-        GeometryType geometryType = geometry.GeometryType;
+        ArcGISGeometryType geometryType = geometry.GeometryType;
 
         switch (geometryType)
         {
-          case GeometryType.Point:
+          case ArcGISGeometryType.Point:
             if ((!geometry.IsEmpty) && IsPointMeasurement)
             {
               if (geometry is MapPoint mapPoint)
@@ -327,8 +343,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             }
 
             break;
-          case GeometryType.Polygon:
-          case GeometryType.Polyline:
+          case ArcGISGeometryType.Polygon:
+          case ArcGISGeometryType.Polyline:
 
             if (geometry is Multipart multipart)
             {
@@ -347,14 +363,14 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         PointNr = result.Count;
 
-        if ((PointNr >= 2) && (geometryType == GeometryType.Polygon))
+        if (PointNr >= 2 && geometryType == ArcGISGeometryType.Polygon)
         {
           MapPoint point1 = result[0];
           MapPoint point2 = result[PointNr - 1];
-          PointNr = point1.IsEqual(point2) ? (PointNr - 1) : PointNr;
+          PointNr = point1.IsEqual(point2) ? PointNr - 1 : PointNr;
         }
 
-        if (PointNr >= 2 && geometryType == GeometryType.Polyline)
+        if (PointNr >= 2 && geometryType == ArcGISGeometryType.Polyline)
         {
           MapPoint point1 = result[0];
           MapPoint point2 = result[PointNr - 1];
@@ -508,13 +524,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             {
               MapView mapView = MapView.Active;
               Map map = mapView?.Map;
-              SpatialReference mapSpatRef = map?.SpatialReference;
+              ArcGISSpatialReference mapSpatRef = map?.SpatialReference;
 
-              MySpatialReference myCyclSpatRef = _settings.CycloramaViewerCoordinateSystem;
-              SpatialReference cyclSpatRef = (myCyclSpatRef == null)
+              StreetSmartSpatialReference myCyclSpatRef = _settings.CycloramaViewerCoordinateSystem;
+              ArcGISSpatialReference cyclSpatRef = (myCyclSpatRef == null)
                 ? mapSpatRef
                 : (myCyclSpatRef.ArcGisSpatialReference ?? (await myCyclSpatRef.CreateArcGisSpatialReferenceAsync()));
-              SpatialReference layerSpatRef = point.SpatialReference ?? cyclSpatRef;
+              ArcGISSpatialReference layerSpatRef = point.SpatialReference ?? cyclSpatRef;
               MapPoint copyGsPoint = null;
 
               await QueuedTask.Run(() =>

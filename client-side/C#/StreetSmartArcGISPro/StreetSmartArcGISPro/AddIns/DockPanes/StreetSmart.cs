@@ -578,6 +578,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         await Api.Init(_options);
         GlobeSpotterConfiguration.Load();
         _measurementList.Api = Api;
+        Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
 
         _cycloMediaGroupLayer.PropertyChanged += OnGroupLayerPropertyChanged;
         _settings.PropertyChanged += OnSettingsPropertyChanged;
@@ -617,6 +618,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         IPanoramaViewer panoramaViewer = cyclViewer as IPanoramaViewer;
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
+        panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, false);
 
         IRecording recording = await panoramaViewer.GetRecording();
         string imageId = recording.Id;

@@ -26,16 +26,24 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+
+using StreetSmart.Common.Interfaces.GeoJson;
+
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Utilities;
 
-using streetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using Point = System.Windows.Point;
+using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+
+using WindowsPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -53,8 +61,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private readonly CultureInfo _ci;
 
     private MapPoint _point;
-    private int _intId;
-    private int _index;
+    private int _pointId;
     private bool _added;
     private bool _open;
     private IDisposable _disposeText;
@@ -69,19 +76,19 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public Measurement Measurement { get; }
 
-    public int IntId
+    public int PointId
     {
+      get => _pointId;
       set
       {
-        _intId = value;
+        _pointId = value;
         // ReSharper disable once ExplicitCallerInfoArgument
         OnPropertyChanged("PreviousPoint");
         // ReSharper disable once ExplicitCallerInfoArgument
         OnPropertyChanged("NextPoint");
+        OnPropertyChanged("Index");
       }
     }
-
-    public int PointId { get; }
 
     public bool Open
     {
@@ -113,16 +120,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public int Index
-    {
-      get => _index;
-      set
-      {
-        _index = value;
-        OnPropertyChanged();
-      }
-    }
-
     public MapPoint Point
     {
       get => _point;
@@ -137,27 +134,25 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public bool NotCreated => Point == null;
 
-    public bool IsFirstNumber => _intId == 1;
+    public bool IsFirstNumber => _pointId == 0;
 
-    public bool IsLastNumber => Measurement == null || _intId == Measurement.Count;
+    public bool IsLastNumber => Measurement == null || _pointId == Measurement.Count - 1;
 
     public MeasurementPoint PreviousPoint
-      => Measurement != null && !IsFirstNumber ? Measurement.GetPointByNr(_intId - 2) : null;
+      => Measurement != null && !IsFirstNumber ? Measurement.GetPointByNr(_pointId - 1) : null;
 
     public MeasurementPoint NextPoint
-      => Measurement != null && !IsLastNumber ? Measurement.GetPointByNr(_intId) : null;
+      => Measurement != null && !IsLastNumber ? Measurement.GetPointByNr(_pointId + 1) : null;
 
     #endregion
 
     #region Constructor
 
-    public MeasurementPoint(int pointId, int intId, Measurement measurement)
+    public MeasurementPoint(int pointId, Measurement measurement)
     {
       _isDisposed = false;
       _updatePoint = false;
       Measurement = measurement;
-      Index = 0;
-      IntId = intId;
       Point = null;
       LastPoint = null;
       PointId = pointId;
@@ -206,7 +201,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public bool IsObservationVisible()
     {
-      streetSmart streetSmart = streetSmart.Current;
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       MeasurementList measurementList = streetSmart.MeasurementList;
       return streetSmart.InsideScale() && !_isDisposed &&
              ((Measurement?.IsOpen ?? false) ||
@@ -232,11 +227,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     private void SetDetailPane()
     {
-      if (Index == 0)
-      {
-        Index = Measurement.GetMeasurementPointIndex(PointId);
-      }
-
       Measurement.SetDetailPanePoint(this);
     }
 
@@ -281,18 +271,42 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public async Task UpdatePointAsync(object measurementPoint, int index)
+    public async Task UpdatePointAsync(IFeature measurementPoint, int index)
     {
       if (!_updatePoint)
       {
         _updatePoint = true;
-        Index = index;
+        PointId = index;
 
         ApiPoint = null;
-        // Todo: get measurementPoint x, y, z
-        double x = 0; // measurementPoint.x;
-        double y = 0; // measurementPoint.y;
-        double z = 0; // measurementPoint.z;
+        double x = 0;
+        double y = 0;
+        double z = 0;
+
+        IGeometry geom = measurementPoint.Geometry;
+
+        switch (geom.Type)
+        {
+          case StreetSmartGeometryType.Point:
+            IPoint point = (IPoint) geom;
+            x = point.X ?? 0;
+            y = point.Y ?? 0;
+            z = point.Z ?? 0;
+            break;
+          case StreetSmartGeometryType.LineString:
+            ILineString line = (ILineString) geom;
+            x = line[index].X ?? 0;
+            y = line[index].Y ?? 0;
+            z = line[index].Z ?? 0;
+            break;
+          case StreetSmartGeometryType.Polygon:
+            IPolygon polygon = (IPolygon) geom;
+            x = polygon[0][index].X ?? 0;
+            y = polygon[0][index].Y ?? 0;
+            z = polygon[0][index].Z ?? 0;
+            break;
+        }
+
         Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
         LastPoint = LastPoint ?? Point;
 
@@ -304,11 +318,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           var ptColl = await Measurement.ToPointCollectionAsync(geometry);
           int nrPoints = Measurement.PointNr;
 
-          if ((ptColl != null) && Measurement.IsSketch)
+          if (ptColl != null && Measurement.IsSketch)
           {
-            if (_intId <= nrPoints)
+            if (_pointId < nrPoints)
             {
-              MapPoint pointC = ptColl[_intId - 1];
+              MapPoint pointC = ptColl[_pointId];
 
               if (!IsSame(pointC))
               {
@@ -323,18 +337,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   }
                   else
                   {
-                    ptColl[_intId - 1] = point;
+                    ptColl[_pointId] = point;
 
-                    if (_intId == 1 && nrPoints + 1 == ptColl.Count)
+                    if (_pointId == 0 && nrPoints + 1 == ptColl.Count)
                     {
                       ptColl[ptColl.Count - 1] = point;
                     }
 
-                    if (Measurement.IsGeometryType(GeometryType.Polygon))
+                    if (Measurement.IsGeometryType(ArcGISGeometryType.Polygon))
                     {
                       geometry = PolygonBuilder.CreatePolygon(ptColl, geometry.SpatialReference);
                     }
-                    else if (Measurement.IsGeometryType(GeometryType.Polyline))
+                    else if (Measurement.IsGeometryType(ArcGISGeometryType.Polyline))
                     {
                       if (ptColl.Count == 1)
                       {
@@ -372,11 +386,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     ptColl.Add(point);
                     break;
                   default:
-                    if (_intId <= (nrPoints + 1))
+                    if (_pointId <= nrPoints)
                     {
-                      if (_intId - 1 != nrPoints2)
+                      if (_pointId != nrPoints2)
                       {
-                        ptColl.Insert((_intId - 1), point);
+                        ptColl.Insert(_pointId, point);
                       }
                       else
                       {
@@ -387,11 +401,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     break;
                 }
 
-                if (Measurement.IsGeometryType(GeometryType.Polygon))
+                if (Measurement.IsGeometryType(ArcGISGeometryType.Polygon))
                 {
                   geometry = PolygonBuilder.CreatePolygon(ptColl, geometry.SpatialReference);
                 }
-                else if (Measurement.IsGeometryType(GeometryType.Polyline))
+                else if (Measurement.IsGeometryType(ArcGISGeometryType.Polyline))
                 {
                   if (ptColl.Count == 1)
                   {
@@ -422,7 +436,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     if (!_added)
                     {
                       _added = true;
-                      MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, Index);
+                      MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, PointId + 1);
                       thisView.SetCurrentSketchAsync(point);
                       _added = false;
                     }
@@ -436,7 +450,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     if ((!double.IsNaN(Point.X)) && (!double.IsNaN(Point.Y)))
                     {
-                      MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, Index);
+                      MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, PointId + 1);
                       thisView.SetCurrentSketchAsync(point);
                     }
                   }
@@ -484,7 +498,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       await QueuedTask.Run(() =>
       {
-        streetSmart streetSmart = streetSmart.Current;
+        ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
         MeasurementList measurementList = streetSmart.MeasurementList;
         _disposeText?.Dispose();
 
@@ -494,19 +508,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             (Measurement?.DrawPoint ?? false) && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y))
         {
           MapView thisView = MapView.Active;
-          Point winPoint = thisView.MapToScreen(Point);
+          WindowsPoint winPoint = thisView.MapToScreen(Point);
           float fontSize = _constants.MeasurementFontSize;
           int fontSizeT = (int) (fontSize*2);
           int fontSizeR = (int) ((fontSize*3)/2);
           int fontSizeK = (int) (fontSize/4);
-          int txt = (Measurement?.IsOpen ?? true) ? Index : measurementList.GetMeasurementNumber(Measurement);
-          string text = txt.ToString(_ci);
+          string text = (Measurement?.IsOpen ?? true) ? (PointId + 1).ToString(_ci) : Measurement.MeasurementName;
           int characters = text.Length;
           Bitmap bitmap = new Bitmap((fontSizeT*characters), fontSizeT);
 
           double pointSize = _constants.MeasurementPointSize;
           double pointSizePoint = pointSize*6/4;
-          Point winPointText = new Point {X = winPoint.X + pointSizePoint, Y = winPoint.Y - pointSizePoint};
+          WindowsPoint winPointText = new WindowsPoint {X = winPoint.X + pointSizePoint, Y = winPoint.Y - pointSizePoint};
           MapPoint pointText = thisView.ScreenToMap(winPointText);
 
           using (var sf = new StringFormat())
