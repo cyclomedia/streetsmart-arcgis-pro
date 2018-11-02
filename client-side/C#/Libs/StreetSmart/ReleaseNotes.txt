@@ -1,8 +1,8 @@
 ﻿Release notes:
 ==============
 
-Version: 18.11.9
-================
+Version: 18.11.10
+=================
 - LookAtCoordinate function is now awaited
 - Exception message if you try to call a viewer which no longer exists
 - Destroy function is now awaited
@@ -15,6 +15,7 @@ Version: 18.11.9
 - Added geoJson parsing, now it is possible for generate a geoJson
 - Solved crash with removing panorama viewers
 - Solved crash with getRecording() and the coordinate doesn't contains decimals after the comma
+- Added function for restart the StreetSmartAPI, only for the WPF version
 
 
 Version: 18.11.0

@@ -158,6 +158,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
+      OnPropertyChanged();
       FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
       XmlConfiguration.Serialize(streamFile, this);
       streamFile.Close();

@@ -1075,6 +1075,17 @@
             Close the developer tools
             </summary>
         </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.RestartStreetSmart">
+            <summary>
+            Restarts streetsmart
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.RestartStreetSmart(System.String)">
+            <summary>
+            Restarts streetsmart
+            </summary>
+            <param name="streetSmartLocation">The location of Street Smart</param>
+        </member>
         <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.AddOverlay(StreetSmart.Common.Interfaces.Data.IOverlay)">
             <summary>
             Add a GeoJSON overlay to the panorama viewer. SRS of API initialisation is used.

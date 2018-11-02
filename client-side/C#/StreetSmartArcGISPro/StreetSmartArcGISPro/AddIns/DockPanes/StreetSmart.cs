@@ -82,6 +82,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private bool _inClose;
     private ICoordinate _lookAt;
     private IOptions _options;
+    private IList<string> _configurationPropertyChanged;
 
     private readonly ApiKey _apiKey;
     private readonly Settings _settings;
@@ -122,6 +123,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _openNearest = new List<string>();
       _crossCheck = null;
       _lastSpatialReference = null;
+      _configurationPropertyChanged = new List<string>();
 
       GetVectorLayerListAsync();
 
@@ -281,6 +283,29 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
+    private void Restart()
+    {
+      if (_login.Credentials)
+      {
+        if (Api == null)
+        {
+          Initialize();
+        }
+        else if (_configuration.UseDefaultStreetSmartUrl)
+        {
+          Api.RestartStreetSmart();
+        }
+        else if (!string.IsNullOrEmpty(_configuration.StreetSmartLocation))
+        {
+          Api.RestartStreetSmart(_configuration.StreetSmartLocation);
+        }
+      }
+      else
+      {
+        DoHide();
+      }
+    }
+
     private void DoHide()
     {
       _currentDispatcher.Invoke(new Action(Hide), DispatcherPriority.ContextIdle);
@@ -291,7 +316,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (Api == null || await Api.GetApiReadyState())
       {
         _inRestart = true;
-        _measurementList.Api = null;
         _cycloMediaGroupLayer.PropertyChanged += OnGroupLayerPropertyChanged;
         _settings.PropertyChanged += OnSettingsPropertyChanged;
         _measurementList.RemoveAll();
@@ -332,7 +356,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         if (reloadApi || Api == null)
         {
-          Initialize();
+          Restart();
         }
         else
         {
@@ -715,19 +739,37 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       switch (args.PropertyName)
       {
-        case "UseDefaultConfigurationUrl":
-        case "ConfigurationUrlLocation":
-        case "UseDefaultStreetSmartUrl":
-        case "StreetSmartLocation":
-        case "UseProxyServer":
-        case "ProxyAddress":
-        case "ProxyPort":
-        case "ProxyBypassLocalAddresses":
-        case "ProxyUseDefaultCredentials":
-        case "ProxyUsername":
-        case "ProxyPassword":
-        case "ProxyDomain":
-          await RestartStreetSmart(true);
+        case "Save":
+          if (_configurationPropertyChanged.Count >= 1)
+          {
+            bool restart = false;
+
+            foreach (string configurationProperty in _configurationPropertyChanged)
+            {
+              switch (configurationProperty)
+              {
+                case "UseDefaultStreetSmartUrl":
+                case "StreetSmartLocation":
+                case "UseProxyServer":
+                case "ProxyAddress":
+                case "ProxyPort":
+                case "ProxyBypassLocalAddresses":
+                case "ProxyUseDefaultCredentials":
+                case "ProxyUsername":
+                case "ProxyPassword":
+                case "ProxyDomain":
+                  restart = true;
+                  break;
+              }
+            }
+
+            await RestartStreetSmart(restart);
+            _configurationPropertyChanged.Clear();
+          }
+
+          break;
+        default:
+          _configurationPropertyChanged.Add(args.PropertyName);
           break;
       }
     }
