@@ -1307,6 +1307,11 @@
             The vewer interface
             </summary>
         </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IViewer.LayerVisibilityChange">
+            <summary>
+            Triggers when the elevation is changed
+            </summary>
+        </member>
         <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetId">
             <summary>
             Returns the viewerId of the viewer
@@ -1595,6 +1600,21 @@
         <member name="T:StreetSmart.Common.Interfaces.Data.IJson">
             <summary>
             JSon object which contains the properties in a key and value pair format
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.ILayerInfo">
+            <summary>
+            Layer info
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.ILayerInfo.LayerId">
+            <summary>
+            The id of the layer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.ILayerInfo.Visible">
+            <summary>
+            Visibility of the layer
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Interfaces.Data.IMeasurementOptions">
@@ -2863,7 +2883,7 @@
         </member>
         <member name="P:StreetSmart.Wpf.Properties.Resources.StreetSmartLocation">
             <summary>
-              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v18.11/api-dotnet.html.
+              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v18.13/api-dotnet.html.
             </summary>
         </member>
         <member name="T:StreetSmart.Wpf.StreetSmartGUI">

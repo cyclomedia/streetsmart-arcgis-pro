@@ -264,7 +264,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 {
                   string name = field.Name;
                   int fieldId = existsResult.FindField(name);
-                  fieldvalues.Add(name, feature.GetOriginalValue(fieldId).ToString());
+                  fieldvalues.Add(name, feature.GetOriginalValue(fieldId)?.ToString());
                 }
 
                 Geometry geometry = feature?.GetShape();

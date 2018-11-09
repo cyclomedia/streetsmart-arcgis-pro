@@ -1,8 +1,13 @@
 ﻿Release notes:
 ==============
 
-Version: 18.11.10
-=================
+Version: 18.14.0
+================
+- Refactor some code
+
+
+Version: 18.13.0
+================
 - LookAtCoordinate function is now awaited
 - Exception message if you try to call a viewer which no longer exists
 - Destroy function is now awaited
@@ -16,6 +21,8 @@ Version: 18.11.10
 - Solved crash with removing panorama viewers
 - Solved crash with getRecording() and the coordinate doesn't contains decimals after the comma
 - Added function for restart the StreetSmartAPI, only for the WPF version
+- added event: LayerVisibilityChanged in the panorama viewer and the oblique viewer
+- Fixed: some more issues about thread safe of the API
 
 
 Version: 18.11.0

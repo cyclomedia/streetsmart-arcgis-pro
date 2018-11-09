@@ -814,7 +814,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private async void OnImageChange(object sender, IEventArgs<object> args)
+    private async void OnImageChange(object sender, EventArgs args)
     {
       if (sender is IPanoramaViewer panoramaViewer && Api != null)
       {
