@@ -250,12 +250,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
     }
 
-    public void OnDetailImagesVisibilityChanged(bool value)
-    {
-      _settings.ShowDetailImages = value;
-      _settings.Save();
-    }
-
     #endregion
 
     #region Events Properties

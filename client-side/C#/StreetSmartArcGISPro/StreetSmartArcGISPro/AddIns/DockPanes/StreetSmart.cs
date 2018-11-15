@@ -40,7 +40,7 @@ using StreetSmart.Common.Interfaces.DomElement;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
-
+using StreetSmart.Common.Interfaces.SLD;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Configuration.Resource;
@@ -55,6 +55,7 @@ using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using GeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
@@ -555,8 +556,30 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (vectorLayer.Overlay == null)
       {
-        // Todo: Use the color in the overlay
-        IOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, null);
+        string sld = null;
+
+        if (geoJson.Features.Count >= 1)
+        {
+          GeometryType type = geoJson.Features[0].Geometry.Type;
+
+          switch (type)
+          {
+            case GeometryType.Point:
+            case GeometryType.MultiPoint:
+              sld = SLDFactory.CreateStylePoint(null, 5.0, color).SLD;
+              break;
+            case GeometryType.LineString:
+            case GeometryType.MultiLineString:
+              sld = SLDFactory.CreateStylePolygon(color).SLD;
+              break;
+            case GeometryType.Polygon:
+            case GeometryType.MultiPolygon:
+              sld = SLDFactory.CreateStyleLine(color).SLD;
+              break;
+          }
+        }
+
+        IOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld);
         overlay = await Api.AddOverlay(overlay);
         vectorLayer.Overlay = overlay;
       }
@@ -799,6 +822,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         case "CycloramaViewerCoordinateSystem":
           await RestartStreetSmart(false);
+          break;
+        case "OverlayDrawDistance":
+          Api.SetOverlayDrawDistance(_settings.OverlayDrawDistance);
           break;
       }
     }

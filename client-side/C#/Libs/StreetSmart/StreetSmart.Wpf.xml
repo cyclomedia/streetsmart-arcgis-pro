@@ -726,6 +726,16 @@
             <param name="sld">Optional XML string for Styled Layer Descriptor</param>
             <returns>Overlay object</returns>
         </member>
+        <member name="M:StreetSmart.Common.Factories.OverlayFactory.Create(StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection,System.String,System.String,StreetSmart.Common.Interfaces.SLD.IStyledLayerDescriptor)">
+            <summary>
+            Create the overlay object
+            </summary>
+            <param name="featureCollection">FeatureCollection object containing the layer data</param>
+            <param name="name">Name of the layer.</param>
+            <param name="srs">Optional EPSG code (srs) for the source GeoJSON, if not provided, srs of API initialisation is used.</param>
+            <param name="styledLayerDescriptor">StyledLayer descriptor contains the sld styling of the layer</param>
+            <returns>Overlay object</returns>
+        </member>
         <member name="T:StreetSmart.Common.Factories.PanoramaViewerOptionsFactory">
             <summary>
             Factory for create Options which are used to initialize the panorama viewer
@@ -790,6 +800,42 @@
             <param name="replace">Replace the panorama viewer</param>
             <param name="recordingsVisible">If recordings should be visible</param>
             <returns>Options to initialize the panorama viewer with</returns>
+        </member>
+        <member name="T:StreetSmart.Common.Factories.SLDFactory">
+            <summary>
+            Factory for create SLD objects
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.SLDFactory.CreateStylePolygon(System.Drawing.Color,System.Nullable{System.Double},System.Nullable{System.Drawing.Color},System.Nullable{System.Double})">
+            <summary>
+            Returns a polygon style
+            </summary>
+            <param name="fillColor">The fill color of the polygon</param>
+            <param name="fillOpacity">The fill opacity of thye polygon</param>
+            <param name="strokeColor">The stroke color of the polygon</param>
+            <param name="strokeWidth">The stroke width of the polygon</param>
+            <returns>Styled layer description of the polygon symbolizer</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.SLDFactory.CreateStyleLine(System.Drawing.Color,System.Nullable{System.Double},System.Nullable{System.Double})">
+            <summary>
+            Returns a line style
+            </summary>
+            <param name="color">The color of the line</param>
+            <param name="width">The width of the line</param>
+            <param name="opacity">The opacity of the line</param>
+            <returns>Styled layer description of the line symbolizer</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.SLDFactory.CreateStylePoint(System.Nullable{StreetSmart.Common.Interfaces.SLD.SymbolizerType},System.Double,System.Drawing.Color,System.Nullable{System.Double},System.Nullable{System.Drawing.Color},System.Nullable{System.Double})">
+            <summary>
+            Returns a point style
+            </summary>
+            <param name="type">Well known name of the point objects</param>
+            <param name="size">Size of the point objects</param>
+            <param name="fillColor">The fill color of the point objects</param>
+            <param name="fillOpacity">The fill opacity of the point objects</param>
+            <param name="strokeColor">The stroke color of the point objects</param>
+            <param name="strokeWidth">The stroke width of the point objects</param>
+            <returns>Styled layer description of the point symbolizer</returns>
         </member>
         <member name="T:StreetSmart.Common.Factories.StreetSmartAPIFactory">
             <summary>
@@ -2853,6 +2899,253 @@
         <member name="F:StreetSmart.Common.Interfaces.GeoJson.Reliability.Unreliable">
             <summary>
             Bad reliability
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.FillType">
+            <summary>
+            Filltype of the polygon
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.FillType.Fill">
+            <summary>
+            The fill
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.FillType.FillOpacity">
+            <summary>
+            The opacity
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IFeatureTypeStyle">
+            <summary>
+            Feature type style
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IFeatureTypeStyle.Rules">
+            <summary>
+            Rules of the style
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IGraphic">
+            <summary>
+            The graphic
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IGraphic.Mark">
+            <summary>
+            Mark of the graphic
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IGraphic.Size">
+            <summary>
+            Size of the graphic
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.ILineSymbolizer">
+            <summary>
+            Line symbolizer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.ILineSymbolizer.Stroke">
+            <summary>
+            Stroke types
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IMark">
+            <summary>
+            The mark
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IMark.WellKnownName">
+            <summary>
+            Symbolizer type
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IMark.Fill">
+            <summary>
+            Fill types
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IMark.Stroke">
+            <summary>
+            Stroke types
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IPointSymbolizer">
+            <summary>
+            The point symbolizer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IPointSymbolizer.Graphic">
+            <summary>
+            The graphic
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IPolygonSymbolizer">
+            <summary>
+            Polygon symbolizer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IPolygonSymbolizer.Fill">
+            <summary>
+            Fill types
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IPolygonSymbolizer.Stroke">
+            <summary>
+            Stroke types
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IRule">
+            <summary>
+            The rule
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IRule.VendorOption">
+            <summary>
+            Vendor option
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IRule.Symbolizer">
+            <summary>
+            Symbolizer
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IStyledLayerDescriptor">
+            <summary>
+            Styled layer descriptor
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IStyledLayerDescriptor.Version">
+            <summary>
+            Version number
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IStyledLayerDescriptor.UserLayer">
+            <summary>
+            the user layer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IStyledLayerDescriptor.SLD">
+            <summary>
+            The SLD
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.ISvgParameter`1">
+            <summary>
+            Svg parameter
+            </summary>
+            <typeparam name="T">name of the parameter</typeparam>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.ISvgParameter`1.Name">
+            <summary>
+            The name
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.ISvgParameter`1.Value">
+            <summary>
+            The value
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.ISvgParameterCollection`1">
+            <summary>
+            Svg parameter collection
+            </summary>
+            <typeparam name="T">names of the parameters</typeparam>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.ISvgParameterCollection`1.SvgParameter">
+            <summary>
+            Svg Parameters
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.ISymbolizer">
+            <summary>
+            The symbolizer
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IUserLayer">
+            <summary>
+            User layer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IUserLayer.UserStyle">
+            <summary>
+            User style
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IUserStyle">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IUserStyle.FeatureTypeStyle">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.IVendorOption">
+            <summary>
+            Vendor option
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.SLD.IVendorOption.Name">
+            <summary>
+            Vendor option name
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.StrokeType">
+            <summary>
+            Stroke type
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.StrokeType.Stroke">
+            <summary>
+            Stroke
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.StrokeType.StrokeWidth">
+            <summary>
+            Width
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.StrokeType.StrokeOpacity">
+            <summary>
+            Opacity
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.SymbolizerType">
+            <summary>
+            Symbolizer type
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.SymbolizerType.Square">
+            <summary>
+            Square
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.SymbolizerType.Circle">
+            <summary>
+            Circle
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.SymbolizerType.Cross">
+            <summary>
+            Cross
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.SLD.VendorOptionType">
+            <summary>
+            Vendor option type
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.VendorOptionType.ExcludeFromCyclorama">
+            <summary>
+            Exclude from cyclorama
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.SLD.VendorOptionType.ExcludeFromMap">
+            <summary>
+            Exclude from map
             </summary>
         </member>
         <member name="T:StreetSmart.Wpf.Properties.Resources">

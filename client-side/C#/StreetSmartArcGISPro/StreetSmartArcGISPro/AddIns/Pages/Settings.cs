@@ -44,10 +44,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly SpatialReference _recordingLayerCoordinateSystem;
     private readonly SpatialReference _cycloramaViewerCoordinateSystem;
 
-    private readonly int _ctrlClickHashTag;
-    private readonly int _ctrlClickDelta;
-    private readonly bool _showDetailImages;
-    private readonly bool _enableSmartClickMeasurement;
+    private readonly int _overlayDrawDistance;
 
     private List<SpatialReference> _existsInAreaSpatialReferences;
 
@@ -62,10 +59,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _recordingLayerCoordinateSystem = _settings.RecordingLayerCoordinateSystem;
       _cycloramaViewerCoordinateSystem = _settings.CycloramaViewerCoordinateSystem;
 
-      _ctrlClickHashTag = _settings.CtrlClickHashTag;
-      _ctrlClickDelta = _settings.CtrlClickDelta;
-      _showDetailImages = _settings.ShowDetailImages;
-      _enableSmartClickMeasurement = _settings.EnableSmartClickMeasurement;
+      _overlayDrawDistance = _settings.OverlayDrawDistance;
     }
 
     #endregion
@@ -85,6 +79,21 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         }
 
         return _existsInAreaSpatialReferences;
+      }
+    }
+
+    public List<int> ListOfOverlayDrawDistance
+    {
+      get
+      {
+        List<int> result = new List<int>();
+
+        for (int i = 5; i <= 100; i = i + 5)
+        {
+          result.Add(i);
+        }
+
+        return result;
       }
     }
 
@@ -130,68 +139,17 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     public bool CanMeasuring => _settings.CycloramaViewerCoordinateSystem != null && _settings.CycloramaViewerCoordinateSystem.CanMeasuring;
 
     /// <summary>
-    /// CTRL-CLICK #
+    /// Overlay draw distance
     /// </summary>
-    public int CtrlClickHashTag
+    public int OverlayDrawDistance
     {
-      get => _settings.CtrlClickHashTag - 1;
+      get => _settings.OverlayDrawDistance;
       set
       {
-        if (_settings.CtrlClickHashTag - 1 != value)
+        if (_settings.OverlayDrawDistance != value)
         {
           IsModified = true;
-          _settings.CtrlClickHashTag = value + 1;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    /// <summary>
-    /// CTRL-CLICK Δ
-    /// </summary>
-    public int CtrlClickDelta
-    {
-      get => _settings.CtrlClickDelta - 1;
-      set
-      {
-        if (_settings.CtrlClickDelta - 1 != value)
-        {
-          IsModified = true;
-          _settings.CtrlClickDelta = value + 1;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    /// <summary>
-    /// Show detail images
-    /// </summary>
-    public bool ShowDetailImages
-    {
-      get => _settings.ShowDetailImages;
-      set
-      {
-        if (_settings.ShowDetailImages != value)
-        {
-          IsModified = true;
-          _settings.ShowDetailImages = value;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    /// <summary>
-    /// Enable smart click measurement
-    /// </summary>
-    public bool EnableSmartClickMeasurement
-    {
-      get => _settings.EnableSmartClickMeasurement;
-      set
-      {
-        if (_settings.EnableSmartClickMeasurement != value)
-        {
-          IsModified = true;
-          _settings.EnableSmartClickMeasurement = value;
+          _settings.OverlayDrawDistance = value;
           NotifyPropertyChanged();
         }
       }
@@ -212,10 +170,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _settings.RecordingLayerCoordinateSystem = _recordingLayerCoordinateSystem;
       _settings.CycloramaViewerCoordinateSystem = _cycloramaViewerCoordinateSystem;
 
-      _settings.CtrlClickHashTag = _ctrlClickHashTag;
-      _settings.CtrlClickDelta = _ctrlClickDelta;
-      _settings.ShowDetailImages = _showDetailImages;
-      _settings.EnableSmartClickMeasurement = _enableSmartClickMeasurement;
+      _settings.OverlayDrawDistance = _overlayDrawDistance;
 
       _settings.Save();
       return base.CancelAsync();

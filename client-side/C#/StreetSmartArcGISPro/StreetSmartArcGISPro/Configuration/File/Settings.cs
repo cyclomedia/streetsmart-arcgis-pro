@@ -43,10 +43,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     private static Settings _settings;
     private SpatialReference _recordingLayerCoordinateSystem;
     private SpatialReference _cycloramaViewerCoordinateSystem;
-    private int _ctrlClickHashTag;
-    private int _ctrlClickDelta;
-    private bool _showDetailImages;
-    private bool _enableSmartClickMeasurement;
+    private int _overlayDrawDistance;
 
     #endregion
 
@@ -122,64 +119,16 @@ namespace StreetSmartArcGISPro.Configuration.File
     }
 
     /// <summary>
-    /// CTRL-CLICK #
+    /// overlay draw distance
     /// </summary>
-    public int CtrlClickHashTag
+    public int OverlayDrawDistance
     {
-      get => _ctrlClickHashTag;
+      get => _overlayDrawDistance;
       set
       {
-        if (_ctrlClickHashTag != value)
+        if (_overlayDrawDistance != value)
         {
-          _ctrlClickHashTag = value;
-          OnPropertyChanged();
-        }
-      }
-    }
-
-    /// <summary>
-    /// CTRL-CLICK Δ
-    /// </summary>
-    public int CtrlClickDelta
-    {
-      get => _ctrlClickDelta;
-      set
-      {
-        if (_ctrlClickDelta != value)
-        {
-          _ctrlClickDelta = value;
-          OnPropertyChanged();
-        }
-      }
-    }
-
-    /// <summary>
-    /// Show detail images
-    /// </summary>
-    public bool ShowDetailImages
-    {
-      get => _showDetailImages;
-      set
-      {
-        if (_showDetailImages != value)
-        {
-          _showDetailImages = value;
-          OnPropertyChanged();
-        }
-      }
-    }
-
-    /// <summary>
-    /// Enable smart click measurement
-    /// </summary>
-    public bool EnableSmartClickMeasurement
-    {
-      get => _enableSmartClickMeasurement;
-      set
-      {
-        if (_enableSmartClickMeasurement != value)
-        {
-          _enableSmartClickMeasurement = value;
+          _overlayDrawDistance = value;
           OnPropertyChanged();
         }
       }
@@ -232,10 +181,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       {
         RecordingLayerCoordinateSystem = null,
         CycloramaViewerCoordinateSystem = null,
-        CtrlClickHashTag = 3,
-        CtrlClickDelta = 1,
-        ShowDetailImages = false,
-        EnableSmartClickMeasurement = true
+        OverlayDrawDistance = 30
       };
 
       result.Save();

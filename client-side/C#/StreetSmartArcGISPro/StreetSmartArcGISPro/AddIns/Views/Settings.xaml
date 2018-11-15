@@ -42,47 +42,26 @@
     <StackPanel Grid.Row="0" Margin="5,10,5,0">
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="Coordinate systems" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Recording layer" Width="95" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Recording layer" Width="120" Margin="0,5,5,0"/>
         <ComboBox ItemsSource="{Binding Path=ExistsInAreaSpatialReferences}" SelectedItem="{Binding Path=RecordingLayerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Cyclorama viewer" Width="95" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Cyclorama viewer" Width="120" Margin="0,5,5,0"/>
         <ComboBox ItemsSource="{Binding Path=ExistsInAreaSpatialReferences}" SelectedItem="{Binding Path=CycloramaViewerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
-      <StackPanel Margin="105,5,5,0">
+      <StackPanel Margin="130,5,5,0">
         <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding CanMeasuring, Converter={StaticResource CanMeasuringConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
       </StackPanel>
     </StackPanel>
     <StackPanel Grid.Row="1" Margin="5,10,5,0">
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="General" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="ctrl-click-#" ToolTip="Sets the initial amount of Cyclorama viewers to be opened when using Ctrl-click to open the nearest cyclorama(s). If more Cyclorama viewers are open a Ctrl-click will replace all of them." Width="95" Margin="0,5,5,0"/>
-        <ComboBox SelectedIndex="{Binding Path=CtrlClickHashTag}" HorizontalAlignment="Left" Margin="0,5,0,0" Width="30">
-          <ComboBoxItem Tag="1" Style="{DynamicResource H6TextBlock}" FontSize="11">1</ComboBoxItem>
-          <ComboBoxItem Tag="2" Style="{DynamicResource H6TextBlock}" FontSize="11">2</ComboBoxItem>
-          <ComboBoxItem Tag="3" IsSelected="True" Style="{DynamicResource H6TextBlock}" FontSize="11">3</ComboBoxItem>
-          <ComboBoxItem Tag="4" Style="{DynamicResource H6TextBlock}" FontSize="11">4</ComboBoxItem>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Overlay draw distance" ToolTip="Sets the overlay draw distance in the cyclorama." Width="120" Margin="0,5,5,0"/>
+        <ComboBox ItemsSource="{Binding Path=ListOfOverlayDrawDistance}" SelectedItem="{Binding Path=OverlayDrawDistance}" HorizontalAlignment="Left" Margin="0,5,0,0" Width="40">
         </ComboBox>
       </DockPanel>
-      <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="ctrl-click-Δ" ToolTip="Sets the amount of recordings between the Cycloramas to be opened on a Ctrl-click. Spreading the viewers like this can help to achieve a better intersection when measuring." Width="95" Margin="0,5,5,0"/>
-        <ComboBox SelectedIndex="{Binding Path=CtrlClickDelta}" HorizontalAlignment="Left" Margin="0,5,0,0" Width="30">
-          <ComboBoxItem Tag="1" IsSelected="True" Style="{DynamicResource H6TextBlock}" FontSize="11">1</ComboBoxItem>
-          <ComboBoxItem Tag="2" Style="{DynamicResource H6TextBlock}" FontSize="11">2</ComboBoxItem>
-          <ComboBoxItem Tag="3" Style="{DynamicResource H6TextBlock}" FontSize="11">3</ComboBoxItem>
-          <ComboBoxItem Tag="4" Style="{DynamicResource H6TextBlock}" FontSize="11">4</ComboBoxItem>
-          <ComboBoxItem Tag="5" Style="{DynamicResource H6TextBlock}" FontSize="11">5</ComboBoxItem>
-          <ComboBoxItem Tag="6" Style="{DynamicResource H6TextBlock}" FontSize="11">6</ComboBoxItem>
-          <ComboBoxItem Tag="7" Style="{DynamicResource H6TextBlock}" FontSize="11">7</ComboBoxItem>
-          <ComboBoxItem Tag="8" Style="{DynamicResource H6TextBlock}" FontSize="11">8</ComboBoxItem>
-        </ComboBox>
-      </DockPanel>
-      <StackPanel Margin="5,5,5,0">
-        <CheckBox Content="Show detail images" HorizontalAlignment="Stretch" IsChecked="{Binding ShowDetailImages}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
-        <CheckBox Content="Enable Smart Click measurement" HorizontalAlignment="Stretch" IsChecked="{Binding EnableSmartClickMeasurement}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
-      </StackPanel>
     </StackPanel>
   </Grid>
 </UserControl>

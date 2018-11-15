@@ -4,6 +4,7 @@
 Version: 18.14.0
 ================
 - Refactor some code
+- Added Constructing of SLD objects
 
 
 Version: 18.13.0
@@ -23,6 +24,8 @@ Version: 18.13.0
 - Added function for restart the StreetSmartAPI, only for the WPF version
 - added event: LayerVisibilityChanged in the panorama viewer and the oblique viewer
 - Fixed: some more issues about thread safe of the API
+- Fixed crash with measurements in other countrys of the Netherlands
+- Fixed some help
 
 
 Version: 18.11.0

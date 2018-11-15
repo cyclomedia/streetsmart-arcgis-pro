@@ -194,7 +194,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      return this.Aggregate(name == _constants.CycloMediaLayerName, (current, layer) => layer.Name == name || current);
+      bool result = this.Aggregate(name == _constants.CycloMediaLayerName, (current, layer) => layer.Name == name || current);
+      return result || this.Aggregate(name == _constants.CycloMediaLayerName,
+               (current, layer) =>
+                 layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)) || current);
     }
 
     public async Task DisposeAsync(bool fromMap)
