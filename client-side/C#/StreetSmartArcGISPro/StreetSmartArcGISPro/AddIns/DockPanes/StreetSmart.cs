@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -265,10 +266,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       if (_login.Credentials)
       {
+        string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+        IAPISettings settings = CefSettingsFactory.Create(cachePath);
+        settings.SetDefaultBrowserSubprocessPath();
         Api = _configuration.UseDefaultStreetSmartUrl
-          ? StreetSmartAPIFactory.Create()
+          ? StreetSmartAPIFactory.Create(settings)
           : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
-            ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
+            ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation, settings)
             : null;
 
         if (Api != null)

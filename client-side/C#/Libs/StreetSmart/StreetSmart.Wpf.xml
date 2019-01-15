@@ -220,6 +220,23 @@
             <param name="database">The name of the database. e.g. 'CMDatabase'</param>
             <returns>The address settings interface to use for address searches</returns>
         </member>
+        <member name="T:StreetSmart.Common.Factories.CefSettingsFactory">
+            <summary>
+            Factory for create a API settings class
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.CefSettingsFactory.Create(System.String,System.String,System.String,System.String)">
+            <summary>
+            Creates a new instance of the API Settings class.
+            </summary>
+            <returns>API Settings class</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.CefSettingsFactory.Create">
+            <summary>
+            Creates a new instance of the API Settings class.
+            </summary>
+            <returns>API Settings class</returns>
+        </member>
         <member name="T:StreetSmart.Common.Factories.CoordinateFactory">
              <summary>
              Factory for create coordinate objects which are used in the api
@@ -842,17 +859,19 @@
             Factory for creates a new instance of the API. API used to use and modify various StreetSmart components.
             </summary>
         </member>
-        <member name="M:StreetSmart.Common.Factories.StreetSmartAPIFactory.Create">
+        <member name="M:StreetSmart.Common.Factories.StreetSmartAPIFactory.Create(StreetSmart.Common.Interfaces.API.IAPISettings)">
             <summary>
             Creates a new instance of the API. API used to use and modify various StreetSmart components.
             </summary>
+            <param name="settings">The settings of CefSharp</param>
             <returns>API used to use and modify various StreetSmart components.</returns>
         </member>
-        <member name="M:StreetSmart.Common.Factories.StreetSmartAPIFactory.Create(System.String)">
+        <member name="M:StreetSmart.Common.Factories.StreetSmartAPIFactory.Create(System.String,StreetSmart.Common.Interfaces.API.IAPISettings)">
             <summary>
             Creates a new instance of the API. API used to use and modify various StreetSmart components.
             </summary>
             <param name="streetSmartLocation">The location Uri of StreetSmart</param>
+            <param name="settings">The settings of CefSharp</param>
             <returns>API used to use and modify various StreetSmart components.</returns>
         </member>
         <member name="T:StreetSmart.Common.Factories.ViewerOptionsFactory">
@@ -887,6 +906,56 @@
             <param name="obliqueViewer">The oblique viewer options</param>
             <returns>The viewer options used for open the viewers</returns>
         </member>
+        <member name="T:StreetSmart.Common.Interfaces.API.IAPISettings">
+            <summary>
+            API used to use and modify various StreetSmart components.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.API.IAPISettings.BrowserSubprocessPath">
+            <summary>
+            The path to a separate executable that will be launched for sub-processes.By default the browser process
+            executable is used.See the comments on Cef.ExecuteProcess() for details.Also configurable using the "browser-
+            subprocess-path" command-line switch. Default is CefSharp.BrowserSubprocess.exe
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.API.IAPISettings.CachePath">
+            <summary>
+            The location where cache data will be stored on disk. If empty then browsers will be created in "incognito mode"
+            where in-memory caches are used for storage and no data is persisted to disk. HTML5 databases such as
+            localStorage will only persist across sessions if a cache path is specified. Can be overridden for individual
+            CefRequestContext instances via the RequestContextSettings.CachePath value.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.API.IAPISettings.DisableGPUCache">
+            <summary>
+            Don't create a "GPUCache" directory when cache-path is unspecified.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.API.IAPISettings.LocalesDirPath">
+            <summary>
+            The path to the locales directory, if empty locales\ will be used.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.API.IAPISettings.ResourcesDirPath">
+            <summary>
+            The path to the resources directory, if empty the Executing Assembly path is used.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IAPISettings.SetDefaultBrowserSubprocessPath">
+            <summary>
+            Sets the default browserSupProcessPath
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IAPISettings.SetDefaultLocalesDirPath">
+            <summary>
+            Sets the default localesDirPath
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IAPISettings.SetDefaultResourcesDirPath">
+            <summary>
+            Sets the default resourcesDirPath
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.API.IObliqueViewer">
             <inheritdoc />
             <summary>
@@ -899,6 +968,12 @@
             </summary>
             <param name="buttonId"></param>
             <returns></returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IObliqueViewer.SwitchViewingDirection(System.Double)">
+            <summary>
+            Changes the viewing direction of the oblique viewer.
+            </summary>
+            <param name="deltaDegrees">Change direction (-90, 90, 180)</param>
         </member>
         <member name="M:StreetSmart.Common.Interfaces.API.IObliqueViewer.ToggleButtonEnabled(StreetSmart.Common.Interfaces.API.ObliqueViewerButtons,System.Boolean)">
             <summary>
@@ -1324,7 +1399,7 @@
             </summary>
             <param name="id">The id of the overlay</param>
         </member>
-        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.SetActiveMeasurement(System.String)">
+        <member name="M:StreetSmart.Common.Interfaces.API.IStreetSmartAPI.SetActiveMeasurement(StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection)">
             <summary>
             Set the active measurement in GeoJSON format
             </summary>
@@ -1392,6 +1467,17 @@
             </summary>
             <returns>Whether timetravel is enabled for the viewer.</returns>
         </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.GetType">
+            <summary>
+            Returns the type of this viewer.
+            </summary>
+            <returns>The type of this viewer..</returns>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.SaveImage">
+            <summary>
+            Downloads the image
+            </summary>
+        </member>
         <member name="M:StreetSmart.Common.Interfaces.API.IViewer.SetBrightness(System.Double)">
             <summary>
             Set the brightness of the viewer.
@@ -1415,6 +1501,12 @@
             Toggles the visibility of the navbar in the PanoramaViewer.
             </summary>
             <param name="visible">Sets visibility to this value.</param>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ToggleOverlay(StreetSmart.Common.Interfaces.Data.IOverlay)">
+            <summary>
+            Toggles the visibility of an overlay.
+            </summary>
+            <param name="overlay">Sets the visibility of the layer to this value.</param>
         </member>
         <member name="M:StreetSmart.Common.Interfaces.API.IViewer.ToggleTimeTravelExpanded(System.Boolean)">
             <summary>
@@ -1448,11 +1540,6 @@
             overlays
             </summary>
         </member>
-        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.CenterMap">
-            <summary>
-            center map
-            </summary>
-        </member>
         <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.ImageInformation">
             <summary>
             image information
@@ -1471,6 +1558,11 @@
         <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.SwitchDirection">
             <summary>
             switch direction
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.SaveImage">
+            <summary>
+            save image
             </summary>
         </member>
         <member name="F:StreetSmart.Common.Interfaces.API.ObliqueViewerButtons.ToggleNadir">
@@ -1498,11 +1590,6 @@
             open oblique
             </summary>
         </member>
-        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.OpenPointCloud">
-            <summary>
-            open pointcloud
-            </summary>
-        </member>
         <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ReportBlurring">
             <summary>
             report blurring
@@ -1513,19 +1600,14 @@
             measure
             </summary>
         </member>
-        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.PlayList">
-            <summary>
-            play list
-            </summary>
-        </member>
-        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.CenterMap">
-            <summary>
-            center map
-            </summary>
-        </member>
         <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ImageInformation">
             <summary>
             image information
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.SaveImage">
+            <summary>
+            save image
             </summary>
         </member>
         <member name="F:StreetSmart.Common.Interfaces.API.PanoramaViewerButtons.ZoomIn">
@@ -1773,6 +1855,11 @@
             Optional XML string for Styled Layer Descriptor.
             </summary>
         </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IOverlay.Visible">
+            <summary>
+            visibility of the layer
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions">
             <summary>
             Options to initialize the panorama viewer with
@@ -1786,6 +1873,21 @@
         <member name="P:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions.RecordingsVisible">
             <summary>
             If recordings should be visible
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions.MeasureTypeButtonVisible">
+            <summary>
+            Show measurement type button in measurement the navigation bar. Default is true.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions.MeasureTypeButtonToggle">
+            <summary>
+            Allow toggle of measurement type in measurement the navigation bar. Default is true.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IPanoramaViewerOptions.MeasureTypeButtonStart">
+            <summary>
+            Start new measurement when clicking on measurement type button in measurement the navigation bar. Default is true.
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Interfaces.Data.IRecording">
@@ -2183,6 +2285,26 @@
             The event value
             </summary>
         </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.CalculatedMethod">
+            <summary>
+            calculatedMethod
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CalculatedMethod.NotDefined">
+            <summary>
+            Not defined
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CalculatedMethod.Manual">
+            <summary>
+            Manual
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CalculatedMethod.Automatic">
+            <summary>
+            Automatic
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.CRSType">
             <summary>
             The CRS type
@@ -2231,6 +2353,11 @@
         <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.Rectangle">
             <summary>
             Rectangle
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.CustomGeometryType.Redline">
+            <summary>
+            Redline
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.FeatureType">
@@ -2363,7 +2490,7 @@
             Segments delta Z
             </summary>
         </member>
-        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentSlopePercentage">
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IDerivedDataLineString.SegmentsSlopePercentage">
             <summary>
             Segments slope percentage
             </summary>
@@ -2816,6 +2943,31 @@
             Triangle
             </summary>
         </member>
+        <member name="T:StreetSmart.Common.Interfaces.GeoJson.MeasurementTools">
+            <summary>
+            measurement tool
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasurementTools.NotDefined">
+            <summary>
+            Not defined
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasurementTools.Map">
+            <summary>
+            Map
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasurementTools.Panorama">
+            <summary>
+            Panorama
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasurementTools.PointCloud">
+            <summary>
+            Point cloud
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod">
             <summary>
             Measure method
@@ -3174,9 +3326,19 @@
               Looks up a localized string similar to StreetSmartApi.
             </summary>
         </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.LocalesPath">
+            <summary>
+              Looks up a localized string similar to locales.
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Wpf.Properties.Resources.ResourcesPath">
+            <summary>
+              Looks up a localized string similar to .
+            </summary>
+        </member>
         <member name="P:StreetSmart.Wpf.Properties.Resources.StreetSmartLocation">
             <summary>
-              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v18.13/api-dotnet.html.
+              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v18.15/api-dotnet.html.
             </summary>
         </member>
         <member name="T:StreetSmart.Wpf.StreetSmartGUI">
