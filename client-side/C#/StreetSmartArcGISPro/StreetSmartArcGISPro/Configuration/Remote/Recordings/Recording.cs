@@ -35,6 +35,8 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
     public const string FieldId = "Id";                            // "Id"
     public const string FieldImageId = "ImageId";                  // "ImageId"
     public const string FieldRecordedAt = "RecordedAt";            // "RecordedAt"
+    public const string FieldHeight = "Height";                    // "Height"
+    public const string FieldHeightSystem = "HeightSyst";          // "HeightSystem"
     public const string FieldLatitudePrecision = "LatPrec";        // "LatitudePrecision"
     public const string FieldLongitudePrecision = "LongPrec";      // "LongitudePrecision"
     public const string FieldHeightPrecision = "HeightPrec";       // "HeightPrecision"
@@ -72,6 +74,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
 
     [XmlElement("location", Namespace = "http://www.cyclomedia.com/atlas")]
     public Location Location { get; set; }
+
+    [XmlElement("height", Namespace = "http://www.cyclomedia.com/atlas")]
+    public Height Height { get; set; }
 
     [XmlElement("latitudePrecision", Namespace = "http://www.cyclomedia.com/atlas")]
     public double? LatitudePrecision { get; set; }
@@ -117,6 +122,8 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
       {FieldId, FieldType.String},
       {FieldImageId, FieldType.String},
       {FieldRecordedAt, FieldType.Date},
+      {FieldHeight, FieldType.Double},
+      {FieldHeightSystem, FieldType.String},
       {FieldLatitudePrecision, FieldType.Double},
       {FieldLongitudePrecision, FieldType.Double},
       {FieldHeightPrecision, FieldType.Double},
@@ -206,6 +213,12 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
         case FieldHasDepthMap:
           result = HasDepthMap.ToString();
           break;
+        case FieldHeight:
+          result = Height.Value;
+          break;
+        case FieldHeightSystem:
+          result = Height.System;
+          break;
       }
 
       return result;
@@ -284,6 +297,22 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
             break;
           case FieldHasDepthMap:
             HasDepthMap = bool.Parse((string) item);
+            break;
+          case FieldHeight:
+            if (Height == null)
+            {
+              Height = new Height();
+            }
+
+            Height.Value = (double?) item;
+            break;
+          case FieldHeightSystem:
+            if (Height == null)
+            {
+              Height = new Height();
+            }
+
+            Height.System = (string) item;
             break;
         }
       }

@@ -16,21 +16,30 @@
  * License along with this library.
  */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Xml;
+using System.Xml.Serialization;
 
-[assembly: AssemblyTitle("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyDescription("Street Smart integration for ArcGIS Pro")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CycloMedia")]
-[assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2018")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
+{
+  [XmlType(AnonymousType = true, Namespace = "http://www.opengis.net/gml")]
+  [XmlRoot(Namespace = "http://www.opengis.net/gml", IsNullable = false)]
+  public class Height
+  {
+    #region Properties
 
-[assembly: ComVisible(false)]
+    [XmlIgnore]
+    public double? Value { get; set; }
 
-[assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
+    [XmlAttribute("system", Namespace = "http://www.opengis.net/gml")]
+    public string System { get; set; }
 
-[assembly: AssemblyVersion("0.7.1.*")]
-[assembly: AssemblyFileVersion("0.7.1")]
+    [XmlText]
+    public string StringValue
+    {
+      get => Value == null ? null : XmlConvert.ToString(Value.Value);
+      set => Value = value == null ? null : (double?) XmlConvert.ToDouble(value);
+    }
+
+    #endregion
+  }
+}

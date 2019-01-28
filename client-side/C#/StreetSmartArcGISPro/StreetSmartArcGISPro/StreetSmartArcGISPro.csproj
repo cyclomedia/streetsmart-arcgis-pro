@@ -158,6 +158,7 @@
     <Compile Include="Configuration\File\Settings.cs" />
     <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
     <Compile Include="Configuration\Remote\Recordings\Images.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Height.cs" />
     <Compile Include="Configuration\Remote\Recordings\Point.cs" />
     <Compile Include="Configuration\Remote\Recordings\Location.cs" />
     <Compile Include="Configuration\Remote\Recordings\FeatureMembers.cs" />

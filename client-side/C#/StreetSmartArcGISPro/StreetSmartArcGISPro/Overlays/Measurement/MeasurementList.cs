@@ -18,8 +18,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ArcGIS.Core.Geometry;
@@ -42,6 +42,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Members
 
+    private int MaxWaitTime = 10000;
+
     private bool _drawingSketch;
     private VectorLayer _lastVectorLayer;
     private long? _lastObjectId;
@@ -56,12 +58,17 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public IStreetSmartAPI Api { private get; set; }
     public bool DrawPoint { private get; set; }
 
+    public EventWaitHandle InUpdateMeasurementMode { get; set; }
+
+    public IFeatureCollection FeatureCollection { get; set; }
+
     #endregion
 
     #region Constructor
 
     public MeasurementList()
     {
+      InUpdateMeasurementMode = new AutoResetEvent(true);
       Open = null;
       Sketch = null;
       DrawPoint = true;
@@ -335,14 +342,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {
-      IFeatureCollection featureCollection = args.Value;
+      InUpdateMeasurementMode.WaitOne(MaxWaitTime);
+      InUpdateMeasurementMode.Reset();
+      FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
 
-      foreach (IFeature feature in featureCollection.Features)
+      foreach (IFeature feature in FeatureCollection.Features)
       {
         if (feature.Properties is IMeasurementProperties properties)
         {
-          if (!ContainsKey(properties.Id))
+          // Hack, solve at a good way!
+//        if (!ContainsKey(properties.Id))
+          if (Count == 0)
           {
             Measurement measurement =
               new Measurement(properties, feature.Geometry, DrawPoint, api)
@@ -361,87 +372,140 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
           else
           {
-            Measurement measurement = this[properties.Id];
-            IGeometry geometry = feature.Geometry;
-            StreetSmartGeometryType geometryType = geometry.Type;
+            // Hack, solve at a good way!
+            // Measurement measurement = this[properties.Id];
+            Measurement measurement = this.ElementAt(0).Value;
+            measurement.ObservationLines = properties.ObservationLines;
 
-            switch (geometryType)
+            if (!measurement.UpdateMeasurement)
             {
-              case StreetSmartGeometryType.Point:
-                if (measurement.Geometry is IPoint pointSrc && geometry is IPoint pointDst)
-                {
-                  await measurement.UpdatePointAsync(0, feature);
-                  measurement.Geometry = geometry;
-                  // update point
-                }
+              measurement.UpdateMeasurement = true;
+              IGeometry geometry = feature.Geometry;
+              StreetSmartGeometryType geometryType = geometry.Type;
 
-                break;
-              case StreetSmartGeometryType.LineString:
-                if (measurement.Geometry is ILineString lineSrc && geometry is ILineString lineDst)
-                {
-                  for (int i = 0; i < Math.Max(lineDst.Count, lineSrc.Count); i++)
+              switch (geometryType)
+              {
+                case StreetSmartGeometryType.Point:
+                  if (measurement.Geometry is IPoint pointSrc && geometry is IPoint pointDst)
                   {
-                    if (lineSrc.Count > i && lineDst.Count > i)
+                    bool result = await measurement.UpdatePointAsync(0, feature);
+                    measurement.Geometry = geometry;
+
+                    if (result)
                     {
-                      await measurement.UpdatePointAsync(i, feature);
-                      // update point [i]
+                      measurement.RemoveObservations(0, feature);
+                      await measurement.RemovePoint(0);
                     }
-                    else if (lineSrc.Count <= i && lineDst.Count > i)
-                    {
-                      measurement.AddPoint(lineSrc.Count);
-                      await measurement.UpdatePointAsync(i, feature);
-                      // add point [lineSrc.Count]
-                    }
-                    else if (lineSrc.Count > i && lineDst.Count <= i)
-                    {
-                      measurement.RemovePoint(i);
-                      await measurement.UpdatePointAsync(Math.Min(i, lineDst.Count - 1), feature);
-                      // remove point [i]
-                    }
+                    // update point
                   }
 
-                  measurement.Geometry = geometry;
-                }
-
-                break;
-              case StreetSmartGeometryType.Polygon:
-                if (measurement.Geometry is IPolygon polySrc && geometry is IPolygon polyDst)
-                {
-                  int polySrcCount = polySrc[0].Count;
-                  int pylyDstCount = polyDst[0].Count;
-
-                  for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
+                  break;
+                case StreetSmartGeometryType.LineString:
+                  if (measurement.Geometry is ILineString lineSrc && geometry is ILineString lineDst)
                   {
-                    if (polySrcCount > i && pylyDstCount > i)
+                    for (int i = 0; i < Math.Max(lineDst.Count, lineSrc.Count); i++)
                     {
-                      await measurement.UpdatePointAsync(i, feature);
-                      // update point [i]
+                      measurement.RemoveObservations(i, feature);
+
+                      if (lineSrc.Count > i && lineDst.Count > i)
+                      {
+                        bool result = await measurement.UpdatePointAsync(i, feature);
+
+                        if (result)
+                        {
+                          await measurement.RemovePoint(i);
+                        }
+                        // update point [i]
+                      }
+                      else if (lineSrc.Count <= i && lineDst.Count > i)
+                      {
+                        measurement.AddPoint(lineSrc.Count);
+                        bool result = await measurement.UpdatePointAsync(i, feature);
+
+                        if (result)
+                        {
+                          await measurement.RemovePoint(i);
+                        }
+                        // add point [lineSrc.Count]
+                      }
+                      else if (lineSrc.Count > i && lineDst.Count <= i)
+                      {
+                        await measurement.RemovePoint(i);
+                        bool result = await measurement.UpdatePointAsync(Math.Min(i, lineDst.Count - 1), feature);
+
+                        if (result)
+                        {
+                          await measurement.RemovePoint(Math.Min(i, lineDst.Count - 1));
+                        }
+                        // remove point [i]
+                      }
                     }
-                    else if (polySrcCount <= i && pylyDstCount > i)
-                    {
-                      measurement.AddPoint(polySrcCount++);
-                      await measurement.UpdatePointAsync(i, feature);
-                      // add point [lineSrc.Count]
-                    }
-                    else if (polySrcCount < i && pylyDstCount <= i)
-                    {
-                      measurement.RemovePoint(i);
-                      polySrcCount--;
-                      await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
-                      // remove point [i]
-                    }
+
+                    measurement.Geometry = geometry;
                   }
 
-                  measurement.Geometry = geometry;
-                }
+                  break;
+                case StreetSmartGeometryType.Polygon:
+                  if (measurement.Geometry is IPolygon polySrc && geometry is IPolygon polyDst)
+                  {
+                    int polySrcCount = polySrc[0].Count;
+                    int pylyDstCount = polyDst[0].Count;
 
-                break;
+                    for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
+                    {
+                      measurement.RemoveObservations(i, feature);
+                      if (polySrcCount > i && pylyDstCount > i)
+                      {
+                        bool result = await measurement.UpdatePointAsync(i, feature);
+
+                        if (result)
+                        {
+                          await measurement.RemovePoint(i);
+                        }
+                        // update point [i]
+                      }
+                      else if (polySrcCount <= i && pylyDstCount > i)
+                      {
+                        measurement.AddPoint(polySrcCount++);
+                        bool result = await measurement.UpdatePointAsync(i, feature);
+
+                        if (result)
+                        {
+                          await measurement.RemovePoint(i);
+                        }
+                        // add point [lineSrc.Count]
+                      }
+                      else if (polySrcCount < i && pylyDstCount <= i)
+                      {
+                        await measurement.RemovePoint(i);
+                        polySrcCount--;
+                        bool result = await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
+
+                        if (result)
+                        {
+                          await measurement.RemovePoint(Math.Min(i, pylyDstCount - 1));
+                        }
+                        // remove point [i]
+                      }
+                    }
+
+                    measurement.Geometry = geometry;
+                  }
+
+                  break;
+              }
+
+              measurement.UpdateMeasurement = false;
+            }
+            else
+            {
+              measurement.DoChange = true;
             }
           }
         }
       }
 
-      if (featureCollection.Type == FeatureType.Unknown)
+      if (FeatureCollection.Type == FeatureType.Unknown)
       {
         if (Count == 1)
         {
@@ -450,32 +514,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           await measurement.CloseAsync();
         }
       }
-    }
 
-    public async void OnMeasurementPointObservationAdded(int entityId, int pointId, string imageId, Bitmap match)
-    {
-      // Todo: get measurement observation data (entityId, pointId, imageId);
-      object measurementObservation = null;
-      Measurement measurement = Get(entityId);
-
-      if (measurement?.ContainsKey(pointId) ?? false)
-      {
-        MeasurementPoint measurementPoint = measurement[pointId];
-        await measurementPoint.UpdateObservationAsync(measurementObservation, match);
-      }
-    }
-
-    public async void OnMeasurementPointObservationUpdated(int entityId, int pointId, string imageId)
-    {
-      // Todo: get measurement observation data (entityId, pointId, imageId);
-      object measurementObservation = null;
-      Measurement measurement = Get(entityId);
-
-      if (measurement?.ContainsKey(pointId) ?? false)
-      {
-        MeasurementPoint measurementPoint = measurement[pointId];
-        await measurementPoint.UpdateObservationAsync(measurementObservation, null);
-      }
+      InUpdateMeasurementMode.Set();
     }
 
     public void OnMeasurementPointObservationRemoved(int entityId, int pointId, string imageId)

@@ -420,6 +420,16 @@
             returns GeoJSon featureCollection object
             </summary>
         </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CloneFeatureCollection(StreetSmart.Common.Interfaces.GeoJson.IFeatureCollection)">
+            <summary>
+            returns a clone of a GeoJSon featureCollection object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreateMeasureDetails">
+            <summary>
+            create measure details
+            </summary>
+        </member>
         <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePointFeature(System.Double,System.Double,System.Double)">
             <summary>
             returns GeoJson point feature object
@@ -443,6 +453,21 @@
         <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePolygonFeature(System.Collections.Generic.IList{System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ICoordinate}})">
             <summary>
             returns GeoJson polygon feature object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePointGeometry(StreetSmart.Common.Interfaces.Data.ICoordinate)">
+            <summary>
+            returns GeoJson point geometry object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreateLineGeometry(System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ICoordinate})">
+            <summary>
+            returns GeoJson line string geometry object
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Factories.GeoJsonFactory.CreatePolygonGeometry(System.Collections.Generic.IList{System.Collections.Generic.IList{StreetSmart.Common.Interfaces.Data.ICoordinate}})">
+            <summary>
+            returns GeoJson polygon geometry object
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Factories.JsonFactory">
@@ -2758,6 +2783,11 @@
             Observation lines
             </summary>
         </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IMeasurementProperties.MeasurementTool">
+            <summary>
+            Measurement tools
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.IObservationLines">
             <summary>
             Observation lines
@@ -2928,6 +2958,11 @@
             RecordedAt
             </summary>
         </member>
+        <member name="P:StreetSmart.Common.Interfaces.GeoJson.IResultDirection.CalculatedMethod">
+            <summary>
+            Calculated method
+            </summary>
+        </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.IStdev">
             <summary>
             Position
@@ -2996,6 +3031,11 @@
         <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.ForwardIntersection">
             <summary>
             Measure using manual forward intersection
+            </summary>
+        </member>
+        <member name="F:StreetSmart.Common.Interfaces.GeoJson.MeasureMethod.unknown">
+            <summary>
+            unknown measurement method
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Interfaces.GeoJson.PointProblems">

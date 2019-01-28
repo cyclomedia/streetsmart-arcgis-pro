@@ -474,25 +474,28 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             {
               FilterGeometry = envelope,
               SpatialRelationship = SpatialRelationship.Contains,
-              SubFields = $"{Recording.FieldGroundLevelOffset}, SHAPE"
+              SubFields = $"{Recording.FieldGroundLevelOffset}, {Recording.FieldHeight}, SHAPE"
             };
 
             using (RowCursor existsResult = featureClass.Search(spatialFilter, false))
             {
               int groundLevelId = existsResult.FindField(Recording.FieldGroundLevelOffset);
+              int heightId = existsResult.FindField(Recording.FieldHeight);
 
               while (existsResult.MoveNext())
               {
                 using (Row row = existsResult.Current)
                 {
                   double? groundLevel = row?.GetOriginalValue(groundLevelId) as double?;
+                  double heightValue = row?.GetOriginalValue(heightId) as double? ?? 0.0;
+                  const double tolerance = 0.01;
 
                   if (groundLevel != null)
                   {
                     Feature feature = row as Feature;
                     Geometry geometry = feature?.GetShape();
                     MapPoint point = geometry as MapPoint;
-                    double height = point?.Z ?? 0;
+                    double height = Math.Abs(heightValue) < tolerance ? point?.Z ?? 0 : heightValue;
 
                     // ReSharper disable once AccessToModifiedClosure
                     result = result ?? 0.0;
