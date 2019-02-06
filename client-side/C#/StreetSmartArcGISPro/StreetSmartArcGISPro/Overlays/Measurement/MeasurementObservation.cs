@@ -164,26 +164,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       PropertyChanged -= OnPropertyMeasurementObservationChanged;
     }
 
-    public void RemoveMe()
-    {
-      _measurementPoint.RemoveObservation(this);
-    }
-
-    public void LookAtMe()
-    {
-      // Todo: add apipoint from measurement point, add the coordinates x, y and z to the coord object
-      ICoordinate coord = null;
-      DockPanestreetSmart streetSmart = DockPanestreetSmart.Show();
-
-      if (streetSmart != null)
-      {
-        streetSmart.LookAt = coord;
-        streetSmart.Replace = true;
-        streetSmart.Nearest = false;
-        streetSmart.Location = ImageId;
-      }
-    }
-
     public async Task RedrawObservationAsync()
     {
       await QueuedTask.Run(() =>

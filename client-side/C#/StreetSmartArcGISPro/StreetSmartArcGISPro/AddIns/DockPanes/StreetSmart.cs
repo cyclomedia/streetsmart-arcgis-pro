@@ -411,6 +411,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReference();
       IList<ViewerType> viewerTypes = new List<ViewerType> { ViewerType.Panorama };
       IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, Replace, true);
+      panoramaOptions.MeasureTypeButtonToggle = false;
       IViewerOptions viewerOptions = ViewerOptionsFactory.Create(viewerTypes, epsgCode, panoramaOptions);
 
       try

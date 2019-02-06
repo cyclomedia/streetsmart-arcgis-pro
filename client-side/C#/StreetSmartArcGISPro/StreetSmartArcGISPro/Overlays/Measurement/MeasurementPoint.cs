@@ -18,21 +18,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
+using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
 
 using StreetSmartArcGISPro.Configuration.File;
@@ -47,7 +46,7 @@ using WindowsPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
-  public class MeasurementPoint : ObservableCollection<MeasurementObservation>, INotifyPropertyChanged
+  public class MeasurementPoint : Dictionary<string, MeasurementObservation>, INotifyPropertyChanged, IDisposable
   {
     #region Events
 
@@ -71,8 +70,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private bool _updatePoint;
     private bool _isDisposed;
 
-    public IDictionary<string, MeasurementObservation> Observations { get; }
-
     #endregion
 
     #region Properties
@@ -86,10 +83,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         _pointId = value;
         // ReSharper disable once ExplicitCallerInfoArgument
-        OnPropertyChanged("PreviousPoint");
+        // OnPropertyChanged("PreviousPoint");
         // ReSharper disable once ExplicitCallerInfoArgument
-        OnPropertyChanged("NextPoint");
-        OnPropertyChanged("Index");
+        // OnPropertyChanged("NextPoint");
+        // OnPropertyChanged("Index");
       }
     }
 
@@ -99,26 +96,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       private set
       {
         _open = value;
-        OnPropertyChanged();
-      }
-    }
-
-    public object ApiPoint
-    {
-      get
-      {
-        // Todo: _apiMeasurementPoint x, y, z
-        if (_apiMeasurementPoint != null && double.IsNaN(0.0) &&
-            double.IsNaN(0.0) && double.IsNaN(0.0))
-        {
-          _apiMeasurementPoint = Measurement.GetApiPoint(PointId);
-        }
-
-        return _apiMeasurementPoint;
-      }
-      set
-      {
-        _apiMeasurementPoint = value;
         OnPropertyChanged();
       }
     }
@@ -133,9 +110,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public MapPoint LastPoint { get; private set; }
-
-    public bool NotCreated => Point == null;
+    public bool Updated { get; set; }
 
     public bool IsFirstNumber => _pointId == 0;
 
@@ -157,13 +132,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       _updatePoint = false;
       Measurement = measurement;
       Point = null;
-      LastPoint = null;
       PointId = pointId;
       _added = false;
       Open = false;
       _constants = ConstantsViewer.Instance;
       _ci = CultureInfo.InvariantCulture;
-      Observations = new Dictionary<string, MeasurementObservation>();
       MapViewCameraChangedEvent.Subscribe(OnMapViewCameraChanged);
     }
 
@@ -181,124 +154,60 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       double yDir = direction.Direction?.Y ?? 0.0;
       MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
 
-      if (Observations.ContainsKey(imageId))
+      if (ContainsKey(imageId))
       {
-        Observations[imageId].Point = point;
-        Observations[imageId].ImageId = imageId;
-        Observations[imageId].XDir = xDir;
-        Observations[imageId].YDir = yDir;
-        Observations[imageId].LineNumber = i;
-        await Observations[imageId].RedrawObservationAsync();
+        this[imageId].Point = point;
+        this[imageId].ImageId = imageId;
+        this[imageId].XDir = xDir;
+        this[imageId].YDir = yDir;
+        this[imageId].LineNumber = i;
+        await this[imageId].RedrawObservationAsync();
       }
       else
       {
         MeasurementObservation measurementObservation = new MeasurementObservation(this, imageId, point, xDir, yDir, i);
-        Observations.Add(imageId, measurementObservation);
-        Add(measurementObservation);
+        Add(imageId, measurementObservation);
         await measurementObservation.RedrawObservationAsync();
       }
-
-     // SetDetailPane();
     }
 
     public bool IsObservationVisible()
     {
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      MeasurementList measurementList = streetSmart.MeasurementList;
-      return streetSmart.InsideScale() && !_isDisposed &&
-             ((Measurement?.IsOpen ?? false) ||
-              (Measurement?.IsPointMeasurement ?? false) && measurementList.Sketch == null) &&
-             (bool)Measurement?.DrawPoint;
+      return streetSmart.InsideScale() && !_isDisposed;
     }
 
     public void RemoveObservation(string imageId)
     {
-      /*
-      if (_observations.ContainsKey(imageId))
+      if (ContainsKey(imageId))
       {
-        MeasurementObservation observation = _observations[imageId];
+        MeasurementObservation observation = this[imageId];
         observation.Dispose();
-        // Remove(observation);
-        _observations.Remove(imageId);
-      }
-      */
-    }
-
-    public void RemoveObservation(MeasurementObservation observation)
-    {
-      Measurement.RemoveObservation(PointId, observation?.ImageId);
-    }
-
-    private void SetDetailPane()
-    {
-      Measurement.SetDetailPanePoint(this);
-    }
-
-    public void Closed()
-    {
-      Open = false;
-      LastPoint = null;
-    }
-
-    public void Opened()
-    {
-      Open = true;
-      SetDetailPane();
-    }
-
-    public void OpenPoint()
-    {
-      Open = true;
-      Measurement?.OpenPoint(PointId);
-      SetDetailPane();
-    }
-
-    public void ClosePoint()
-    {
-      if (Open)
-      {
-        Open = false;
-        Measurement?.ClosePoint(PointId);
+        Remove(imageId);
       }
     }
 
-    public async Task Dispose()
+    public bool HasOneObservation()
+    {
+      return Count == 1;
+    }
+
+    public void Dispose()
     {
       _isDisposed = true;
       MapViewCameraChangedEvent.Unsubscribe(OnMapViewCameraChanged);
-      Measurement.SetDetailPanePoint(null, this);
       _disposeText?.Dispose();
 
-      MapView thisView = MapView.Active;
-      Geometry geometry = await thisView.GetCurrentSketchAsync();
-      var ptColl = await Measurement.ToPointCollectionAsync(geometry);
-
-      if (ptColl.Count > _pointId)
+      while (Count >= 1)
       {
-        ptColl.RemoveAt(_pointId);
-      }
-
-      await QueuedTask.Run(() =>
-      {
-        if (Measurement.IsGeometryType(ArcGISGeometryType.Polygon))
-        {
-          geometry = PolygonBuilder.CreatePolygon(ptColl, geometry.SpatialReference);
-        }
-        else if (Measurement.IsGeometryType(ArcGISGeometryType.Polyline))
-        {
-          geometry = PolylineBuilder.CreatePolyline(ptColl, geometry.SpatialReference);
-        }
-
-        thisView.SetCurrentSketchAsync(geometry);
-      });
-
-      foreach (MeasurementObservation observation in this)
-      {
+        var element = this.ElementAt(0);
+        MeasurementObservation observation = element.Value;
         observation.Dispose();
+        Remove(element.Key);
       }
     }
 
-    public async Task<bool> UpdatePointAsync(IFeature measurementPoint, int index)
+    public async Task UpdatePointAsync(IFeature measurementPoint, int index)
     {
       bool result = false;
 
@@ -307,7 +216,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         _updatePoint = true;
         PointId = index;
 
-        ApiPoint = null;
         double x = 0;
         double y = 0;
         double z = 0;
@@ -344,221 +252,65 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         IMeasureDetails details = properties?.MeasureDetails?.Count > index ? properties.MeasureDetails[index] : null;
         List<string> imageIds = new List<string>();
 
-        if (details?.Details is IDetailsForwardIntersection forwardIntersection)
+        if (details?.Details is IDetailsForwardIntersection detailForwardIntersection)
         {
-          for (int i = 0; i < forwardIntersection.ResultDirections.Count; i++)
+          for (int i = 0; i < detailForwardIntersection.ResultDirections.Count; i++)
           {
-            imageIds.Add(forwardIntersection.ResultDirections[i].Id);
-            await UpdateObservationAsync(forwardIntersection.ResultDirections[i], i);
+            imageIds.Add(detailForwardIntersection.ResultDirections[i].Id);
+            await UpdateObservationAsync(detailForwardIntersection.ResultDirections[i], i);
           }
         }
 
-        foreach (string observation in Observations.Keys)
+        List<string> toRemove = new List<string>();
+
+        foreach (string observation in Keys)
         {
           if (!imageIds.Contains(observation))
           {
-            RemoveObservation(observation);
+            toRemove.Add(observation);
           }
+        }
+
+        foreach (string observation in toRemove)
+        {
+          RemoveObservation(observation);
         }
 
         if (!result)
         {
           Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
-          LastPoint = LastPoint ?? Point;
 
           MapView thisView = MapView.Active;
           Geometry geometry = await thisView.GetCurrentSketchAsync();
+          Updated = true;
 
           if (geometry != null)
           {
             var ptColl = await Measurement.ToPointCollectionAsync(geometry);
-            int nrPoints = Measurement.PointNr;
 
-            if (ptColl != null && Measurement.IsSketch)
+            if (ptColl != null)
             {
-              if (_pointId < nrPoints)
+              if (_pointId < ptColl.Count)
               {
                 MapPoint pointC = ptColl[_pointId];
 
-                if (!IsSame(pointC))
+                if (IsSame(pointC))
                 {
-                  await QueuedTask.Run(() =>
-                  {
-                    MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, Point.M,
-                      geometry.SpatialReference);
-
-                    if (Measurement.IsPointMeasurement)
-                    {
-                      thisView.SetCurrentSketchAsync(point);
-                    }
-                    else
-                    {
-                      ptColl[_pointId] = point;
-
-                      if (_pointId == 0 && nrPoints + 1 == ptColl.Count)
-                      {
-                        ptColl[ptColl.Count - 1] = point;
-                      }
-
-                      if (Measurement.IsGeometryType(ArcGISGeometryType.Polygon))
-                      {
-                        geometry = PolygonBuilder.CreatePolygon(ptColl, geometry.SpatialReference);
-                      }
-                      else if (Measurement.IsGeometryType(ArcGISGeometryType.Polyline))
-                      {
-                        if (ptColl.Count == 1)
-                        {
-                          ptColl.Add(ptColl[0]);
-                        }
-
-                        geometry = PolylineBuilder.CreatePolyline(ptColl, geometry.SpatialReference);
-                      }
-
-                      thisView.SetCurrentSketchAsync(geometry);
-                    }
-                  });
+ //                 Updated = false;
                 }
-              }
-              else
-              {
-                await QueuedTask.Run(() =>
-                {
-                  MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, Point.M,
-                    geometry.SpatialReference);
-                  int nrPoints2 = ptColl.Count;
-
-                  switch (nrPoints2)
-                  {
-                    case 0:
-                      ptColl.Add(point);
-
-                      //if (geometry is Polygon)
-                      //{
-                      //  ptColl.Add(point);
-                     // }
-
-                      break;
-                    case 1:
-                      ptColl.Add(point);
-                      break;
-                    default:
-                      if (_pointId <= nrPoints)
-                      {
-                        if (_pointId != nrPoints2 && geometry is Polyline || _pointId != nrPoints2 - 1 && geometry is Polygon)
-                        {
-                          ptColl.Insert(_pointId, point);
-                        }
-                        else
-                        {
-                          if (geometry is Polygon)
-                          {
-                            ptColl.Insert(_pointId, point);
-                          }
-                          else
-                          {
-                            ptColl.Add(point);
-                          }
-                        }
-                      }
-
-                      break;
-                  }
-
-                  if (Measurement.IsGeometryType(ArcGISGeometryType.Polygon))
-                  {
-                    if (ptColl.Count == 1)
-                    {
-                      ptColl.Add(ptColl[0]);
-                    }
-                    else if (ptColl.Count >= 3 && IsSame(ptColl[0]) && IsSame(ptColl[ptColl.Count - 1]))
-                    {
-                      int removeCount = 0;
-                      int nrPoints3 = ptColl.Count;
-
-                      for (int i = 1; i < nrPoints3 - 1; i++)
-                      {
-                        if (IsSame(ptColl[i - removeCount]))
-                        {
-                          ptColl.RemoveAt(i - removeCount);
-                          removeCount++;
-                        }
-                      }
-                    }
-
-                    if (Measurement.Count == ptColl.Count)
-                    {
-                      geometry = PolygonBuilder.CreatePolygon(ptColl, geometry.SpatialReference);
-                    }
-                    else
-                    {
-                      
-                    }
-                  }
-                  else if (Measurement.IsGeometryType(ArcGISGeometryType.Polyline))
-                  {
-                    if (ptColl.Count == 1)
-                    {
-                      ptColl.Add(ptColl[0]);
-                    }
-
-                    geometry = PolylineBuilder.CreatePolyline(ptColl, geometry.SpatialReference);
-                  }
-                  else if (Measurement.IsPointMeasurement && ptColl.Count == 1)
-                  {
-                    geometry = ptColl[0];
-                  }
-
-                  thisView.SetCurrentSketchAsync(geometry);
-                });
-              }
-            }
-            else
-            {
-              if (geometry is MapPoint)
-              {
-                await QueuedTask.Run(() =>
-                {
-                  if (geometry.IsEmpty)
-                  {
-                    if ((!double.IsNaN(Point.X)) && (!double.IsNaN(Point.Y)))
-                    {
-                      if (!_added)
-                      {
-                        _added = true;
-                        MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, PointId + 1);
-                        thisView.SetCurrentSketchAsync(point);
-                        _added = false;
-                      }
-                    }
-                  }
-                  else
-                  {
-                    var pointC = geometry as MapPoint;
-
-                    if (!IsSame(pointC))
-                    {
-                      if ((!double.IsNaN(Point.X)) && (!double.IsNaN(Point.Y)))
-                      {
-                        MapPoint point = MapPointBuilder.CreateMapPoint(Point.X, Point.Y, Point.Z, PointId + 1);
-                        thisView.SetCurrentSketchAsync(point);
-                      }
-                    }
-                  }
-                });
               }
             }
           }
+        }
+        else
+        {
+          Point = null;
         }
 
         _updatePoint = false;
       }
 
-      if (!result)
-      {
-        await RedrawPointAsync();
-      }
-
-      return result;
+      await RedrawPointAsync();
     }
 
     public bool IsSame(MapPoint point)
@@ -579,16 +331,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
              (!includeZ || Math.Abs(Point.Z - point.Z) < dinstance);
     }
 
-    public void OpenNearestImage()
-    {
-      Measurement?.OpenNearestImage(ApiPoint);
-    }
-
-    public void LookAtMeasurement()
-    {
-      Measurement?.LookAtMeasurement(ApiPoint);
-    }
-
     public async Task RedrawPointAsync()
     {
       await QueuedTask.Run(() =>
@@ -602,64 +344,63 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
              (Measurement?.IsPointMeasurement ?? false) && measurementList.Sketch == null) &&
             (Measurement?.DrawPoint ?? false) && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y))
         {
-          MapView thisView = MapView.Active;
-          WindowsPoint winPoint = thisView.MapToScreen(Point);
-          float fontSize = _constants.MeasurementFontSize;
-          int fontSizeT = (int) (fontSize*2);
-          int fontSizeR = (int) ((fontSize*3)/2);
-          int fontSizeK = (int) (fontSize/4);
-          string text = (Measurement?.IsOpen ?? true) ? (PointId + 1).ToString(_ci) : Measurement.MeasurementName;
-          int characters = text.Length;
-          Bitmap bitmap = new Bitmap((fontSizeT*characters), fontSizeT);
-
-          double pointSize = _constants.MeasurementPointSize;
-          double pointSizePoint = pointSize*6/4;
-          WindowsPoint winPointText = new WindowsPoint {X = winPoint.X + pointSizePoint, Y = winPoint.Y - pointSizePoint};
-          MapPoint pointText = thisView.ScreenToMap(winPointText);
-
-          using (var sf = new StringFormat())
+          if (Measurement.Geometry.Type != StreetSmartGeometryType.Polygon || Measurement.Count >= 1 && (PointId == 0 || !IsSame(Measurement[0].Point)))
           {
-            using (Graphics g = Graphics.FromImage(bitmap))
+            MapView thisView = MapView.Active;
+            WindowsPoint winPoint = thisView.MapToScreen(Point);
+            float fontSize = _constants.MeasurementFontSize;
+            int fontSizeT = (int) (fontSize * 2);
+            int fontSizeR = (int) (fontSize * 3 / 2);
+            int fontSizeK = (int) (fontSize / 4);
+            string text = (PointId + 1).ToString(_ci);
+            int characters = text.Length;
+            Bitmap bitmap = new Bitmap((fontSizeT * characters), fontSizeT);
+
+            double pointSize = _constants.MeasurementPointSize;
+            double pointSizePoint = pointSize * 6 / 4;
+            WindowsPoint winPointText = new WindowsPoint
+              {X = winPoint.X + pointSizePoint, Y = winPoint.Y - pointSizePoint};
+            MapPoint pointText = thisView.ScreenToMap(winPointText);
+
+            using (var sf = new StringFormat())
             {
-              g.Clear(Color.Transparent);
-              Font font = new Font("Arial", fontSize);
-              sf.Alignment = StringAlignment.Center;
-              Rectangle rectangle = new Rectangle(fontSizeK, fontSizeK, (fontSizeR*characters), fontSizeR);
-              g.DrawString(text, font, Brushes.Black, rectangle, sf);
+              using (Graphics g = Graphics.FromImage(bitmap))
+              {
+                g.Clear(Color.Transparent);
+                Font font = new Font("Arial", fontSize);
+                sf.Alignment = StringAlignment.Center;
+                Rectangle rectangle = new Rectangle(fontSizeK, fontSizeK, (fontSizeR * characters), fontSizeR);
+                g.DrawString(text, font, Brushes.Black, rectangle, sf);
+              }
             }
-          }
 
-          BitmapSource source = bitmap.ToBitmapSource();
-          var frame = BitmapFrame.Create(source);
-          var encoder = new PngBitmapEncoder();
-          encoder.Frames.Add(frame);
+            BitmapSource source = bitmap.ToBitmapSource();
+            var frame = BitmapFrame.Create(source);
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(frame);
 
-          using (MemoryStream stream = new MemoryStream())
-          {
-            encoder.Save(stream);
-            byte[] imageBytes = stream.ToArray();
-            string base64String = Convert.ToBase64String(imageBytes);
-            string url = $"data:image/bmp;base64,{base64String}";
-
-            CIMPictureMarker marker = new CIMPictureMarker
+            using (MemoryStream stream = new MemoryStream())
             {
-              URL = url,
-              Enable = true,
-              ScaleX = 1,
-              Size = fontSizeR
-            };
+              encoder.Save(stream);
+              byte[] imageBytes = stream.ToArray();
+              string base64String = Convert.ToBase64String(imageBytes);
+              string url = $"data:image/bmp;base64,{base64String}";
 
-            CIMPointSymbol symbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
-            CIMSymbolReference symbolReference = symbol.MakeSymbolReference();
-            _disposeText = thisView.AddOverlay(pointText, symbolReference);
+              CIMPictureMarker marker = new CIMPictureMarker
+              {
+                URL = url,
+                Enable = true,
+                ScaleX = 1,
+                Size = fontSizeR
+              };
+
+              CIMPointSymbol symbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
+              CIMSymbolReference symbolReference = symbol.MakeSymbolReference();
+              _disposeText = thisView.AddOverlay(pointText, symbolReference);
+            }
           }
         }
       });
-    }
-
-    public void RemoveMe()
-    {
-      Measurement.RemoveMeasurementPoint(PointId);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

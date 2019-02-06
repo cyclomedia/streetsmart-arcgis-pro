@@ -414,7 +414,6 @@ namespace StreetSmartArcGISPro.VectorLayers
         EditTool = EditTools.Verticles;
         Measurement measurement = _measurementList.Sketch;
         measurement?.OpenMeasurement();
-        measurement?.EnableMeasurementSeries();
       }
       else if (geometry == null && EditTool == EditTools.Verticles)
       {

@@ -100,10 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddIns\Buttons\Help.cs" />
-    <Compile Include="AddIns\Buttons\MeasurementDetail.cs" />
     <Compile Include="AddIns\Buttons\ImageIdSearch.cs" />
     <Compile Include="AddIns\Buttons\RecordingLayer.cs" />
-    <Compile Include="AddIns\DockPanes\MeasurementDetail.cs" />
     <Compile Include="AddIns\Pages\Agreement.cs" />
     <Compile Include="AddIns\Pages\Configuration.cs" />
     <Compile Include="AddIns\Pages\About.cs" />
@@ -123,7 +121,6 @@
     <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
     <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
-    <Compile Include="AddIns\Views\Converters\MeasurementUndo.cs" />
     <Compile Include="AddIns\Views\Converters\IsNotNull.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementObservationSelected.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementOpenClose.cs" />
@@ -142,9 +139,6 @@
     <Compile Include="AddIns\Views\Converters\MeasurementPositionStd.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementPosition.cs" />
     <Compile Include="AddIns\Views\Converters\LoginStatus.cs" />
-    <Compile Include="AddIns\Views\MeasurementDetail.xaml.cs">
-      <DependentUpon>MeasurementDetail.xaml</DependentUpon>
-    </Compile>
     <Compile Include="AddIns\Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -221,10 +215,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="AddIns\Views\About.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="AddIns\Views\MeasurementDetail.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

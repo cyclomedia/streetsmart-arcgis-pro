@@ -23,7 +23,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
   <AddInInfo id="{BD021436-D851-4D91-8301-AC76733FD444}"
-             version="0.7.1"
+             version="0.7.2"
              desktopVersion="2.0">
     <Name>Street Smart for ArcGIS Pro</Name>
     <Description>
@@ -48,7 +48,6 @@
           <group refID="streetSmartArcGISPro_layerGroup" />
           <group refID="streetSmartArcGISPro_inquiryGroup" />
           <group refID="streetSmartArcGISPro_navigateGroup" />
-          <group refID="streetSmartArcGISPro_measurementGroup" />
         </tab>
       </tabs>
       <groups>
@@ -74,13 +73,6 @@
                 size="large" />
           <tool refID="esri_mapping_exploreTool"
                 size="large" />
-        </group>
-        <group id="streetSmartArcGISPro_measurementGroup"
-               caption="Measurement"
-               appearsOnAddInTab="false"
-               keytip="MG">
-          <button refID="streetSmartArcGISPro_MeasurementDetailButton"
-                  size="large" />
         </group>
       </groups>
       <controls>
@@ -131,18 +123,6 @@
             <disabledText />
           </tooltip>
         </button>
-        <button id="streetSmartArcGISPro_MeasurementDetailButton"
-                caption="Measurement Detail"
-                className="AddIns.Buttons.MeasurementDetail"
-                loadOnClick="false"
-                largeImage="Images\MeasurementDetail32.png"
-                condition="streetSmartArcGISPro_measurementDetailReadyCondition"
-                keytip="GM">
-          <tooltip heading="Show measurement detail">
-            Show measurement detail information
-            <disabledText />
-          </tooltip>
-        </button>
         <button id="streetSmartArcGISPro_HelpButton"
                 caption="Street Smart Help"
                 className="AddIns.Buttons.Help"
@@ -171,13 +151,6 @@
                   dock="group"
                   dockWith="esri_mapping_locateDockPane">
           <content className="AddIns.Views.ImageIdSearch" />
-        </dockPane>
-        <dockPane id="streetSmartArcGISPro_MeasurementDetail"
-                  caption="Measurement Observations"
-                  className="AddIns.DockPanes.MeasurementDetail"
-                  dock="group"
-                  dockWith="esri_editing_EditFeaturesDockPane">
-          <content className="AddIns.Views.MeasurementDetail" />
         </dockPane>
       </dockPanes>
     </insertModule>
@@ -247,15 +220,6 @@
         <state id="streetSmartArcGISPro_agreementAcceptedState" />
         <state id="streetSmartArcGISPro_loginSuccessfullyState" />
         <state id="streetSmartArcGISPro_recordingLayerEnabledState" />
-        <state id="esri_mapping_mapPane" />
-      </and>
-    </insertCondition>
-    <insertCondition id="streetSmartArcGISPro_measurementDetailReadyCondition"
-                 caption="Measurement detail is available.">
-      <and>
-        <state id="streetSmartArcGISPro_agreementAcceptedState" />
-        <state id="streetSmartArcGISPro_loginSuccessfullyState" />
-        <state id="streetSmartArcGISPro_measurementState" />
         <state id="esri_mapping_mapPane" />
       </and>
     </insertCondition>
