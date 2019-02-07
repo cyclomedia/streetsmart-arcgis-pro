@@ -209,6 +209,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async Task UpdatePointAsync(IFeature measurementPoint, int index)
     {
+      _isDisposed = false;
       bool result = false;
 
       if (!_updatePoint)

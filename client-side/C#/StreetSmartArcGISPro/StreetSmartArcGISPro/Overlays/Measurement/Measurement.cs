@@ -192,25 +192,26 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       return Values.Count > nr ? Values.ElementAt(nr) : null;
     }
 
-    public async Task CloseAsync()
+    public void Close()
     {
       _measurementList.Open = null;
       DrawPoint = true;
 
-      if (!IsPointMeasurement)
-      {
+      //if (!IsPointMeasurement)
+      //{
         for (int i = 0; i < Count; i++)
         {
           MeasurementPoint point = this.ElementAt(i).Value;
-          await point.RedrawPointAsync();
+          point.Dispose();
+        //  await point.RedrawPointAsync();
 
-          for (int j = 0; j < point.Count; j++)
-          {
-            MeasurementObservation observation = point.ElementAt(j).Value;
-            await observation.RedrawObservationAsync();
-          }
+          //for (int j = 0; j < point.Count; j++)
+          //{
+         //   MeasurementObservation observation = point.ElementAt(j).Value;
+         //   await observation.RedrawObservationAsync();
+         // }
         }
-      }
+      //}
     }
 
     public void Open()
@@ -479,7 +480,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       {
                         coordinates.RemoveAt(l);
                         changes = true;
-                        //int lm = measureDetails.Count == l && geometry.GeometryType == ArcGISGeometryType.Polygon ? l - 1 : l;
 
                         if (measureDetails.Count > l)
                         {
@@ -495,7 +495,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     coordinates[i] = await GeoJsonCoordAsync(point);
                     changes = true;
-                    //int im = measureDetails.Count == i && geometry.GeometryType == ArcGISGeometryType.Polygon ? i - 1 : i;
 
                     if (measureDetails.Count > i)
                     {
@@ -506,12 +505,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     coordinates.Insert(i, await GeoJsonCoordAsync(point));
                     changes = true;
-                    //int im = measureDetails.Count == i && geometry.GeometryType == ArcGISGeometryType.Polygon ? i - 1 : i;
-
-                    //if (measureDetails.Count > im)
-                    //{
-                      measureDetails.Insert(i, GeoJsonFactory.CreateMeasureDetails());
-                    //}
+                    measureDetails.Insert(i, GeoJsonFactory.CreateMeasureDetails());
                   }
                 }
               }
@@ -537,7 +531,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 {
                   coordinates.RemoveAt(cyclCount);
                   changes = true;
-                  //int im = measureDetails.Count == i && geometry.GeometryType == ArcGISGeometryType.Polygon ? i - 1 : i;
 
                   if (cyclCount < measureDetails.Count)
                   {

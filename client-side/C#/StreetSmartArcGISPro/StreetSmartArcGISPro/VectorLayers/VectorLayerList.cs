@@ -385,6 +385,12 @@ namespace StreetSmartArcGISPro.VectorLayers
           default:
             EditTool = EditTools.NoEditTool;
             SketchFinished();
+
+            if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
+            {
+              _measurementList.Api.StopMeasurementMode();
+            }
+
             break;
         }
 

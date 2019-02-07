@@ -23,7 +23,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Internal.Mapping;
 using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
@@ -35,6 +37,7 @@ using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
+using IViewer = StreetSmart.Common.Interfaces.API.IViewer;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
@@ -56,7 +59,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public Measurement Sketch { get; set; }
     public Measurement Open { get; set; }
-    public IStreetSmartAPI Api { private get; set; }
+    public IStreetSmartAPI Api { get; set; }
     public bool DrawPoint { private get; set; }
 
     public EventWaitHandle InUpdateMeasurementMode { get; set; }
@@ -259,6 +262,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             //if (_lastSketch)
             //{
             Measurement measurement2 = this.ElementAt(0).Value;
+            measurement2.VectorLayer = _lastVectorLayer;
             measurement2.SetSketch();
             //}
 
@@ -351,8 +355,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           Measurement measurement;
 
-          // Hack, solve at a good way!
-          //        if (!ContainsKey(properties.Id))
           if (Count == 0)
           {
             measurement = new Measurement(properties, feature.Geometry, DrawPoint, api)
@@ -371,8 +373,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
           else
           {
-            // Hack, solve at a good way!
-            // Measurement measurement = this[properties.Id];
             measurement = this.ElementAt(0).Value;
           }
 
@@ -397,29 +397,19 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             switch (geometryType)
             {
               case StreetSmartGeometryType.Point:
+                await RemoveLineStringPoints(measurement);
+                await RemovePolygonPoints(measurement);
+
                 if (geometry is IPoint pointDst)
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
-                      (pointDst.X == null || pointDst.Y == null))
+                      (pointDst.X == null || pointDst.Y == null) && measurement.MeasurementId != properties.Id)
                   {
-                    if (measurement.MeasurementId == properties.Id)
-                    {
-                      await measurement.UpdatePointAsync(0, feature);
-                      measurement.Geometry = geometry;
-
-                      await QueuedTask.Run(() =>
-                      {
-                        MapView mapView = MapView.Active;
-                        MapPoint point = MapPointBuilder.CreateMapPoint(0, 0);
-                        mapView.SetCurrentSketchAsync(point);
-                      });
-                    }
-                    else
-                    {
-                      MapView mapView = MapView.Active;
-                      Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                      await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
-                    }
+                    MapView mapView = MapView.Active;
+                    Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+                    await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
+                    await mapView.ClearSketchAsync();
+                    measurement[0].Dispose();
                   }
                   else
                   {
@@ -433,6 +423,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
                 break;
               case StreetSmartGeometryType.LineString:
+                await RemovePointPoints(measurement);
+                await RemovePolygonPoints(measurement);
+
                 if (geometry is ILineString lineDst)
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
@@ -441,21 +434,17 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
                     await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
-
-                    //while (measurement.Count > 0)
-                    //{
-                    //  await measurement.RemovePoint(measurement.ElementAt(0).Key);
-                    //}
-
-                    // ToDo: solve issue
                     await mapView.ClearSketchAsync();
 
-                    await QueuedTask.Run(() =>
+                    if (geometrySketch != null)
                     {
-                      List<MapPoint> points = new List<MapPoint>();
-                      Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
-                      mapView.SetCurrentSketchAsync(line);
-                    });
+                      await QueuedTask.Run(() =>
+                      {
+                        List<MapPoint> points = new List<MapPoint>();
+                        Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
+                        mapView.SetCurrentSketchAsync(line);
+                      });
+                    }
                   }
                   else if (measurement.Geometry is ILineString lineSrc)
                   {
@@ -501,6 +490,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
                 break;
               case StreetSmartGeometryType.Polygon:
+                await RemovePointPoints(measurement);
+                await RemoveLineStringPoints(measurement);
+
                 if (geometry is IPolygon polyDst)
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
@@ -509,21 +501,17 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
                     await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
-
-                    //while (measurement.Count > 0)
-                    //{
-                    //  await measurement.RemovePoint(measurement.ElementAt(0).Key);
-                    //}
-
-                    // ToDo: solve issue
                     await mapView.ClearSketchAsync();
 
-                    await QueuedTask.Run(() =>
+                    if (geometrySketch != null)
                     {
-                      List<MapPoint> points = new List<MapPoint>();
-                      Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
-                      mapView.SetCurrentSketchAsync(polygon);
-                    });
+                      await QueuedTask.Run(() =>
+                      {
+                        List<MapPoint> points = new List<MapPoint>();
+                        Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
+                        mapView.SetCurrentSketchAsync(polygon);
+                      });
+                    }
                   }
                   else if (measurement.Geometry is IPolygon polySrc)
                   {
@@ -586,13 +574,46 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         if (Count == 1)
         {
-          // Close measurement
           Measurement measurement = this.ElementAt(0).Value;
-          await measurement.CloseAsync();
+          measurement.Close();
+          await FrameworkApplication.SetCurrentToolAsync(string.Empty);
         }
       }
 
       InUpdateMeasurementMode.Set();
+    }
+
+    public async Task RemoveLineStringPoints(Measurement measurement)
+    {
+      if (measurement.Geometry is ILineString)
+      {
+        while (measurement.Count >= 1)
+        {
+          await measurement.RemovePoint(measurement.ElementAt(0).Key);
+        }
+      }
+    }
+
+    public async Task RemovePolygonPoints(Measurement measurement)
+    {
+      if (measurement.Geometry is IPolygon)
+      {
+        while (measurement.Count >= 1)
+        {
+          await measurement.RemovePoint(measurement.ElementAt(0).Key);
+        }
+      }
+    }
+
+    public async Task RemovePointPoints(Measurement measurement)
+    {
+      if (measurement.Geometry is IPoint)
+      {
+        while (measurement.Count >= 1)
+        {
+          await measurement.RemovePoint(measurement.ElementAt(0).Key);
+        }
+      }
     }
 
     #endregion
