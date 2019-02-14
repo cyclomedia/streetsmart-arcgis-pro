@@ -39,6 +39,8 @@ namespace StreetSmartArcGISPro.Overlays
 
     #endregion
 
+    public IPanoramaViewer ActiveViewer { get; set; }
+
     public List<Viewer> MarkerViewers => (from viewer in this where viewer.Value.HasMarker select viewer.Value).ToList();
 
     public ICollection<Viewer> Viewers => Values;
@@ -66,6 +68,7 @@ namespace StreetSmartArcGISPro.Overlays
 
     public void Add(IPanoramaViewer panoramaViewer, string imageId)
     {
+      ActiveViewer = panoramaViewer;
       Viewer viewer = new Viewer(imageId);
       viewer.PropertyChanged += OnViewerPropertyChanged;
       Add(panoramaViewer, viewer);

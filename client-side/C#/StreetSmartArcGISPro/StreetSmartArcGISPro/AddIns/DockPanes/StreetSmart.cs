@@ -889,6 +889,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       if (sender is IPanoramaViewer panoramaViewer)
       {
+        _viewerList.ActiveViewer = panoramaViewer;
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
 
         if (viewer != null)

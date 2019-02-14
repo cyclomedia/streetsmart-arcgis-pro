@@ -1028,6 +1028,11 @@
             Triggers when a recording is clicked inside the PanoramaViewer.
             </summary>
         </member>
+        <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.FeatureClick">
+            <summary>
+            Triggers when a feature is clicked inside the PanoramaViewer.
+            </summary>
+        </member>
         <member name="E:StreetSmart.Common.Interfaces.API.IPanoramaViewer.SurfaceCursorChange">
             <summary>
             Triggers when the surface cursor is changed
@@ -1748,6 +1753,26 @@
         <member name="P:StreetSmart.Common.Interfaces.Data.IElevationInfo.GroundLevel">
             <summary>
             Level of ground
+            </summary>
+        </member>
+        <member name="T:StreetSmart.Common.Interfaces.Data.IFeatureInfo">
+            <summary>
+            Layer info
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IFeatureInfo.LayerName">
+            <summary>
+            The name of the layer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IFeatureInfo.LayerId">
+            <summary>
+            Id of the layer
+            </summary>
+        </member>
+        <member name="P:StreetSmart.Common.Interfaces.Data.IFeatureInfo.FeatureProperties">
+            <summary>
+            Feature properties
             </summary>
         </member>
         <member name="T:StreetSmart.Common.Interfaces.Data.IJson">
@@ -3378,7 +3403,7 @@
         </member>
         <member name="P:StreetSmart.Wpf.Properties.Resources.StreetSmartLocation">
             <summary>
-              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v18.15/api-dotnet.html.
+              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v19.1/api-dotnet.html.
             </summary>
         </member>
         <member name="T:StreetSmart.Wpf.StreetSmartGUI">

@@ -39,6 +39,7 @@ using StreetSmartArcGISPro.VectorLayers;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
 using IViewer = StreetSmart.Common.Interfaces.API.IViewer;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -241,9 +242,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         if (measurementGeometryType != MeasurementGeometryType.Unknown)
         {
-          IList<IViewer> viewers = await Api.GetViewers();
-          IPanoramaViewer panoramaViewer = viewers.Aggregate<IViewer, IPanoramaViewer>(null,
-            (current, viewer) => viewer is IPanoramaViewer ? (IPanoramaViewer) viewer : current);
+          ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
+          ViewerList viewerList = streetSmartModule.ViewerList;
+          IPanoramaViewer panoramaViewer = viewerList.ActiveViewer;
 
           if (panoramaViewer != null)
           {
@@ -495,7 +496,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
                 if (geometry is IPolygon polyDst)
                 {
-                  if (measurement.Count >= 1 && measurement[0].Point != null &&
+                  if (measurement.Count >= 1 && measurement[measurement.ElementAt(0).Key].Point != null &&
                       polyDst[0].Count == 0 && measurement.MeasurementId != properties.Id)
                   {
                     MapView mapView = MapView.Active;
