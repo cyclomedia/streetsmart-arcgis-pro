@@ -30,10 +30,8 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
-using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
 
-using DockPanestreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using Point = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
@@ -42,7 +40,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Constants
 
-    private const double InnerLineSize = 0.75;
     private const double OuterLineSize = 1.25;
     private const double DistLine = 30.0;
 
@@ -55,7 +52,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private MapPoint _point;
     private Viewer _viewer;
     private string _imageId;
-    private IDisposable _disposeInnerLine;
     private IDisposable _disposeOuterLine;
 
     #endregion
@@ -148,8 +144,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     #region Functions
 
     public void Dispose()
-    {      
-      _disposeInnerLine?.Dispose();
+    {
       _disposeOuterLine?.Dispose();
       Viewer = null;
       AddIns.Modules.StreetSmart streetSmart = AddIns.Modules.StreetSmart.Current;
@@ -168,7 +163,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       await QueuedTask.Run(() =>
       {
-        _disposeInnerLine?.Dispose();
         _disposeOuterLine?.Dispose();
 
         if (_measurementPoint?.IsObservationVisible() ?? false)
@@ -177,7 +171,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           MapPoint measPoint = _measurementPoint?.Point;
           MapPoint mapPointObsLine;
 
-          if ((measPoint != null) && (!double.IsNaN(measPoint.X)) && (!double.IsNaN(measPoint.Y)))
+          if (measPoint != null && !double.IsNaN(measPoint.X) && !double.IsNaN(measPoint.Y))
           {
             Point winMeasPoint = thisView.MapToScreen(measPoint);
             Point winObsPoint = thisView.MapToScreen(Point);
@@ -199,41 +193,35 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           Color outerColorLine = Color.DarkGray;
           IObservationLines observationLines = _measurementPoint.Measurement.ObservationLines;
 
-          if (observationLines.RecordingId == ImageId)
+          if (observationLines.ActiveObservation + 1 == _measurementPoint.PointId)
           {
-             outerColorLine = observationLines.Color;
-          }
-          else
-          {
-            switch (LineNumber)
+            if (observationLines.RecordingId == ImageId)
             {
-              case 0:
-                outerColorLine = Color.Blue;
-                break;
-              case 1:
-                outerColorLine = Color.Yellow;
-                break;
-              case 2:
-                outerColorLine = Color.Red;
-                break;
+              outerColorLine = observationLines.Color;
+            }
+            else
+            {
+              switch (LineNumber)
+              {
+                case 0:
+                  outerColorLine = Color.Blue;
+                  break;
+                case 1:
+                  outerColorLine = Color.Yellow;
+                  break;
+                case 2:
+                  outerColorLine = Color.Red;
+                  break;
+              }
             }
           }
 
-          // Color outerColorLine = Viewer?.Color ?? Color.DarkGray;
           CIMColor cimOuterColorLine = ColorFactory.Instance.CreateColor(Color.FromArgb(255, outerColorLine));
           CIMLineSymbol cimOuterLineSymbol = SymbolFactory.Instance.DefaultLineSymbol;
           cimOuterLineSymbol.SetColor(cimOuterColorLine);
           cimOuterLineSymbol.SetSize(OuterLineSize);
           CIMSymbolReference cimOuterLineSymbolRef = cimOuterLineSymbol.MakeSymbolReference();
           _disposeOuterLine = thisView.AddOverlay(polyline, cimOuterLineSymbolRef);
-
-          Color innerColorLine = outerColorLine; // Color.LightGray;
-          CIMColor cimInnerColorLine = ColorFactory.Instance.CreateColor(innerColorLine);
-          CIMLineSymbol cimInnerLineSymbol = SymbolFactory.Instance.DefaultLineSymbol;
-          cimInnerLineSymbol.SetColor(cimInnerColorLine);
-          cimInnerLineSymbol.SetSize(InnerLineSize);
-          CIMSymbolReference cimInnerLineSymbolRef = cimInnerLineSymbol.MakeSymbolReference();
-          _disposeInnerLine = thisView.AddOverlay(polyline, cimInnerLineSymbolRef);
         }
       });
     }
