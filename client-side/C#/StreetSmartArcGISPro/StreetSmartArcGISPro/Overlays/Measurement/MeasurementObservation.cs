@@ -193,28 +193,28 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           Color outerColorLine = Color.DarkGray;
           IObservationLines observationLines = _measurementPoint.Measurement.ObservationLines;
 
-          if (observationLines.ActiveObservation + 1 == _measurementPoint.PointId)
-          {
-            if (observationLines.RecordingId == ImageId)
-            {
-              outerColorLine = observationLines.Color;
-            }
-            else
-            {
-              switch (LineNumber)
-              {
-                case 0:
-                  outerColorLine = Color.Blue;
-                  break;
-                case 1:
-                  outerColorLine = Color.Yellow;
-                  break;
-                case 2:
-                  outerColorLine = Color.Red;
-                  break;
-              }
-            }
-          }
+          //if (observationLines.ActiveObservation + 1 == _measurementPoint.PointId)
+          //{
+          //  if (observationLines.RecordingId == ImageId)
+          //  {
+          //    outerColorLine = observationLines.Color;
+          //  }
+          //  else
+          //  {
+          //    switch (LineNumber)
+          //    {
+          //      case 0:
+          //        outerColorLine = Color.Blue;
+          //        break;
+          //      case 1:
+          //        outerColorLine = Color.Yellow;
+          //        break;
+          //      case 2:
+          //        outerColorLine = Color.Red;
+          //        break;
+          //    }
+          //  }
+          //}
 
           CIMColor cimOuterColorLine = ColorFactory.Instance.CreateColor(Color.FromArgb(255, outerColorLine));
           CIMLineSymbol cimOuterLineSymbol = SymbolFactory.Instance.DefaultLineSymbol;
