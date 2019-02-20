@@ -665,9 +665,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       IViewer cyclViewer = args.Value;
 
-      if (cyclViewer is IPanoramaViewer)
+      if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        IPanoramaViewer panoramaViewer = cyclViewer as IPanoramaViewer;
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, false);
@@ -700,10 +699,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.FeatureClick += OnFeatureClick;
       }
-      else if (cyclViewer is IObliqueViewer)
+      else if (cyclViewer is IObliqueViewer obliqueViewer)
       {
-        IObliqueViewer obliqueViewer = cyclViewer as IObliqueViewer;
         obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomIn, false);
         obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomOut, false);
       }
@@ -712,6 +711,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         await UpdateVectorLayerAsync();
       }
+    }
+
+    private void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
+    {
+      IFeatureInfo featureInfo = args.Value;
+      VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId);
+      layer.SelectFeature(featureInfo.FeatureProperties);
     }
 
     private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
@@ -743,6 +749,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         panoramaViewer.ImageChange -= OnImageChange;
         panoramaViewer.ViewChange -= OnViewChange;
+        panoramaViewer.FeatureClick -= OnFeatureClick;
       }
 
       if (Api != null && !_inRestart)

@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 
 using ArcGIS.Core.Geometry;
@@ -413,8 +412,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (geometry != null && !UpdateMeasurement)
       {
-        _measurementList.InUpdateMeasurementMode.WaitOne(5000);
-        _measurementList.InUpdateMeasurementMode.Reset();
+//        _measurementList.InUpdateMeasurementMode.WaitOne(5000);
+//        _measurementList.InUpdateMeasurementMode.Reset();
         UpdateMeasurement = true;
         List<MapPoint> ptColl = await ToPointCollectionAsync(geometry);
         IFeatureCollection featureCollection =
@@ -568,7 +567,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
 
         UpdateMeasurement = false;
-        _measurementList.InUpdateMeasurementMode.Set();
+//        _measurementList.InUpdateMeasurementMode.Set();
       }
     }
 
@@ -602,11 +601,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Geometry geometry = await thisView.GetCurrentSketchAsync();
       List<MapPoint> points = new List<MapPoint>();
       bool toUpdate = false;
+      IList<MapPoint> pointsGeometry = await ToPointCollectionAsync(geometry);
 
-      foreach (var measurementPoint in this)
+      for (int i = 0; i < Count; i ++)
       {
-        MeasurementPoint mp = measurementPoint.Value;
-        toUpdate = toUpdate || mp.Updated;
+        MapPoint mapPoint = pointsGeometry.Count > i ? pointsGeometry[i] : null;
+        MeasurementPoint mp = this.ElementAt(i).Value;
+        toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
 
         if (mp.Point != null)
         {

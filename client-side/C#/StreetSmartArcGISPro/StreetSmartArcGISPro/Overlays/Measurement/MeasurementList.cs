@@ -165,34 +165,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public void RemoveUnusedMeasurements(List<Measurement> usedMeasurements)
-    {
-      if (Sketch != null)
-      {
-        if (!usedMeasurements.Contains(Sketch))
-        {
-          usedMeasurements.Add(Sketch);
-        }
-      }
-
-      int i = 0;
-
-      while (i < Count)
-      {
-        var measurement = this.ElementAt(i);
-        Measurement element = measurement.Value;
-
-        if (!usedMeasurements.Contains(element))
-        {
-          element.RemoveMeasurement();
-        }
-        else
-        {
-          i++;
-        }
-      }
-    }
-
     public void OpenMeasurement(string entityId)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
@@ -345,8 +317,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {
-      InUpdateMeasurementMode.WaitOne(MaxWaitTime);
-      InUpdateMeasurementMode.Reset();
+//      InUpdateMeasurementMode.WaitOne(MaxWaitTime);
+//      InUpdateMeasurementMode.Reset();
       FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
 
@@ -404,7 +376,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 if (geometry is IPoint pointDst)
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
-                      (pointDst.X == null || pointDst.Y == null) && measurement.MeasurementId != properties.Id)
+                      (pointDst.X == null || pointDst.Y == null) && measurement.MeasurementId != properties.Id &&
+                      measurement.VectorLayer != null)
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
@@ -430,7 +403,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 if (geometry is ILineString lineDst)
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
-                      lineDst.Count == 0 && measurement.MeasurementId != properties.Id)
+                      lineDst.Count == 0 && measurement.MeasurementId != properties.Id &&
+                      measurement.VectorLayer != null)
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
@@ -497,7 +471,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 if (geometry is IPolygon polyDst)
                 {
                   if (measurement.Count >= 1 && measurement[measurement.ElementAt(0).Key].Point != null &&
-                      polyDst[0].Count == 0 && measurement.MeasurementId != properties.Id)
+                      polyDst[0].Count == 0 && measurement.MeasurementId != properties.Id &&
+                      measurement.VectorLayer != null)
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
@@ -519,6 +494,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     int polySrcCount = polySrc[0].Count;
                     int pylyDstCount = polyDst[0].Count;
+                    int j = 0;
 
                     for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
                     {
@@ -534,9 +510,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       }
                       else if (polySrcCount > i && pylyDstCount <= i)
                       {
-                        await measurement.RemovePoint(i);
-                        polySrcCount--;
-                        await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
+                        await measurement.RemovePoint(i - j);
+                        j++;
+
+                        if (measurement.Count > Math.Min(i, pylyDstCount - 1))
+                        {
+                          await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
+                        }
                       }
                     }
 
@@ -581,7 +561,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
       }
 
-      InUpdateMeasurementMode.Set();
+//      InUpdateMeasurementMode.Set();
     }
 
     public async Task RemoveLineStringPoints(Measurement measurement)
