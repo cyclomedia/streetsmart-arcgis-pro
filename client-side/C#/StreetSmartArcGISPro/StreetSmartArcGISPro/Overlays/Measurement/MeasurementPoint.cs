@@ -340,10 +340,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         MeasurementList measurementList = streetSmart.MeasurementList;
         _disposeText?.Dispose();
 
-        if (streetSmart.InsideScale() && !_isDisposed && Point != null &&
-            ((Measurement?.IsOpen ?? false) ||
-             (Measurement?.IsPointMeasurement ?? false) && measurementList.Sketch == null) &&
-            (Measurement?.DrawPoint ?? false) && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y))
+        if (streetSmart.InsideScale() && !_isDisposed && Point != null
+            && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y))
         {
           if (Measurement.Geometry.Type != StreetSmartGeometryType.Polygon || Measurement.Count >= 1 && (PointId == 0 || !IsSame(Measurement[0].Point)))
           {

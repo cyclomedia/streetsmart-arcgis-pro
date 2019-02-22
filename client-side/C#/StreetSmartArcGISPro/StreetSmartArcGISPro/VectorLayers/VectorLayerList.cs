@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -94,6 +93,11 @@ namespace StreetSmartArcGISPro.VectorLayers
         (current, layerCheck) => layerCheck?.Layer == layer ? layerCheck : current);
     }
 
+    public VectorLayer GetLayer(string layerId)
+    {
+      return this.First<VectorLayer>(current => current.Overlay.Id == layerId);
+    }
+
     public async Task LoadMeasurementsAsync()
     {
       foreach (VectorLayer vectorLayer in this)
@@ -146,7 +150,6 @@ namespace StreetSmartArcGISPro.VectorLayers
           if (initialized)
           {
             Add(vectorLayer);
-            vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
             LayerAdded?.Invoke(vectorLayer);
           }
         }
@@ -171,7 +174,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Measurement measurement = _measurementList.Sketch;
       MapView mapView = MapView.Active;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
-      await _measurementList.StartMeasurement(geometry, measurement, true, null, vectorLayer);
+      _measurementList.StartMeasurement(geometry, measurement, true, null, vectorLayer);
     }
 
     public async Task StartSketchToolAsync()
@@ -340,6 +343,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public void SketchFinished()
     {
+      _measurementList.FromMap = true;
       Measurement sketch = _measurementList.Sketch;
 
       if (sketch != null)
@@ -506,26 +510,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Event handlers
 
-    private void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {
-      if (args.PropertyName == "Measurements")
-      {
-        List<Measurement> totalMeasurements = new List<Measurement>();
-
-        foreach (var vectorLayer in this)
-        {
-          List<Measurement> measurements = vectorLayer.Measurements;
-
-          if (measurements != null)
-          {
-            totalMeasurements.AddRange(measurements);
-          }
-        }
-
-        _measurementList.RemoveUnusedMeasurements(totalMeasurements);
-      }
-    }
-
     private void OnTocSelectionChanged(MapViewEventArgs args)
     {
       LayerUpdated?.Invoke();
@@ -600,7 +584,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task RemoveLayer(VectorLayer vectorLayer)
     {
-      vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
       LayerRemoved?.Invoke(vectorLayer);
       await vectorLayer.DisposeAsync();
 
