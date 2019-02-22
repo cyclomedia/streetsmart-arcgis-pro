@@ -174,7 +174,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Measurement measurement = _measurementList.Sketch;
       MapView mapView = MapView.Active;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
-      await _measurementList.StartMeasurement(geometry, measurement, true, null, vectorLayer);
+      _measurementList.StartMeasurement(geometry, measurement, true, null, vectorLayer);
     }
 
     public async Task StartSketchToolAsync()
@@ -343,6 +343,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public void SketchFinished()
     {
+      _measurementList.FromMap = true;
       Measurement sketch = _measurementList.Sketch;
 
       if (sketch != null)

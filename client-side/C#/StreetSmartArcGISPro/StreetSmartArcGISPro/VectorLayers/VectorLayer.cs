@@ -635,7 +635,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         long objectId = feature?.GetObjectID() ?? -1;
         Measurement measurement = _measurementList.Get(objectId);
         _measurementList.DrawPoint = false;
-        measurement = await _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
+        measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
         _measurementList.DrawPoint = true;
 
         if (measurement != null)

@@ -724,9 +724,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       IViewer cyclViewer = args.Value;
 
-      if (cyclViewer is IPanoramaViewer)
+      if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        IPanoramaViewer panoramaViewer = cyclViewer as IPanoramaViewer;
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
         panoramaViewer.ImageChange -= OnImageChange;
 

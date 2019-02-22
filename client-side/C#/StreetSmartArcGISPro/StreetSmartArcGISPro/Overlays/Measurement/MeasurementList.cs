@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Internal.Mapping;
 using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
@@ -47,8 +46,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Members
 
-    private int MaxWaitTime = 10000;
-
     private bool _drawingSketch;
     private VectorLayer _lastVectorLayer;
     private long? _lastObjectId;
@@ -62,6 +59,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public Measurement Open { get; set; }
     public IStreetSmartAPI Api { get; set; }
     public bool DrawPoint { private get; set; }
+
+    public bool FromMap { get; set; }
 
     public EventWaitHandle InUpdateMeasurementMode { get; set; }
 
@@ -81,6 +80,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       _lastObjectId = null;
       _lastVectorLayer = null;
       _lastSketch = false;
+      FromMap = false;
     }
 
     #endregion
@@ -181,7 +181,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public async Task CreateMeasurement(ArcGISGeometryType geometryType)
+    public void CreateMeasurement(ArcGISGeometryType geometryType)
     {
       if (Api != null)
       {
@@ -232,12 +232,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               measurement.Open();
             }
 
-            //if (_lastSketch)
-            //{
             Measurement measurement2 = this.ElementAt(0).Value;
             measurement2.VectorLayer = _lastVectorLayer;
             measurement2.SetSketch();
-            //}
+            FromMap = true;
 
             IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
             Api.StartMeasurementMode(panoramaViewer, options);
@@ -266,7 +264,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
           {
             _drawingSketch = true;
-            measurement = await StartMeasurement(geometry, measurement, true, null, vectorLayer);
+            measurement = StartMeasurement(geometry, measurement, true, null, vectorLayer);
           }
 
           if (measurement != null)
@@ -277,7 +275,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public async Task<Measurement> StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, long? objectId, VectorLayer vectorLayer)
+    public Measurement StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, long? objectId, VectorLayer vectorLayer)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
@@ -303,7 +301,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             _lastObjectId = objectId;
             _lastVectorLayer = vectorLayer;
             _lastSketch = sketch;
-            await CreateMeasurement(geometryType);
+            CreateMeasurement(geometryType);
           }
         }
       }
@@ -317,8 +315,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {
-//      InUpdateMeasurementMode.WaitOne(MaxWaitTime);
-//      InUpdateMeasurementMode.Reset();
       FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
 
@@ -377,7 +373,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
                       (pointDst.X == null || pointDst.Y == null) && measurement.MeasurementId != properties.Id &&
-                      measurement.VectorLayer != null)
+                      measurement.VectorLayer != null && !FromMap)
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
@@ -404,7 +400,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 {
                   if (measurement.Count >= 1 && measurement[0].Point != null &&
                       lineDst.Count == 0 && measurement.MeasurementId != properties.Id &&
-                      measurement.VectorLayer != null)
+                      measurement.VectorLayer != null && !FromMap)
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
@@ -472,7 +468,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 {
                   if (measurement.Count >= 1 && measurement[measurement.ElementAt(0).Key].Point != null &&
                       polyDst[0].Count == 0 && measurement.MeasurementId != properties.Id &&
-                      measurement.VectorLayer != null)
+                      measurement.VectorLayer != null && !FromMap)
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
@@ -551,6 +547,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
       }
 
+      FromMap = false;
+
       if (FeatureCollection.Type == FeatureType.Unknown)
       {
         if (Count == 1)
@@ -560,8 +558,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           await FrameworkApplication.SetCurrentToolAsync(string.Empty);
         }
       }
-
-//      InUpdateMeasurementMode.Set();
     }
 
     public async Task RemoveLineStringPoints(Measurement measurement)
