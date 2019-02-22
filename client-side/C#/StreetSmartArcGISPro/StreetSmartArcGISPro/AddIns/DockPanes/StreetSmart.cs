@@ -557,34 +557,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       string layerName = vectorLayer.Name;
       IFeatureCollection geoJson = vectorLayer.GeoJson;
-      Color color = vectorLayer.Color;
+      IStyledLayerDescriptor sld = vectorLayer.Sld;
 
       if (vectorLayer.Overlay == null)
       {
-        string sld = null;
-
-        if (geoJson.Features.Count >= 1)
-        {
-          GeometryType type = geoJson.Features[0].Geometry.Type;
-
-          switch (type)
-          {
-            case GeometryType.Point:
-            case GeometryType.MultiPoint:
-              sld = SLDFactory.CreateStylePoint(null, 5.0, color).SLD;
-              break;
-            case GeometryType.LineString:
-            case GeometryType.MultiLineString:
-              sld = SLDFactory.CreateStylePolygon(color).SLD;
-              break;
-            case GeometryType.Polygon:
-            case GeometryType.MultiPolygon:
-              sld = SLDFactory.CreateStyleLine(color).SLD;
-              break;
-          }
-        }
-
-        IOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld);
+        IOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD);
         overlay = await Api.AddOverlay(overlay);
         vectorLayer.Overlay = overlay;
       }
