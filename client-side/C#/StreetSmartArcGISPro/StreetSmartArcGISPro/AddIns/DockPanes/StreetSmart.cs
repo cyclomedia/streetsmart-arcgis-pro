@@ -717,7 +717,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       IFeatureInfo featureInfo = args.Value;
       VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId);
-      layer.SelectFeature(featureInfo.FeatureProperties);
+      layer?.SelectFeature(featureInfo.FeatureProperties);
     }
 
     private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)

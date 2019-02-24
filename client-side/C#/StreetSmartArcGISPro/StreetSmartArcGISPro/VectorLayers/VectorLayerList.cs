@@ -95,7 +95,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public VectorLayer GetLayer(string layerId)
     {
-      return this.First<VectorLayer>(current => current.Overlay.Id == layerId);
+      return this.Aggregate<VectorLayer, VectorLayer>(null,
+        (current, layerCheck) => layerCheck.Overlay.Id == layerId ? layerCheck : current);
     }
 
     public async Task LoadMeasurementsAsync()
@@ -344,6 +345,11 @@ namespace StreetSmartArcGISPro.VectorLayers
     public void SketchFinished()
     {
       _measurementList.FromMap = true;
+      if (_measurementList.Count >= 1)
+      {
+        _measurementList[_measurementList.ElementAt(0).Key].Dispose();
+      }
+
       Measurement sketch = _measurementList.Sketch;
 
       if (sketch != null)

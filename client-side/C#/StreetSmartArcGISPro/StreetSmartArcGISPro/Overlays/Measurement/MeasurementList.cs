@@ -416,6 +416,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                         mapView.SetCurrentSketchAsync(line);
                       });
                     }
+
+                    measurement.Dispose();
                   }
                   else if (measurement.Geometry is ILineString lineSrc)
                   {
@@ -484,6 +486,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                         mapView.SetCurrentSketchAsync(polygon);
                       });
                     }
+
+                    measurement.Dispose();
                   }
                   else if (measurement.Geometry is IPolygon polySrc)
                   {
