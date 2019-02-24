@@ -106,6 +106,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public bool IsOpen => _measurementList.Open == this;
 
+    public bool IsDisposed { get; set; }
+
     public string MeasurementName => Properties.Name;
 
     public bool UpdateMeasurement { get; set; }
@@ -133,6 +135,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       UpdateMeasurement = false;
       DoChange = false;
       Geometry = geometry;
+      IsDisposed = false;
       // SetDetailPanePoint(null);
 
       if (geometry != null)
@@ -161,6 +164,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void Dispose()
     {
+      IsDisposed = true;
+
       foreach (var element in this)
       {
         MeasurementPoint measurementPoint = element.Value;
@@ -412,8 +417,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (geometry != null && !UpdateMeasurement)
       {
-//        _measurementList.InUpdateMeasurementMode.WaitOne(5000);
-//        _measurementList.InUpdateMeasurementMode.Reset();
         UpdateMeasurement = true;
         List<MapPoint> ptColl = await ToPointCollectionAsync(geometry);
         IFeatureCollection featureCollection =
@@ -560,6 +563,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   break;
               }
 
+              _measurementList.FromMap = true;
               _api.SetActiveMeasurement(featureCollection);
               DoChange = false;
             }
@@ -567,7 +571,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
 
         UpdateMeasurement = false;
-//        _measurementList.InUpdateMeasurementMode.Set();
       }
     }
 
@@ -603,40 +606,43 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       bool toUpdate = false;
       IList<MapPoint> pointsGeometry = await ToPointCollectionAsync(geometry);
 
-      for (int i = 0; i < Count; i ++)
+      if (!_measurementList.FromMap)
       {
-        MapPoint mapPoint = pointsGeometry.Count > i ? pointsGeometry[i] : null;
-        MeasurementPoint mp = this.ElementAt(i).Value;
-        toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
-
-        if (mp.Point != null)
+        for (int i = 0; i < Count; i++)
         {
-          points.Add(mp.Point);
+          MapPoint mapPoint = pointsGeometry.Count > i ? pointsGeometry[i] : null;
+          MeasurementPoint mp = this.ElementAt(i).Value;
+          toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
+
+          if (mp.Point != null)
+          {
+            points.Add(mp.Point);
+          }
         }
-      }
 
-      if (toUpdate)
-      {
-        await QueuedTask.Run(() =>
+        if (toUpdate)
         {
-          ArcGISSpatialReference spatialReference =
-            geometry?.SpatialReference ?? VectorLayer.Layer.GetSpatialReference();
+          await QueuedTask.Run(() =>
+          {
+            ArcGISSpatialReference spatialReference =
+              geometry?.SpatialReference ?? VectorLayer.Layer.GetSpatialReference();
 
-          if (IsGeometryType(ArcGISGeometryType.Polygon))
-          {
-            geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
-          }
-          else if (IsGeometryType(ArcGISGeometryType.Polyline))
-          {
-            geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
-          }
-          else if (geometry is MapPoint)
-          {
-            geometry = Count >= 1 ? this.ElementAt(0).Value.Point : geometry;
-          }
+            if (IsGeometryType(ArcGISGeometryType.Polygon))
+            {
+              geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+            }
+            else if (IsGeometryType(ArcGISGeometryType.Polyline))
+            {
+              geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+            }
+            else if (geometry is MapPoint)
+            {
+              geometry = Count >= 1 ? this.ElementAt(0).Value.Point : geometry;
+            }
 
-          thisView.SetCurrentSketchAsync(geometry);
-        });
+            thisView.SetCurrentSketchAsync(geometry);
+          });
+        }
       }
     }
 

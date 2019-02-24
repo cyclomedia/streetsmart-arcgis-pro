@@ -694,16 +694,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       IFeatureInfo featureInfo = args.Value;
       VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId);
-      layer.SelectFeature(featureInfo.FeatureProperties);
+      layer?.SelectFeature(featureInfo.FeatureProperties);
     }
 
     private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
     {
       IViewer cyclViewer = args.Value;
 
-      if (cyclViewer is IPanoramaViewer)
+      if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        IPanoramaViewer panoramaViewer = cyclViewer as IPanoramaViewer;
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
         panoramaViewer.ImageChange -= OnImageChange;
 

@@ -360,8 +360,15 @@ namespace StreetSmartArcGISPro.VectorLayers
 
                 foreach (var fieldvalue in fieldvalues)
                 {
-                  featureCollection.Features[featureCollection.Features.Count - 1].Properties
-                    .Add(fieldvalue.Key, fieldvalue.Value);
+                  if (featureCollection.Features.Count >= 1)
+                  {
+                    if (!featureCollection.Features[featureCollection.Features.Count - 1].Properties
+                      .ContainsKey(fieldvalue.Key))
+                    {
+                      featureCollection.Features[featureCollection.Features.Count - 1].Properties
+                        .Add(fieldvalue.Key, fieldvalue.Value);
+                    }
+                  }
                 }
               }
             }
@@ -706,7 +713,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         long objectId = feature?.GetObjectID() ?? -1;
         Measurement measurement = _measurementList.Get(objectId);
         _measurementList.DrawPoint = false;
-        measurement = await _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
+        measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
         _measurementList.DrawPoint = true;
 
         if (measurement != null)
