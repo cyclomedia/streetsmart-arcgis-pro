@@ -171,19 +171,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         MeasurementPoint measurementPoint = element.Value;
         measurementPoint.Dispose();
       }
-
-      _measurementList.Open = IsOpen ? null : _measurementList.Open;
-      _measurementList.Sketch = IsSketch ? null : _measurementList.Sketch;
-
-      if (_measurementList.Count >= 1)
-      {
-        _measurementList.Remove(_measurementList.ElementAt(0).Key);
-      }
-
-      if (VectorLayer != null)
-      {
-        await VectorLayer.GenerateJsonAsync();
-      }
     }
 
     public bool IsGeometryType(ArcGISGeometryType geometryType)
