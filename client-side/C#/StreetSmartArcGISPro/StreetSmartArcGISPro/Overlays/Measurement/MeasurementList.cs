@@ -559,7 +559,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           Measurement measurement = this.ElementAt(0).Value;
           measurement.Close();
-          await FrameworkApplication.SetCurrentToolAsync(string.Empty);
+          string currentTool = FrameworkApplication.CurrentTool;
+
+          switch (currentTool)
+          {
+            case "esri_editing_SketchLineTool":
+            case "esri_editing_SketchPolygonTool":
+            case "esri_editing_SketchPointTool":
+              await FrameworkApplication.SetCurrentToolAsync(string.Empty);
+              break;
+          }
         }
       }
     }

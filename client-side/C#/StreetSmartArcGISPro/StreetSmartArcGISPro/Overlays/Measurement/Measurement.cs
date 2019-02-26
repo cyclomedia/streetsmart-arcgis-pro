@@ -597,7 +597,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         for (int i = 0; i < Count; i++)
         {
-          MapPoint mapPoint = pointsGeometry.Count > i ? pointsGeometry[i] : null;
+          MapPoint mapPoint = pointsGeometry?.Count > i ? pointsGeometry[i] : null;
           MeasurementPoint mp = this.ElementAt(i).Value;
           toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
 
