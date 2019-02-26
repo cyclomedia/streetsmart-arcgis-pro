@@ -296,7 +296,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     #region Functions
 
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+    protected override void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -94,21 +95,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public VectorLayer VectorLayer { get; set; }
 
-    public bool DrawPoint { get; private set; }
-
     public int PointNr { get; private set; }
 
     public long? ObjectId { get; set; }
 
     public bool IsPointMeasurement => _geometryType == ArcGISGeometryType.Point;
 
-    public bool IsSketch => _measurementList.Sketch == this;
-
     public bool IsOpen => _measurementList.Open == this;
 
     public bool IsDisposed { get; set; }
-
-    public string MeasurementName => Properties.Name;
 
     public bool UpdateMeasurement { get; set; }
 
@@ -122,7 +117,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Constructor
 
-    public Measurement(IMeasurementProperties properties, IGeometry geometry, bool drawPoint, IStreetSmartAPI api)
+    public Measurement(IMeasurementProperties properties, IGeometry geometry, IStreetSmartAPI api)
     {
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       _measurementList = streetSmart.MeasurementList;
@@ -130,7 +125,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       _ci = CultureInfo.InvariantCulture;
       _api = api;
       _settings = Settings.Instance;
-      DrawPoint = drawPoint;
       Properties = properties;
       UpdateMeasurement = false;
       DoChange = false;
@@ -162,14 +156,22 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Functions
 
-    public async void Dispose()
+    public void Dispose()
     {
       IsDisposed = true;
 
-      foreach (var element in this)
+//      foreach (var element in this)
+//      {
+//        MeasurementPoint measurementPoint = element.Value;
+//        measurementPoint.Dispose();
+//      }
+
+      while (Count >= 1)
       {
+        var element = this.ElementAt(0);
         MeasurementPoint measurementPoint = element.Value;
         measurementPoint.Dispose();
+        Remove(element.Key);
       }
     }
 
@@ -186,23 +188,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public void Close()
     {
       _measurementList.Open = null;
-      DrawPoint = true;
 
-      //if (!IsPointMeasurement)
-      //{
-        for (int i = 0; i < Count; i++)
-        {
-          MeasurementPoint point = this.ElementAt(i).Value;
-          point.Dispose();
-        //  await point.RedrawPointAsync();
-
-          //for (int j = 0; j < point.Count; j++)
-          //{
-         //   MeasurementObservation observation = point.ElementAt(j).Value;
-         //   await observation.RedrawObservationAsync();
-         // }
-        }
-      //}
+      for (int i = 0; i < Count; i++)
+      {
+        MeasurementPoint point = this.ElementAt(i).Value;
+        point.Dispose();
+      }
     }
 
     public void Open()
@@ -289,7 +280,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (IsOpen && GlobeSpotterConfiguration.MeasurePermissions)
       {
         _measurementList.Open = null;
-        // ToDo: Close measurement, EntityId
       }
     }
 
@@ -304,7 +294,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       if (IsPointMeasurement && GlobeSpotterConfiguration.MeasurePermissions)
       {
-        // Todo: set focus EntityId
         _measurementList.AddMeasurementPoint(EntityId);
       }
     }
@@ -316,15 +305,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         CloseMeasurement();
       }
 
-      if (GlobeSpotterConfiguration.MeasurePermissions)
-      {
-        // Todo: remove EntityId
-      }
-
       Dispose();
     }
 
-    public async Task RemovePoint(int pointId)
+    public void RemovePoint(int pointId)
     {
       if (ContainsKey(pointId))
       {

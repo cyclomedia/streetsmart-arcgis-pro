@@ -345,6 +345,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     public void SketchFinished()
     {
       _measurementList.FromMap = true;
+
       if (_measurementList.Count >= 1)
       {
         _measurementList[_measurementList.ElementAt(0).Key].Dispose();
@@ -420,7 +421,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       MapView mapView = args.MapView;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
 
-      if ((geometry?.HasZ ?? false) && (EditTool == EditTools.SketchPointTool))
+      if ((geometry?.HasZ ?? false) && EditTool == EditTools.SketchPointTool)
       {
         await AddHeightToMeasurementAsync(geometry, mapView);
       }

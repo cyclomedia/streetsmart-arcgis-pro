@@ -50,7 +50,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Events
 
-    public new event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler PropertyChanged;
 
     #endregion
 
@@ -62,11 +62,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public IFeature Feature { get; set; }
 
     private MapPoint _point;
-    private int _pointId;
-    private bool _added;
     private bool _open;
     private IDisposable _disposeText;
-    private object _apiMeasurementPoint;
     private bool _updatePoint;
     private bool _isDisposed;
 
@@ -76,19 +73,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public Measurement Measurement { get; }
 
-    public int PointId
-    {
-      get => _pointId;
-      set
-      {
-        _pointId = value;
-        // ReSharper disable once ExplicitCallerInfoArgument
-        // OnPropertyChanged("PreviousPoint");
-        // ReSharper disable once ExplicitCallerInfoArgument
-        // OnPropertyChanged("NextPoint");
-        // OnPropertyChanged("Index");
-      }
-    }
+    public int PointId { get; set; }
 
     public bool Open
     {
@@ -112,15 +97,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public bool Updated { get; set; }
 
-    public bool IsFirstNumber => _pointId == 0;
+    public bool IsFirstNumber => PointId == 0;
 
-    public bool IsLastNumber => Measurement == null || _pointId == Measurement.Count - 1;
+    public bool IsLastNumber => Measurement == null || PointId == Measurement.Count - 1;
 
     public MeasurementPoint PreviousPoint
-      => Measurement != null && !IsFirstNumber ? Measurement.GetPointByNr(_pointId - 1) : null;
+      => Measurement != null && !IsFirstNumber ? Measurement.GetPointByNr(PointId - 1) : null;
 
     public MeasurementPoint NextPoint
-      => Measurement != null && !IsLastNumber ? Measurement.GetPointByNr(_pointId + 1) : null;
+      => Measurement != null && !IsLastNumber ? Measurement.GetPointByNr(PointId + 1) : null;
 
     #endregion
 
@@ -133,7 +118,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Measurement = measurement;
       Point = null;
       PointId = pointId;
-      _added = false;
       Open = false;
       _constants = ConstantsViewer.Instance;
       _ci = CultureInfo.InvariantCulture;
@@ -291,9 +275,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
             if (ptColl != null)
             {
-              if (_pointId < ptColl.Count)
+              if (PointId < ptColl.Count)
               {
-                MapPoint pointC = ptColl[_pointId];
+                MapPoint pointC = ptColl[PointId];
 
                 if (IsSame(pointC))
                 {

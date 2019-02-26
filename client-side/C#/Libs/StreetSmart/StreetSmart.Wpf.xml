@@ -1171,6 +1171,17 @@
             <param name="properties">The properties by which the feature should be determined</param>
             <param name="layerId">The layerId to which the feature is selected</param>
         </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ShowAttributePanelOnFeatureClick">
+            <summary>
+            Toggles the visibility of the Attribute information panel, decided if it should be shown on clicking on a feature.
+            </summary>
+        </member>
+        <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.ShowAttributePanelOnFeatureClick(System.Boolean)">
+            <summary>
+            Toggles the visibility of the Attribute information panel, decided if it should be shown on clicking on a feature.
+            </summary>
+            <param name="visible">visibility of the show attributes panel</param>
+        </member>
         <member name="M:StreetSmart.Common.Interfaces.API.IPanoramaViewer.Toggle3DCursor(System.Boolean)">
             <summary>
             Toggles the visibility of the 3D cursor in the PanoramaViewer
@@ -3403,7 +3414,7 @@
         </member>
         <member name="P:StreetSmart.Wpf.Properties.Resources.StreetSmartLocation">
             <summary>
-              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v19.1/api-dotnet.html.
+              Looks up a localized string similar to https://streetsmart.cyclomedia.com/api/v19.2/api-dotnet.html.
             </summary>
         </member>
         <member name="T:StreetSmart.Wpf.StreetSmartGUI">

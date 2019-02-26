@@ -71,15 +71,6 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There is no pdf viewer available on your system, please first install a pdf viewer.
-        /// </summary>
-        internal static string Help_pdf_viewer_is_not_installed_on_your_system_ {
-            get {
-                return ResourceManager.GetString("Help_pdf_viewer_is_not_installed_on_your_system_", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Password must be at least 8 characters..
         /// </summary>
         internal static string Login_CreateAes_Password_must_be_at_least_8_characters_ {
@@ -94,24 +85,6 @@ namespace StreetSmartArcGISPro.Properties {
         internal static string Login_CreateAes_Salt_must_be_at_least_8_bytes_ {
             get {
                 return ResourceManager.GetString("Login_CreateAes_Salt_must_be_at_least_8_bytes_", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to streetSmart ArcGISPro Addin Error..
-        /// </summary>
-        internal static string streetSmart_ArcGISPro_Error_ {
-            get {
-                return ResourceManager.GetString("streetSmart_ArcGISPro_Error_", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to open the new Cyclorama viewer. Max number of Cyclorama viewers reached..
-        /// </summary>
-        internal static string streetSmart_OnMaxViewers_Failed {
-            get {
-                return ResourceManager.GetString("streetSmart_OnMaxViewers_Failed", resourceCulture);
             }
         }
         

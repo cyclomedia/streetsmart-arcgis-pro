@@ -56,18 +56,12 @@ namespace StreetSmartArcGISPro.AddIns.Views
     #region Members
 
     private readonly FileSettings _settings;
-    private readonly FileConfiguration _configuration;
     private readonly ConstantsViewer _constants;
-    private readonly FileLogin _login;
-    private readonly List<string> _openNearest;
     private readonly List<CycloMediaLayer> _layers;
     private readonly ViewerList _viewerList;
     private readonly MeasurementList _measurementList;
     private readonly CycloMediaGroupLayer _cycloMediaGroupLayer;
 
-    private CrossCheck _crossCheck;
-    private SpatialReference _lastSpatialReference;
-    private bool _startOpenNearest;
     private VectorLayerList _vectorLayerList;
 
     #endregion
@@ -79,16 +73,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
       InitializeComponent();
       _settings = FileSettings.Instance;
       _constants = ConstantsViewer.Instance;
-
-      _login = FileLogin.Instance;
-
-      _configuration = FileConfiguration.Instance;
-
-      _openNearest = new List<string>();
-      _crossCheck = null;
-      _lastSpatialReference = null;
       _layers = new List<CycloMediaLayer>();
-      _startOpenNearest = false;
 
       GetVectorLayerListAsync();
       ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
@@ -214,11 +199,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
 
       await UpdateVectorLayerAsync();
-    }
-
-    public void OnMaxViewers()
-    {
-      MessageBox.Show(ThisResources.streetSmart_OnMaxViewers_Failed);
     }
 
     public async void OnShowLocationRequested(uint viewerId, object point3D)
