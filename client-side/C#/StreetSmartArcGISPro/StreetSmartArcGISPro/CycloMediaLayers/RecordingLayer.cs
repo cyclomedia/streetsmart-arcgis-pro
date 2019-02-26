@@ -52,7 +52,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public override string Name => Constants.RecordingLayerName;
     public override string FcName => Constants.RecordingLayerFeatureClassName;
-    public override bool UseDateRange => false;
 
     public override string WfsRequest
       =>
@@ -80,12 +79,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected override bool Filter(Recording recording)
     {
-      bool result = (recording != null);
+      bool result = recording != null;
 
       if (result)
       {
         DateTime? recordedAt = recording.RecordedAt;
-        result = (recordedAt != null);
+        result = recordedAt != null;
 
         if (result)
         {

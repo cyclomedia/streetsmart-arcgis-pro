@@ -99,11 +99,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         foreach (Layer layer in layersForGroupLayer)
         {
-          if (layer is GroupLayer)
+          if (layer is GroupLayer groupLayer)
           {
             if (!leave)
             {
-              GroupLayer = layer as GroupLayer;
+              GroupLayer = groupLayer;
               leave = true;
             }
           }
@@ -157,11 +157,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           // ReSharper disable once ExplicitCallerInfoArgument
           NotifyPropertyChanged(nameof(Count));
           FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
-
-          if (thisLayer.UseDateRange)
-          {
-            FrameworkApplication.State.Activate("streetSmartArcGISPro_historicalLayerEnabledState");
-          }          
         }
       }
 
@@ -183,11 +178,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         if (Count == 0)
         {
           FrameworkApplication.State.Deactivate("streetSmartArcGISPro_recordingLayerEnabledState");
-        }
-
-        if (layer.UseDateRange)
-        {
-          FrameworkApplication.State.Deactivate("streetSmartArcGISPro_historicalLayerEnabledState");
         }
       }
     }

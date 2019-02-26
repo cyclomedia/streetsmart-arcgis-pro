@@ -65,7 +65,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     private Envelope _lastextent;
     private FeatureCollection _addData;
-    private bool _isVisibleInstreetSmart;
     private bool _visible;
 
     #endregion
@@ -73,9 +72,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     #region Properties
 
     public abstract string Name { get; }
+
     public abstract string FcName { get; }
-    public abstract bool UseDateRange { get; }
+
     public abstract string WfsRequest { get; }
+
     public abstract double MinimumScale { get; set; }
 
     public bool Visible
@@ -89,21 +90,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     }
 
     public bool IsRemoved { get; set; }
+
     public bool IsInitialized { get; private set; }
 
     public FeatureLayer Layer { get; private set; }
 
     public bool IsVisible => Layer != null && Layer.IsVisible;
-
-    public bool IsVisibleInstreetSmart
-    {
-      get => _isVisibleInstreetSmart && IsVisible;
-      set
-      {
-        _isVisibleInstreetSmart = value;
-        NotifyPropertyChanged();
-      }
-    }
 
     public bool InsideScale
     {
@@ -124,7 +116,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       _constants = ConstantsRecordingLayer.Instance;
       _cycloMediaGroupLayer = layer;
-      _isVisibleInstreetSmart = true;
       Visible = false;
       IsRemoved = true;
       _lastextent = initialExtent ?? MapView.Active?.Extent;
@@ -243,11 +234,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         foreach (Layer layer in layersByName)
         {
-          if (layer is FeatureLayer)
+          if (layer is FeatureLayer featureLayer)
           {
             if (!leave)
             {
-              Layer = layer as FeatureLayer;
+              Layer = featureLayer;
               leave = true;
             }
           }
@@ -273,7 +264,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       IsRemoved = false;
       MapViewCameraChangedEvent.Subscribe(OnMapViewCameraChanged);
-      TOCSelectionChangedEvent.Subscribe(OnTocSelectionChanged);
       LayersRemovedEvent.Subscribe(OnLayersRemoved);
       await RefreshAsync();
       IsInitialized = true;
@@ -518,7 +508,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       Layer = null;
       IsRemoved = true;
       MapViewCameraChangedEvent.Unsubscribe(OnMapViewCameraChanged);
-      TOCSelectionChangedEvent.Unsubscribe(OnTocSelectionChanged);
       LayersRemovedEvent.Unsubscribe(OnLayersRemoved);
     }
 
@@ -865,12 +854,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         FrameworkApplication.State.Deactivate("streetSmartArcGISPro_InsideScaleState");
       }
-    }
-
-    private void OnTocSelectionChanged(MapViewEventArgs mapViewEventArgs)
-    {
-      // todo: get color from layer
-      // todo: Layer changed event
     }
 
     private async void OnLayersRemoved(LayerEventsArgs args)
