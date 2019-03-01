@@ -301,6 +301,7 @@
     <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libGLESv2.dll">
       <Link>Install\swiftshader\libGLESv2.dll</Link>
     </AddInContent>
+    <EmbeddedResource Include="Resources\Agreement.md" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
     <EmbeddedResource Include="Images\SystemSearch16.png" />
