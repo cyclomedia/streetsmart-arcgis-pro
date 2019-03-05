@@ -86,6 +86,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
         if (streetSmart != null)
         {
+          streetSmart.MapView = MapView.Active;
           streetSmart.LookAt = null;
           streetSmart.Replace = replace;
           streetSmart.Nearest = _nearest;
@@ -162,7 +163,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           var features = activeView.GetFeatures(envelope);
 
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-          CycloMediaGroupLayer groupLayer = streetSmart?.CycloMediaGroupLayer;
+          CycloMediaGroupLayer groupLayer = streetSmart?.GetCycloMediaGroupLayer(MapView.Active);
 
           if (features != null && groupLayer != null)
           {
@@ -170,7 +171,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
             if (_nearest)
             {
-              Settings settings = Settings.Instance;
+              Setting settings = ProjectList.Instance.GetSettings(MapView.Active);
               MySpatialReference cycloCoordSystem = settings.CycloramaViewerCoordinateSystem;
 
               if (cycloCoordSystem != null)
@@ -190,7 +191,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
                   CultureInfo ci = CultureInfo.InvariantCulture;
                   _location = string.Format(ci, "{0},{1}", point.X, point.Y);
 
-                  if (!streetSmart.InsideScale())
+                  if (!streetSmart.InsideScale(MapView.Active))
                   {
                     double minimumScale = ConstantsRecordingLayer.Instance.MinimumScale;
                     double scale = minimumScale/2;

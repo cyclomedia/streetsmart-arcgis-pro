@@ -136,7 +136,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       double z = direction.Position?.Z ?? 0.0;
       double xDir = direction.Direction?.X ?? 0.0;
       double yDir = direction.Direction?.Y ?? 0.0;
-      MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
+      MapView mapView = await Measurement.GetMeasurementView();
+      MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
       if (ContainsKey(imageId))
       {
@@ -158,7 +159,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public bool IsObservationVisible()
     {
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      return streetSmart.InsideScale() && !_isDisposed;
+      return streetSmart.InsideScale(MapView.Active) && !_isDisposed;
     }
 
     public void RemoveObservation(string imageId)
@@ -263,7 +264,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         if (!result)
         {
-          Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
+          MapView mapView = await Measurement.GetMeasurementView();
+          Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
           MapView thisView = MapView.Active;
           Geometry geometry = await thisView.GetCurrentSketchAsync();
@@ -324,7 +326,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         MeasurementList measurementList = streetSmart.MeasurementList;
         _disposeText?.Dispose();
 
-        if (streetSmart.InsideScale() && !_isDisposed && Point != null
+        if (streetSmart.InsideScale(MapView.Active) && !_isDisposed && Point != null
             && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y) && !Measurement.IsDisposed)
         {
           if (Measurement.Geometry.Type != StreetSmartGeometryType.Polygon || Measurement.Count >= 1 && (PointId == 0 || !IsSame(Measurement[0].Point)))

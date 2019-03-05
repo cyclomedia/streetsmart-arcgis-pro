@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Core;
+
 using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Framework;
@@ -44,7 +44,9 @@ using StreetSmartArcGISPro.Utilities;
 
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
+using Project = StreetSmartArcGISPro.Configuration.File.Project;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
+using ArcGISProject = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
@@ -58,7 +60,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     #region Members
 
-    private static SortedDictionary<int, int> _yearMonth;
+    private static Dictionary<FeatureLayer, SortedDictionary<int, int>> _yearMonth;
 
     private readonly CycloMediaGroupLayer _cycloMediaGroupLayer;
     private readonly ConstantsRecordingLayer _constants;
@@ -78,6 +80,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     public abstract string WfsRequest { get; }
 
     public abstract double MinimumScale { get; set; }
+
+    public MapView MapView => _cycloMediaGroupLayer.MapView;
 
     public bool Visible
     {
@@ -101,12 +105,25 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       get
       {
-        Camera camera = MapView.Active?.Camera;
+        Camera camera = MapView?.Camera;
         return camera != null && Layer != null && Math.Floor(camera.Scale) <= (MinimumScale = Layer.MinScale);
       }
     }
 
-    protected static SortedDictionary<int, int> YearMonth => _yearMonth ?? (_yearMonth = new SortedDictionary<int, int>());
+    protected static Dictionary<FeatureLayer, SortedDictionary<int, int>> YearMonth => _yearMonth ?? (_yearMonth = new Dictionary<FeatureLayer, SortedDictionary<int, int>>());
+
+    protected SortedDictionary<int, int> GetYearMonth(FeatureLayer layer)
+    {
+      if (layer != null)
+      {
+        if (!YearMonth.ContainsKey(layer))
+        {
+          YearMonth.Add(layer, new SortedDictionary<int, int>());
+        }
+      }
+
+      return layer == null ? null : YearMonth[layer];
+    }
 
     #endregion
 
@@ -118,7 +135,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       _cycloMediaGroupLayer = layer;
       Visible = false;
       IsRemoved = true;
-      _lastextent = initialExtent ?? MapView.Active?.Extent;
+      _lastextent = initialExtent ?? MapView?.Extent;
       IsInitialized = false;
     }
 
@@ -194,9 +211,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     private async Task CreateFeatureLayerAsync()
     {
-      Map map = MapView.Active?.Map;
+      Map map = MapView?.Map;
       SpatialReference spatialReference = null;
-      Settings config = Settings.Instance;
+      Setting config = ProjectList.Instance.GetSettings(MapView);
       MySpatialReference spatialReferenceRecording = config.RecordingLayerCoordinateSystem;
 
       if (spatialReferenceRecording == null)
@@ -213,8 +230,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       }
 
       int wkid = spatialReference?.Wkid ?? 0;
-      string fcNameWkid = string.Concat(FcName, wkid);
-      Project project = Project.Current;
+      string mapName = map?.Name;
+      string fcNameWkid = string.Concat(FcName, mapName, wkid);
+      var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
       Layer = await CreateLayerAsync(project, fcNameWkid, _cycloMediaGroupLayer.GroupLayer);
       await MakeEmptyAsync();
@@ -222,10 +240,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       await project.SaveEditsAsync();
     }
 
-    public async Task AddToLayersAsync(MapView mapView = null)
+    public async Task AddToLayersAsync()
     {
       Layer = null;
-      Map map = (mapView ?? MapView.Active)?.Map;
+      Map map = MapView?.Map;
 
       if (map != null)
       {
@@ -258,7 +276,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         await MakeEmptyAsync();
         await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
-        Project project = Project.Current;
+        var project = ArcGISProject.Current;
         await project.SaveEditsAsync();
       }
 
@@ -277,13 +295,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
         MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
-        Settings settings = Settings.Instance;
+        var projectList = ProjectList.Instance;
+        Setting settings = projectList.GetSettings(MapView);
         settings.RecordingLayerCoordinateSystem = mySpatialReference;
-        settings.Save();
+        projectList.Save();
       }
     }
 
-    private async Task<FeatureLayer> CreateLayerAsync(Project project, string fcName, ILayerContainerEdit layerContainer)
+    private async Task<FeatureLayer> CreateLayerAsync(ArcGISProject project, string fcName, ILayerContainerEdit layerContainer)
     {
       return await QueuedTask.Run(() =>
       {
@@ -431,7 +450,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       await QueuedTask.Run(() =>
       {
-        Envelope extent = MapView.Active?.Extent;
+        Envelope extent = MapView?.Extent;
 
         if (extent != null)
         {
@@ -528,7 +547,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    private async Task CreateFeatureClassAsync(Project project, string fcName, SpatialReference spatialReference)
+    private async Task CreateFeatureClassAsync(ArcGISProject project, string fcName, SpatialReference spatialReference)
     {
       bool createNewFeatureClass = false;
 
@@ -563,7 +582,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         await QueuedTask.Run(() =>
         {
-          Map map = MapView.Active?.Map;
+          Map map = MapView?.Map;
 
           if (map != null)
           {
@@ -576,7 +595,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       }
     }
 
-    private async Task<IGPResult> CreateFeatureClass(Project project, string fcName, string template, SpatialReference spatialReference)
+    private async Task<IGPResult> CreateFeatureClass(ArcGISProject project, string fcName, string template, SpatialReference spatialReference)
     {
       var arguments = new List<object>
       {
@@ -642,7 +661,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           FeatureMembers featureMembers = featureCollection.FeatureMembers;
           Recording[] recordings = featureMembers?.Recordings;
 
-          if ((Layer != null) && (recordings != null))
+          if (Layer != null && recordings != null)
           {
             string idField = Recording.ObjectId;
             var exists = new Dictionary<string, long>();
@@ -722,9 +741,15 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    public static void ResetYears()
+    public static void ResetYears(FeatureLayer layer)
     {
-      YearMonth.Clear();
+      if (layer != null)
+      {
+        if (YearMonth.ContainsKey(layer))
+        {
+          YearMonth[layer].Clear();
+        }
+      }
     }
 
     protected CIMMarker GetPipSymbol(Color color)
@@ -807,12 +832,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       if (InsideScale && IsVisible)
       {
-        MapView mapView = MapView.Active;
-
-        if (mapView != null && Layer != null && _cycloMediaGroupLayer != null && _addData == null)
+        if (MapView != null && Layer != null && _cycloMediaGroupLayer != null && _addData == null)
         {
           const double epsilon = 0.0;
-          var extent = mapView.Extent;
+          var extent = MapView.Extent;
 
           if (Math.Abs(extent.XMax - _lastextent.XMax) > epsilon ||
               Math.Abs(extent.YMin - _lastextent.YMin) > epsilon ||
@@ -826,16 +849,16 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             {
               _addData = FeatureCollection.Load(thisEnvelope, WfsRequest);
 
-              if ((_addData != null) && (_addData.NumberOfFeatures >= 1))
+              if (_addData != null && _addData.NumberOfFeatures >= 1)
               {
                 await SaveFeatureMembersAsync(_addData, thisEnvelope);
               }
 
               _addData = null;
-              Project project = Project.Current;
+              var project = ArcGISProject.Current;
               await PostEntryStepAsync(thisEnvelope);
               await project.SaveEditsAsync();
-              await QueuedTask.Run(() => Layer.ClearDisplayCache());
+              await QueuedTask.Run(() => Layer?.ClearDisplayCache());
             }
           }
         }
@@ -843,7 +866,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       else
       {
         _addData = null;
-        YearMonth.Clear();
+        ResetYears(Layer);
       }
 
       if (InsideScale)

@@ -205,19 +205,19 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           result = (Images.Image.Length >= 2).ToString();
           break;
         case FieldPip1Yaw:
-          result = (Images.Image.Length >= 1) ? Images.Image[0].Yaw : null;
+          result = Images.Image.Length >= 1 ? Images.Image[0].Yaw : null;
           break;
         case FieldPip2Yaw:
-          result = (Images.Image.Length >= 2) ? Images.Image[1].Yaw : null;
+          result = Images.Image.Length >= 2 ? Images.Image[1].Yaw : null;
           break;
         case FieldHasDepthMap:
           result = HasDepthMap.ToString();
           break;
         case FieldHeight:
-          result = Height.Value;
+          result = Height?.Value;
           break;
         case FieldHeightSystem:
-          result = Height.System;
+          result = Height?.System;
           break;
       }
 

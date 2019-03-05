@@ -55,6 +55,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public GroupLayer GroupLayer { get; private set; }
 
+    public MapView MapView { get; }
+
     public IList<CycloMediaLayer> AllLayers => _allLayers ?? (_allLayers = new List<CycloMediaLayer>
     {
       new RecordingLayer(this, InitialExtent),
@@ -67,14 +69,15 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       get { return this.Aggregate(false, (current, layer) => layer.InsideScale || current); }
     }
 
-    public Envelope InitialExtent => _initialExtent ?? (_initialExtent = MapView.Active?.Extent);
+    public Envelope InitialExtent => _initialExtent ?? (_initialExtent = MapView.Extent);
 
     #endregion
 
     #region Constructor
 
-    public CycloMediaGroupLayer()
+    public CycloMediaGroupLayer(MapView mapView)
     {
+      MapView = mapView;
       _constants = ConstantsRecordingLayer.Instance;
     }
 
@@ -82,13 +85,13 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     #region Functions
 
-    public async Task InitializeAsync(MapView mapView = null)
+    public async Task InitializeAsync()
     {
       _updateVisibility = false;
       GroupLayer = null;
       Clear();
-      _initialExtent = (mapView ?? MapView.Active)?.Extent;
-      Map map = (mapView ?? MapView.Active)?.Map;
+      _initialExtent = MapView.Extent;
+      Map map = MapView?.Map;
       string name = _constants.CycloMediaLayerName;
 
       if (map != null)
@@ -127,7 +130,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         foreach (Layer layer in layers)
         {
-          await AddLayerAsync(layer.Name, mapView);
+          await AddLayerAsync(layer.Name);
         }
       }
 
@@ -141,7 +144,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         (current, layerCheck) => layerCheck.Layer == layer ? layerCheck : current);
     }
 
-    public async Task<CycloMediaLayer> AddLayerAsync(string name, MapView mapView = null)
+    public async Task<CycloMediaLayer> AddLayerAsync(string name)
     {
       CycloMediaLayer thisLayer = null;
 
@@ -153,7 +156,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         if (thisLayer != null)
         {
           Add(thisLayer);
-          await thisLayer.AddToLayersAsync(mapView);
+          await thisLayer.AddToLayersAsync();
           // ReSharper disable once ExplicitCallerInfoArgument
           NotifyPropertyChanged(nameof(Count));
           FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
@@ -201,7 +204,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         await QueuedTask.Run(() =>
         {
-          Map map = MapView.Active?.Map;
+          Map map = MapView?.Map;
 
           if (map != null && GroupLayer != null)
           {

@@ -47,11 +47,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     #region Properties
 
     /// <summary>
-    /// Overlay draw distance
-    /// </summary>
-    public double OverlayDrawDistance { get; set; }
-
-    /// <summary>
     /// Address language code
     /// </summary>
     public string AddressLanguageCode { get; set; }
@@ -116,7 +111,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new ConstantsViewer
       {
-        OverlayDrawDistance = 30.0,
         AddressLanguageCode = "nl",
         AddressDatabase = "CMDatabase",
         CrossCheckSize = 10.0,

@@ -64,6 +64,7 @@ namespace StreetSmartArcGISPro.Overlays
     private bool _isInitialized;
     private IDisposable _disposePolygon;
     private SystCol? _color;
+    private MapView _mapView;
 
     #endregion Members
 
@@ -102,35 +103,40 @@ namespace StreetSmartArcGISPro.Overlays
 
     #region Functions
 
-    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, Color color)
+    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, Color color, MapView mapView)
     {
       Coordinate = coordinate;
       _orientation = orientation;
       Color = color;
       _isInitialized = true;
+      _mapView = mapView;
 
       double x = coordinate.X ?? 0.0;
       double y = coordinate.Y ?? 0.0;
-      Settings settings = Settings.Instance;
-      MySpatialReference spatRel = settings.CycloramaViewerCoordinateSystem;
+      Setting settings = ProjectList.Instance.GetSettings(mapView);
 
-      await QueuedTask.Run(() =>
+      if (settings != null)
       {
-        Map map = MapView.Active?.Map;
-        SpatialReference mapSpatialReference = map?.SpatialReference;
-        SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
-        MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
+        MySpatialReference spatRel = settings.CycloramaViewerCoordinateSystem;
 
-        if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)
+        await QueuedTask.Run(() =>
         {
-          ProjectionTransformation projection = ProjectionTransformation.Create(spatialReference, mapSpatialReference);
-          _mapPoint = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
-        }
-        else
-        {
-          _mapPoint = (MapPoint) point.Clone();
-        }
-      });
+          SpatialReference mapSpatialReference = mapView?.Map?.SpatialReference;
+          SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
+          MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
+
+          if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)
+          {
+            ProjectionTransformation
+              projection = ProjectionTransformation.Create(spatialReference, mapSpatialReference);
+            _mapPoint = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
+          }
+          else
+          {
+            _mapPoint = (MapPoint) point.Clone();
+          }
+        });
+      }
 
       MapViewCameraChangedEvent.Subscribe(OnMapViewCameraChanged);
       await RedrawConeAsync();
@@ -173,47 +179,50 @@ namespace StreetSmartArcGISPro.Overlays
       {
         StreetSmartModule streetSmart = StreetSmartModule.Current;
 
-        if (streetSmart.InsideScale() && !_mapPoint.IsEmpty && Color != null)
+        if (streetSmart.InsideScale(_mapView) && !_mapPoint.IsEmpty && Color != null)
         {
           var thisColor = (SystCol) Color;
-          MapView thisView = MapView.Active;
-          Map map = thisView.Map;
-          SpatialReference mapSpat = map.SpatialReference;
-          SpatialReference mapPointSpat = _mapPoint.SpatialReference;
-          ProjectionTransformation projection = ProjectionTransformation.Create(mapPointSpat, mapSpat);
-          _mapPoint = GeometryEngine.Instance.ProjectEx(_mapPoint, projection) as MapPoint;
+          Map map = _mapView.Map;
+          SpatialReference mapSpat = map?.SpatialReference;
+          SpatialReference mapPointSpat = _mapPoint?.SpatialReference;
 
-          WinPoint point = thisView.MapToScreen(_mapPoint);
-          double angleh = (_orientation.HFov ?? 0.0) * Math.PI / 360;
-          double angle = (270 + (_orientation.Yaw ?? 0.0)) % 360 * Math.PI / 180;
-          double angle1 = angle - angleh;
-          double angle2 = angle + angleh;
-          double x = point.X;
-          double y = point.Y;
-          double size = Size / 2;
+          if (mapPointSpat != null && mapSpat != null)
+          {
+            ProjectionTransformation projection = ProjectionTransformation.Create(mapPointSpat, mapSpat);
+            _mapPoint = GeometryEngine.Instance.ProjectEx(_mapPoint, projection) as MapPoint;
 
-          WinPoint screenPoint1 = new WinPoint(x + size * Math.Cos(angle1), y + size * Math.Sin(angle1));
-          WinPoint screenPoint2 = new WinPoint(x + size * Math.Cos(angle2), y + size * Math.Sin(angle2));
-          MapPoint point1 = thisView.ScreenToMap(screenPoint1);
-          MapPoint point2 = thisView.ScreenToMap(screenPoint2);
+            WinPoint point = _mapView.MapToScreen(_mapPoint);
+            double angleh = (_orientation.HFov ?? 0.0) * Math.PI / 360;
+            double angle = (270 + (_orientation.Yaw ?? 0.0)) % 360 * Math.PI / 180;
+            double angle1 = angle - angleh;
+            double angle2 = angle + angleh;
+            double x = point.X;
+            double y = point.Y;
+            double size = Size / 2;
 
-          IList<MapPoint> polygonPointList = new List<MapPoint>();
-          polygonPointList.Add(_mapPoint);
-          polygonPointList.Add(point1);
-          polygonPointList.Add(point2);
-          polygonPointList.Add(_mapPoint);
-          Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
+            WinPoint screenPoint1 = new WinPoint(x + size * Math.Cos(angle1), y + size * Math.Sin(angle1));
+            WinPoint screenPoint2 = new WinPoint(x + size * Math.Cos(angle2), y + size * Math.Sin(angle2));
+            MapPoint point1 = _mapView.ScreenToMap(screenPoint1);
+            MapPoint point2 = _mapView.ScreenToMap(screenPoint2);
 
-          Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
-          CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
-          CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
-          polygonSymbol.SetColor(cimColorPolygon);
-          polygonSymbol.SetOutlineColor(null);
-          CIMSymbolReference polygonSymbolReference = polygonSymbol.MakeSymbolReference();
-          IDisposable disposePolygon = thisView.AddOverlay(polygon, polygonSymbolReference);
+            IList<MapPoint> polygonPointList = new List<MapPoint>();
+            polygonPointList.Add(_mapPoint);
+            polygonPointList.Add(point1);
+            polygonPointList.Add(point2);
+            polygonPointList.Add(_mapPoint);
+            Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
 
-          _disposePolygon?.Dispose();
-          _disposePolygon = disposePolygon;
+            Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
+            CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
+            CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
+            polygonSymbol.SetColor(cimColorPolygon);
+            polygonSymbol.SetOutlineColor(null);
+            CIMSymbolReference polygonSymbolReference = polygonSymbol.MakeSymbolReference();
+            IDisposable disposePolygon = _mapView.AddOverlay(polygon, polygonSymbolReference);
+
+            _disposePolygon?.Dispose();
+            _disposePolygon = disposePolygon;
+          }
         }
         else
         {

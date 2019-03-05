@@ -131,7 +131,6 @@
     <Compile Include="AddIns\Views\Converters\CanMeasuring.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementObservationWidth.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementColor.cs" />
-    <Compile Include="AddIns\Views\Converters\MeasurementImageStd.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementMatch.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementImage.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementRelEst.cs" />
@@ -148,7 +147,9 @@
     <Compile Include="Configuration\File\Agreement.cs" />
     <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
     <Compile Include="Configuration\File\ConstantsViewer.cs" />
-    <Compile Include="Configuration\File\Settings.cs" />
+    <Compile Include="Configuration\File\Project.cs" />
+    <Compile Include="Configuration\File\ProjectList.cs" />
+    <Compile Include="Configuration\File\Setting.cs" />
     <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
     <Compile Include="Configuration\Remote\Recordings\Images.cs" />
     <Compile Include="Configuration\Remote\Recordings\Height.cs" />

@@ -17,19 +17,14 @@
  */
 
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
-using StreetSmartArcGISPro.Utilities;
-
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
-  [XmlRoot("Settings")]
-  public class Settings: INotifyPropertyChanged
+  public class Setting: INotifyPropertyChanged
   {
     #region Events
 
@@ -39,24 +34,31 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     #region Members
 
-    private static readonly XmlSerializer XmlSettings;
-    private static Settings _settings;
     private SpatialReference _recordingLayerCoordinateSystem;
     private SpatialReference _cycloramaViewerCoordinateSystem;
     private int _overlayDrawDistance;
-
-    #endregion
-
-    #region Constructors
-
-    static Settings()
-    {
-      XmlSettings = new XmlSerializer(typeof(Settings));
-    }
+    private string _map;
 
     #endregion
 
     #region Properties
+
+    /// <summary>
+    /// Name of the map
+    /// </summary>
+    [XmlAttribute("Name")]
+    public string Map
+    {
+      get => _map;
+      set
+      {
+        if (_map != value)
+        {
+          _map = value;
+          OnPropertyChanged();
+        }
+      }
+    }
 
     /// <summary>
     /// Recording layer coordinate system
@@ -68,7 +70,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       {
         if (value != null)
         {
-          bool changed = (value != _recordingLayerCoordinateSystem);
+          bool changed = value != _recordingLayerCoordinateSystem;
           SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
           _recordingLayerCoordinateSystem = value;
 
@@ -98,7 +100,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       {
         if (value != null)
         {
-          bool changed = (value != _cycloramaViewerCoordinateSystem);
+          bool changed = value != _cycloramaViewerCoordinateSystem;
           SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
           _cycloramaViewerCoordinateSystem = value;
 
@@ -134,57 +136,25 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
     }
 
-    public static Settings Instance
-    {
-      get
-      {
-        if (_settings == null)
-        {
-          Load();
-        }
-
-        return _settings ?? (_settings = Create());
-      }
-    }
-
-    private static string FileName => Path.Combine(FileUtils.FileDir, "Settings.xml");
-
     #endregion
 
     #region Functions
-
-    public void Save()
-    {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlSettings.Serialize(streamFile, this);
-      streamFile.Close();
-    }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private static void Load()
+    public static Setting Create(string map)
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _settings = (Settings) XmlSettings.Deserialize(streamFile);
-        streamFile.Close();
-      }
-    }
-
-    private static Settings Create()
-    {
-      var result = new Settings
+      var result = new Setting
       {
         RecordingLayerCoordinateSystem = null,
         CycloramaViewerCoordinateSystem = null,
-        OverlayDrawDistance = 30
+        OverlayDrawDistance = 30,
+        Map = map ?? string.Empty
       };
 
-      result.Save();
       return result;
     }
 

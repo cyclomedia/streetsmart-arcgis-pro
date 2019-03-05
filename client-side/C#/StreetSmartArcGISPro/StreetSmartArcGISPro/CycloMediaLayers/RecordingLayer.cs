@@ -39,9 +39,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
   {
     #region Members
 
-    private static List<int> _yearPip;
-    private static List<int> _yearForbidden;
-    private static List<int> _years;
+    private static Dictionary<FeatureLayer, List<int>> _yearPip;
+    private static Dictionary<FeatureLayer, List<int>> _yearForbidden;
+    private static Dictionary<FeatureLayer, List<int>> _years;
     private static double _minimumScale;
 
     private static readonly ConstantsRecordingLayer Constants;
@@ -51,6 +51,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     #region Properties
 
     public override string Name => Constants.RecordingLayerName;
+
     public override string FcName => Constants.RecordingLayerFeatureClassName;
 
     public override string WfsRequest
@@ -67,11 +68,50 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       set => _minimumScale = value;
     }
 
-    private static List<int> Years => _years ?? (_years = new List<int>());
+    private static Dictionary<FeatureLayer, List<int>> Years => _years ?? (_years = new Dictionary<FeatureLayer, List<int>>());
 
-    private static List<int> YearPip => _yearPip ?? (_yearPip = new List<int>());
+    private static Dictionary<FeatureLayer, List<int>> YearPip => _yearPip ?? (_yearPip = new Dictionary<FeatureLayer, List<int>>());
 
-    private static List<int> YearForbidden => _yearForbidden ?? (_yearForbidden = new List<int>());
+    private static Dictionary<FeatureLayer, List<int>> YearForbidden => _yearForbidden ?? (_yearForbidden = new Dictionary<FeatureLayer, List<int>>());
+
+    protected List<int> GetYears(FeatureLayer layer)
+    {
+      if (layer != null)
+      {
+        if (!Years.ContainsKey(layer))
+        {
+          Years.Add(layer, new List<int>());
+        }
+      }
+
+      return layer == null ? null : Years[layer];
+    }
+
+    protected List<int> GetYearPip(FeatureLayer layer)
+    {
+      if (layer != null)
+      {
+        if (!YearPip.ContainsKey(layer))
+        {
+          YearPip.Add(layer, new List<int>());
+        }
+      }
+
+      return layer == null ? null : YearPip[layer];
+    }
+
+    protected List<int> GetYearForbidden(FeatureLayer layer)
+    {
+      if (layer != null)
+      {
+        if (!YearForbidden.ContainsKey(layer))
+        {
+          YearForbidden.Add(layer, new List<int>());
+        }
+      }
+
+      return layer == null ? null : YearForbidden[layer];
+    }
 
     #endregion
 
@@ -91,16 +131,17 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           var dateTime = (DateTime) recordedAt;
           int year = dateTime.Year;
           int month = dateTime.Month;
+          var yearMonth = GetYearMonth(Layer);
 
-          if (!YearMonth.ContainsKey(year))
+          if (!yearMonth.ContainsKey(year))
           {
-            YearMonth.Add(year, month);
+            yearMonth.Add(year, month);
             // ReSharper disable once ExplicitCallerInfoArgument
             NotifyPropertyChanged(nameof(YearMonth));
           }
           else
           {
-            YearMonth[year] = month;
+            yearMonth[year] = month;
           }
         }
       }
@@ -146,10 +187,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                   {
                     var dateTime = (DateTime) value;
                     int year = dateTime.Year;
+                    var years = GetYears(Layer);
 
-                    if (!Years.Contains(year))
+                    if (!years.Contains(year))
                     {
-                      Years.Add(year);
+                      years.Add(year);
                       added.Add(year);
                     }
 
@@ -158,10 +200,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     if (pipValue != null)
                     {
                       bool pip = bool.Parse((string) pipValue);
+                      var yearPip = GetYearPip(Layer);
 
-                      if (pip && !YearPip.Contains(year))
+                      if (pip && !yearPip.Contains(year))
                       {
-                        YearPip.Add(year);
+                        yearPip.Add(year);
                         pipAdded.Add(year);
                       }
                     }
@@ -171,10 +214,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     if (forbiddenValue != null)
                     {
                       bool forbidden = !bool.Parse((string) forbiddenValue);
+                      var yearForbidden = GetYearForbidden(Layer);
 
-                      if (forbidden && !YearForbidden.Contains(year))
+                      if (forbidden && !yearForbidden.Contains(year))
                       {
-                        YearForbidden.Add(year);
+                        yearForbidden.Add(year);
                         forbiddenAdded.Add(year);
                       }
                     }
@@ -362,9 +406,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected override void ClearYears()
     {
-      Years.Clear();
-      YearPip.Clear();
-      YearForbidden.Clear();
+      var years = GetYears(Layer);
+      years?.Clear();
+
+      var yearPip = GetYearPip(Layer);
+      yearPip?.Clear();
+
+      var yearForbidden = GetYearForbidden(Layer);
+      yearForbidden?.Clear();
     }
 
     #endregion

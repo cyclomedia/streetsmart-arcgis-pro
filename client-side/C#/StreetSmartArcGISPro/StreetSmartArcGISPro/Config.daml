@@ -176,12 +176,6 @@
             condition="streetSmartArcGISPro_agreementAcceptedCondition">
         <content className="AddIns.Views.Login" />
       </page>
-      <page id="streetSmartArcGISPro_settingsPage"
-            caption="Settings"
-            className="AddIns.Pages.Settings"
-            condition="streetSmartArcGISPro_agreementAcceptedCondition">
-        <content className="AddIns.Views.Settings" />
-      </page>
       <page id="streetSmartArcGISPro_configurationPage"
             caption="Configuration"
             className="AddIns.Pages.Configuration"
@@ -200,6 +194,14 @@
         <content className="AddIns.Views.Agreement" />
       </page>
     </insertSheet>
+    <updateSheet refID="esri_mapping_mapPropertySheet">
+      <insertPage id="streetSmartArcGISPro_SettingsPage"
+                  caption="Street Smart"
+                  className="AddIns.Pages.Settings"
+                  condition="streetSmartArcGISPro_agreementAcceptedCondition">
+        <content className="AddIns.Views.Settings" />
+      </insertPage>
+    </updateSheet>
   </propertySheets>
   <conditions>
     <insertCondition id="streetSmartArcGISPro_agreementAcceptedCondition"

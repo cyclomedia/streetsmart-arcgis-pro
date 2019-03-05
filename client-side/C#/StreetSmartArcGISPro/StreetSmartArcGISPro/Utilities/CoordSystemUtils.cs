@@ -18,9 +18,11 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+
 using StreetSmartArcGISPro.Configuration.File;
 
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
@@ -30,34 +32,33 @@ namespace StreetSmartArcGISPro.Utilities
 {
   class CoordSystemUtils
   {
-    public static async Task<SpatialReference> CycloramaSpatialReferenceAsync()
+    public static async Task<SpatialReference> CycloramaSpatialReferenceAsync(MapView mapView)
     {
-      Settings settings = Settings.Instance;
-      MySpatialReference gsSpatRel = settings.CycloramaViewerCoordinateSystem;
-
-      MapView mapView = MapView.Active;
       Map map = mapView?.Map;
+
+      Setting settings = ProjectList.Instance.GetSettings(mapView);
+      MySpatialReference gsSpatRel = settings?.CycloramaViewerCoordinateSystem;
+
       SpatialReference mapSpatialReference = map?.SpatialReference;
-      SpatialReference gsSpatialReference = (gsSpatRel == null)
+      SpatialReference gsSpatialReference = gsSpatRel == null
         ? mapSpatialReference
-        : (gsSpatRel.ArcGisSpatialReference ?? (await gsSpatRel.CreateArcGisSpatialReferenceAsync()));
+        : gsSpatRel.ArcGisSpatialReference ?? await gsSpatRel.CreateArcGisSpatialReferenceAsync();
       return gsSpatialReference;
     }
 
-    public static async Task<MapPoint> CycloramaToMapPointAsync(double x, double y, double z)
+    public static async Task<MapPoint> CycloramaToMapPointAsync(double x, double y, double z, MapView mapView)
     {
-      MapView mapView = MapView.Active;
       Map map = mapView?.Map;
       SpatialReference mapSpatialReference = map?.SpatialReference;
-      SpatialReference gsSpatialReference = await CycloramaSpatialReferenceAsync();
+      SpatialReference gsSpatialReference = await CycloramaSpatialReferenceAsync(mapView);
       MapPoint point = null;
 
       await QueuedTask.Run(() =>
       {
         MapPoint mapPoint = MapPointBuilder.CreateMapPoint(x, y, z, gsSpatialReference);
 
-        if ((mapSpatialReference != null) && (gsSpatialReference != null) &&
-            (gsSpatialReference.Wkid != mapSpatialReference.Wkid))
+        if (mapSpatialReference != null && gsSpatialReference != null &&
+            gsSpatialReference.Wkid != mapSpatialReference.Wkid)
         {
           ProjectionTransformation projection = ProjectionTransformation.Create(gsSpatialReference, mapSpatialReference);
           point = GeometryEngine.Instance.ProjectEx(mapPoint, projection) as MapPoint;
@@ -74,7 +75,7 @@ namespace StreetSmartArcGISPro.Utilities
     public static async Task<bool> CheckInAreaCycloramaSpatialReferenceAsync()
     {
       bool result = false;
-      Settings settings = Settings.Instance;
+      Setting settings = ProjectList.Instance.GetSettings(MapView.Active);
       MySpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
 
       if (spatialReference != null)
@@ -90,16 +91,17 @@ namespace StreetSmartArcGISPro.Utilities
       return result;
     }
 
-    public static string CheckCycloramaSpatialReference()
+    public static string CheckCycloramaSpatialReferenceMapView(MapView mapView)
     {
-      Settings settings = Settings.Instance;
+      Setting settings = ProjectList.Instance.GetSettings(mapView);
       MySpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
       return CheckCycloramaSpatialReference(spatialReference);
     }
 
     private static string CheckCycloramaSpatialReference(MySpatialReference spatialReference)
     {
-      Settings settings = Settings.Instance;
+      ProjectList projectList = ProjectList.Instance;
+      Setting settings = projectList.GetSettings(MapView.Active);
       MySpatialReference recordingSpatialReference = settings.RecordingLayerCoordinateSystem;
       string epsgCode = spatialReference == null
         ? (recordingSpatialReference == null
@@ -119,7 +121,7 @@ namespace StreetSmartArcGISPro.Utilities
         {
           epsgCode = spatialReference.SRSName;
           settings.CycloramaViewerCoordinateSystem = spatialReference;
-          settings.Save();
+          projectList.Save();
         }
       }
 

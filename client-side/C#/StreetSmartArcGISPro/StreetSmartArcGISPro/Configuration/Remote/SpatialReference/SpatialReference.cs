@@ -24,8 +24,10 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 
+using StreetSmartArcGISPro.Configuration.File;
+
 using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
-using FileSettings = StreetSmartArcGISPro.Configuration.File.Settings;
+using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 {
@@ -137,7 +139,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
           if (activeView == null)
           {
-            FileSettings settings = FileSettings.Instance;
+            FileSettings settings = ProjectList.Instance.GetSettings(MapView.Active);
             SpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
 
             if (spatialReference != null)

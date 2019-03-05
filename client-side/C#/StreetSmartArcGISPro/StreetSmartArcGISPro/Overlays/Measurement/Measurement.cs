@@ -50,7 +50,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     #region Members
 
     private ArcGISGeometryType _geometryType;
-    private readonly Settings _settings;
     private readonly MeasurementList _measurementList;
     private readonly IStreetSmartAPI _api;
     private readonly CultureInfo _ci;
@@ -124,7 +123,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       _ci = CultureInfo.InvariantCulture;
       _api = api;
-      _settings = Settings.Instance;
       Properties = properties;
       UpdateMeasurement = false;
       DoChange = false;
@@ -551,7 +549,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Map map = mapView?.Map;
       ArcGISSpatialReference mapSpatRef = map?.SpatialReference;
 
-      StreetSmartSpatialReference myCyclSpatRef = _settings.CycloramaViewerCoordinateSystem;
+      Setting settings = ProjectList.Instance.GetSettings(mapView);
+      StreetSmartSpatialReference myCyclSpatRef = settings.CycloramaViewerCoordinateSystem;
       ArcGISSpatialReference cyclSpatRef = myCyclSpatRef == null
         ? mapSpatRef
         : myCyclSpatRef.ArcGisSpatialReference ?? await myCyclSpatRef.CreateArcGisSpatialReferenceAsync();
@@ -615,6 +614,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           });
         }
       }
+    }
+
+    public async Task<MapView> GetMeasurementView()
+    {
+      var moduleStreetSmart = ModuleStreetSmart.Current;
+      var vectorLayerList = await moduleStreetSmart.GetVectorLayerListAsync();
+      return vectorLayerList.GetMapViewFromLayer(VectorLayer.Layer);
     }
 
     #endregion
