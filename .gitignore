@@ -196,5 +196,6 @@ FakesAssemblies/
 *.opt
 
 ## Ignore key files for GlobeSpotter for ArcGIS Pro
-/client-side/C#/GlobeSpotterArcGISPro/GlobeSpotterArcGISPro/Resources/APIKey.xml
+/client-side/C#/StreetSmartArcGISPro/StreetSmartArcGISPro/Resources/APIKey.xml
 /client-side/C#/SignKey
+/client-side/C#/Libs
