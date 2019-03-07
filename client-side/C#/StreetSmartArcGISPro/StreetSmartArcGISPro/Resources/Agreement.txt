@@ -9,34 +9,34 @@ employee or on assignment basis, is only permitted under the following terms
 and conditions.
 
 Definitions
-Image Material	Cycloramas, Aquaramas, Aerials, Aerial photographs 
-				and/or 3D images or other static and/or moving images.
+Image Material Cycloramas, Aquaramas, Aerials, Aerial photographs and/or 3D
+images or other static and/or moving images.
 
-Information Products	Any data generated from Image Material and/or generated 
-from other other datasets or object information and/or 
-change detection data in any form, including but not 
-limited to BAG Smart, 3D data and data with regard to
+Information Products
+Any data generated from Image Material and/or generated from other other 
+datasets or object information and/or change detection data in any form, 
+including but not limited to BAG Smart, 3D data and data with regard to 
 traffic signs, road markings and light poles.
 
-User.					The duly authorized user of products and/or services 
-                        under the Agreement, who is employed by the Customer 
-                        or has been authorized by the Customer within the 
-                        Customer’s organization on any other basis.
+User
+The duly authorized user of products and/or services under the Agreement, who
+is employed by the Customer or has been authorized by the Customer within the 
+Customer’s organization on any other basis.
 
-Agreement.				The agreement between or on behalf of CycloMedia and 
-                        the organisation of the User (‘Customer’) which sets
-                        out their mutual rights and obligations relating to
-                        the software to be provided or the Services and/or
-                        Products to be delivered by CycloMedia to the Customer.
+Agreement
+The agreement between or on behalf of CycloMedia and the organisation of the 
+User (‘Customer’) which sets out their mutual rights and obligations relating 
+to the software to be provided or the Services and/or Products to be 
+delivered by CycloMedia to the Customer.
 
-Software.				The computer software to be provided by CycloMedia to
-                        the Customer, including scripts and data sets, including
-                        but not limited to standard data layers, as well as
-                        Documentation.
+Software
+The computer software to be provided by CycloMedia to the Customer, including
+scripts and data sets, including but not limited to standard data layers, as 
+well as Documentation.
 
-System.					Computer and related equipment used by or on behalf of
-                        CycloMedia for access to the SaaS Services, services,
-                        products and/or use of the Software.
+System
+Computer and related equipment used by or on behalf of CycloMedia for access 
+to the SaaS Services, services, products and/or use of the Software.
 
 1.	The User shall (a) keep the access code(s) provided secret, (b) immediately 
 	inform CycloMedia if the User no longer possesses the access code(s) and (c)
@@ -54,7 +54,7 @@ System.					Computer and related equipment used by or on behalf of
 
 4.	Without CycloMedia’s prior permission in writing, the User is not permitted 
 	to:
-    4.1	make the Image Material and/or the Information Products available to 
+	4.1	make the Image Material and/or the Information Products available to 
 		third parties;
 	4.2	change or remove references to CycloMedia in the Image Material and/or 
 		the Information Products;
@@ -109,23 +109,3 @@ CycloMedia website.
 
 By clicking Accept you agree to these user terms and conditions Street Smart 			
 © Copyright 2019 CycloMedia Technology B.V.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
