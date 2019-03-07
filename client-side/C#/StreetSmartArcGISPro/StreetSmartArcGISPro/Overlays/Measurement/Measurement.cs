@@ -106,6 +106,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public bool IsOpen => _measurementList.Open == this;
 
+    public bool IsDisposed { get; set; }
+
     public string MeasurementName => Properties.Name;
 
     public bool UpdateMeasurement { get; set; }
@@ -133,6 +135,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       UpdateMeasurement = false;
       DoChange = false;
       Geometry = geometry;
+      IsDisposed = false;
       // SetDetailPanePoint(null);
 
       if (geometry != null)
@@ -161,23 +164,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void Dispose()
     {
+      IsDisposed = true;
+
       foreach (var element in this)
       {
         MeasurementPoint measurementPoint = element.Value;
         measurementPoint.Dispose();
-      }
-
-      _measurementList.Open = IsOpen ? null : _measurementList.Open;
-      _measurementList.Sketch = IsSketch ? null : _measurementList.Sketch;
-
-      if (_measurementList.Count >= 1)
-      {
-        _measurementList.Remove(_measurementList.ElementAt(0).Key);
-      }
-
-      if (VectorLayer != null)
-      {
-        await VectorLayer.GenerateJsonAsync();
       }
     }
 

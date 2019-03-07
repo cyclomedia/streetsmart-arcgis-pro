@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -38,7 +37,7 @@ using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
-
+using StreetSmart.Common.Interfaces.SLD;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Overlays;
@@ -48,6 +47,7 @@ using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Unit = ArcGIS.Core.Geometry.Unit;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -106,7 +106,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
     }
 
-    public Color Color { get; private set; }
+    public IStyledLayerDescriptor Sld { get; private set; }
 
     public FeatureLayer Layer { get; }
 
@@ -157,7 +157,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
-      Color color = Color.White;
       IFeatureCollection featureCollection = null;
 
       await QueuedTask.Run(async () =>
@@ -376,26 +375,105 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
         }
 
+        GeoJsonChanged = await CreateSld(featureCollection);
+      });
+
+      string newJson = featureCollection?.ToString();
+      GeoJsonChanged = newJson != GeoJson?.ToString() || GeoJsonChanged;
+      return GeoJson = featureCollection;
+    }
+
+    private async Task<bool> CreateSld(IFeatureCollection featureCollection)
+    {
+      return await QueuedTask.Run(() =>
+      {
+        double strokeWidth = 1.0;
+        double strokeOpacity = 1.0;
         CIMRenderer renderer = Layer.GetRenderer();
         CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
         CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
         CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
         CIMSymbol symbol = symbolRef?.Symbol;
         CIMColor cimColor = symbol?.GetColor();
-        double[] colorValues = cimColor?.Values;
+        CIMColor cimStroke = null;
+        double fillOpacity = (cimColor?.Alpha ?? 100) / 100;
 
-        int red = colorValues != null && colorValues.Length >= 1 ? (int) colorValues[0] : 255;
-        int green = colorValues != null && colorValues.Length >= 2 ? (int) colorValues[1] : 255;
-        int blue = colorValues != null && colorValues.Length >= 3 ? (int) colorValues[2] : 255;
-        int alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
-        color = Color.FromArgb(alpha, red, green, blue);
+        if (symbol is CIMPointSymbol pointSymbol)
+        {
+          foreach (CIMSymbolLayer layer in pointSymbol.SymbolLayers)
+          {
+            if (layer is CIMVectorMarker vectorMarker)
+            {
+              foreach (var markerGraphics in vectorMarker.MarkerGraphics)
+              {
+                if (markerGraphics.Symbol is CIMPolygonSymbol polygonSymbol)
+                {
+                  foreach (CIMSymbolLayer layer2 in polygonSymbol.SymbolLayers)
+                  {
+                    if (layer2 is CIMSolidStroke stroke)
+                    {
+                      cimStroke = stroke.Color;
+                      strokeWidth = stroke.Width;
+                      strokeOpacity = cimStroke.Alpha / 100;
+                    }
+                    else if (layer2 is CIMSolidFill fill)
+                    {
+                      cimColor = fill.Color;
+                      fillOpacity = cimColor.Alpha / 100;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        Color color = CimColorToWinColor(cimColor);
+        Color? strokeColor = null;
+
+        if (cimStroke != null)
+        {
+          strokeColor = CimColorToWinColor(cimStroke);
+        }
+
+        string oldSld = Sld?.SLD;
+
+        if (featureCollection?.Features.Count >= 1)
+        {
+          StreetSmartGeometryType type = featureCollection.Features[0].Geometry.Type;
+
+          switch (type)
+          {
+            case StreetSmartGeometryType.Point:
+            case StreetSmartGeometryType.MultiPoint:
+              Sld = strokeColor != null
+                ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth)
+                : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
+
+              break;
+            case StreetSmartGeometryType.LineString:
+            case StreetSmartGeometryType.MultiLineString:
+              Sld = SLDFactory.CreateStylePolygon(color);
+              break;
+            case StreetSmartGeometryType.Polygon:
+            case StreetSmartGeometryType.MultiPolygon:
+              Sld = SLDFactory.CreateStyleLine(color);
+              break;
+          }
+        }
+
+        return oldSld != Sld?.SLD;
       });
+    }
 
-      GeoJsonChanged = Color != color;
-      Color = color;
-      string newJson = featureCollection?.ToString();
-      GeoJsonChanged = newJson != GeoJson?.ToString() || GeoJsonChanged;
-      return GeoJson = featureCollection;
+    private Color CimColorToWinColor(CIMColor cimColor)
+    {
+      double[] colorValues = cimColor?.Values;
+      int red = colorValues != null && colorValues.Length >= 1 ? (int)colorValues[0] : 255;
+      int green = colorValues != null && colorValues.Length >= 2 ? (int)colorValues[1] : 255;
+      int blue = colorValues != null && colorValues.Length >= 3 ? (int)colorValues[2] : 255;
+      int alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
+      return Color.FromArgb(alpha, red, green, blue);
     }
 
     public async Task<double> GetOffsetZAsync()
