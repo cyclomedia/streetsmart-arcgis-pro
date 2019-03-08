@@ -195,7 +195,7 @@ FakesAssemblies/
 # Visual Studio 6 workspace options file
 *.opt
 
-## Ignore key files for GlobeSpotter for ArcGIS Pro
+## Ignore key files for Street Smart for ArcGIS Pro
 /client-side/C#/StreetSmartArcGISPro/StreetSmartArcGISPro/Resources/APIKey.xml
 /client-side/C#/SignKey
 /client-side/C#/Libs
