@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,8 @@ using System.ComponentModel;
 using System.Linq;
 
 using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
 
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.CycloMediaLayers;
@@ -33,6 +35,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     #region Members
 
     private readonly ConstantsRecordingLayer _constantsRecordingLayer;
+    private MapView _mapView;
 
     #endregion
 
@@ -41,24 +44,17 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     protected RecordingLayer()
     {
       IsChecked = false;
-      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      CycloMediaGroupLayer groupLayer = streetSmart.CycloMediaGroupLayer;
+      _mapView = MapView.Active;
       _constantsRecordingLayer = ConstantsRecordingLayer.Instance;
+
+      ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
+      CycloMediaGroupLayer groupLayer = streetSmart.GetCycloMediaGroupLayer(_mapView);
 
       if (groupLayer != null)
       {
-        foreach (var layer in groupLayer)
-        {
-          if (layer.IsRemoved)
-          {
-            IsChecked = layer.Name != _constantsRecordingLayer.RecordingLayerName && IsChecked;
-          }
-          else
-          {
-            IsChecked = layer.Name == _constantsRecordingLayer.RecordingLayerName || IsChecked;
-          }
-        }
-
+        CheckCheckedState(groupLayer);
         groupLayer.PropertyChanged += OnLayerPropertyChanged;
       }
     }
@@ -74,11 +70,11 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
 
       if (IsChecked)
       {
-        await streetSmart.RemoveLayerAsync(_constantsRecordingLayer.RecordingLayerName);
+        await streetSmart.RemoveLayerAsync(_constantsRecordingLayer.RecordingLayerName, _mapView);
       }
       else
       {
-        await streetSmart.AddLayersAsync(_constantsRecordingLayer.RecordingLayerName);
+        await streetSmart.AddLayersAsync(_constantsRecordingLayer.RecordingLayerName, _mapView);
       }
     }
 
@@ -91,6 +87,51 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
       if (sender is CycloMediaGroupLayer groupLayer && args.PropertyName == "Count")
       {
         IsChecked = groupLayer.Aggregate(false, (current, layer) => layer.Name == _constantsRecordingLayer.RecordingLayerName || current);
+      }
+    }
+
+    private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
+    {
+      _mapView = args.IncomingView;
+      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
+
+      CycloMediaGroupLayer outGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.OutgoingView);
+
+      if (outGroupLayer != null)
+      {
+        outGroupLayer.PropertyChanged -= OnLayerPropertyChanged;
+      }
+
+      if (args.IncomingView != null)
+      {
+        CycloMediaGroupLayer inGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.IncomingView);
+
+        if (inGroupLayer != null)
+        {
+          CheckCheckedState(inGroupLayer);
+          inGroupLayer.PropertyChanged += OnLayerPropertyChanged;
+        }
+      }
+    }
+
+    #endregion
+
+    #region Functions
+
+    private void CheckCheckedState(CycloMediaGroupLayer groupLayer)
+    {
+      IsChecked = false;
+
+      foreach (var layer in groupLayer)
+      {
+        if (layer.IsRemoved)
+        {
+          IsChecked = layer.Name != _constantsRecordingLayer.RecordingLayerName && IsChecked;
+        }
+        else
+        {
+          IsChecked = layer.Name == _constantsRecordingLayer.RecordingLayerName || IsChecked;
+        }
       }
     }
 

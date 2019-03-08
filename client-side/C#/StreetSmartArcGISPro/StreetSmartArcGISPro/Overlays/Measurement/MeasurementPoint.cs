@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -50,7 +50,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Events
 
-    public new event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler PropertyChanged;
 
     #endregion
 
@@ -62,11 +62,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public IFeature Feature { get; set; }
 
     private MapPoint _point;
-    private int _pointId;
-    private bool _added;
     private bool _open;
     private IDisposable _disposeText;
-    private object _apiMeasurementPoint;
     private bool _updatePoint;
     private bool _isDisposed;
 
@@ -76,19 +73,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public Measurement Measurement { get; }
 
-    public int PointId
-    {
-      get => _pointId;
-      set
-      {
-        _pointId = value;
-        // ReSharper disable once ExplicitCallerInfoArgument
-        // OnPropertyChanged("PreviousPoint");
-        // ReSharper disable once ExplicitCallerInfoArgument
-        // OnPropertyChanged("NextPoint");
-        // OnPropertyChanged("Index");
-      }
-    }
+    public int PointId { get; set; }
 
     public bool Open
     {
@@ -112,15 +97,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public bool Updated { get; set; }
 
-    public bool IsFirstNumber => _pointId == 0;
+    public bool IsFirstNumber => PointId == 0;
 
-    public bool IsLastNumber => Measurement == null || _pointId == Measurement.Count - 1;
+    public bool IsLastNumber => Measurement == null || PointId == Measurement.Count - 1;
 
     public MeasurementPoint PreviousPoint
-      => Measurement != null && !IsFirstNumber ? Measurement.GetPointByNr(_pointId - 1) : null;
+      => Measurement != null && !IsFirstNumber ? Measurement.GetPointByNr(PointId - 1) : null;
 
     public MeasurementPoint NextPoint
-      => Measurement != null && !IsLastNumber ? Measurement.GetPointByNr(_pointId + 1) : null;
+      => Measurement != null && !IsLastNumber ? Measurement.GetPointByNr(PointId + 1) : null;
 
     #endregion
 
@@ -133,7 +118,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Measurement = measurement;
       Point = null;
       PointId = pointId;
-      _added = false;
       Open = false;
       _constants = ConstantsViewer.Instance;
       _ci = CultureInfo.InvariantCulture;
@@ -152,7 +136,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       double z = direction.Position?.Z ?? 0.0;
       double xDir = direction.Direction?.X ?? 0.0;
       double yDir = direction.Direction?.Y ?? 0.0;
-      MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
+      MapView mapView = await Measurement.GetMeasurementView();
+      MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
       if (ContainsKey(imageId))
       {
@@ -174,7 +159,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public bool IsObservationVisible()
     {
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      return streetSmart.InsideScale() && !_isDisposed;
+      return streetSmart.InsideScale(MapView.Active) && !_isDisposed;
     }
 
     public void RemoveObservation(string imageId)
@@ -279,7 +264,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         if (!result)
         {
-          Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z);
+          MapView mapView = await Measurement.GetMeasurementView();
+          Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
           MapView thisView = MapView.Active;
           Geometry geometry = await thisView.GetCurrentSketchAsync();
@@ -291,9 +277,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
             if (ptColl != null)
             {
-              if (_pointId < ptColl.Count)
+              if (PointId < ptColl.Count)
               {
-                MapPoint pointC = ptColl[_pointId];
+                MapPoint pointC = ptColl[PointId];
 
                 if (IsSame(pointC))
                 {
@@ -340,8 +326,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         MeasurementList measurementList = streetSmart.MeasurementList;
         _disposeText?.Dispose();
 
-        if (streetSmart.InsideScale() && !_isDisposed && Point != null
-            && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y))
+        if (streetSmart.InsideScale(MapView.Active) && !_isDisposed && Point != null
+            && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y) && !Measurement.IsDisposed)
         {
           if (Measurement.Geometry.Type != StreetSmartGeometryType.Polygon || Measurement.Count >= 1 && (PointId == 0 || !IsSame(Measurement[0].Point)))
           {

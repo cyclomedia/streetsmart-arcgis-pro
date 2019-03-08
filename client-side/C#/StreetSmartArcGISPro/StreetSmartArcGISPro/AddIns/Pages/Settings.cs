@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,10 +22,12 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Mapping;
 
 using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
 
-using FileSettings = StreetSmartArcGISPro.Configuration.File.Settings;
+using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
+using FileProjectList = StreetSmartArcGISPro.Configuration.File.ProjectList;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
@@ -40,6 +42,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     #region Members
 
     private readonly FileSettings _settings;
+    private readonly FileProjectList _projectList;
 
     private readonly SpatialReference _recordingLayerCoordinateSystem;
     private readonly SpatialReference _cycloramaViewerCoordinateSystem;
@@ -54,7 +57,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     protected Settings()
     {
-      _settings = FileSettings.Instance;
+      _projectList = FileProjectList.Instance;
+      _settings = _projectList.GetSettings(MapView.Active);
 
       _recordingLayerCoordinateSystem = _settings.RecordingLayerCoordinateSystem;
       _cycloramaViewerCoordinateSystem = _settings.CycloramaViewerCoordinateSystem;
@@ -161,7 +165,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     protected override Task CommitAsync()
     {
-      _settings.Save();
+      _projectList.Save();
       return base.CommitAsync();
     }
 
@@ -172,7 +176,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       _settings.OverlayDrawDistance = _overlayDrawDistance;
 
-      _settings.Save();
+      _projectList.Save();
       return base.CancelAsync();
     }
 
@@ -180,7 +184,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     #region Functions
 
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+    protected override void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

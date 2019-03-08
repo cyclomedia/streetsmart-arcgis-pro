@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 
 using ArcGIS.Core.Geometry;
-
+using ArcGIS.Desktop.Mapping;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
 
@@ -50,6 +50,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
           if (streetSmart != null)
           {
+            streetSmart.MapView = MapView.Active;
             streetSmart.LookAt = null;
             streetSmart.Replace = true;
             streetSmart.Nearest = false;
@@ -63,25 +64,28 @@ namespace StreetSmartArcGISPro.AddIns.Views
     {
       TextBox textBox = sender as TextBox;
       string imageId = textBox?.Text ?? string.Empty;
-      PaneImageIdSearch paneImageIdSearch = ((dynamic)DataContext);
+      PaneImageIdSearch paneImageIdSearch = (dynamic) DataContext;
       paneImageIdSearch.ImageInfo.Clear();
 
       if (imageId.Length == 8)
       {
         ModulestreetSmart streetSmart = ModulestreetSmart.Current;
-        CycloMediaGroupLayer groupLayer = streetSmart.CycloMediaGroupLayer;
+        CycloMediaGroupLayer groupLayer = streetSmart.GetCycloMediaGroupLayer(MapView.Active);
 
-        foreach (var layer in groupLayer)
+        if (groupLayer != null)
         {
-          SpatialReference spatialReference = await layer.GetSpatialReferenceAsync();
-          string epsgCode = $"EPSG:{spatialReference.Wkid}";
-          FeatureCollection featureCollection = FeatureCollection.Load(imageId, epsgCode);
-
-          if (featureCollection.NumberOfFeatures >= 1)
+          foreach (var layer in groupLayer)
           {
-            foreach (Recording recording in featureCollection.FeatureMembers.Recordings)
+            SpatialReference spatialReference = await layer.GetSpatialReferenceAsync();
+            string epsgCode = $"EPSG:{spatialReference.Wkid}";
+            FeatureCollection featureCollection = FeatureCollection.Load(imageId, epsgCode);
+
+            if (featureCollection.NumberOfFeatures >= 1)
             {
-              paneImageIdSearch.ImageInfo.Add(recording);
+              foreach (Recording recording in featureCollection.FeatureMembers.Recordings)
+              {
+                paneImageIdSearch.ImageInfo.Add(recording);
+              }
             }
           }
         }

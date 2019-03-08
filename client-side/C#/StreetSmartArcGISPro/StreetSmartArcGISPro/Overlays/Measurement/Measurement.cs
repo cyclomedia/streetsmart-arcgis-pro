@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,7 +50,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     #region Members
 
     private ArcGISGeometryType _geometryType;
-    private readonly Settings _settings;
     private readonly MeasurementList _measurementList;
     private readonly IStreetSmartAPI _api;
     private readonly CultureInfo _ci;
@@ -94,19 +94,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public VectorLayer VectorLayer { get; set; }
 
-    public bool DrawPoint { get; private set; }
-
     public int PointNr { get; private set; }
 
     public long? ObjectId { get; set; }
 
     public bool IsPointMeasurement => _geometryType == ArcGISGeometryType.Point;
 
-    public bool IsSketch => _measurementList.Sketch == this;
-
     public bool IsOpen => _measurementList.Open == this;
 
-    public string MeasurementName => Properties.Name;
+    public bool IsDisposed { get; set; }
 
     public bool UpdateMeasurement { get; set; }
 
@@ -120,19 +116,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Constructor
 
-    public Measurement(IMeasurementProperties properties, IGeometry geometry, bool drawPoint, IStreetSmartAPI api)
+    public Measurement(IMeasurementProperties properties, IGeometry geometry, IStreetSmartAPI api)
     {
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       _measurementList = streetSmart.MeasurementList;
 
       _ci = CultureInfo.InvariantCulture;
       _api = api;
-      _settings = Settings.Instance;
-      DrawPoint = drawPoint;
       Properties = properties;
       UpdateMeasurement = false;
       DoChange = false;
       Geometry = geometry;
+      IsDisposed = false;
       // SetDetailPanePoint(null);
 
       if (geometry != null)
@@ -159,25 +154,22 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region Functions
 
-    public async void Dispose()
+    public void Dispose()
     {
-      foreach (var element in this)
+      IsDisposed = true;
+
+//      foreach (var element in this)
+//      {
+//        MeasurementPoint measurementPoint = element.Value;
+//        measurementPoint.Dispose();
+//      }
+
+      while (Count >= 1)
       {
+        var element = this.ElementAt(0);
         MeasurementPoint measurementPoint = element.Value;
         measurementPoint.Dispose();
-      }
-
-      _measurementList.Open = IsOpen ? null : _measurementList.Open;
-      _measurementList.Sketch = IsSketch ? null : _measurementList.Sketch;
-
-      if (_measurementList.Count >= 1)
-      {
-        _measurementList.Remove(_measurementList.ElementAt(0).Key);
-      }
-
-      if (VectorLayer != null)
-      {
-        await VectorLayer.GenerateJsonAsync();
+        Remove(element.Key);
       }
     }
 
@@ -194,23 +186,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public void Close()
     {
       _measurementList.Open = null;
-      DrawPoint = true;
 
-      //if (!IsPointMeasurement)
-      //{
-        for (int i = 0; i < Count; i++)
-        {
-          MeasurementPoint point = this.ElementAt(i).Value;
-          point.Dispose();
-        //  await point.RedrawPointAsync();
-
-          //for (int j = 0; j < point.Count; j++)
-          //{
-         //   MeasurementObservation observation = point.ElementAt(j).Value;
-         //   await observation.RedrawObservationAsync();
-         // }
-        }
-      //}
+      for (int i = 0; i < Count; i++)
+      {
+        MeasurementPoint point = this.ElementAt(i).Value;
+        point.Dispose();
+      }
     }
 
     public void Open()
@@ -297,7 +278,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (IsOpen && GlobeSpotterConfiguration.MeasurePermissions)
       {
         _measurementList.Open = null;
-        // ToDo: Close measurement, EntityId
       }
     }
 
@@ -312,7 +292,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       if (IsPointMeasurement && GlobeSpotterConfiguration.MeasurePermissions)
       {
-        // Todo: set focus EntityId
         _measurementList.AddMeasurementPoint(EntityId);
       }
     }
@@ -324,15 +303,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         CloseMeasurement();
       }
 
-      if (GlobeSpotterConfiguration.MeasurePermissions)
-      {
-        // Todo: remove EntityId
-      }
-
       Dispose();
     }
 
-    public async Task RemovePoint(int pointId)
+    public void RemovePoint(int pointId)
     {
       if (ContainsKey(pointId))
       {
@@ -575,7 +549,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Map map = mapView?.Map;
       ArcGISSpatialReference mapSpatRef = map?.SpatialReference;
 
-      StreetSmartSpatialReference myCyclSpatRef = _settings.CycloramaViewerCoordinateSystem;
+      Setting settings = ProjectList.Instance.GetSettings(mapView);
+      StreetSmartSpatialReference myCyclSpatRef = settings.CycloramaViewerCoordinateSystem;
       ArcGISSpatialReference cyclSpatRef = myCyclSpatRef == null
         ? mapSpatRef
         : myCyclSpatRef.ArcGisSpatialReference ?? await myCyclSpatRef.CreateArcGisSpatialReferenceAsync();
@@ -605,7 +580,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         for (int i = 0; i < Count; i++)
         {
-          MapPoint mapPoint = pointsGeometry.Count > i ? pointsGeometry[i] : null;
+          MapPoint mapPoint = pointsGeometry?.Count > i ? pointsGeometry[i] : null;
           MeasurementPoint mp = this.ElementAt(i).Value;
           toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
 
@@ -639,6 +614,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           });
         }
       }
+    }
+
+    public async Task<MapView> GetMeasurementView()
+    {
+      var moduleStreetSmart = ModuleStreetSmart.Current;
+      var vectorLayerList = await moduleStreetSmart.GetVectorLayerListAsync();
+      return vectorLayerList.GetMapViewFromLayer(VectorLayer.Layer);
     }
 
     #endregion

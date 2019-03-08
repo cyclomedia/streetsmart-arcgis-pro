@@ -197,5 +197,5 @@ FakesAssemblies/
 
 ## Ignore key files for Street Smart for ArcGIS Pro
 /client-side/C#/StreetSmartArcGISPro/StreetSmartArcGISPro/Resources/APIKey.xml
-/client-side/C#/Libs/
 /client-side/C#/SignKey
+/client-side/C#/Libs

@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,11 +45,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     #endregion
 
     #region Properties
-
-    /// <summary>
-    /// Overlay draw distance
-    /// </summary>
-    public double OverlayDrawDistance { get; set; }
 
     /// <summary>
     /// Address language code
@@ -116,7 +111,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new ConstantsViewer
       {
-        OverlayDrawDistance = 30.0,
         AddressLanguageCode = "nl",
         AddressDatabase = "CMDatabase",
         CrossCheckSize = 10.0,
