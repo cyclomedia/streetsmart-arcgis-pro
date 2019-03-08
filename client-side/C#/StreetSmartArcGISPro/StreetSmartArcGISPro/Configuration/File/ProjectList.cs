@@ -32,7 +32,7 @@ using ArcGisProject = ArcGIS.Desktop.Core.Project;
 namespace StreetSmartArcGISPro.Configuration.File
 {
   [XmlRoot("Projects")]
-  public class ProjectList: ObservableCollection<Project>, INotifyPropertyChanged
+  public class ProjectList: ObservableCollection<Project>
   {
     #region Events
 

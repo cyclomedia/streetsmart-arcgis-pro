@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
+
 using ArcGIS.Desktop.Internal.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.Configuration.File

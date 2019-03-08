@@ -122,13 +122,7 @@
     <value>..\Images\FocusMode16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StreetSmartOnLoginFailed" xml:space="preserve">
-    <value>Can not login the API</value>
-  </data>
-  <data name="Login_CreateAes_Password_must_be_at_least_8_characters_" xml:space="preserve">
-    <value>Password must be at least 8 characters.</value>
-  </data>
-  <data name="Login_CreateAes_Salt_must_be_at_least_8_bytes_" xml:space="preserve">
-    <value>Salt must be at least 8 bytes.</value>
+    <value>Can not login to Street Smart</value>
   </data>
   <data name="SystemSearch16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SystemSearch16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -137,6 +131,93 @@
     <value>..\Images\UserTrash16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StreetSmartCanNotOpenImage" xml:space="preserve">
-    <value>Can not open image</value>
+    <value>Can not open the image</value>
+  </data>
+  <data name="LanguageLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>version</value>
+  </data>
+  <data name="AgreementAcceptance" xml:space="preserve">
+    <value>I have read and agree to the terms of use.</value>
+  </data>
+  <data name="ConfigurationAddress" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="ConfigurationBypassProxy" xml:space="preserve">
+    <value>Bypass proxy server for local addresses</value>
+  </data>
+  <data name="ConfigurationConfigurationUrl" xml:space="preserve">
+    <value>Configuration url</value>
+  </data>
+  <data name="ConfigurationDomain" xml:space="preserve">
+    <value>Domain</value>
+  </data>
+  <data name="ConfigurationLocation" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="ConfigurationPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="ConfigurationPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ConfigurationProxyServer" xml:space="preserve">
+    <value>Proxy server</value>
+  </data>
+  <data name="ConfigurationStreetSmartLocation" xml:space="preserve">
+    <value>Street Smart location</value>
+  </data>
+  <data name="ConfigurationUseDefault" xml:space="preserve">
+    <value>Use default</value>
+  </data>
+  <data name="ConfigurationUseDefaultCredentials" xml:space="preserve">
+    <value>Use default credentials</value>
+  </data>
+  <data name="ConfigurationUseProxyServer" xml:space="preserve">
+    <value>Use a proxy server</value>
+  </data>
+  <data name="ConfigurationUsername" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="ImageIdSearchDate" xml:space="preserve">
+    <value>Date:</value>
+  </data>
+  <data name="ImageIdSearchImageId" xml:space="preserve">
+    <value>ImageId:</value>
+  </data>
+  <data name="ImageIdSearchLocation" xml:space="preserve">
+    <value>Location:</value>
+  </data>
+  <data name="ImageIdSearchProductType" xml:space="preserve">
+    <value>Product type:</value>
+  </data>
+  <data name="ImageIdSearchTime" xml:space="preserve">
+    <value>Time:</value>
+  </data>
+  <data name="LanguageGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="LoginCheck" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="LoginCheckText" xml:space="preserve">
+    <value>Check the username and password combination</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>Login Failed</value>
+  </data>
+  <data name="LoginLogin" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="LoginPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LoginSuccessfully" xml:space="preserve">
+    <value>Login Successfully</value>
+  </data>
+  <data name="LoginUsername" xml:space="preserve">
+    <value>Username</value>
   </data>
 </root>

@@ -176,6 +176,12 @@
             condition="streetSmartArcGISPro_agreementAcceptedCondition">
         <content className="AddIns.Views.Login" />
       </page>
+      <page id="streetSmartArcGISPro_languagePage"
+            caption="Language"
+            className="AddIns.Pages.Language"
+            condition="streetSmartArcGISPro_agreementAcceptedCondition">
+        <content className="AddIns.Views.Language" />
+      </page>
       <page id="streetSmartArcGISPro_configurationPage"
             caption="Configuration"
             className="AddIns.Pages.Configuration"

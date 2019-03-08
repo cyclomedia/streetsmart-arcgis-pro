@@ -18,9 +18,13 @@
 
 using System;
 using System.Diagnostics;
+
 using System.Reflection;
+using System.Resources;
 
 using ArcGIS.Desktop.Framework.Contracts;
+
+using StreetSmartArcGISPro.Configuration.File;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
@@ -40,6 +44,10 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       get
       {
+        ResourceManager res = Properties.Resources.ResourceManager;
+        LanguageSettings language = LanguageSettings.Instance;
+        string versionTxt = res.GetString("AboutVersion", language.CultureInfo);
+
         // Assembly info
         Type type = GetType();
         Assembly assembly = type.Assembly;
@@ -52,7 +60,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         string copyright = info.LegalCopyright;
         Version version = assName.Version;
 
-        return string.Format("{0}{3}{1}{3}Version: {2}.", product, copyright, version, Environment.NewLine);
+        return $"{product}{Environment.NewLine}{copyright}{Environment.NewLine}{versionTxt}: {version}.";
       }
     }
 

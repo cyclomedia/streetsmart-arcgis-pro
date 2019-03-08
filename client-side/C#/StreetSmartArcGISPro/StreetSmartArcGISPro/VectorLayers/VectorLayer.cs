@@ -203,10 +203,17 @@ namespace StreetSmartArcGISPro.VectorLayers
               Envelope envelope = EnvelopeBuilder.CreateEnvelope(xMin, yMin, xMax, yMax, cyclSpatRef);
               Envelope copyEnvelope = envelope;
 
-              if (layerSpatRef?.Wkid != 0 && cyclSpatRef != null)
+              if (layerSpatRef?.Wkid != 0 && cyclSpatRef?.Wkid != 0)
               {
-                ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
-                copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
+                try
+                {
+                  ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
+                  copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
+                }
+                catch (Exception)
+                {
+                  // ignored
+                }
               }
 
               Polygon copyPolygon = PolygonBuilder.CreatePolygon(copyEnvelope, layerSpatRef);
