@@ -76,6 +76,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Members
 
+    private string _message;
     private string _location;
     private bool _isActive;
     private bool _replace;
@@ -166,6 +167,19 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         if (_location != value)
         {
           _location = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public string Message
+    {
+      get => _message;
+      set
+      {
+        if (_message != value)
+        {
+          _message = value;
           NotifyPropertyChanged();
         }
       }

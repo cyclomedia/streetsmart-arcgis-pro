@@ -27,7 +27,29 @@
  */
 -->
   <Grid>
-    <streetSmart:StreetSmartGUI
-      Api="{Binding Api, Mode=OneWay}" />
+    <TextBlock Text="{Binding Message}">
+      <TextBlock.Style>
+        <Style TargetType="{x:Type TextBlock}">
+          <Setter Property="Visibility" Value="Hidden"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Message}" Value="test">
+              <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </TextBlock.Style>
+    </TextBlock>
+    <streetSmart:StreetSmartGUI Api="{Binding Api, Mode=OneWay}">
+      <streetSmart:StreetSmartGUI.Style>
+        <Style TargetType="{x:Type streetSmart:StreetSmartGUI}">
+          <Setter Property="Visibility" Value="Visible"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Message}" Value="test">
+              <Setter Property="Visibility" Value="Hidden"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </streetSmart:StreetSmartGUI.Style>
+    </streetSmart:StreetSmartGUI>
   </Grid>
 </UserControl>

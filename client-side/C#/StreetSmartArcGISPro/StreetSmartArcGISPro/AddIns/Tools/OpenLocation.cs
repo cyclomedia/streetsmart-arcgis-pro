@@ -91,10 +91,21 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           streetSmart.Replace = replace;
           streetSmart.Nearest = _nearest;
           streetSmart.Location = _location;
+          streetSmart.Message = String.Empty;
         }
 
         _location = string.Empty;
         _nearest = false;
+      }
+      else
+      {
+        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Show();
+
+        if (streetSmart != null)
+        {
+          streetSmart.MapView = MapView.Active;
+          streetSmart.Message = "test";
+        }
       }
     }
 /*
