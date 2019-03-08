@@ -72,11 +72,11 @@ namespace StreetSmartArcGISPro.Utilities
       return point;
     }
 
-    public static async Task<bool> CheckInAreaCycloramaSpatialReferenceAsync()
+    public static async Task<bool> CheckInAreaCycloramaSpatialReferenceAsync(MapView mapView)
     {
       bool result = false;
-      Setting settings = ProjectList.Instance.GetSettings(MapView.Active);
-      MySpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
+      Setting settings = ProjectList.Instance.GetSettings(mapView);
+      MySpatialReference spatialReference = settings?.CycloramaViewerCoordinateSystem;
 
       if (spatialReference != null)
       {

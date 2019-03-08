@@ -377,7 +377,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
                     await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
                     await mapView.ClearSketchAsync();
-                    measurement[0].Dispose();
+                    measurement.Dispose();
                   }
                   else
                   {

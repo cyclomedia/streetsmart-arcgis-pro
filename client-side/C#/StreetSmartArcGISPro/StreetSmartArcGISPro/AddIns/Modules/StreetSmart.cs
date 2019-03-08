@@ -318,7 +318,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (settings.CycloramaViewerCoordinateSystem != null)
       {
-        await CoordSystemUtils.CheckInAreaCycloramaSpatialReferenceAsync();
+        await CoordSystemUtils.CheckInAreaCycloramaSpatialReferenceAsync(args.MapView);
       }
 
       if (!_agreement.Value)
