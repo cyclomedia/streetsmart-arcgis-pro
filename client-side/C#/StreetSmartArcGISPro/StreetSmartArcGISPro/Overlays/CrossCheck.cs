@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,13 +43,14 @@ namespace StreetSmartArcGISPro.Overlays
 
     public async Task UpdateAsync(double x, double y, double size)
     {
-      Settings settings = Settings.Instance;
-      MySpatialReference spatRel = settings.CycloramaViewerCoordinateSystem;
-
       await QueuedTask.Run(() =>
       {
         MapView thisView = MapView.Active;
         Map map = thisView?.Map;
+
+        Setting settings = ProjectList.Instance.GetSettings(thisView);
+        MySpatialReference spatRel = settings.CycloramaViewerCoordinateSystem;
+
         SpatialReference mapSpatialReference = map?.SpatialReference;
         SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
         MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);

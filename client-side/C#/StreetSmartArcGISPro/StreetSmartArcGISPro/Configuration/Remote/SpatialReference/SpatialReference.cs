@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,10 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 
+using StreetSmartArcGISPro.Configuration.File;
+
 using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
-using FileSettings = StreetSmartArcGISPro.Configuration.File.Settings;
+using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 {
@@ -133,34 +135,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
         if (ArcGisSpatialReference != null)
         {
           MapView activeView = MapView.Active;
-          Envelope envelope = null;
-
-          if (activeView == null)
-          {
-            FileSettings settings = FileSettings.Instance;
-            SpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
-
-            if (spatialReference != null)
-            {
-              if (spatialReference.ArcGisSpatialReference == null)
-              {
-                spatialReference.CreateSpatialReference();
-              }
-
-              if (spatialReference.ArcGisSpatialReference != null)
-              {
-                Bounds bounds = spatialReference.NativeBounds;
-                var minCoordinate = new Coordinate2D(bounds.MinX, bounds.MinY);
-                var maxCoordinate = new Coordinate2D(bounds.MaxX, bounds.MaxY);
-                envelope = EnvelopeBuilder.CreateEnvelope(minCoordinate, maxCoordinate,
-                  spatialReference.ArcGisSpatialReference);
-              }
-            }
-          }
-          else
-          {
-            envelope = activeView.Extent;
-          }
+          Envelope envelope = activeView?.Extent;
 
           if (envelope != null)
           {

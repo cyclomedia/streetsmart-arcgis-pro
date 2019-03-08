@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -113,7 +113,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     #region Functions
 
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+    protected override void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

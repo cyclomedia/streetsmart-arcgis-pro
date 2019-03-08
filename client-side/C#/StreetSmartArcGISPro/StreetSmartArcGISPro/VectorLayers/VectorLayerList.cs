@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
   #endregion
 
-  public class VectorLayerList : List<VectorLayer>
+  public class VectorLayerList : Dictionary<MapView, List<VectorLayer>>
   {
     #region Events
 
@@ -59,9 +59,9 @@ namespace StreetSmartArcGISPro.VectorLayers
     #region Properties
 
     private readonly MeasurementList _measurementList;
-    private readonly CycloMediaGroupLayer _cycloMediaGroupLayer;
     private string _currentToolId;
     private bool _updateHeight;
+    private bool _eventsInitialized;
 
     #endregion
 
@@ -75,41 +75,46 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public VectorLayerList()
     {
+      _eventsInitialized = false;
       _updateHeight = false;
       _currentToolId = string.Empty;
       ModuleStreetSmart modulestreetSmart = ModuleStreetSmart.Current;
       _measurementList = modulestreetSmart.MeasurementList;
-      _cycloMediaGroupLayer = modulestreetSmart.CycloMediaGroupLayer;
       EditTool = EditTools.NoEditTool;
+      ActiveMapViewChangedEvent.Subscribe(OnMapViewChangedEvent);
     }
 
     #endregion
 
     #region Functions
 
-    public VectorLayer GetLayer(Layer layer)
+    public VectorLayer GetLayer(Layer layer, MapView mapView)
     {
-      return this.Aggregate<VectorLayer, VectorLayer>(null,
+      var layerList = ContainsKey(mapView) ? this[mapView] : null;
+      return layerList?.Aggregate<VectorLayer, VectorLayer>(null,
         (current, layerCheck) => layerCheck?.Layer == layer ? layerCheck : current);
     }
 
-    public VectorLayer GetLayer(string layerId)
+    public VectorLayer GetLayer(string layerId, MapView mapView)
     {
-      return this.Aggregate<VectorLayer, VectorLayer>(null,
+      var layerList = ContainsKey(mapView) ? this[mapView] : null;
+      return layerList?.Aggregate<VectorLayer, VectorLayer>(null,
         (current, layerCheck) => layerCheck.Overlay.Id == layerId ? layerCheck : current);
     }
 
-    public async Task LoadMeasurementsAsync()
+    public async Task LoadMeasurementsAsync(MapView mapView)
     {
-      foreach (VectorLayer vectorLayer in this)
+      var layerList = this[mapView];
+
+      foreach (VectorLayer vectorLayer in layerList)
       {
         await vectorLayer.LoadMeasurementsAsync();
       }
     }
 
-    public async Task DetectVectorLayersAsync()
+    public async Task DetectVectorLayersAsync(MapView mapView)
     {
-      await DetectVectorLayersAsync(true);
+      await DetectVectorLayersAsync(true, mapView);
     }
 
     private async Task DetectVectorLayersAsync(bool initEvents, MapView initMapView = null)
@@ -123,7 +128,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         foreach (var layer in layers)
         {
-          await AddLayerAsync(layer);
+          await AddLayerAsync(layer, mapView);
         }
       }
 
@@ -135,22 +140,34 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
     }
 
-    private async Task AddLayerAsync(Layer layer)
+    private async Task AddLayerAsync(Layer layer, MapView mapView)
     {
       FeatureLayer featureLayer = layer as FeatureLayer;
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      CycloMediaGroupLayer cycloGrouplayer = streetSmart?.CycloMediaGroupLayer;
+      CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetCycloMediaGroupLayer(mapView);
+
+      List<VectorLayer> layerList = null;
+
+      if (ContainsKey(mapView))
+      {
+        layerList = this[mapView];
+      }
+      else
+      {
+        layerList = new List<VectorLayer>();
+        Add(mapView, layerList);
+      }
 
       if (featureLayer != null && cycloGrouplayer != null && !cycloGrouplayer.IsKnownName(featureLayer.Name))
       {
-        if (!this.Aggregate(false, (current, vecLayer) => vecLayer.Layer == layer || current))
+        if (!layerList.Aggregate(false, (current, vecLayer) => vecLayer.Layer == layer || current))
         {
           var vectorLayer = new VectorLayer(featureLayer, this);
           bool initialized = await vectorLayer.InitializeEventsAsync();
 
           if (initialized)
           {
-            Add(vectorLayer);
+            layerList.Add(vectorLayer);
             LayerAdded?.Invoke(vectorLayer);
           }
         }
@@ -159,34 +176,37 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private void AddEvents()
     {
-      LayersAddedEvent.Subscribe(OnLayersAdded);
-      LayersMovedEvent.Subscribe(OnLayersMoved);
-      LayersRemovedEvent.Subscribe(OnLayersRemoved);
-      MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertiesChanged);
-      TOCSelectionChangedEvent.Subscribe(OnTocSelectionChanged);
-      DrawStartedEvent.Subscribe(OnDrawStarted);
-      DrawCompleteEvent.Subscribe(OnDrawCompleted);
-      ActiveToolChangedEvent.Subscribe(OnActiveToolChangedEvent);
-      EditCompletedEvent.Subscribe(OnEditCompleted);
+      if (!_eventsInitialized)
+      {
+        _eventsInitialized = true;
+        LayersAddedEvent.Subscribe(OnLayersAdded);
+        LayersMovedEvent.Subscribe(OnLayersMoved);
+        LayersRemovedEvent.Subscribe(OnLayersRemoved);
+        MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertiesChanged);
+        TOCSelectionChangedEvent.Subscribe(OnTocSelectionChanged);
+        DrawStartedEvent.Subscribe(OnDrawStarted);
+        DrawCompleteEvent.Subscribe(OnDrawCompleted);
+        ActiveToolChangedEvent.Subscribe(OnActiveToolChangedEvent);
+        EditCompletedEvent.Subscribe(OnEditCompleted);
+      }
     }
 
-    private async Task StartMeasurementSketchAsync(VectorLayer vectorLayer)
+    private async Task StartMeasurementSketchAsync(VectorLayer vectorLayer, MapView mapView)
     {
       Measurement measurement = _measurementList.Sketch;
-      MapView mapView = MapView.Active;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
       _measurementList.StartMeasurement(geometry, measurement, true, null, vectorLayer);
     }
 
-    public async Task StartSketchToolAsync()
+    public async Task StartSketchToolAsync(MapView mapView)
     {
       EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
       Layer layer = editingFeatureTemplate?.Layer;
-      VectorLayer vectorLayer = GetLayer(layer);
+      VectorLayer vectorLayer = GetLayer(layer, mapView);
 
       if (vectorLayer != null)
       {
-        await StartMeasurementSketchAsync(vectorLayer);
+        await StartMeasurementSketchAsync(vectorLayer, mapView);
       }
     }
 
@@ -221,7 +241,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 if (Math.Abs(point.Z) < e)
                 {
                   changesLine = true;
-                  MapPoint srcLinePoint = await AddHeightToMapPointAsync(point);
+                  MapPoint srcLinePoint = await AddHeightToMapPointAsync(point, mapView);
                   mapLinePoints.Add(MapPointBuilder.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
                 }
                 else
@@ -263,7 +283,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 if (Math.Abs(mapPoint.Z) < e && j <= polygon.Points.Count - 2)
                 {
                   changesPolygon = true;
-                  MapPoint srcPolygonPoint = await AddHeightToMapPointAsync(mapPoint);
+                  MapPoint srcPolygonPoint = await AddHeightToMapPointAsync(mapPoint, mapView);
                   mapPolygonPoints.Add(srcPolygonPoint);
                 }
                 else if (changesPolygon && j == polygon.Points.Count - 1)
@@ -308,30 +328,31 @@ namespace StreetSmartArcGISPro.VectorLayers
         double centerY = (envelope.YMax - envelope.YMin)/2 + envelope.YMin;
         double centerZ = (envelope.ZMax - envelope.ZMin)/2 + envelope.ZMin;
         MapPoint srcPoint = MapPointBuilder.CreateMapPoint(centerX, centerY, centerZ);
-        MapPoint dstPoint = await AddHeightToMapPointAsync(srcPoint);
+        MapPoint dstPoint = await AddHeightToMapPointAsync(srcPoint, mapView);
         ElevationCapturing.ElevationConstantValue = dstPoint.Z;
       });
     }
 
-    public async Task<MapPoint> AddHeightToMapPointAsync(MapPoint srcPoint)
+    public async Task<MapPoint> AddHeightToMapPointAsync(MapPoint srcPoint, MapView mapView)
     {
       return await QueuedTask.Run(async () =>
       {
-        MapView mapView = MapView.Active;
         Map map = mapView.Map;
         SpatialReference srcSpatialReference = map.SpatialReference;
-        SpatialReference dstSpatialReference = await CoordSystemUtils.CycloramaSpatialReferenceAsync();
+        SpatialReference dstSpatialReference = await CoordSystemUtils.CycloramaSpatialReferenceAsync(mapView);
 
         ProjectionTransformation dstProjection = ProjectionTransformation.Create(srcSpatialReference,
           dstSpatialReference);
 
         if (GeometryEngine.Instance.ProjectEx(srcPoint, dstProjection) is MapPoint dstPoint)
         {
-          double? height = await _cycloMediaGroupLayer.GetHeightAsync(dstPoint.X, dstPoint.Y);
+          ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
+          CycloMediaGroupLayer cycloMediaGroupLayer = streetSmart.GetCycloMediaGroupLayer(mapView);
+          double? height = await cycloMediaGroupLayer.GetHeightAsync(dstPoint.X, dstPoint.Y);
 
           if (height != null)
           {
-            dstPoint = MapPointBuilder.CreateMapPoint(dstPoint.X, dstPoint.Y, ((double) height), dstSpatialReference);
+            dstPoint = MapPointBuilder.CreateMapPoint(dstPoint.X, dstPoint.Y, (double) height, dstSpatialReference);
             ProjectionTransformation srcProjection = ProjectionTransformation.Create(dstSpatialReference,
               srcSpatialReference);
             srcPoint = GeometryEngine.Instance.ProjectEx(dstPoint, srcProjection) as MapPoint;
@@ -345,6 +366,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     public void SketchFinished()
     {
       _measurementList.FromMap = true;
+
       if (_measurementList.Count >= 1)
       {
         _measurementList[_measurementList.ElementAt(0).Key].Dispose();
@@ -380,17 +402,17 @@ namespace StreetSmartArcGISPro.VectorLayers
           case "esri_editing_SketchLineTool":
             EditTool = EditTools.SketchLineTool;
             SketchFinished();
-            await StartSketchToolAsync();
+            await StartSketchToolAsync(MapView.Active);
             break;
           case "esri_editing_SketchPolygonTool":
             EditTool = EditTools.SketchPolygonTool;
             SketchFinished();
-            await StartSketchToolAsync();
+            await StartSketchToolAsync(MapView.Active);
             break;
           case "esri_editing_SketchPointTool":
             EditTool = EditTools.SketchPointTool;
             SketchFinished();
-            await StartSketchToolAsync();
+            await StartSketchToolAsync(MapView.Active);
             break;
           default:
             EditTool = EditTools.NoEditTool;
@@ -420,7 +442,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       MapView mapView = args.MapView;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
 
-      if ((geometry?.HasZ ?? false) && (EditTool == EditTools.SketchPointTool))
+      if ((geometry?.HasZ ?? false) && EditTool == EditTools.SketchPointTool)
       {
         await AddHeightToMeasurementAsync(geometry, mapView);
       }
@@ -443,9 +465,9 @@ namespace StreetSmartArcGISPro.VectorLayers
       Geometry geometry = await mapView.GetCurrentSketchAsync();
       EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
       Layer layer = editingFeatureTemplate?.Layer;
-      VectorLayer thisVectorLayer = GetLayer(layer);
+      VectorLayer thisVectorLayer = GetLayer(layer, mapView);
 
-      if (geometry != null)
+      if (geometry != null && thisVectorLayer != null)
       {
         switch (EditTool)
         {
@@ -459,7 +481,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
               if (geometry.PointCount == 0)
               {
-                await StartMeasurementSketchAsync(vectorLayer);
+                await StartMeasurementSketchAsync(vectorLayer, mapView);
               }
               else if (geometry.HasZ)
               {
@@ -532,22 +554,36 @@ namespace StreetSmartArcGISPro.VectorLayers
       AddEvents();
     }
 
+    private async void OnMapViewChangedEvent(ActiveMapViewChangedEventArgs args)
+    {
+      if (args.IncomingView != null)
+      {
+        await DetectVectorLayersAsync(args.IncomingView);
+      }
+    }
+
     private async void OnMapClosed(MapClosedEventArgs args)
     {
-      LayersAddedEvent.Unsubscribe(OnLayersAdded);
-      LayersMovedEvent.Unsubscribe(OnLayersMoved);
-      LayersRemovedEvent.Unsubscribe(OnLayersRemoved);
-      MapMemberPropertiesChangedEvent.Unsubscribe(OnMapMemberPropertiesChanged);
-      TOCSelectionChangedEvent.Unsubscribe(OnTocSelectionChanged);
-      ActiveToolChangedEvent.Unsubscribe(OnActiveToolChangedEvent);
-      EditCompletedEvent.Unsubscribe(OnEditCompleted);
-      DrawCompleteEvent.Unsubscribe(OnDrawCompleted);
-      DrawStartedEvent.Unsubscribe(OnDrawStarted);
-
-      while (Count >= 1)
+      if (_eventsInitialized)
       {
-        VectorLayer vectorLayer = this[0];
-        await RemoveLayer(vectorLayer);
+        _eventsInitialized = false;
+        LayersAddedEvent.Unsubscribe(OnLayersAdded);
+        LayersMovedEvent.Unsubscribe(OnLayersMoved);
+        LayersRemovedEvent.Unsubscribe(OnLayersRemoved);
+        MapMemberPropertiesChangedEvent.Unsubscribe(OnMapMemberPropertiesChanged);
+        TOCSelectionChangedEvent.Unsubscribe(OnTocSelectionChanged);
+        ActiveToolChangedEvent.Unsubscribe(OnActiveToolChangedEvent);
+        EditCompletedEvent.Unsubscribe(OnEditCompleted);
+        DrawCompleteEvent.Unsubscribe(OnDrawCompleted);
+        DrawStartedEvent.Unsubscribe(OnDrawStarted);
+      }
+
+      MapView mapView = args.MapPane.MapView;
+
+      while (ContainsKey(mapView) && this[mapView].Count >= 1)
+      {
+        VectorLayer vectorLayer = this[mapView][0];
+        await RemoveLayer(vectorLayer, mapView);
       }
     }
 
@@ -555,7 +591,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       foreach (Layer layer in args.Layers)
       {
-        await AddLayerAsync(layer);
+        MapView mapView = GetMapViewFromLayer(layer);
+        await AddLayerAsync(layer, mapView ?? MapView.Active);
       }
     }
 
@@ -570,14 +607,15 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         if (layer is FeatureLayer featureLayer)
         {
+          MapView mapView = GetMapViewFromLayer(layer);
           int i = 0;
 
-          while (Count > i)
+          while (mapView != null && ContainsKey(mapView) && this[mapView].Count > i)
           {
-            if (this[i].Layer == featureLayer)
+            if (this[mapView][i].Layer == featureLayer)
             {
-              VectorLayer vectorLayer = this[i];
-              await RemoveLayer(vectorLayer);
+              VectorLayer vectorLayer = this[mapView][i];
+              await RemoveLayer(vectorLayer, mapView);
             }
             else
             {
@@ -588,15 +626,32 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
     }
 
-    private async Task RemoveLayer(VectorLayer vectorLayer)
+    private async Task RemoveLayer(VectorLayer vectorLayer, MapView mapView)
     {
       LayerRemoved?.Invoke(vectorLayer);
       await vectorLayer.DisposeAsync();
 
-      if (Contains(vectorLayer))
+      if (ContainsKey(mapView) && this[mapView].Contains(vectorLayer))
       {
-        Remove(vectorLayer);
+        this[mapView].Remove(vectorLayer);
       }
+    }
+
+    public MapView GetMapViewFromLayer(Layer layer)
+    {
+      return GetMapViewFromMap(layer.Map);
+    }
+
+    public MapView GetMapViewFromMap(Map map)
+    {
+      MapView mapView = null;
+
+      foreach (var elem in this)
+      {
+        mapView = elem.Key.Map == map ? elem.Key : mapView;
+      }
+
+      return mapView;
     }
 
     #endregion

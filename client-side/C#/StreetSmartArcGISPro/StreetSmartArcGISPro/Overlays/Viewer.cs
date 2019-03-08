@@ -1,6 +1,6 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018, CycloMedia, All rights reserved.
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
 
 using System.Drawing;
 using System.Threading.Tasks;
-
+using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Interfaces.Data;
 
 namespace StreetSmartArcGISPro.Overlays
@@ -59,10 +59,10 @@ namespace StreetSmartArcGISPro.Overlays
 
     #region Functions
 
-    public async Task SetAsync(ICoordinate coordinate, IOrientation orientation, Color color)
+    public async Task SetAsync(ICoordinate coordinate, IOrientation orientation, Color color, MapView mapView)
     {
       Dispose();
-      await InitializeAsync(coordinate, orientation, color);
+      await InitializeAsync(coordinate, orientation, color, mapView);
     }
 
     #endregion
