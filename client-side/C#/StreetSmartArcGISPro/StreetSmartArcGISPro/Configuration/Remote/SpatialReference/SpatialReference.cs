@@ -135,34 +135,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
         if (ArcGisSpatialReference != null)
         {
           MapView activeView = MapView.Active;
-          Envelope envelope = null;
-
-          if (activeView == null)
-          {
-            FileSettings settings = ProjectList.Instance.GetSettings(MapView.Active);
-            SpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
-
-            if (spatialReference != null)
-            {
-              if (spatialReference.ArcGisSpatialReference == null)
-              {
-                spatialReference.CreateSpatialReference();
-              }
-
-              if (spatialReference.ArcGisSpatialReference != null)
-              {
-                Bounds bounds = spatialReference.NativeBounds;
-                var minCoordinate = new Coordinate2D(bounds.MinX, bounds.MinY);
-                var maxCoordinate = new Coordinate2D(bounds.MaxX, bounds.MaxY);
-                envelope = EnvelopeBuilder.CreateEnvelope(minCoordinate, maxCoordinate,
-                  spatialReference.ArcGisSpatialReference);
-              }
-            }
-          }
-          else
-          {
-            envelope = activeView.Extent;
-          }
+          Envelope envelope = activeView?.Extent;
 
           if (envelope != null)
           {
