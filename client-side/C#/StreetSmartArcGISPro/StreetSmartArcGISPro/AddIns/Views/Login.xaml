@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:converters="clr-namespace:StreetSmartArcGISPro.AddIns.Views.Converters" 
+             xmlns:util="clr-namespace:StreetSmartArcGISPro.Utilities"
              mc:Ignorable="d" 
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -36,13 +37,13 @@
   </UserControl.Resources>
   <Grid>
     <StackPanel Grid.Row="0" Margin="5,10,5,0">
-      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="Login"/>
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Username" Width="60" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginUsername" Width="60" Margin="0,5,5,0"/>
         <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0"/>
       </DockPanel>
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Password" Width="60" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginPassword" Width="60" Margin="0,5,5,0"/>
         <PasswordBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded"/>
       </DockPanel>
       <StackPanel Margin="5,5,5,0">
@@ -54,7 +55,7 @@
           </Grid.ColumnDefinitions>
           <TextBlock Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Right" Text="Status" Width="60" Margin="0,5,5,0"/>
           <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" Text="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
-          <Button Grid.Column="2" Style="{StaticResource Esri_SimpleButton}" Content="Check" Width="60" ToolTip="Check the username and password combination" Click="OnCheckButtonClicked" />
+          <Button Grid.Column="2" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginCheck" util:LocalizationProvider.TooltipId="LoginCheckText" Width="60" Click="OnCheckButtonClicked" />
         </Grid>
       </StackPanel>
     </StackPanel>

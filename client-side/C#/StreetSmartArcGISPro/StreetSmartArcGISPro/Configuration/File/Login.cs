@@ -27,7 +27,6 @@ using System.Xml.Serialization;
 using ArcGIS.Desktop.Framework;
 
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
-using StreetSmartArcGISPro.Properties;
 using StreetSmartArcGISPro.Utilities;
 
 using SystemIOFile = System.IO.File;
@@ -261,17 +260,6 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private static Aes CreateAes(string password, byte[] salt)
     {
-      // Salt may not be needed if password is safe
-      if (password.Length < 8)
-      {
-        throw new ArgumentException(Resources.Login_CreateAes_Password_must_be_at_least_8_characters_, nameof(password));
-      }
-
-      if (salt.Length < 8)
-      {
-        throw new ArgumentException(Resources.Login_CreateAes_Salt_must_be_at_least_8_bytes_, nameof(salt));
-      }
-
       var pdb = new PasswordDeriveBytes(password, salt, "SHA512", 129);
       var aes = Aes.Create();
 

@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -89,6 +90,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private MapView _oldMapView;
     private readonly IList<string> _configurationPropertyChanged;
 
+    private readonly LanguageSettings _languageSettings;
     private readonly ApiKey _apiKey;
     private readonly FileConfiguration _configuration;
     private readonly ConstantsViewer _constants;
@@ -112,6 +114,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _currentDispatcher = Dispatcher.CurrentDispatcher;
       _inRestart = false;
       _inClose = false;
+
+      _languageSettings = LanguageSettings.Instance;
+      _languageSettings.PropertyChanged += OnLanguageSettingsChanged;
 
       _apiKey = ApiKey.Instance;
       _constants = ConstantsViewer.Instance;
@@ -319,6 +324,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
         IAPISettings settings = CefSettingsFactory.Create(cachePath);
+        settings.Locale = _languageSettings.Locale;
         settings.SetDefaultBrowserSubprocessPath();
         Api = _configuration.UseDefaultStreetSmartUrl
           ? StreetSmartAPIFactory.Create(settings)
@@ -502,14 +508,20 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
 
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
-        MySpatialReference cycloSpatialReference = settings.CycloramaViewerCoordinateSystem;
-        _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
-                                await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+        MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
+
+        if (cycloSpatialReference != null)
+        {
+          _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
+                                  await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+        }
       }
       catch (StreetSmartImageNotFoundException)
       {
-        MessageBox.Show($"{ThisResources.StreetSmartCanNotOpenImage}: {_location} ({_epsgCode})",
-          ThisResources.StreetSmartCanNotOpenImage, MessageBoxButton.OK, MessageBoxImage.Error);
+        ResourceManager res = ThisResources.ResourceManager;
+        string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
+        MessageBox.Show($"{canNotOpenImageTxt}: {_location} ({_epsgCode})",
+          canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -694,8 +706,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       IAddressSettings addressSettings = AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
       IDomElement element = DomElementFactory.Create();
       _options = _configuration.UseDefaultConfigurationUrl
-        ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, addressSettings, element)
-        : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, string.Empty,
+        ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element)
+        : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
           _configuration.ConfigurationUrlLocation, addressSettings, element);
 
       try
@@ -728,8 +740,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       catch (StreetSmartLoginFailedException)
       {
-        MessageBox.Show(ThisResources.StreetSmartOnLoginFailed, ThisResources.StreetSmartOnLoginFailed,
-          MessageBoxButton.OK, MessageBoxImage.Error);
+        ResourceManager res = ThisResources.ResourceManager;
+        string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
+        MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
         DoHide();
       }
     }
@@ -917,6 +930,17 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
           }
 
+          break;
+      }
+    }
+
+    private async void OnLanguageSettingsChanged(object sender, PropertyChangedEventArgs args)
+    {
+      switch (args.PropertyName)
+      {
+        case "Language":
+          CefSettingsFactory.SetLanguage(_languageSettings.Locale);
+          await RestartStreetSmart(false);
           break;
       }
     }

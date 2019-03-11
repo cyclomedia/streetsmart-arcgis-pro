@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +25,7 @@ using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -52,7 +52,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private ArcGISGeometryType _geometryType;
     private readonly MeasurementList _measurementList;
     private readonly IStreetSmartAPI _api;
-    private readonly CultureInfo _ci;
 
     private IGeometry _geometry;
 
@@ -121,7 +120,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       _measurementList = streetSmart.MeasurementList;
 
-      _ci = CultureInfo.InvariantCulture;
       _api = api;
       Properties = properties;
       UpdateMeasurement = false;

@@ -104,6 +104,7 @@
     <Compile Include="AddIns\Pages\Agreement.cs" />
     <Compile Include="AddIns\Pages\Configuration.cs" />
     <Compile Include="AddIns\Pages\About.cs" />
+    <Compile Include="AddIns\Pages\Language.cs" />
     <Compile Include="AddIns\Pages\Settings.cs" />
     <Compile Include="AddIns\Pages\Login.cs" />
     <Compile Include="AddIns\Buttons\CycloMediaOptions.cs" />
@@ -137,6 +138,9 @@
     <Compile Include="AddIns\Views\Converters\MeasurementPositionStd.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementPosition.cs" />
     <Compile Include="AddIns\Views\Converters\LoginStatus.cs" />
+    <Compile Include="AddIns\Views\Language.xaml.cs">
+      <DependentUpon>Language.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddIns\Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -149,6 +153,7 @@
     <Compile Include="Configuration\File\ConstantsViewer.cs" />
     <Compile Include="Configuration\File\Project.cs" />
     <Compile Include="Configuration\File\ProjectList.cs" />
+    <Compile Include="Configuration\File\LanguageSettings.cs" />
     <Compile Include="Configuration\File\Setting.cs" />
     <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
     <Compile Include="Configuration\Remote\Recordings\Images.cs" />
@@ -163,6 +168,8 @@
     <Compile Include="Configuration\Remote\Recordings\Recording.cs" />
     <Compile Include="Configuration\Remote\SpatialReference\SpatialReference.cs" />
     <Compile Include="Configuration\Remote\SpatialReference\SpatialReferenceList.cs" />
+    <Compile Include="Configuration\Resource\Language.cs" />
+    <Compile Include="Configuration\Resource\Languages.cs" />
     <Compile Include="Configuration\Resource\APIKey.cs" />
     <Compile Include="Configuration\Remote\GlobeSpotter\ApplicationConfiguration.cs" />
     <Compile Include="Configuration\Remote\GlobeSpotter\Functionality.cs" />
@@ -186,6 +193,7 @@
     <Compile Include="Overlays\Measurement\MeasurementPoint.cs" />
     <Compile Include="Overlays\ViewerList.cs" />
     <Compile Include="Utilities\ImageExtensions.cs" />
+    <Compile Include="Utilities\LocalizationProvider.cs" />
     <Compile Include="VectorLayers\EditTools.cs" />
     <Compile Include="VectorLayers\VectorLayer.cs" />
     <Compile Include="CycloMediaLayers\CycloMediaGroupLayer.cs" />
@@ -215,6 +223,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="AddIns\Views\About.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Language.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -301,6 +313,7 @@
     <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libGLESv2.dll">
       <Link>Install\swiftshader\libGLESv2.dll</Link>
     </AddInContent>
+    <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
     <EmbeddedResource Include="Images\SystemSearch16.png" />
@@ -310,11 +323,6 @@
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
-      <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="..\..\Libs\StreetSmart\cef.pak">
@@ -346,6 +354,164 @@
     </AddInContent>
     <AddInContent Include="..\..\Libs\StreetSmart\v8_context_snapshot.bin">
       <Link>Install\v8_context_snapshot.bin</Link>
+    </AddInContent>
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\am.pak">
+      <Link>Install\locales\am.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ar.pak">
+      <Link>Install\locales\ar.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\bg.pak">
+      <Link>Install\locales\bg.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\bn.pak">
+      <Link>Install\locales\bn.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ca.pak">
+      <Link>Install\locales\ca.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\cs.pak">
+      <Link>Install\locales\cs.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\da.pak">
+      <Link>Install\locales\da.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\de.pak">
+      <Link>Install\locales\de.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\el.pak">
+      <Link>Install\locales\el.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\en-GB.pak">
+      <Link>Install\locales\en-GB.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\es-419.pak">
+      <Link>Install\locales\es-419.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\es.pak">
+      <Link>Install\locales\es.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\et.pak">
+      <Link>Install\locales\et.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\fa.pak">
+      <Link>Install\locales\fa.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\fi.pak">
+      <Link>Install\locales\fi.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\fil.pak">
+      <Link>Install\locales\fil.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\fr.pak">
+      <Link>Install\locales\fr.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\gu.pak">
+      <Link>Install\locales\gu.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\he.pak">
+      <Link>Install\locales\he.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\hi.pak">
+      <Link>Install\locales\hi.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\hr.pak">
+      <Link>Install\locales\hr.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\hu.pak">
+      <Link>Install\locales\hu.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\id.pak">
+      <Link>Install\locales\id.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\it.pak">
+      <Link>Install\locales\it.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ja.pak">
+      <Link>Install\locales\ja.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\kn.pak">
+      <Link>Install\locales\kn.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ko.pak">
+      <Link>Install\locales\ko.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\lt.pak">
+      <Link>Install\locales\lt.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\lv.pak">
+      <Link>Install\locales\lv.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ml.pak">
+      <Link>Install\locales\ml.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\mr.pak">
+      <Link>Install\locales\mr.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ms.pak">
+      <Link>Install\locales\ms.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\nb.pak">
+      <Link>Install\locales\nb.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\nl.pak">
+      <Link>Install\locales\nl.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\pl.pak">
+      <Link>Install\locales\pl.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\pt-BR.pak">
+      <Link>Install\locales\pt-BR.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\pt-PT.pak">
+      <Link>Install\locales\pt-PT.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ro.pak">
+      <Link>Install\locales\ro.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ru.pak">
+      <Link>Install\locales\ru.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\sk.pak">
+      <Link>Install\locales\sk.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\sl.pak">
+      <Link>Install\locales\sl.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\sr.pak">
+      <Link>Install\locales\sr.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\sv.pak">
+      <Link>Install\locales\sv.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\sw.pak">
+      <Link>Install\locales\sw.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\ta.pak">
+      <Link>Install\locales\ta.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\te.pak">
+      <Link>Install\locales\te.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\th.pak">
+      <Link>Install\locales\th.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\tr.pak">
+      <Link>Install\locales\tr.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\uk.pak">
+      <Link>Install\locales\uk.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\vi.pak">
+      <Link>Install\locales\vi.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\zh-CN.pak">
+      <Link>Install\locales\zh-CN.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\locales\zh-TW.pak">
+      <Link>Install\locales\zh-TW.pak</Link>
     </AddInContent>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

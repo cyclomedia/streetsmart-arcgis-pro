@@ -198,7 +198,12 @@ namespace StreetSmartArcGISPro.AddIns.Modules
           Setting settings = ProjectList.Instance.GetSettings(mapView);
           Login login = Login.Instance;
           LayersRemovedEvent.Unsubscribe(OnLayerRemoved);
-          settings.PropertyChanged -= OnSettingsPropertyChanged;
+
+          if (settings != null)
+          {
+            settings.PropertyChanged -= OnSettingsPropertyChanged;
+          }
+
           login.PropertyChanged -= OnLoginPropertyChanged;
         }
       }

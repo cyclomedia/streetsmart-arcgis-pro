@@ -18,24 +18,23 @@
 
 using System;
 using System.Globalization;
+using System.Resources;
 using System.Windows.Data;
+using StreetSmartArcGISPro.Configuration.File;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
   class LoginStatus : IValueConverter
   {
-    #region Constants
-
-    private const string LoginFailed = "Login Failed";
-    private const string LoginSuccessfully = "Login Successfully";
-
-    #endregion
-
     #region IValueConverter Members
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && (bool) value ? LoginSuccessfully : LoginFailed;
+      ResourceManager res = Properties.Resources.ResourceManager;
+      LanguageSettings language = LanguageSettings.Instance;
+      string loginFailedTxt = res.GetString("LoginFailed", language.CultureInfo);
+      string loginSuccessFullyTxt = res.GetString("LoginSuccessfully", language.CultureInfo);
+      return value != null && (bool) value ? loginSuccessFullyTxt : loginFailedTxt;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

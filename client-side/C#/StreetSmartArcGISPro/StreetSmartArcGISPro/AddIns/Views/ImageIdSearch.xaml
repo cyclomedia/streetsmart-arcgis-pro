@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:StreetSmartArcGISPro.AddIns.Views.Converters"
+             xmlns:util="clr-namespace:StreetSmartArcGISPro.Utilities"
              mc:Ignorable="d" 
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -42,7 +43,7 @@
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
     <DockPanel Grid.Row="0" LastChildFill="true" KeyboardNavigation.TabNavigation="Local" Height="30">
-      <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" Text="ImageId" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+      <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ImageIdSearchImageId" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
       <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" Text="{Binding ImageId, Converter={StaticResource ImageIdInputConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" TextChanged="OnImageIdChanged"/>
     </DockPanel>
     <ListBox Grid.Row="1" ItemsSource="{Binding ImageInfo, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedObservation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" BorderThickness="0" Background="Transparent" Margin="0,3,0,0" MouseDoubleClick="OnMatchesMouseDoubleClicked">
@@ -67,11 +68,11 @@
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*"/>
                   </Grid.ColumnDefinitions>
-                  <TextBlock Grid.Row="0" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="ImageId:"/>
-                  <TextBlock Grid.Row="1" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="Date:"/>
-                  <TextBlock Grid.Row="2" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="Time:"/>
-                  <TextBlock Grid.Row="3" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="Location:"/>
-                  <TextBlock Grid.Row="4" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="Product type:"/>
+                  <TextBlock Grid.Row="0" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ImageIdSearchImageId"/>
+                  <TextBlock Grid.Row="1" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ImageIdSearchDate"/>
+                  <TextBlock Grid.Row="2" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ImageIdSearchTime"/>
+                  <TextBlock Grid.Row="3" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ImageIdSearchLocation"/>
+                  <TextBlock Grid.Row="4" Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ImageIdSearchProductType"/>
                   <TextBlock Grid.Row="0" Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding ImageId}"/>
                   <TextBlock Grid.Row="1" Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding RecordedAt, Converter={StaticResource DateTimeToDateConverter}}"/>
                   <TextBlock Grid.Row="2" Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding RecordedAt, Converter={StaticResource DateTimeToTimeConverter}}"/>

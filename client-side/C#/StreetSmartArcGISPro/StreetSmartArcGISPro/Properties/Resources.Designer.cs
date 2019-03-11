@@ -61,6 +61,141 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to version.
+        /// </summary>
+        internal static string AboutVersion {
+            get {
+                return ResourceManager.GetString("AboutVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I have read and agree to the terms of use..
+        /// </summary>
+        internal static string AgreementAcceptance {
+            get {
+                return ResourceManager.GetString("AgreementAcceptance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Address.
+        /// </summary>
+        internal static string ConfigurationAddress {
+            get {
+                return ResourceManager.GetString("ConfigurationAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bypass proxy server for local addresses.
+        /// </summary>
+        internal static string ConfigurationBypassProxy {
+            get {
+                return ResourceManager.GetString("ConfigurationBypassProxy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configuration url.
+        /// </summary>
+        internal static string ConfigurationConfigurationUrl {
+            get {
+                return ResourceManager.GetString("ConfigurationConfigurationUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Domain.
+        /// </summary>
+        internal static string ConfigurationDomain {
+            get {
+                return ResourceManager.GetString("ConfigurationDomain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location.
+        /// </summary>
+        internal static string ConfigurationLocation {
+            get {
+                return ResourceManager.GetString("ConfigurationLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        internal static string ConfigurationPassword {
+            get {
+                return ResourceManager.GetString("ConfigurationPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        internal static string ConfigurationPort {
+            get {
+                return ResourceManager.GetString("ConfigurationPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Proxy server.
+        /// </summary>
+        internal static string ConfigurationProxyServer {
+            get {
+                return ResourceManager.GetString("ConfigurationProxyServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Street Smart location.
+        /// </summary>
+        internal static string ConfigurationStreetSmartLocation {
+            get {
+                return ResourceManager.GetString("ConfigurationStreetSmartLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use default.
+        /// </summary>
+        internal static string ConfigurationUseDefault {
+            get {
+                return ResourceManager.GetString("ConfigurationUseDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use default credentials.
+        /// </summary>
+        internal static string ConfigurationUseDefaultCredentials {
+            get {
+                return ResourceManager.GetString("ConfigurationUseDefaultCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use a proxy server.
+        /// </summary>
+        internal static string ConfigurationUseProxyServer {
+            get {
+                return ResourceManager.GetString("ConfigurationUseProxyServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        internal static string ConfigurationUsername {
+            get {
+                return ResourceManager.GetString("ConfigurationUsername", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap FocusMode16 {
@@ -71,25 +206,187 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Password must be at least 8 characters..
+        ///   Looks up a localized string similar to Date:.
         /// </summary>
-        internal static string Login_CreateAes_Password_must_be_at_least_8_characters_ {
+        internal static string ImageIdSearchDate {
             get {
-                return ResourceManager.GetString("Login_CreateAes_Password_must_be_at_least_8_characters_", resourceCulture);
+                return ResourceManager.GetString("ImageIdSearchDate", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Salt must be at least 8 bytes..
+        ///   Looks up a localized string similar to ImageId:.
         /// </summary>
-        internal static string Login_CreateAes_Salt_must_be_at_least_8_bytes_ {
+        internal static string ImageIdSearchImageId {
             get {
-                return ResourceManager.GetString("Login_CreateAes_Salt_must_be_at_least_8_bytes_", resourceCulture);
+                return ResourceManager.GetString("ImageIdSearchImageId", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can not open image.
+        ///   Looks up a localized string similar to Location:.
+        /// </summary>
+        internal static string ImageIdSearchLocation {
+            get {
+                return ResourceManager.GetString("ImageIdSearchLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Product type:.
+        /// </summary>
+        internal static string ImageIdSearchProductType {
+            get {
+                return ResourceManager.GetString("ImageIdSearchProductType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Time:.
+        /// </summary>
+        internal static string ImageIdSearchTime {
+            get {
+                return ResourceManager.GetString("ImageIdSearchTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to General.
+        /// </summary>
+        internal static string LanguageGeneral {
+            get {
+                return ResourceManager.GetString("LanguageGeneral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        internal static string LanguageLanguage {
+            get {
+                return ResourceManager.GetString("LanguageLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check.
+        /// </summary>
+        internal static string LoginCheck {
+            get {
+                return ResourceManager.GetString("LoginCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check the username and password combination.
+        /// </summary>
+        internal static string LoginCheckText {
+            get {
+                return ResourceManager.GetString("LoginCheckText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login Failed.
+        /// </summary>
+        internal static string LoginFailed {
+            get {
+                return ResourceManager.GetString("LoginFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        internal static string LoginLogin {
+            get {
+                return ResourceManager.GetString("LoginLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        internal static string LoginPassword {
+            get {
+                return ResourceManager.GetString("LoginPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login Successfully.
+        /// </summary>
+        internal static string LoginSuccessfully {
+            get {
+                return ResourceManager.GetString("LoginSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        internal static string LoginUsername {
+            get {
+                return ResourceManager.GetString("LoginUsername", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Coordinate systems.
+        /// </summary>
+        internal static string SettingsCoordinateSystems {
+            get {
+                return ResourceManager.GetString("SettingsCoordinateSystems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cyclorama viewer.
+        /// </summary>
+        internal static string SettingsCycloramaViewer {
+            get {
+                return ResourceManager.GetString("SettingsCycloramaViewer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to General.
+        /// </summary>
+        internal static string SettingsGeneral {
+            get {
+                return ResourceManager.GetString("SettingsGeneral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overlay draw distance.
+        /// </summary>
+        internal static string SettingsOverlayDrawDistance {
+            get {
+                return ResourceManager.GetString("SettingsOverlayDrawDistance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recording layer.
+        /// </summary>
+        internal static string SettingsRecordingLayer {
+            get {
+                return ResourceManager.GetString("SettingsRecordingLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sets the overlay draw distance in the cyclorama..
+        /// </summary>
+        internal static string SettingsSetsOverlayDrawDistance {
+            get {
+                return ResourceManager.GetString("SettingsSetsOverlayDrawDistance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not open the image.
         /// </summary>
         internal static string StreetSmartCanNotOpenImage {
             get {
@@ -98,7 +395,7 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can not login the API.
+        ///   Looks up a localized string similar to Can not login to Street Smart.
         /// </summary>
         internal static string StreetSmartOnLoginFailed {
             get {
