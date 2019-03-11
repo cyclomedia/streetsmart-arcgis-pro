@@ -220,4 +220,22 @@
   <data name="LoginUsername" xml:space="preserve">
     <value>Username</value>
   </data>
+  <data name="SettingsCoordinateSystems" xml:space="preserve">
+    <value>Coordinate systems</value>
+  </data>
+  <data name="SettingsCycloramaViewer" xml:space="preserve">
+    <value>Cyclorama viewer</value>
+  </data>
+  <data name="SettingsGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsOverlayDrawDistance" xml:space="preserve">
+    <value>Overlay draw distance</value>
+  </data>
+  <data name="SettingsRecordingLayer" xml:space="preserve">
+    <value>Recording layer</value>
+  </data>
+  <data name="SettingsSetsOverlayDrawDistance" xml:space="preserve">
+    <value>Sets the overlay draw distance in the cyclorama.</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:StreetSmartArcGISPro.AddIns.Views.Converters"
+             xmlns:util="clr-namespace:StreetSmartArcGISPro.Utilities"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -40,14 +41,14 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <StackPanel Grid.Row="0" Margin="5,10,5,0">
-      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="Coordinate systems" />
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="SettingsCoordinateSystems" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Recording layer" Width="120" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsRecordingLayer" Width="120" Margin="0,5,5,0"/>
         <ComboBox ItemsSource="{Binding Path=ExistsInAreaSpatialReferences}" SelectedItem="{Binding Path=RecordingLayerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Cyclorama viewer" Width="120" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsCycloramaViewer" Width="120" Margin="0,5,5,0"/>
         <ComboBox ItemsSource="{Binding Path=ExistsInAreaSpatialReferences}" SelectedItem="{Binding Path=CycloramaViewerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
@@ -56,9 +57,9 @@
       </StackPanel>
     </StackPanel>
     <StackPanel Grid.Row="1" Margin="5,10,5,0">
-      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" Text="General" />
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="SettingsGeneral" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" Text="Overlay draw distance" ToolTip="Sets the overlay draw distance in the cyclorama." Width="120" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsOverlayDrawDistance" util:LocalizationProvider.TooltipId="SettingsSetsOverlayDrawDistance" Width="120" Margin="0,5,5,0"/>
         <ComboBox ItemsSource="{Binding Path=ListOfOverlayDrawDistance}" SelectedItem="{Binding Path=OverlayDrawDistance}" HorizontalAlignment="Left" Margin="0,5,0,0" Width="40">
         </ComboBox>
       </DockPanel>

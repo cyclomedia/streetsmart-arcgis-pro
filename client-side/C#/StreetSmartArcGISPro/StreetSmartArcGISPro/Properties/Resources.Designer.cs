@@ -332,6 +332,60 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Coordinate systems.
+        /// </summary>
+        internal static string SettingsCoordinateSystems {
+            get {
+                return ResourceManager.GetString("SettingsCoordinateSystems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cyclorama viewer.
+        /// </summary>
+        internal static string SettingsCycloramaViewer {
+            get {
+                return ResourceManager.GetString("SettingsCycloramaViewer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to General.
+        /// </summary>
+        internal static string SettingsGeneral {
+            get {
+                return ResourceManager.GetString("SettingsGeneral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overlay draw distance.
+        /// </summary>
+        internal static string SettingsOverlayDrawDistance {
+            get {
+                return ResourceManager.GetString("SettingsOverlayDrawDistance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recording layer.
+        /// </summary>
+        internal static string SettingsRecordingLayer {
+            get {
+                return ResourceManager.GetString("SettingsRecordingLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sets the overlay draw distance in the cyclorama..
+        /// </summary>
+        internal static string SettingsSetsOverlayDrawDistance {
+            get {
+                return ResourceManager.GetString("SettingsSetsOverlayDrawDistance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not open the image.
         /// </summary>
         internal static string StreetSmartCanNotOpenImage {
