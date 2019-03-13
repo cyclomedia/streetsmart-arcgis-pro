@@ -18,24 +18,24 @@
 
 using System;
 using System.Globalization;
+using System.Resources;
 using System.Windows.Data;
+
+using StreetSmartArcGISPro.Configuration.File;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
   class CanMeasuring : IValueConverter
   {
-    #region Constants
-
-    private const string MeasuringSupported = "Measuring supported";
-    private const string MeasuringNotSupported = "Measuring not supported";
-
-    #endregion
-
     #region IValueConverter Members
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && (bool) value ? MeasuringSupported : MeasuringNotSupported;
+      ResourceManager res = Properties.Resources.ResourceManager;
+      LanguageSettings language = LanguageSettings.Instance;
+      string measurementSupportedTxt = res.GetString("SettingsMeasurementSupported", language.CultureInfo);
+      string measurementNotSupportedTxt = res.GetString("SettingsMeasurementNotSupported", language.CultureInfo);
+      return value != null && (bool) value ? measurementSupportedTxt : measurementNotSupportedTxt;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

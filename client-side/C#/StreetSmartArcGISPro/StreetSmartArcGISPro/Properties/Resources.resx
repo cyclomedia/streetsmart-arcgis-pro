@@ -229,6 +229,12 @@
   <data name="SettingsGeneral" xml:space="preserve">
     <value>General</value>
   </data>
+  <data name="SettingsMeasurementNotSupported" xml:space="preserve">
+    <value>Measuring not supported</value>
+  </data>
+  <data name="SettingsMeasurementSupported" xml:space="preserve">
+    <value>Measuring supported</value>
+  </data>
   <data name="SettingsOverlayDrawDistance" xml:space="preserve">
     <value>Overlay draw distance</value>
   </data>
