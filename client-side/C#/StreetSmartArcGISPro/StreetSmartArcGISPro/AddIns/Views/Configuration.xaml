@@ -47,7 +47,7 @@
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ConfigurationConfigurationUrl" />
       <CheckBox util:LocalizationProvider.ContentId="ConfigurationUseDefault" HorizontalAlignment="Stretch" IsChecked="{Binding UseDefaultConfigurationUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationLocation" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationLocation" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
         <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseDefaultConfigurationUrl, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
           <TextBox.Text>
             <MultiBinding Converter="{StaticResource ConfigurationServiceConverter}">
@@ -62,7 +62,7 @@
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ConfigurationStreetSmartLocation" />
       <CheckBox util:LocalizationProvider.ContentId="ConfigurationUseDefault" HorizontalAlignment="Stretch" IsChecked="{Binding UseDefaultStreetSmartUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationLocation" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationLocation" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
         <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseDefaultStreetSmartUrl, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
           <TextBox.Text>
             <MultiBinding Converter="{StaticResource ConfigurationServiceConverter}">
@@ -84,7 +84,7 @@
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
           <DockPanel Margin="0,0,0,0" Grid.Column="0">
-            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationAddress" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationAddress" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
             <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseProxyServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Width="150" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
               <TextBox.Text>
                 <MultiBinding Converter="{StaticResource ConfigurationServiceConverter}">
@@ -95,7 +95,7 @@
             </TextBox>
           </DockPanel>
           <DockPanel Margin="0,0,0,0" Grid.Column="2">
-            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationPort" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationPort" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
             <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" IsEnabled="{Binding UseProxyServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Width="150" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PreviewTextInput="OnNumberValidation">
               <TextBox.Text>
                 <MultiBinding Converter="{StaticResource ConfigurationServiceConverter}" ConverterParameter="80">
@@ -123,7 +123,7 @@
             <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
           <DockPanel Margin="0,0,0,0" Grid.Column="0" Grid.Row="0">
-            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationUsername" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationUsername" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
             <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" Width="150" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
               <TextBox.IsEnabled>
                 <MultiBinding Converter="{StaticResource CombineBooleanConverter}">
@@ -141,7 +141,7 @@
             </TextBox>
           </DockPanel>
           <DockPanel Margin="0,0,0,0" Grid.Column="2" Grid.Row="0">
-            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationPassword" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationPassword" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
             <PasswordBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" Width="150" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded" IsEnabledChanged="OnPasswordEnabledChanged">
               <PasswordBox.IsEnabled>
                 <MultiBinding Converter="{StaticResource CombineBooleanConverter}">
@@ -152,7 +152,7 @@
             </PasswordBox>
           </DockPanel>
           <DockPanel Margin="0,0,0,0" Grid.Column="0" Grid.Row="1">
-            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationDomain" Width="70" TextAlignment="Right" Margin="0,5,5,0"/>
+            <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" util:LocalizationProvider.ContentId="ConfigurationDomain" Width="100" TextAlignment="Right" Margin="0,5,5,0"/>
             <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" Width="150" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0">
               <TextBox.IsEnabled>
                 <MultiBinding Converter="{StaticResource CombineBooleanConverter}">

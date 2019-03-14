@@ -192,6 +192,11 @@
     <Compile Include="Overlays\Measurement\MeasurementObservation.cs" />
     <Compile Include="Overlays\Measurement\MeasurementPoint.cs" />
     <Compile Include="Overlays\ViewerList.cs" />
+    <Compile Include="Properties\Resources.fr.Designer.cs">
+      <DependentUpon>Resources.fr.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Utilities\ImageExtensions.cs" />
     <Compile Include="Utilities\LocalizationProvider.cs" />
     <Compile Include="VectorLayers\EditTools.cs" />
@@ -251,6 +256,10 @@
     <AddInContent Include="Images\CycloMediaOptions32.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Agreement.txt" />
     <EmbeddedResource Include="Resources\APIKey.xml" />
     <EmbeddedResource Include="Properties\Resources.resx">
