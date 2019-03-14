@@ -41,7 +41,7 @@
     <StackPanel Grid.Row="0" Margin="5,10,5,0">
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LanguageGeneral" />
       <DockPanel Margin="5,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LanguageLanguage" Width="60" Margin="0,5,5,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LanguageLanguage" Width="100" Margin="0,5,5,0"/>
         <ComboBox ItemsSource="{Binding Path=Languages}" SelectedItem="{Binding Path=SelectedLanguage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
