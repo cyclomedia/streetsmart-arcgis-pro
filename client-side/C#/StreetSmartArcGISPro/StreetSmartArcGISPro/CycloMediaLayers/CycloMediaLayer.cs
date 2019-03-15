@@ -44,7 +44,6 @@ using StreetSmartArcGISPro.Utilities;
 
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
-using Project = StreetSmartArcGISPro.Configuration.File.Project;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 

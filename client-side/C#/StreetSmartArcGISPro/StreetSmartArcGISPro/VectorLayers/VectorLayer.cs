@@ -389,11 +389,11 @@ namespace StreetSmartArcGISPro.VectorLayers
                     }
                   }
                 }
+
+                GeoJsonChanged = await CreateSld(featureCollection);
               }
             }
           }
-
-          GeoJsonChanged = await CreateSld(featureCollection);
         });
 
         string newJson = featureCollection?.ToString();
@@ -408,78 +408,42 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       return await QueuedTask.Run(() =>
       {
-        double strokeWidth = 1.0;
-        double strokeOpacity = 1.0;
-        CIMRenderer renderer = Layer.GetRenderer();
-        CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
-        CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
-        CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
-        CIMSymbol symbol = symbolRef?.Symbol;
-        CIMColor cimColor = symbol?.GetColor();
-        CIMColor cimStroke = null;
-        double fillOpacity = (cimColor?.Alpha ?? 100) / 100;
-
-        if (symbol is CIMPointSymbol pointSymbol)
-        {
-          foreach (CIMSymbolLayer layer in pointSymbol.SymbolLayers)
-          {
-            if (layer is CIMVectorMarker vectorMarker)
-            {
-              foreach (var markerGraphics in vectorMarker.MarkerGraphics)
-              {
-                if (markerGraphics.Symbol is CIMPolygonSymbol polygonSymbol)
-                {
-                  foreach (CIMSymbolLayer layer2 in polygonSymbol.SymbolLayers)
-                  {
-                    if (layer2 is CIMSolidStroke stroke)
-                    {
-                      cimStroke = stroke.Color;
-                      strokeWidth = stroke.Width;
-                      strokeOpacity = cimStroke.Alpha / 100;
-                    }
-                    else if (layer2 is CIMSolidFill fill)
-                    {
-                      cimColor = fill.Color;
-                      fillOpacity = cimColor.Alpha / 100;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        Color color = CimColorToWinColor(cimColor);
-        Color? strokeColor = null;
-
-        if (cimStroke != null)
-        {
-          strokeColor = CimColorToWinColor(cimStroke);
-        }
-
         string oldSld = Sld?.SLD;
 
-        if (featureCollection?.Features.Count >= 1)
+        if (featureCollection.Features.Count >= 1)
         {
+          Sld = SLDFactory.CreateEmptyStyle();
           StreetSmartGeometryType type = featureCollection.Features[0].Geometry.Type;
 
-          switch (type)
-          {
-            case StreetSmartGeometryType.Point:
-            case StreetSmartGeometryType.MultiPoint:
-              Sld = strokeColor != null
-                ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth)
-                : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
+          CIMRenderer renderer = Layer?.GetRenderer();
+          CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
+          CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
+          CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
 
-              break;
-            case StreetSmartGeometryType.LineString:
-            case StreetSmartGeometryType.MultiLineString:
-              Sld = SLDFactory.CreateStylePolygon(color);
-              break;
-            case StreetSmartGeometryType.Polygon:
-            case StreetSmartGeometryType.MultiPolygon:
-              Sld = SLDFactory.CreateStyleLine(color);
-              break;
+          ISymbolizer symbolizer = CreateSymbolizer(symbolRef, type);
+          IRule rule = SLDFactory.CreateRule(symbolizer, null);
+          SLDFactory.AddRuleToStyle(Sld, rule);
+
+          if (uniqueValueRendererRenderer != null)
+          {
+            var fields = uniqueValueRendererRenderer.Fields;
+
+            foreach (var group in uniqueValueRendererRenderer.Groups)
+            {
+              foreach (var uniqueClass in group.Classes)
+              {
+                foreach (var uniqueValue in uniqueClass.Values)
+                {
+                  foreach (var fieldValue in uniqueValue.FieldValues)
+                  {
+
+                  }
+                }
+
+                CIMSymbolReference uniqueSymbolRef = uniqueClass?.Symbol;
+                CIMSymbol uniqueSymbol = uniqueSymbolRef?.Symbol;
+              }
+            }
           }
         }
 
@@ -487,13 +451,85 @@ namespace StreetSmartArcGISPro.VectorLayers
       });
     }
 
+    private ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef, StreetSmartGeometryType type)
+    {
+      double strokeWidth = 1.0;
+      double strokeOpacity = 1.0;
+
+      CIMSymbol symbol = symbolRef?.Symbol;
+      CIMColor cimColor = symbol?.GetColor();
+      CIMColor cimStroke = null;
+      double fillOpacity = (cimColor?.Alpha ?? 100) / 100;
+
+      if (symbol is CIMPointSymbol pointSymbol)
+      {
+        foreach (CIMSymbolLayer layer in pointSymbol.SymbolLayers)
+        {
+          if (layer is CIMVectorMarker vectorMarker)
+          {
+            foreach (var markerGraphics in vectorMarker.MarkerGraphics)
+            {
+              if (markerGraphics.Symbol is CIMPolygonSymbol polygonSymbol)
+              {
+                foreach (CIMSymbolLayer layer2 in polygonSymbol.SymbolLayers)
+                {
+                  if (layer2 is CIMSolidStroke stroke)
+                  {
+                    cimStroke = stroke.Color;
+                    strokeWidth = stroke.Width;
+                    strokeOpacity = cimStroke.Alpha / 100;
+                  }
+                  else if (layer2 is CIMSolidFill fill)
+                  {
+                    cimColor = fill.Color;
+                    fillOpacity = cimColor.Alpha / 100;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      Color color = CimColorToWinColor(cimColor);
+      Color? strokeColor = null;
+      ISymbolizer symbolizer = null;
+
+      if (cimStroke != null)
+      {
+        strokeColor = CimColorToWinColor(cimStroke);
+      }
+
+      switch (type)
+      {
+        case StreetSmartGeometryType.Point:
+        case StreetSmartGeometryType.MultiPoint:
+          symbolizer = strokeColor != null
+            ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth)
+            : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
+          break;
+
+        case StreetSmartGeometryType.LineString:
+        case StreetSmartGeometryType.MultiLineString:
+          symbolizer = SLDFactory.CreateStylePolygon(color);
+          break;
+
+        case StreetSmartGeometryType.Polygon:
+        case StreetSmartGeometryType.MultiPolygon:
+          symbolizer = SLDFactory.CreateStyleLine(color);
+          break;
+      }
+
+      return symbolizer;
+    }
+
     private Color CimColorToWinColor(CIMColor cimColor)
     {
       double[] colorValues = cimColor?.Values;
-      int red = colorValues != null && colorValues.Length >= 1 ? (int)colorValues[0] : 255;
-      int green = colorValues != null && colorValues.Length >= 2 ? (int)colorValues[1] : 255;
-      int blue = colorValues != null && colorValues.Length >= 3 ? (int)colorValues[2] : 255;
-      int alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
+      int red = colorValues != null && colorValues.Length >= 1 ? (int) colorValues[0] : 255;
+      int green = colorValues != null && colorValues.Length >= 2 ? (int) colorValues[1] : 255;
+      int blue = colorValues != null && colorValues.Length >= 3 ? (int) colorValues[2] : 255;
+      int alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
       return Color.FromArgb(alpha, red, green, blue);
     }
 
