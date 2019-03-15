@@ -30,6 +30,7 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Internal.Mapping.CommonControls;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -420,10 +421,6 @@ namespace StreetSmartArcGISPro.VectorLayers
           CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
           CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
 
-          ISymbolizer symbolizer = CreateSymbolizer(symbolRef, type);
-          IRule rule = SLDFactory.CreateRule(symbolizer, null);
-          SLDFactory.AddRuleToStyle(Sld, rule);
-
           if (uniqueValueRendererRenderer != null)
           {
             var fields = uniqueValueRendererRenderer.Fields;
@@ -432,18 +429,29 @@ namespace StreetSmartArcGISPro.VectorLayers
             {
               foreach (var uniqueClass in group.Classes)
               {
+                IFilter filter = null;
+
                 foreach (var uniqueValue in uniqueClass.Values)
                 {
-                  foreach (var fieldValue in uniqueValue.FieldValues)
+                  for (int i = 0; i < fields.Length; i++)
                   {
-
+                    string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
+                    filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
                   }
                 }
 
-                CIMSymbolReference uniqueSymbolRef = uniqueClass?.Symbol;
-                CIMSymbol uniqueSymbol = uniqueSymbolRef?.Symbol;
+                CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef, type);
+                IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                SLDFactory.AddRuleToStyle(Sld, rule);
               }
             }
+          }
+          else
+          {
+            ISymbolizer symbolizer = CreateSymbolizer(symbolRef, type);
+            IRule rule = SLDFactory.CreateRule(symbolizer);
+            SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
 
@@ -455,6 +463,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       double strokeWidth = 1.0;
       double strokeOpacity = 1.0;
+      ISymbolizer symbolizer = null;
 
       CIMSymbol symbol = symbolRef?.Symbol;
       CIMColor cimColor = symbol?.GetColor();
@@ -487,37 +496,41 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
               }
             }
+
+            Color color = CimColorToWinColor(cimColor);
+            Color? strokeColor = cimStroke == null ? null : (Color?)CimColorToWinColor(cimStroke);
+
+            switch (type)
+            {
+              case StreetSmartGeometryType.Point:
+              case StreetSmartGeometryType.MultiPoint:
+                symbolizer = strokeColor != null
+                  ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth, strokeOpacity)
+                  : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
+                break;
+
+              case StreetSmartGeometryType.LineString:
+              case StreetSmartGeometryType.MultiLineString:
+                symbolizer = SLDFactory.CreateStylePolygon(color);
+                break;
+
+              case StreetSmartGeometryType.Polygon:
+              case StreetSmartGeometryType.MultiPolygon:
+                symbolizer = SLDFactory.CreateStyleLine(color);
+                break;
+            }
+          }
+          else if (layer is CIMPictureMarker pictureMarker)
+          {
+            double size = pictureMarker.Size;
+            string url = pictureMarker.URL;
+
+            string[] parts = url.Split(';');
+            string base64 = parts.Length >= 2 ? parts[1] : string.Empty;
+            base64 = base64.Replace("base64,", string.Empty);
+            symbolizer = SLDFactory.CreateImageSymbol(size, base64);
           }
         }
-      }
-
-      Color color = CimColorToWinColor(cimColor);
-      Color? strokeColor = null;
-      ISymbolizer symbolizer = null;
-
-      if (cimStroke != null)
-      {
-        strokeColor = CimColorToWinColor(cimStroke);
-      }
-
-      switch (type)
-      {
-        case StreetSmartGeometryType.Point:
-        case StreetSmartGeometryType.MultiPoint:
-          symbolizer = strokeColor != null
-            ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth)
-            : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
-          break;
-
-        case StreetSmartGeometryType.LineString:
-        case StreetSmartGeometryType.MultiLineString:
-          symbolizer = SLDFactory.CreateStylePolygon(color);
-          break;
-
-        case StreetSmartGeometryType.Polygon:
-        case StreetSmartGeometryType.MultiPolygon:
-          symbolizer = SLDFactory.CreateStyleLine(color);
-          break;
       }
 
       return symbolizer;
