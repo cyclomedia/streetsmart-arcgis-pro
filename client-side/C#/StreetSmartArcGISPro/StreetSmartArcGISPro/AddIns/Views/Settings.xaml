@@ -53,7 +53,7 @@
         </ComboBox>
       </DockPanel>
       <StackPanel Margin="130,5,5,0">
-        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding CanMeasuring, Converter={StaticResource CanMeasuringConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="{Binding CanMeasuring, Converter={StaticResource CanMeasuringConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
       </StackPanel>
     </StackPanel>
     <StackPanel Grid.Row="1" Margin="5,10,5,0">

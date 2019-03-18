@@ -314,6 +314,15 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        internal static string LoginStatus {
+            get {
+                return ResourceManager.GetString("LoginStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login Successfully.
         /// </summary>
         internal static string LoginSuccessfully {

@@ -244,4 +244,7 @@
   <data name="SettingsSetsOverlayDrawDistance" xml:space="preserve">
     <value>Sets the overlay draw distance in the cyclorama.</value>
   </data>
+  <data name="LoginStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
 </root>

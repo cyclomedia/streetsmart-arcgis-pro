@@ -240,4 +240,13 @@ Type de produit:</value>
   <data name="SettingsSetsOverlayDrawDistance" xml:space="preserve">
     <value>Définit la distance superposée dans le cyclorama.</value>
   </data>
+  <data name="LoginStatus" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="SettingsMeasurementNotSupported" xml:space="preserve">
+    <value>Mesure non prise en charge</value>
+  </data>
+  <data name="SettingsMeasurementSupported" xml:space="preserve">
+    <value>Mesure prise en charge</value>
+  </data>
 </root>

@@ -53,8 +53,8 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <TextBlock Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Right" Text="Status" Width="100" Margin="0,5,5,0"/>
-          <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" Text="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
+          <TextBlock Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginStatus" Width="100" Margin="0,5,5,0"/>
+          <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
           <Button Grid.Column="2" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginCheck" util:LocalizationProvider.TooltipId="LoginCheckText" Width="60" Click="OnCheckButtonClicked" />
         </Grid>
       </StackPanel>
