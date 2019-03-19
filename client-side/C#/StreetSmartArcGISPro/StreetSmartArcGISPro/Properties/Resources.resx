@@ -247,4 +247,19 @@
   <data name="LoginStatus" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="RecordingLayerDepthMap" xml:space="preserve">
+    <value>Depth map</value>
+  </data>
+  <data name="RecordingLayerDetailImages" xml:space="preserve">
+    <value>Detail images</value>
+  </data>
+  <data name="RecordingLayerGroupName" xml:space="preserve">
+    <value>Street Smart</value>
+  </data>
+  <data name="RecordingLayerName" xml:space="preserve">
+    <value>Recordings</value>
+  </data>
+  <data name="RecordingLayerNoAuthorization" xml:space="preserve">
+    <value>No Authorization</value>
+  </data>
 </root>

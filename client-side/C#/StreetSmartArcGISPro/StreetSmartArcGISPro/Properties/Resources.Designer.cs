@@ -341,6 +341,51 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Depth map.
+        /// </summary>
+        internal static string RecordingLayerDepthMap {
+            get {
+                return ResourceManager.GetString("RecordingLayerDepthMap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detail images.
+        /// </summary>
+        internal static string RecordingLayerDetailImages {
+            get {
+                return ResourceManager.GetString("RecordingLayerDetailImages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Street Smart.
+        /// </summary>
+        internal static string RecordingLayerGroupName {
+            get {
+                return ResourceManager.GetString("RecordingLayerGroupName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recordings.
+        /// </summary>
+        internal static string RecordingLayerName {
+            get {
+                return ResourceManager.GetString("RecordingLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Authorization.
+        /// </summary>
+        internal static string RecordingLayerNoAuthorization {
+            get {
+                return ResourceManager.GetString("RecordingLayerNoAuthorization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Coordinate systems.
         /// </summary>
         internal static string SettingsCoordinateSystems {

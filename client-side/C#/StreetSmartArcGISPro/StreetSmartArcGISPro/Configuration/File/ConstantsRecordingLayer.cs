@@ -47,11 +47,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     #region Properties
 
     /// <summary>
-    /// CycloMedia layer name
-    /// </summary>
-    public string CycloMediaLayerName { get; set; }
-
-    /// <summary>
     /// The size of the layer
     /// </summary>
     public double SizeLayer { get; set; }
@@ -60,11 +55,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// Minimum scale
     /// </summary>
     public double MinimumScale { get; set; }
-
-    /// <summary>
-    /// Recording layer name
-    /// </summary>
-    public string RecordingLayerName { get; set; }
 
     /// <summary>
     /// Recording feature class name
@@ -111,10 +101,8 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new ConstantsRecordingLayer
       {
-        CycloMediaLayerName = "Street Smart",
         SizeLayer = 8.0,
         MinimumScale = 2000.0,
-        RecordingLayerName = "Recordings",
         RecordingLayerFeatureClassName = "FCStreetSmartRecordings"
       };
 

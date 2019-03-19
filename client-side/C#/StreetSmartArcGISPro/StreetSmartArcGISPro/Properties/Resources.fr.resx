@@ -249,4 +249,19 @@ Type de produit:</value>
   <data name="SettingsMeasurementSupported" xml:space="preserve">
     <value>Mesure prise en charge</value>
   </data>
+  <data name="RecordingLayerDepthMap" xml:space="preserve">
+    <value>Carte de profondeur</value>
+  </data>
+  <data name="RecordingLayerDetailImages" xml:space="preserve">
+    <value>Détail images</value>
+  </data>
+  <data name="RecordingLayerGroupName" xml:space="preserve">
+    <value>Street Smart</value>
+  </data>
+  <data name="RecordingLayerName" xml:space="preserve">
+    <value>Enregistrements</value>
+  </data>
+  <data name="RecordingLayerNoAuthorization" xml:space="preserve">
+    <value>Aucune autorisation</value>
+  </data>
 </root>
