@@ -18,7 +18,6 @@
 
 using System;
 using System.Globalization;
-
 using System.Windows.Data;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
