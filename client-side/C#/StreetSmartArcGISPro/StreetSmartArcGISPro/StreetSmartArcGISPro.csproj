@@ -92,6 +92,9 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
+    <AddInContent Include="Config.fr.daml">
+      <SubType>Designer</SubType>
+    </AddInContent>
     <AddInContent Include="Config.daml">
       <SubType>Designer</SubType>
     </AddInContent>

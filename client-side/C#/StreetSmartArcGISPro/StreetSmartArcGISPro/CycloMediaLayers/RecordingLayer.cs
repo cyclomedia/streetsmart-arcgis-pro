@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 
 using ArcGIS.Core.CIM;
@@ -46,11 +47,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     private static readonly ConstantsRecordingLayer Constants;
 
+    private readonly ResourceManager _resourceManager;
+    private readonly LanguageSettings _language;
+
     #endregion
 
     #region Properties
 
-    public override string Name => Constants.RecordingLayerName;
+    public override string Name => _resourceManager.GetString("RecordingLayerName", _language.CultureInfo);
 
     public override string FcName => Constants.RecordingLayerFeatureClassName;
 
@@ -275,6 +279,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             {
               CIMColor cimColor = CIMColor.CreateRGBColor(152, 194, 60);
               CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
+              string depthString = _resourceManager.GetString("RecordingLayerDepthMap", _language.CultureInfo);
 
               CIMUniqueValue uniqueValue = new CIMUniqueValue
               {
@@ -287,7 +292,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                 Visible = true,
                 Values = new[] { uniqueValue },
                 Symbol = pointSymbolReference,
-                Label = $"{value} (Depth map)"
+                Label = $"{value} ({depthString})"
               };
 
               CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
@@ -310,6 +315,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             CIMMarker marker = GetPipSymbol(color);
             var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
             var pointSymbolReference = pointSymbol.MakeSymbolReference();
+            string detailImagesString = _resourceManager.GetString("RecordingLayerDetailImages", _language.CultureInfo);
 
             CIMUniqueValue uniqueValue = new CIMUniqueValue
             {
@@ -322,7 +328,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
               Visible = true,
               Values = new[] { uniqueValue },
               Symbol = pointSymbolReference,
-              Label = $"{value} (Detail images)"
+              Label = $"{value} ({detailImagesString})"
             };
 
             CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
@@ -343,6 +349,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             CIMMarker marker = GetForbiddenSymbol(color);
             var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
             var pointSymbolReference = pointSymbol.MakeSymbolReference();
+            string noAuthorizationString = _resourceManager.GetString("RecordingLayerNoAuthorization", _language.CultureInfo);
 
             CIMUniqueValue uniqueValue = new CIMUniqueValue
             {
@@ -365,7 +372,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
               Visible = true,
               Values = new[] { uniqueValue, uniqueValuePip, depthMap },
               Symbol = pointSymbolReference,
-              Label = $"{value} (No Authorization)"
+              Label = $"{value} ({noAuthorizationString})"
             };
 
             CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
@@ -429,6 +436,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     public RecordingLayer(CycloMediaGroupLayer layer, Envelope initialExtent = null)
       : base(layer, initialExtent)
     {
+      _resourceManager = Properties.Resources.ResourceManager;
+      _language = LanguageSettings.Instance;
     }
 
     #endregion

@@ -37,7 +37,7 @@
     <Subject>Content</Subject>
   </AddInInfo>
   <modules>
-    <insertModule id="streetSmartArcGISPro_module_en-GB"
+    <insertModule id="streetSmartArcGISPro_module_fr"
                   className="AddIns.Modules.StreetSmart"
                   autoLoad="true"
                   caption="Street Smart module">
@@ -52,21 +52,21 @@
       </tabs>
       <groups>
         <group id="streetSmartArcGISPro_layerGroup"
-               caption="Layer"
+               caption="Calque"
                appearsOnAddInTab="false"
                keytip="GL">
           <button refID="streetSmartArcGISPro_recordingLayerButton"
                   size="large" />
         </group>
         <group id="streetSmartArcGISPro_inquiryGroup"
-               caption="Inquiry"
+               caption="Requête"
                appearsOnAddInTab="false"
                keytip="GI">
           <button refID="streetSmartArcGISPro_ImageIdSearchButton"
                   size="large" />
         </group>
         <group id="streetSmartArcGISPro_navigateGroup"
-               caption="Navigate"
+               caption="Naviguer"
                appearsOnAddInTab="false"
                keytip="GN">
           <tool refID="streetSmartArcGISPro_openImageTool"
@@ -77,14 +77,14 @@
       </groups>
       <controls>
         <tool id="streetSmartArcGISPro_openImageTool"
-              caption="Open Location"
+              caption="Lieu ouvert"
               className="AddIns.Tools.OpenLocation"
               loadOnClick="false"
               largeImage="Images\OpenLocation32.png"
               condition="streetSmartArcGISPro_openImageToolReadyCondition"
               keytip="GO">
-          <tooltip heading="Open Location">
-            Open the location in a cyclorama
+          <tooltip heading="Lieu ouvert">
+            Ouvrir le lieu dans un cyclorama
             <disabledText />
           </tooltip>
         </tool>
@@ -94,32 +94,32 @@
                 loadOnClick="false"
                 largeImage="Images\CycloMediaOptions32.png"
                 keytip="GS">
-          <tooltip heading="Settings">
-            Settings for Street Smart for ArcGIS Pro
+          <tooltip heading="Réglages">
+            Paramètres de Street Smart pour ArcGIS Pro
             <disabledText />
           </tooltip>
         </button>
         <button id="streetSmartArcGISPro_recordingLayerButton"
-                caption="Recording Layer"
+                caption="Calque enregistrement"
                 className="AddIns.Buttons.RecordingLayer"
                 loadOnClick="false"
                 largeImage="Images\RecordingLayer32.png"
                 condition="streetSmartArcGISPro_recordingsReadyCondition"
                 keytip="GR">
-          <tooltip heading="Recording Layer">
-            Add recording layer to the map
+          <tooltip heading="Calque enregistrement">
+            Ajouter une calque enregistrement à la carte
             <disabledText />
           </tooltip>
         </button>
         <button id="streetSmartArcGISPro_ImageIdSearchButton"
-                caption="ImageId Search"
+                caption="Recherche d'ImageId"
                 className="AddIns.Buttons.ImageIdSearch"
                 loadOnClick="false"
                 largeImage="Images\ImageIdSearch32.png"
                 condition="streetSmartArcGISPro_recordingsReadyCondition"
                 keytip="GIS">
-          <tooltip heading="ImageId Search">
-            Search for the imageId
+          <tooltip heading="Recherche d'ImageId">
+            Rechercher l'imageId
             <disabledText />
           </tooltip>
         </button>
@@ -130,8 +130,8 @@
                 largeImage="Images\Help32.png"
                 condition="streetSmartArcGISPro_agreementAcceptedCondition"
                 keytip="GH">
-          <tooltip heading="Show help information">
-            Show help information
+          <tooltip heading="Afficher les informations d'aide">
+            Afficher les informations d'aide
             <disabledText />
           </tooltip>
         </button>
@@ -146,7 +146,7 @@
           <content className="AddIns.Views.StreetSmart" />
         </dockPane>
         <dockPane id="streetSmartArcGISPro_ImageIdSearch"
-                  caption="ImageId Search"
+                  caption="Recherche d'ImageId"
                   className="AddIns.DockPanes.ImageIdSearch"
                   dock="group"
                   dockWith="esri_mapping_locateDockPane">
@@ -171,13 +171,13 @@
     <insertSheet id="streetSmartArcGISPro_optionsPropertySheet"
                  caption="Street Smart for ArcGIS Pro">
       <page id="streetSmartArcGISPro_loginPage"
-            caption="Login"
+            caption="S'identifier"
             className="AddIns.Pages.Login"
             condition="streetSmartArcGISPro_agreementAcceptedCondition">
         <content className="AddIns.Views.Login" />
       </page>
       <page id="streetSmartArcGISPro_languagePage"
-            caption="Language"
+            caption="Langue"
             className="AddIns.Pages.Language"
             condition="streetSmartArcGISPro_agreementAcceptedCondition">
         <content className="AddIns.Views.Language" />
@@ -189,13 +189,13 @@
         <content className="AddIns.Views.Configuration" />
       </page>
       <page id="streetSmartArcGISPro_aboutPage"
-            caption="About"
+            caption="A propos"
             className="AddIns.Pages.About"
             condition="streetSmartArcGISPro_agreementAcceptedCondition">
         <content className="AddIns.Views.About" />
       </page>
       <page id="streetSmartArcGISPro_agreementPage"
-            caption="Agreement"
+            caption="Accord"
             className="AddIns.Pages.Agreement">
         <content className="AddIns.Views.Agreement" />
       </page>
@@ -211,11 +211,11 @@
   </propertySheets>
   <conditions>
     <insertCondition id="streetSmartArcGISPro_agreementAcceptedCondition"
-                     caption="The agreement is accepted.">
+                     caption="L'accord est accepté.">
       <state id="streetSmartArcGISPro_agreementAcceptedState" />
     </insertCondition>
     <insertCondition id="streetSmartArcGISPro_recordingsReadyCondition"
-                     caption="The recordings are ready.">
+                     caption="Les enregistrements sont prêts..">
       <and>
         <state id="streetSmartArcGISPro_agreementAcceptedState" />
         <state id="streetSmartArcGISPro_loginSuccessfullyState" />
@@ -223,7 +223,7 @@
       </and>
     </insertCondition>
     <insertCondition id="streetSmartArcGISPro_openImageToolReadyCondition"
-                     caption="The image tool is ready.">
+                     caption="L'outil image est prêt.">
       <and>
         <state id="streetSmartArcGISPro_agreementAcceptedState" />
         <state id="streetSmartArcGISPro_loginSuccessfullyState" />

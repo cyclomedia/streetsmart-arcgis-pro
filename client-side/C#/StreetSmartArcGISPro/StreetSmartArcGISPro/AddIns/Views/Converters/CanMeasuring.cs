@@ -18,10 +18,7 @@
 
 using System;
 using System.Globalization;
-using System.Resources;
 using System.Windows.Data;
-
-using StreetSmartArcGISPro.Configuration.File;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
@@ -31,11 +28,7 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      ResourceManager res = Properties.Resources.ResourceManager;
-      LanguageSettings language = LanguageSettings.Instance;
-      string measurementSupportedTxt = res.GetString("SettingsMeasurementSupported", language.CultureInfo);
-      string measurementNotSupportedTxt = res.GetString("SettingsMeasurementNotSupported", language.CultureInfo);
-      return value != null && (bool) value ? measurementSupportedTxt : measurementNotSupportedTxt;
+      return value != null && (bool) value ? "SettingsMeasurementSupported" : "SettingsMeasurementNotSupported";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

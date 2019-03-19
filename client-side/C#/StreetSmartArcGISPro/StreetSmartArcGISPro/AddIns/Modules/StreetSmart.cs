@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 
 using ArcGIS.Desktop.Framework;
@@ -27,6 +28,7 @@ using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
 using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.CycloMediaLayers;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
@@ -42,13 +44,14 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     #region Members
 
     private static StreetSmart _streetSmart;
+    private static LanguageSettings _langSettings;
 
     private Dictionary<MapView, CycloMediaGroupLayer> _cycloMediaGroupLayer;
     private VectorLayerList _vectorLayerList;
     private ViewerList _viewerList;
     private MeasurementList _measurementList;
     private readonly Agreement _agreement;
-    private readonly ConstantsRecordingLayer _constantsRecordingLayer;
+    private ResourceManager _resourceManager;
 
     #endregion
 
@@ -60,10 +63,12 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     public static StreetSmart Current
       =>
         _streetSmart ??
-        (_streetSmart = (StreetSmart) FrameworkApplication.FindModule("streetSmartArcGISPro_module"));
+        (_streetSmart = (StreetSmart) FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}"));
 
     public Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer =>
       _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = new Dictionary<MapView, CycloMediaGroupLayer>());
+
+    private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
     public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
     {
@@ -111,12 +116,27 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public StreetSmart()
     {
+      _langSettings = LanguageSettings.Instance;
       _agreement = Agreement.Instance;
-      _constantsRecordingLayer = ConstantsRecordingLayer.Instance;
+      _resourceManager = Properties.Resources.ResourceManager;
 
       if (_agreement.Value)
       {
         FrameworkApplication.State.Activate("streetSmartArcGISPro_agreementAcceptedState");
+      }
+
+      var splitId = ID.Split('_');
+      string langId = splitId.Length == 0 ? string.Empty : splitId[splitId.Length - 1];
+      Language language = Languages.Instance.Get(langId);
+
+      if (language != null)
+      {
+        _langSettings.Language = language;
+        _langSettings.Save();
+      }
+      else
+      {
+        _langSettings.Language = Languages.Instance.Get("en-GB");
       }
 
       Login login = Login.Instance;
@@ -165,7 +185,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
       return mapView?.Map?.Layers.Aggregate(false, (current, layer) =>
                  (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
-                  layer.Name == _constantsRecordingLayer.CycloMediaLayerName) || current) ?? false;
+                  layer.Name == GroupLayerName) || current) ?? false;
     }
 
     private bool ContainsCycloMediaLayer(Map map)
@@ -173,7 +193,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(map);
       return map?.Layers.Aggregate(false, (current, layer) =>
                  (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
-                  layer.Name == _constantsRecordingLayer.CycloMediaLayerName) || current) ?? false;
+                  layer.Name == GroupLayerName) || current) ?? false;
     }
 
     private async Task CloseCycloMediaLayerAsync(bool closeMap, MapView mapView)

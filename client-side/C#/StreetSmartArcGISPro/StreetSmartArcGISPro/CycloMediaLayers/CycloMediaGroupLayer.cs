@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -38,7 +39,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
   {
     #region Members
 
-    private readonly ConstantsRecordingLayer _constants;
     private IList<CycloMediaLayer> _allLayers;
     private bool _updateVisibility;
     private Envelope _initialExtent;
@@ -52,6 +52,16 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     #endregion
 
     #region Properties
+
+    private string GroupLayerName
+    {
+      get
+      {
+        ResourceManager resourceManager = Properties.Resources.ResourceManager;
+        LanguageSettings language = LanguageSettings.Instance;
+        return resourceManager.GetString("RecordingLayerGroupName", language.CultureInfo);
+      }
+    }
 
     public GroupLayer GroupLayer { get; private set; }
 
@@ -78,7 +88,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     public CycloMediaGroupLayer(MapView mapView)
     {
       MapView = mapView;
-      _constants = ConstantsRecordingLayer.Instance;
     }
 
     #endregion
@@ -92,12 +101,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       Clear();
       _initialExtent = MapView.Extent;
       Map map = MapView?.Map;
-      string name = _constants.CycloMediaLayerName;
 
       if (map != null)
       {
         var layers = map.GetLayersAsFlattenedList();
-        var layersForGroupLayer = map.FindLayers(name);
+        var layersForGroupLayer = map.FindLayers(GroupLayerName);
         bool leave = false;
 
         foreach (Layer layer in layersForGroupLayer)
@@ -123,7 +131,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           await QueuedTask.Run(() =>
           {
-            GroupLayer = LayerFactory.Instance.CreateGroupLayer(map, 0, name);
+            GroupLayer = LayerFactory.Instance.CreateGroupLayer(map, 0, GroupLayerName);
             GroupLayer.SetExpanded(true);
           });
         }
@@ -187,8 +195,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      bool result = this.Aggregate(name == _constants.CycloMediaLayerName, (current, layer) => layer.Name == name || current);
-      return result || this.Aggregate(name == _constants.CycloMediaLayerName,
+      bool result = this.Aggregate(name == GroupLayerName, (current, layer) => layer.Name == name || current);
+      return result || this.Aggregate(name == GroupLayerName,
                (current, layer) =>
                  layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)) || current);
     }

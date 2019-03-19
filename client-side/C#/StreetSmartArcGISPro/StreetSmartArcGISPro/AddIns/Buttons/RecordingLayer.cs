@@ -18,6 +18,7 @@
 
 using System.ComponentModel;
 using System.Linq;
+using System.Resources;
 
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
@@ -34,8 +35,21 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
   {
     #region Members
 
-    private readonly ConstantsRecordingLayer _constantsRecordingLayer;
     private MapView _mapView;
+
+    #endregion
+
+    #region Properties
+
+    private string RecordingLayerName
+    {
+      get
+      {
+        ResourceManager resourceManager = Properties.Resources.ResourceManager;
+        LanguageSettings language = LanguageSettings.Instance;
+        return resourceManager.GetString("RecordingLayerName", language.CultureInfo);
+      }
+    }
 
     #endregion
 
@@ -45,7 +59,6 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     {
       IsChecked = false;
       _mapView = MapView.Active;
-      _constantsRecordingLayer = ConstantsRecordingLayer.Instance;
 
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
 
@@ -70,11 +83,11 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
 
       if (IsChecked)
       {
-        await streetSmart.RemoveLayerAsync(_constantsRecordingLayer.RecordingLayerName, _mapView);
+        await streetSmart.RemoveLayerAsync(RecordingLayerName, _mapView);
       }
       else
       {
-        await streetSmart.AddLayersAsync(_constantsRecordingLayer.RecordingLayerName, _mapView);
+        await streetSmart.AddLayersAsync(RecordingLayerName, _mapView);
       }
     }
 
@@ -86,7 +99,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     {
       if (sender is CycloMediaGroupLayer groupLayer && args.PropertyName == "Count")
       {
-        IsChecked = groupLayer.Aggregate(false, (current, layer) => layer.Name == _constantsRecordingLayer.RecordingLayerName || current);
+        IsChecked = groupLayer.Aggregate(false, (current, layer) => layer.Name == RecordingLayerName || current);
       }
     }
 
@@ -126,11 +139,11 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
       {
         if (layer.IsRemoved)
         {
-          IsChecked = layer.Name != _constantsRecordingLayer.RecordingLayerName && IsChecked;
+          IsChecked = layer.Name != RecordingLayerName && IsChecked;
         }
         else
         {
-          IsChecked = layer.Name == _constantsRecordingLayer.RecordingLayerName || IsChecked;
+          IsChecked = layer.Name == RecordingLayerName || IsChecked;
         }
       }
     }
