@@ -143,7 +143,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       Measurement result = null;
 
-      for (int i = 0; ((i < Count) && (result == null)); i++)
+      for (int i = 0; i < Count && result == null; i++)
       {
         var element = this.ElementAt(i);
         Measurement measurement = element.Value;
@@ -160,6 +160,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         var element = this.ElementAt(0);
         Measurement measurement = element.Value;
         measurement.RemoveMeasurement();
+        Remove(element.Key);
       }
     }
 

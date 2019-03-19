@@ -668,7 +668,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
         {
-          IOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD);
+          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD);
           overlay = await Api.AddOverlay(overlay);
           vectorLayer.Overlay = overlay;
         }

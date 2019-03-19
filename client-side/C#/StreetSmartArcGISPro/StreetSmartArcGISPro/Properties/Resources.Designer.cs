@@ -359,6 +359,24 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Measuring not supported.
+        /// </summary>
+        internal static string SettingsMeasurementNotSupported {
+            get {
+                return ResourceManager.GetString("SettingsMeasurementNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Measuring supported.
+        /// </summary>
+        internal static string SettingsMeasurementSupported {
+            get {
+                return ResourceManager.GetString("SettingsMeasurementSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Overlay draw distance.
         /// </summary>
         internal static string SettingsOverlayDrawDistance {
