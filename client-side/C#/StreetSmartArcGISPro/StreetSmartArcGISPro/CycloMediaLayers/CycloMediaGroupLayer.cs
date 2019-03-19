@@ -53,13 +53,13 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     #region Properties
 
-    private string RecordingLayerName
+    private string GroupLayerName
     {
       get
       {
         ResourceManager resourceManager = Properties.Resources.ResourceManager;
         LanguageSettings language = LanguageSettings.Instance;
-        return resourceManager.GetString("RecordingLayerName", language.CultureInfo);
+        return resourceManager.GetString("RecordingLayerGroupName", language.CultureInfo);
       }
     }
 
@@ -105,7 +105,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       if (map != null)
       {
         var layers = map.GetLayersAsFlattenedList();
-        var layersForGroupLayer = map.FindLayers(RecordingLayerName);
+        var layersForGroupLayer = map.FindLayers(GroupLayerName);
         bool leave = false;
 
         foreach (Layer layer in layersForGroupLayer)
@@ -131,7 +131,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           await QueuedTask.Run(() =>
           {
-            GroupLayer = LayerFactory.Instance.CreateGroupLayer(map, 0, RecordingLayerName);
+            GroupLayer = LayerFactory.Instance.CreateGroupLayer(map, 0, GroupLayerName);
             GroupLayer.SetExpanded(true);
           });
         }
@@ -195,8 +195,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      bool result = this.Aggregate(name == RecordingLayerName, (current, layer) => layer.Name == name || current);
-      return result || this.Aggregate(name == RecordingLayerName,
+      bool result = this.Aggregate(name == GroupLayerName, (current, layer) => layer.Name == name || current);
+      return result || this.Aggregate(name == GroupLayerName,
                (current, layer) =>
                  layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)) || current);
     }

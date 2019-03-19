@@ -68,7 +68,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     public Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer =>
       _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = new Dictionary<MapView, CycloMediaGroupLayer>());
 
-    private string RecordingLayerName => _resourceManager.GetString("RecordingLayerName", _langSettings.CultureInfo);
+    private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
     public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
     {
@@ -185,7 +185,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
       return mapView?.Map?.Layers.Aggregate(false, (current, layer) =>
                  (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
-                  layer.Name == RecordingLayerName) || current) ?? false;
+                  layer.Name == GroupLayerName) || current) ?? false;
     }
 
     private bool ContainsCycloMediaLayer(Map map)
@@ -193,7 +193,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(map);
       return map?.Layers.Aggregate(false, (current, layer) =>
                  (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
-                  layer.Name == RecordingLayerName) || current) ?? false;
+                  layer.Name == GroupLayerName) || current) ?? false;
     }
 
     private async Task CloseCycloMediaLayerAsync(bool closeMap, MapView mapView)
