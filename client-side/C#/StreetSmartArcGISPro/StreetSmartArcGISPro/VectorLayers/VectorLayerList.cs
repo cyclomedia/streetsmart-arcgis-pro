@@ -119,7 +119,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task DetectVectorLayersAsync(bool initEvents, MapView initMapView = null)
     {
-      Clear();
       MapView mapView = initMapView ?? MapView.Active;
       Map map = mapView?.Map;
       IReadOnlyList<Layer> layers = map?.GetLayersAsFlattenedList();
@@ -145,8 +144,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       FeatureLayer featureLayer = layer as FeatureLayer;
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetCycloMediaGroupLayer(mapView);
-
-      List<VectorLayer> layerList = null;
+      List<VectorLayer> layerList;
 
       if (ContainsKey(mapView))
       {
