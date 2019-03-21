@@ -679,6 +679,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         await QueuedTask.Run(async () =>
         {
           Selection selectionFeatures = Layer?.GetSelection();
+          _vectorLayerList.LastSelectedLayer = this;
 
           using (RowCursor rowCursur = selectionFeatures?.Search())
           {

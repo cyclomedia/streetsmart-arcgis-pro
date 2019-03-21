@@ -234,6 +234,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             Measurement measurement2 = this.ElementAt(0).Value;
             measurement2.VectorLayer = _lastVectorLayer;
             measurement2.SetSketch();
+            measurement2.IsDisposed = false;
             FromMap = true;
 
             IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
@@ -288,10 +289,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             measurementExists = true;
             measurement.OpenMeasurement();
-          }
-          else
-          {
-            measurement?.RemoveMeasurement();
           }
 
           if (!measurementExists)

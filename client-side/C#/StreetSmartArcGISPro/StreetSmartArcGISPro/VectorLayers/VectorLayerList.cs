@@ -67,6 +67,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Properties
 
+    public VectorLayer LastSelectedLayer { get; set; }
+
     public EditTools EditTool { get; private set; }
 
     #endregion
@@ -448,8 +450,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       if (geometry != null && EditTool == EditTools.ModifyFeatureImpl)
       {
         EditTool = EditTools.Verticles;
-        Measurement measurement = _measurementList.Sketch;
-        measurement?.OpenMeasurement();
+        _measurementList.StartMeasurement(geometry, null, false, null, LastSelectedLayer);
+        await _measurementList.SketchModifiedAsync(geometry, LastSelectedLayer);
       }
       else if (geometry == null && EditTool == EditTools.Verticles)
       {
@@ -463,7 +465,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Geometry geometry = await mapView.GetCurrentSketchAsync();
       EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
       Layer layer = editingFeatureTemplate?.Layer;
-      VectorLayer thisVectorLayer = GetLayer(layer, mapView);
+      VectorLayer thisVectorLayer = GetLayer(layer, mapView) ?? LastSelectedLayer;
 
       if (geometry != null && thisVectorLayer != null)
       {
