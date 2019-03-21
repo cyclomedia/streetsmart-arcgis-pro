@@ -29,6 +29,7 @@ using ArcGIS.Core.Events;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
+using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Internal.Mapping.CommonControls;
 using ArcGIS.Desktop.Mapping;
@@ -641,15 +642,36 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task AddFeatureAsync(Geometry geometry)
     {
-      var editOperation = new EditOperation
+      await QueuedTask.Run(async () =>
       {
-        Name = $"Add feature to layer: {Name}",
-        SelectNewFeatures = true,
-        ShowModalMessageAfterFailure = false
-      };
+        var editOperation = new EditOperation
+        {
+          Name = $"Add feature to layer: {Name}",
+          SelectNewFeatures = true,
+          ShowModalMessageAfterFailure = false
+        };
 
-      editOperation.Create(Layer, geometry);
-      await editOperation.ExecuteAsync();
+        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
+
+        if (!(editingFeatureTemplate.GetDefinition() is CIMFeatureTemplate definition))
+        {
+          editOperation.Create(Layer, geometry);
+          await editOperation.ExecuteAsync();
+        }
+        else
+        {
+          Dictionary<string, object> toAddFields = new Dictionary<string, object>();
+
+          foreach (var value in definition.DefaultValues)
+          {
+            toAddFields.Add(value.Key, value.Value);
+          }
+
+          toAddFields.Add("Shape", geometry);
+          editOperation.Create(Layer, toAddFields);
+          await editOperation.ExecuteAsync();
+        }
+      });
     }
 
     public async Task UpdateFeatureAsync(long uid, Geometry geometry)
