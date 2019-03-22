@@ -653,7 +653,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
 
-        if (!(editingFeatureTemplate.GetDefinition() is CIMFeatureTemplate definition))
+        if (!(editingFeatureTemplate.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
         {
           editOperation.Create(Layer, geometry);
           await editOperation.ExecuteAsync();
