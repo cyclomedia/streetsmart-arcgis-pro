@@ -264,4 +264,10 @@ Type de produit:</value>
   <data name="RecordingLayerNoAuthorization" xml:space="preserve">
     <value>Aucune autorisation</value>
   </data>
+  <data name="HelpErrorOpenHelpDocument" xml:space="preserve">
+    <value>Une erreur lors de l'ouverture du document d'aide</value>
+  </data>
+  <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
+    <value>Il n'y a pas de lecteur de pdf installé sur votre système</value>
+  </data>
 </root>

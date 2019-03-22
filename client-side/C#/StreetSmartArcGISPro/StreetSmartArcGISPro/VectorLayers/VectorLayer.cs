@@ -29,7 +29,6 @@ using ArcGIS.Core.Events;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
-using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Internal.Mapping.CommonControls;
 using ArcGIS.Desktop.Mapping;
@@ -170,7 +169,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
-      GeoJsonChanged = false;
 
       if (Layer.Map == map)
       {
@@ -400,7 +398,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         });
 
         string newJson = featureCollection?.ToString();
-        GeoJsonChanged = !(newJson?.Equals(GeoJson?.ToString()) ?? false) || GeoJsonChanged;
+        GeoJsonChanged = newJson != GeoJson?.ToString() || GeoJsonChanged;
         GeoJson = featureCollection;
       }
 
@@ -416,6 +414,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (featureCollection.Features.Count >= 1)
         {
           Sld = SLDFactory.CreateEmptyStyle();
+          StreetSmartGeometryType type = featureCollection.Features[0].Geometry.Type;
 
           CIMRenderer renderer = Layer?.GetRenderer();
           CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
@@ -442,7 +441,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
 
                 CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef, type);
                 IRule rule = SLDFactory.CreateRule(symbolizer, filter);
                 SLDFactory.AddRuleToStyle(Sld, rule);
               }
@@ -450,17 +449,17 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           else
           {
-            ISymbolizer symbolizer = CreateSymbolizer(symbolRef);
+            ISymbolizer symbolizer = CreateSymbolizer(symbolRef, type);
             IRule rule = SLDFactory.CreateRule(symbolizer);
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
 
-        return !(oldSld?.Equals(Sld?.SLD) ?? false);
+        return oldSld != Sld?.SLD;
       });
     }
 
-    private ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef)
+    private ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef, StreetSmartGeometryType type)
     {
       double strokeWidth = 1.0;
       double strokeOpacity = 1.0;
@@ -501,9 +500,25 @@ namespace StreetSmartArcGISPro.VectorLayers
             Color color = CimColorToWinColor(cimColor);
             Color? strokeColor = cimStroke == null ? null : (Color?)CimColorToWinColor(cimStroke);
 
-            symbolizer = strokeColor != null
-              ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth, strokeOpacity)
-              : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
+            switch (type)
+            {
+              case StreetSmartGeometryType.Point:
+              case StreetSmartGeometryType.MultiPoint:
+                symbolizer = strokeColor != null
+                  ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth, strokeOpacity)
+                  : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
+                break;
+
+              case StreetSmartGeometryType.LineString:
+              case StreetSmartGeometryType.MultiLineString:
+                symbolizer = SLDFactory.CreateStylePolygon(color);
+                break;
+
+              case StreetSmartGeometryType.Polygon:
+              case StreetSmartGeometryType.MultiPolygon:
+                symbolizer = SLDFactory.CreateStyleLine(color);
+                break;
+            }
           }
           else if (layer is CIMPictureMarker pictureMarker)
           {
@@ -516,16 +531,6 @@ namespace StreetSmartArcGISPro.VectorLayers
             symbolizer = SLDFactory.CreateImageSymbol(size, base64);
           }
         }
-      }
-      else if (symbol is CIMLineSymbol)
-      {
-        Color color = CimColorToWinColor(cimColor);
-        symbolizer = SLDFactory.CreateStyleLine(color, null, fillOpacity);
-      }
-      else if (symbol is CIMPolygonSymbol)
-      {
-        Color color = CimColorToWinColor(cimColor);
-        symbolizer = SLDFactory.CreateStylePolygon(color, fillOpacity);
       }
 
       return symbolizer;
@@ -636,36 +641,15 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task AddFeatureAsync(Geometry geometry)
     {
-      await QueuedTask.Run(async () =>
+      var editOperation = new EditOperation
       {
-        var editOperation = new EditOperation
-        {
-          Name = $"Add feature to layer: {Name}",
-          SelectNewFeatures = true,
-          ShowModalMessageAfterFailure = false
-        };
+        Name = $"Add feature to layer: {Name}",
+        SelectNewFeatures = true,
+        ShowModalMessageAfterFailure = false
+      };
 
-        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
-
-        if (!(editingFeatureTemplate.GetDefinition() is CIMFeatureTemplate definition))
-        {
-          editOperation.Create(Layer, geometry);
-          await editOperation.ExecuteAsync();
-        }
-        else
-        {
-          Dictionary<string, object> toAddFields = new Dictionary<string, object>();
-
-          foreach (var value in definition.DefaultValues)
-          {
-            toAddFields.Add(value.Key, value.Value);
-          }
-
-          toAddFields.Add("Shape", geometry);
-          editOperation.Create(Layer, toAddFields);
-          await editOperation.ExecuteAsync();
-        }
-      });
+      editOperation.Create(Layer, geometry);
+      await editOperation.ExecuteAsync();
     }
 
     public async Task UpdateFeatureAsync(long uid, Geometry geometry)
@@ -701,7 +685,6 @@ namespace StreetSmartArcGISPro.VectorLayers
         await QueuedTask.Run(async () =>
         {
           Selection selectionFeatures = Layer?.GetSelection();
-          _vectorLayerList.LastSelectedLayer = this;
 
           using (RowCursor rowCursur = selectionFeatures?.Search())
           {

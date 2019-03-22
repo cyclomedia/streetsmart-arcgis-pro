@@ -329,7 +329,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         if (streetSmart.InsideScale(MapView.Active) && !_isDisposed && Point != null
             && !double.IsNaN(Point.X) && !double.IsNaN(Point.Y) && !Measurement.IsDisposed)
         {
-          if (Measurement.Geometry.Type != StreetSmartGeometryType.Polygon || Measurement.Count >= 1 && (PointId == 0 || !IsSame(Measurement[0].Point)))
+          if (Measurement.Geometry.Type != StreetSmartGeometryType.Polygon || Measurement.Count >= 1 &&
+              (PointId == 0 || !IsSame(Measurement[Measurement.ElementAt(0).Key].Point)))
           {
             MapView thisView = MapView.Active;
             WindowsPoint winPoint = thisView.MapToScreen(Point);

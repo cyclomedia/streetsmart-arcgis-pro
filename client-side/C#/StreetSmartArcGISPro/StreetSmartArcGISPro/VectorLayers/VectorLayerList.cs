@@ -67,8 +67,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Properties
 
-    public VectorLayer LastSelectedLayer { get; set; }
-
     public EditTools EditTool { get; private set; }
 
     #endregion
@@ -121,6 +119,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task DetectVectorLayersAsync(bool initEvents, MapView initMapView = null)
     {
+      Clear();
       MapView mapView = initMapView ?? MapView.Active;
       Map map = mapView?.Map;
       IReadOnlyList<Layer> layers = map?.GetLayersAsFlattenedList();
@@ -146,7 +145,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       FeatureLayer featureLayer = layer as FeatureLayer;
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetCycloMediaGroupLayer(mapView);
-      List<VectorLayer> layerList;
+
+      List<VectorLayer> layerList = null;
 
       if (ContainsKey(mapView))
       {
@@ -450,8 +450,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       if (geometry != null && EditTool == EditTools.ModifyFeatureImpl)
       {
         EditTool = EditTools.Verticles;
-        _measurementList.StartMeasurement(geometry, null, false, null, LastSelectedLayer);
-        await _measurementList.SketchModifiedAsync(geometry, LastSelectedLayer);
+        Measurement measurement = _measurementList.Sketch;
+        measurement?.OpenMeasurement();
       }
       else if (geometry == null && EditTool == EditTools.Verticles)
       {
@@ -465,7 +465,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Geometry geometry = await mapView.GetCurrentSketchAsync();
       EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
       Layer layer = editingFeatureTemplate?.Layer;
-      VectorLayer thisVectorLayer = GetLayer(layer, mapView) ?? LastSelectedLayer;
+      VectorLayer thisVectorLayer = GetLayer(layer, mapView);
 
       if (geometry != null && thisVectorLayer != null)
       {

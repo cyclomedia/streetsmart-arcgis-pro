@@ -206,6 +206,24 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error while opening the help document.
+        /// </summary>
+        internal static string HelpErrorOpenHelpDocument {
+            get {
+                return ResourceManager.GetString("HelpErrorOpenHelpDocument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no pdf viewer installed on your system.
+        /// </summary>
+        internal static string HelpNoPdfViewerInstalledOnYourSystem {
+            get {
+                return ResourceManager.GetString("HelpNoPdfViewerInstalledOnYourSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Date:.
         /// </summary>
         internal static string ImageIdSearchDate {
