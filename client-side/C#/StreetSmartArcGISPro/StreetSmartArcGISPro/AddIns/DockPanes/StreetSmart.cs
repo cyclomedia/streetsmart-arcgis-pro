@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -99,6 +100,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private readonly ViewerList _viewerList;
     private readonly MeasurementList _measurementList;
     private readonly Dispatcher _currentDispatcher;
+    private readonly IList<VectorLayer> _vectorLayerInChange;
 
     private CrossCheck _crossCheck;
     private SpatialReference _lastSpatialReference;
@@ -114,6 +116,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _currentDispatcher = Dispatcher.CurrentDispatcher;
       _inRestart = false;
       _inClose = false;
+      _vectorLayerInChange = new List<VectorLayer>();
 
       _languageSettings = LanguageSettings.Instance;
       _languageSettings.PropertyChanged += OnLanguageSettingsChanged;
@@ -370,7 +373,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private void DoHide()
     {
-      _currentDispatcher.Invoke(new Action(Hide), DispatcherPriority.ContextIdle);
+      try
+      {
+        _currentDispatcher.Invoke(Hide, DispatcherPriority.ContextIdle);
+      }
+      catch (TaskCanceledException)
+      {
+      }
     }
 
     private async Task RestartStreetSmart(bool reloadApi)
@@ -821,29 +830,31 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-        panoramaViewer.ImageChange -= OnImageChange;
+        RemovePanoramaViewer(panoramaViewer);
+      }
+      else
+      {
+        IList<IViewer> viewers = await Api.GetViewers();
+        IList<IViewer> removeList = new List<IViewer>();
 
-        if (viewer != null)
+        foreach (var keyValueViewer in _viewerList)
         {
-          bool hasMarker = viewer.HasMarker;
-          _viewerList.Delete(panoramaViewer);
+          IViewer viewer = keyValueViewer.Key;
+          bool exists = viewers.Aggregate(false, (current, viewer2) => viewer2 == viewer || current);
 
-          if (hasMarker)
+          if (!exists)
           {
-            List<Viewer> markerViewers = _viewerList.MarkerViewers;
-
-            if (markerViewers.Count == 0 && _crossCheck != null)
-            {
-              _crossCheck.Dispose();
-              _crossCheck = null;
-            }
+            removeList.Add(viewer);
           }
         }
 
-        panoramaViewer.ImageChange -= OnImageChange;
-        panoramaViewer.ViewChange -= OnViewChange;
-        panoramaViewer.FeatureClick -= OnFeatureClick;
+        foreach (var viewerRemove in removeList)
+        {
+          if (viewerRemove is IPanoramaViewer panoramaViewer2)
+          {
+            RemovePanoramaViewer(panoramaViewer2);
+          }
+        }
       }
 
       if (Api != null && !_inRestart)
@@ -862,6 +873,33 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           await Api.CloseViewer(await viewers[0].GetId());
         }
       }
+    }
+
+    private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)
+    {
+      Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+      panoramaViewer.ImageChange -= OnImageChange;
+
+      if (viewer != null)
+      {
+        bool hasMarker = viewer.HasMarker;
+        _viewerList.Delete(panoramaViewer);
+
+        if (hasMarker)
+        {
+          List<Viewer> markerViewers = _viewerList.MarkerViewers;
+
+          if (markerViewers.Count == 0 && _crossCheck != null)
+          {
+            _crossCheck.Dispose();
+            _crossCheck = null;
+          }
+        }
+      }
+
+      panoramaViewer.ImageChange -= OnImageChange;
+      panoramaViewer.ViewChange -= OnViewChange;
+      panoramaViewer.FeatureClick -= OnFeatureClick;
     }
 
     private async void OnConfigurationPropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -1041,10 +1079,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (args.PropertyName)
           {
             case "GeoJson":
-              if (vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged)
+              if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
               {
+                _vectorLayerInChange.Add(vectorLayer);
                 await RemoveVectorLayerAsync(vectorLayer);
                 await AddVectorLayerAsync(vectorLayer);
+                _vectorLayerInChange.Remove(vectorLayer);
               }
 
               break;

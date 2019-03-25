@@ -169,6 +169,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
+      GeoJsonChanged = false;
 
       if (Layer.Map == map)
       {
@@ -398,7 +399,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         });
 
         string newJson = featureCollection?.ToString();
-        GeoJsonChanged = newJson != GeoJson?.ToString() || GeoJsonChanged;
+        GeoJsonChanged = !(newJson?.Equals(GeoJson?.ToString()) ?? false) || GeoJsonChanged;
         GeoJson = featureCollection;
       }
 
@@ -414,7 +415,6 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (featureCollection.Features.Count >= 1)
         {
           Sld = SLDFactory.CreateEmptyStyle();
-          StreetSmartGeometryType type = featureCollection.Features[0].Geometry.Type;
 
           CIMRenderer renderer = Layer?.GetRenderer();
           CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
@@ -441,7 +441,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
 
                 CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef, type);
+                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
                 IRule rule = SLDFactory.CreateRule(symbolizer, filter);
                 SLDFactory.AddRuleToStyle(Sld, rule);
               }
@@ -449,17 +449,17 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           else
           {
-            ISymbolizer symbolizer = CreateSymbolizer(symbolRef, type);
+            ISymbolizer symbolizer = CreateSymbolizer(symbolRef);
             IRule rule = SLDFactory.CreateRule(symbolizer);
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
 
-        return oldSld != Sld?.SLD;
+        return !(oldSld?.Equals(Sld?.SLD) ?? false);
       });
     }
 
-    private ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef, StreetSmartGeometryType type)
+    private ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef)
     {
       double strokeWidth = 1.0;
       double strokeOpacity = 1.0;
@@ -500,25 +500,9 @@ namespace StreetSmartArcGISPro.VectorLayers
             Color color = CimColorToWinColor(cimColor);
             Color? strokeColor = cimStroke == null ? null : (Color?)CimColorToWinColor(cimStroke);
 
-            switch (type)
-            {
-              case StreetSmartGeometryType.Point:
-              case StreetSmartGeometryType.MultiPoint:
-                symbolizer = strokeColor != null
-                  ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth, strokeOpacity)
-                  : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
-                break;
-
-              case StreetSmartGeometryType.LineString:
-              case StreetSmartGeometryType.MultiLineString:
-                symbolizer = SLDFactory.CreateStylePolygon(color);
-                break;
-
-              case StreetSmartGeometryType.Polygon:
-              case StreetSmartGeometryType.MultiPolygon:
-                symbolizer = SLDFactory.CreateStyleLine(color);
-                break;
-            }
+            symbolizer = strokeColor != null
+              ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth, strokeOpacity)
+              : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
           }
           else if (layer is CIMPictureMarker pictureMarker)
           {
@@ -531,6 +515,16 @@ namespace StreetSmartArcGISPro.VectorLayers
             symbolizer = SLDFactory.CreateImageSymbol(size, base64);
           }
         }
+      }
+      else if (symbol is CIMLineSymbol)
+      {
+        Color color = CimColorToWinColor(cimColor);
+        symbolizer = SLDFactory.CreateStyleLine(color, null, fillOpacity);
+      }
+      else if (symbol is CIMPolygonSymbol)
+      {
+        Color color = CimColorToWinColor(cimColor);
+        symbolizer = SLDFactory.CreateStylePolygon(color, fillOpacity);
       }
 
       return symbolizer;
@@ -685,6 +679,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         await QueuedTask.Run(async () =>
         {
           Selection selectionFeatures = Layer?.GetSelection();
+          _vectorLayerList.LastSelectedLayer = this;
 
           using (RowCursor rowCursur = selectionFeatures?.Search())
           {
