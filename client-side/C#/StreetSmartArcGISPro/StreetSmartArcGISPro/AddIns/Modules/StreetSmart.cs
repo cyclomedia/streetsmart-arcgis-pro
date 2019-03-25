@@ -244,7 +244,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         _vectorLayerList = new VectorLayerList();
       }
 
-      if (!_vectorLayerList.ContainsKey(mapView))
+      if (mapView != null && !_vectorLayerList.ContainsKey(mapView))
       {
         await _vectorLayerList.DetectVectorLayersAsync(mapView);
       }

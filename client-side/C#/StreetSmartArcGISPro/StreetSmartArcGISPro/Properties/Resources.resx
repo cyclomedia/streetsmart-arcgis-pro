@@ -262,4 +262,10 @@
   <data name="RecordingLayerNoAuthorization" xml:space="preserve">
     <value>No Authorization</value>
   </data>
+  <data name="HelpErrorOpenHelpDocument" xml:space="preserve">
+    <value>An error while opening the help document</value>
+  </data>
+  <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
+    <value>There is no pdf viewer installed on your system</value>
+  </data>
 </root>

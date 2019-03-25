@@ -80,11 +80,14 @@ namespace StreetSmartArcGISPro.AddIns.Views
             string epsgCode = $"EPSG:{spatialReference.Wkid}";
             FeatureCollection featureCollection = FeatureCollection.Load(imageId, epsgCode);
 
-            if (featureCollection.NumberOfFeatures >= 1)
+            if (featureCollection != null)
             {
-              foreach (Recording recording in featureCollection.FeatureMembers.Recordings)
+              if (featureCollection.NumberOfFeatures >= 1)
               {
-                paneImageIdSearch.ImageInfo.Add(recording);
+                foreach (Recording recording in featureCollection.FeatureMembers.Recordings)
+                {
+                  paneImageIdSearch.ImageInfo.Add(recording);
+                }
               }
             }
           }
