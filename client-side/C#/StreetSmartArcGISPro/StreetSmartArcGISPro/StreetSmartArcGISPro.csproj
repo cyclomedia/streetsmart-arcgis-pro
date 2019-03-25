@@ -526,6 +526,11 @@
       <Link>Install\locales\zh-TW.pak</Link>
     </AddInContent>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
+      <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.CleanAddIn" />

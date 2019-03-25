@@ -84,7 +84,7 @@ namespace StreetSmartArcGISPro.Utilities
 
         if (!result)
         {
-          CheckCycloramaSpatialReference(null);
+          CheckCycloramaSpatialReference(null, mapView);
         }
       }
 
@@ -94,19 +94,19 @@ namespace StreetSmartArcGISPro.Utilities
     public static string CheckCycloramaSpatialReferenceMapView(MapView mapView)
     {
       Setting settings = ProjectList.Instance.GetSettings(mapView);
-      MySpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
-      return CheckCycloramaSpatialReference(spatialReference);
+      MySpatialReference spatialReference = settings?.CycloramaViewerCoordinateSystem;
+      return CheckCycloramaSpatialReference(spatialReference, mapView);
     }
 
-    private static string CheckCycloramaSpatialReference(MySpatialReference spatialReference)
+    private static string CheckCycloramaSpatialReference(MySpatialReference spatialReference, MapView mapView)
     {
       ProjectList projectList = ProjectList.Instance;
-      Setting settings = projectList.GetSettings(MapView.Active);
-      MySpatialReference recordingSpatialReference = settings.RecordingLayerCoordinateSystem;
+      Setting settings = projectList.GetSettings(mapView);
+      MySpatialReference recordingSpatialReference = settings?.RecordingLayerCoordinateSystem;
       string epsgCode = spatialReference == null
-        ? (recordingSpatialReference == null
+        ? recordingSpatialReference == null
           ? $"EPSG:{MapView.Active?.Map?.SpatialReference.Wkid ?? 0}"
-          : recordingSpatialReference.SRSName)
+          : recordingSpatialReference.SRSName
         : spatialReference.SRSName;
 
       if (spatialReference?.ArcGisSpatialReference == null)
@@ -120,8 +120,12 @@ namespace StreetSmartArcGISPro.Utilities
         if (spatialReference != null)
         {
           epsgCode = spatialReference.SRSName;
-          settings.CycloramaViewerCoordinateSystem = spatialReference;
-          projectList.Save();
+
+          if (settings != null)
+          {
+            settings.CycloramaViewerCoordinateSystem = spatialReference;
+            projectList.Save();
+          }
         }
       }
 
