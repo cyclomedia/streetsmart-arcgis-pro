@@ -703,47 +703,53 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async Task InitApi()
     {
       string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-      IAddressSettings addressSettings = AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
-      IDomElement element = DomElementFactory.Create();
-      _options = _configuration.UseDefaultConfigurationUrl
-        ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element)
-        : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
-          _configuration.ConfigurationUrlLocation, addressSettings, element);
 
-      try
+      if (!epsgCode.Equals("EPSG:0"))
       {
-        await Api.Init(_options);
-        GlobeSpotterConfiguration.Load();
-        _measurementList.Api = Api;
-        Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
+        IAddressSettings addressSettings =
+          AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
+        IDomElement element = DomElementFactory.Create();
+        _options = _configuration.UseDefaultConfigurationUrl
+          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
+            addressSettings, element)
+          : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
+            _configuration.ConfigurationUrlLocation, addressSettings, element);
 
-        _vectorLayerList.LayerAdded += OnAddVectorLayer;
-        _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
-        _vectorLayerList.LayerUpdated += OnUpdateVectorLayer;
-
-        if (_vectorLayerList.ContainsKey(MapView))
+        try
         {
-          foreach (var vectorLayer in _vectorLayerList[MapView])
+          await Api.Init(_options);
+          GlobeSpotterConfiguration.Load();
+          _measurementList.Api = Api;
+          Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
+
+          _vectorLayerList.LayerAdded += OnAddVectorLayer;
+          _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
+          _vectorLayerList.LayerUpdated += OnUpdateVectorLayer;
+
+          if (_vectorLayerList.ContainsKey(MapView))
           {
-            vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+            foreach (var vectorLayer in _vectorLayerList[MapView])
+            {
+              vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+            }
+          }
+
+          if (string.IsNullOrEmpty(Location))
+          {
+            DoHide();
+          }
+          else
+          {
+            await OpenImageAsync();
           }
         }
-
-        if (string.IsNullOrEmpty(Location))
+        catch (StreetSmartLoginFailedException)
         {
+          ResourceManager res = ThisResources.ResourceManager;
+          string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
+          MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
           DoHide();
         }
-        else
-        {
-          await OpenImageAsync();
-        }
-      }
-      catch (StreetSmartLoginFailedException)
-      {
-        ResourceManager res = ThisResources.ResourceManager;
-        string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
-        MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
-        DoHide();
       }
     }
 
