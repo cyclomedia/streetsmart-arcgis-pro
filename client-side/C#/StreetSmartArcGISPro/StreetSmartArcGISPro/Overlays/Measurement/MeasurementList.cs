@@ -36,7 +36,6 @@ using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using IViewer = StreetSmart.Common.Interfaces.API.IViewer;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
@@ -88,55 +87,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public void CloseOpenMeasurement()
     {
       Open?.CloseMeasurement();
-    }
-
-    public Task<Measurement> GetAsync(Geometry geometry)
-    {
-      return GetAsync(geometry, true);
-    }
-
-    public async Task<Measurement> GetAsync(Geometry geometry, bool includeZ)
-    {
-      Measurement result = null;
-
-      if (geometry != null)
-      {
-        for (int i = 0; ((i < Count) && (result == null)); i++)
-        {
-          var element = this.ElementAt(i);
-          Measurement measurement = element.Value;
-          var ptColl = await measurement.ToPointCollectionAsync(geometry);
-          int nrPoints = measurement.PointNr;
-
-          if (ptColl != null)
-          {
-            int msPoints = measurement.Count;
-
-            if (nrPoints == msPoints)
-            {
-              bool found = true;
-
-              for (int j = 0; j < nrPoints && found; j++)
-              {
-                MapPoint point = ptColl[j];
-                MeasurementPoint measurementPoint = measurement.GetPointByNr(j);
-
-                if (point != null)
-                {
-                  found = measurementPoint?.IsSame(point, includeZ) ?? true;
-                }
-              }
-
-              if (found)
-              {
-                result = measurement;
-              }
-            }
-          }
-        }
-      }
-
-      return result;
     }
 
     public Measurement Get(long objectId)

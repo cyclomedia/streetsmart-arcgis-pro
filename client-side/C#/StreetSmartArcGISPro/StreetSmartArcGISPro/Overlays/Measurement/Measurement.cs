@@ -48,19 +48,19 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
   {
     #region Members
 
-    private ArcGISGeometryType _geometryType;
     private readonly MeasurementList _measurementList;
     private readonly IStreetSmartAPI _api;
 
+    private ArcGISGeometryType _geometryType;
     private IGeometry _geometry;
-
-    public IMeasurementProperties Properties { get; set; }
 
     #endregion
 
     #region Properties
 
     public string MeasurementId { get; set; }
+
+    public IMeasurementProperties Properties { get; set; }
 
     public IGeometry Geometry
     {
