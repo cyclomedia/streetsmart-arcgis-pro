@@ -845,7 +845,11 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             MapPoint dstPoint = await _vectorLayerList.AddHeightToMapPointAsync(srcPoint, MapView.Active);
             ElevationCapturing.ElevationConstantValue = dstPoint.Z;
-            feature.SetShape(dstPoint);
+
+            if (geometry.HasZ)
+            {
+              feature.SetShape(dstPoint);
+            }
           }
         }
       });
