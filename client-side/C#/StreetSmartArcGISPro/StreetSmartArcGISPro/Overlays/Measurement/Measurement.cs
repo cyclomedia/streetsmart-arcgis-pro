@@ -92,10 +92,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public VectorLayer VectorLayer { get; set; }
 
-    public int PointNr { get; private set; }
-
-    public long? ObjectId { get; set; }
-
     public bool IsPointMeasurement => _geometryType == ArcGISGeometryType.Point;
 
     public bool IsOpen => _measurementList.Open == this;
@@ -327,7 +323,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public async Task<List<MapPoint>> ToPointCollectionAsync(Geometry geometry)
     {
       List<MapPoint> result = null;
-      PointNr = 0;
 
       if (geometry != null)
       {
@@ -379,11 +374,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         : MapPointBuilder.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
     }
 
-    public async Task UpdateMeasurementPointsAsync(Geometry geometry)
+    public async Task UpdateMeasurementPointsAsync(MapView mapView, Geometry inGeometry)
     {
-      if (geometry != null && !UpdateMeasurement)
+      if ((mapView != null || inGeometry != null) && !UpdateMeasurement)
       {
         UpdateMeasurement = true;
+        Geometry geometry = mapView == null ? inGeometry : await mapView.GetCurrentSketchAsync();
         List<MapPoint> ptColl = await ToPointCollectionAsync(geometry);
         IFeatureCollection featureCollection =
           GeoJsonFactory.CloneFeatureCollection(_measurementList.FeatureCollection);
@@ -559,6 +555,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         ProjectionTransformation projection = ProjectionTransformation.Create(layerSpatRef, cyclSpatRef);
         copyGsPoint = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
       });
+
+      double e = 0.0001;
+
+      if (copyGsPoint.HasZ && Math.Abs(copyGsPoint.Z) < e)
+      {
+        copyGsPoint = await VectorLayer.AddHeightToMapPointAsync(copyGsPoint, mapView);
+      }
 
       return copyGsPoint.HasZ
         ? CoordinateFactory.Create(copyGsPoint.X, copyGsPoint.Y, copyGsPoint.Z)
