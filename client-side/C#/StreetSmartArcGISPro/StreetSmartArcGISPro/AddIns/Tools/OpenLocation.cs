@@ -33,24 +33,13 @@ using StreetSmartArcGISPro.CycloMediaLayers;
 
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using WinPoint = System.Windows.Point;
-
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using WinPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
   class OpenLocation : MapTool
   {
-    #region Members
-
-    private readonly Cursor _thisCursor;
-
-    private string _location;
-    private bool _nearest;
-//    private bool _containsFeatures;
-
-    #endregion
-
     #region Constructor
 
     public OpenLocation()
@@ -62,93 +51,30 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
       if (cursorStream != null)
       {
-        _thisCursor = new Cursor(cursorStream);
+        Cursor = new Cursor(cursorStream);
       }
 
-      Cursor = _thisCursor;
       IsSketchTool = true;
       SketchType = SketchGeometryType.Point;
-      _location = string.Empty;
-      _nearest = false;
-//      _containsFeatures = false;
     }
 
     #endregion
 
     #region Overrides
 
-    protected override void OnToolMouseUp(MapViewMouseButtonEventArgs e)
+    protected override async Task<bool> OnSketchCompleteAsync(Geometry geometry)
     {
-      if (!string.IsNullOrEmpty(_location))
+      bool nearest = false;
+      string location = string.Empty;
+      MapView activeView = MapView.Active;
+
+      await QueuedTask.Run(async () =>
       {
-        bool replace = (!(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)));
-        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Show();
-
-        if (streetSmart != null)
-        {
-          streetSmart.MapView = MapView.Active;
-          streetSmart.LookAt = null;
-          streetSmart.Replace = replace;
-          streetSmart.Nearest = _nearest;
-          streetSmart.Location = _location;
-        }
-
-        _location = string.Empty;
-        _nearest = false;
-      }
-    }
-/*
-    protected async override void OnUpdate()
-    {
-      Cursor nowCursor = Cursor;
-      Cursor = _containsFeatures ? Cursors.Arrow : _thisCursor;
-
-      if (nowCursor != Cursor)
-      {
-        await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
-        await FrameworkApplication.SetCurrentToolAsync("StreetSmartArcGISPro_openImageTool");
-      }
-
-      base.OnUpdate();
-    }
-
-    protected override async void OnToolMouseMove(MapViewMouseEventArgs e)
-    {
-      await QueuedTask.Run(() =>
-      {
-        var constants = ConstantsRecordingLayer.Instance;
-        double size = constants.SizeLayer;
-        double halfSize = size / 2;
-        MapView activeView = MapView.Active;
-
-        WinPoint clientPoint = e.ClientPoint;
-        WinPoint pointScreen = activeView.ClientToScreen(clientPoint);
-        double x = pointScreen.X;
-        double y = pointScreen.Y;
-        WinPoint minPoint = new WinPoint(x - halfSize, y - halfSize);
-        WinPoint maxPoint = new WinPoint(x + halfSize, y + halfSize);
-        MapPoint minPoint1 = activeView.ScreenToMap(minPoint);
-        MapPoint maxPoint1 = activeView.ScreenToMap(maxPoint);
-        Envelope envelope = EnvelopeBuilder.CreateEnvelope(minPoint1, maxPoint1, minPoint1.SpatialReference);
-        var features = MapView.Active?.GetFeatures(envelope);
-        _containsFeatures = (features != null) && (features.Count >= 1);
-      });
-
-      base.OnToolMouseMove(e);
-    }
-*/
-    protected override Task<bool> OnSketchCompleteAsync(Geometry geometry)
-    {
-      return QueuedTask.Run(() =>
-      {
-        MapPoint point = geometry as MapPoint;
-        MapView activeView = MapView.Active;
-
-        if (point != null && activeView != null)
+        if (geometry is MapPoint point && activeView != null)
         {
           var constants = ConstantsRecordingLayer.Instance;
           double size = constants.SizeLayer;
-          double halfSize = size/2;
+          double halfSize = size / 2;
 
           SpatialReference pointSpatialReference = point.SpatialReference;
           var pointScreen = activeView.MapToScreen(point);
@@ -163,21 +89,21 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           var features = activeView.GetFeatures(envelope);
 
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-          CycloMediaGroupLayer groupLayer = streetSmart?.GetCycloMediaGroupLayer(MapView.Active);
+          CycloMediaGroupLayer groupLayer = streetSmart?.GetCycloMediaGroupLayer(activeView);
 
           if (features != null && groupLayer != null)
           {
-            _nearest = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            nearest = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
 
-            if (_nearest)
+            if (nearest)
             {
-              Setting settings = ProjectList.Instance.GetSettings(MapView.Active);
+              Setting settings = ProjectList.Instance.GetSettings(activeView);
               MySpatialReference cycloCoordSystem = settings.CycloramaViewerCoordinateSystem;
 
               if (cycloCoordSystem != null)
               {
                 SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ??
-                                                         cycloCoordSystem.CreateArcGisSpatialReferenceAsync().Result;
+                                                         await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
 
                 if (pointSpatialReference.Wkid != cycloSpatialReference.Wkid)
                 {
@@ -189,14 +115,14 @@ namespace StreetSmartArcGISPro.AddIns.Tools
                 if (point != null)
                 {
                   CultureInfo ci = CultureInfo.InvariantCulture;
-                  _location = string.Format(ci, "{0},{1}", point.X, point.Y);
+                  location = string.Format(ci, "{0},{1}", point.X, point.Y);
 
-                  if (!streetSmart.InsideScale(MapView.Active))
+                  if (!streetSmart.InsideScale(activeView))
                   {
                     double minimumScale = ConstantsRecordingLayer.Instance.MinimumScale;
-                    double scale = minimumScale/2;
+                    double scale = minimumScale / 2;
                     Camera camera = new Camera(point.X, point.Y, scale, 0.0);
-                    MapView.Active?.ZoomTo(camera);
+                    activeView.ZoomTo(camera);
                   }
                 }
               }
@@ -212,11 +138,11 @@ namespace StreetSmartArcGISPro.AddIns.Tools
                 {
                   foreach (long uid in feature.Value)
                   {
-                    Recording recording = cycloMediaLayer.GetRecordingAsync(uid).Result;
+                    Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
 
                     if (recording.IsAuthorized == null || (bool) recording.IsAuthorized)
                     {
-                      _location = recording.ImageId;
+                      location = recording.ImageId;
                     }
                   }
                 }
@@ -224,9 +150,24 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
           }
         }
-
-        return true;
       });
+
+      if (!string.IsNullOrEmpty(location))
+      {
+        bool replace = !(Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift));
+        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Show();
+
+        if (streetSmart != null)
+        {
+          streetSmart.MapView = activeView;
+          streetSmart.LookAt = null;
+          streetSmart.Replace = replace;
+          streetSmart.Nearest = nearest;
+          streetSmart.Location = location;
+        }
+      }
+
+      return true;
     }
 
     #endregion
