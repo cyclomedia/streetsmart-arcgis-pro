@@ -260,18 +260,10 @@ namespace StreetSmartArcGISPro.VectorLayers
             {
               while (existsResult?.MoveNext() ?? false)
               {
+                var fieldValues = GetPropertiesFromRow(existsResult);
+
                 Row row = existsResult.Current;
                 Feature feature = row as Feature;
-                var fieldvalues = new Dictionary<string, string>();
-                IReadOnlyList<Field> fields = feature.GetFields();
-
-                foreach (Field field in fields)
-                {
-                  string name = field.Name;
-                  int fieldId = existsResult.FindField(name);
-                  fieldvalues.Add(name, feature.GetOriginalValue(fieldId)?.ToString());
-                }
-
                 Geometry geometry = feature?.GetShape();
                 GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
                 Geometry copyGeometry = geometry;
@@ -340,15 +332,15 @@ namespace StreetSmartArcGISPro.VectorLayers
 
                       break;
                     case GeometryType.Polyline:
-                      if (copyGeometry is Polyline polylineGeoJson)
+                      if (copyGeometry is Polyline polyLineGeoJson)
                       {
-                        ReadOnlyPartCollection polylineParts = polylineGeoJson.Parts;
+                        ReadOnlyPartCollection polyLineParts = polyLineGeoJson.Parts;
 
-                        using (IEnumerator<ReadOnlySegmentCollection> polylineSegments = polylineParts.GetEnumerator())
+                        using (IEnumerator<ReadOnlySegmentCollection> polyLineSegments = polyLineParts.GetEnumerator())
                         {
-                          while (polylineSegments.MoveNext())
+                          while (polyLineSegments.MoveNext())
                           {
-                            ReadOnlySegmentCollection segments = polylineSegments.Current;
+                            ReadOnlySegmentCollection segments = polyLineSegments.Current;
                             IList<ICoordinate> coordinates = new List<ICoordinate>();
 
                             if (segments != null)
@@ -379,15 +371,15 @@ namespace StreetSmartArcGISPro.VectorLayers
                       break;
                   }
 
-                  foreach (var fieldvalue in fieldvalues)
+                  foreach (var fieldValue in fieldValues)
                   {
                     if (featureCollection.Features.Count >= 1)
                     {
                       if (!featureCollection.Features[featureCollection.Features.Count - 1].Properties
-                        .ContainsKey(fieldvalue.Key))
+                        .ContainsKey(fieldValue.Key))
                       {
                         featureCollection.Features[featureCollection.Features.Count - 1].Properties
-                          .Add(fieldvalue.Key, fieldvalue.Value);
+                          .Add(fieldValue.Key, fieldValue.Value);
                       }
                     }
                   }
@@ -696,40 +688,26 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task ReloadSelectionAsync()
     {
-      if (Layer.SelectionCount >= 1)
+      if (Layer.SelectionCount >= 1 && _measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
       {
         await QueuedTask.Run(async () =>
         {
           Selection selectionFeatures = Layer?.GetSelection();
           _vectorLayerList.LastSelectedLayer = this;
 
-          using (RowCursor rowCursur = selectionFeatures?.Search())
+          using (RowCursor rowCursor = selectionFeatures?.Search())
           {
-            while (rowCursur?.MoveNext() ?? false)
+            while (rowCursor?.MoveNext() ?? false)
             {
-              Row row = rowCursur.Current;
-              Feature feature = row as Feature;
-              IReadOnlyList<Field> fields = feature?.GetFields();
-              Dictionary<string, string> properties = new Dictionary<string, string>();
+              IList<IViewer> viewers = await _measurementList.Api.GetViewers();
 
-              foreach (Field field in fields)
+              foreach (IViewer viewer in viewers)
               {
-                string name = field.Name;
-                int fieldId = rowCursur.FindField(name);
-                properties.Add(name, feature?.GetOriginalValue(fieldId)?.ToString());
-              }
-
-              if (_measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
-              {
-                IList<IViewer> viewers = await _measurementList.Api.GetViewers();
-
-                foreach (IViewer viewer in viewers)
+                if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
                 {
-                  if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
-                  {
-                    IJson json = JsonFactory.Create(properties);
-                    panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
-                  }
+                  Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
+                  IJson json = JsonFactory.Create(properties);
+                  panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
                 }
               }
             }
@@ -744,6 +722,33 @@ namespace StreetSmartArcGISPro.VectorLayers
           // todo: add functionality for deselect a feature in a layer
         }
       }
+    }
+
+    public Dictionary<string, string> GetPropertiesFromRow(RowCursor rowCursor)
+    {
+      Row row = rowCursor.Current;
+      Feature feature = row as Feature;
+      IReadOnlyList<Field> fields = feature?.GetFields();
+      Dictionary<string, string> properties = new Dictionary<string, string>();
+
+      if (fields != null)
+      {
+        foreach (Field field in fields)
+        {
+          string name = field.Name;
+          int fieldId = rowCursor.FindField(name);
+
+          try
+          {
+            properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
+          }
+          catch (NullReferenceException)
+          {
+          }
+        }
+      }
+
+      return properties;
     }
 
     private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
