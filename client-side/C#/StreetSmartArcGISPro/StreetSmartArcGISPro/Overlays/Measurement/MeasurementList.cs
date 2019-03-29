@@ -36,7 +36,6 @@ using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
 
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using IViewer = StreetSmart.Common.Interfaces.API.IViewer;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
@@ -48,12 +47,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     private bool _drawingSketch;
     private VectorLayer _lastVectorLayer;
-    private long? _lastObjectId;
     private bool _lastSketch;
 
     #endregion
 
     #region Properties
+
+    public long? ObjectId { get; set; }
 
     public Measurement Sketch { get; set; }
     public Measurement Open { get; set; }
@@ -75,7 +75,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Open = null;
       Sketch = null;
       _drawingSketch = false;
-      _lastObjectId = null;
+      ObjectId = null;
       _lastVectorLayer = null;
       _lastSketch = false;
       FromMap = false;
@@ -88,69 +88,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public void CloseOpenMeasurement()
     {
       Open?.CloseMeasurement();
-    }
-
-    public Task<Measurement> GetAsync(Geometry geometry)
-    {
-      return GetAsync(geometry, true);
-    }
-
-    public async Task<Measurement> GetAsync(Geometry geometry, bool includeZ)
-    {
-      Measurement result = null;
-
-      if (geometry != null)
-      {
-        for (int i = 0; ((i < Count) && (result == null)); i++)
-        {
-          var element = this.ElementAt(i);
-          Measurement measurement = element.Value;
-          var ptColl = await measurement.ToPointCollectionAsync(geometry);
-          int nrPoints = measurement.PointNr;
-
-          if (ptColl != null)
-          {
-            int msPoints = measurement.Count;
-
-            if (nrPoints == msPoints)
-            {
-              bool found = true;
-
-              for (int j = 0; j < nrPoints && found; j++)
-              {
-                MapPoint point = ptColl[j];
-                MeasurementPoint measurementPoint = measurement.GetPointByNr(j);
-
-                if (point != null)
-                {
-                  found = measurementPoint?.IsSame(point, includeZ) ?? true;
-                }
-              }
-
-              if (found)
-              {
-                result = measurement;
-              }
-            }
-          }
-        }
-      }
-
-      return result;
-    }
-
-    public Measurement Get(long objectId)
-    {
-      Measurement result = null;
-
-      for (int i = 0; i < Count && result == null; i++)
-      {
-        var element = this.ElementAt(i);
-        Measurement measurement = element.Value;
-        result = measurement.ObjectId == objectId ? measurement : null;
-      }
-
-      return result;
     }
 
     public void RemoveAll()
@@ -223,7 +160,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             {
               Measurement measurement = new Measurement(null, null, Api)
               {
-                ObjectId = _lastObjectId,
                 VectorLayer = _lastVectorLayer
               };
 
@@ -253,29 +189,30 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public async Task SketchModifiedAsync(Geometry geometry, VectorLayer vectorLayer)
+    public async Task SketchModifiedAsync(MapView mapView, VectorLayer vectorLayer)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
         Measurement measurement = Sketch;
+        Geometry geometry = await mapView.GetCurrentSketchAsync();
 
         if (geometry != null)
         {
           if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
           {
             _drawingSketch = true;
-            measurement = StartMeasurement(geometry, measurement, true, null, vectorLayer);
+            measurement = StartMeasurement(geometry, measurement, true, vectorLayer);
           }
 
           if (measurement != null)
           {
-            await measurement.UpdateMeasurementPointsAsync(geometry);
+            await measurement.UpdateMeasurementPointsAsync(mapView, null);
           }
         }
       }
     }
 
-    public Measurement StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, long? objectId, VectorLayer vectorLayer)
+    public Measurement StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, VectorLayer vectorLayer)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
@@ -294,7 +231,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           if (!measurementExists)
           {
             CloseOpenMeasurement();
-            _lastObjectId = objectId;
             _lastVectorLayer = vectorLayer;
             _lastSketch = sketch;
             CreateMeasurement(geometryType);
@@ -324,7 +260,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             measurement = new Measurement(properties, feature.Geometry, api)
             {
-              ObjectId = _lastObjectId,
               VectorLayer = _lastVectorLayer
             };
 
@@ -373,7 +308,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
+                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch);
                     await mapView.ClearSketchAsync();
                     measurement.Dispose();
                   }
@@ -382,6 +317,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     await measurement.UpdatePointAsync(0, feature);
                     measurement.Geometry = geometry;
+                    FromMap = false;
                   }
                 }
 
@@ -400,7 +336,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
+                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch);
                     await mapView.ClearSketchAsync();
 
                     if (geometrySketch != null)
@@ -470,7 +406,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddFeatureAsync(geometrySketch);
+                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch);
                     await mapView.ClearSketchAsync();
 
                     if (geometrySketch != null)
@@ -553,8 +489,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         if (Count == 1)
         {
-          Measurement measurement = this.ElementAt(0).Value;
-          measurement.Close();
           string currentTool = FrameworkApplication.CurrentTool;
 
           switch (currentTool)
@@ -563,6 +497,19 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             case "esri_editing_SketchPolygonTool":
             case "esri_editing_SketchPointTool":
               await FrameworkApplication.SetCurrentToolAsync(string.Empty);
+              break;
+            case "esri_editing_ModifyFeatureImpl":
+              var geometry = await MapView.Active.GetCurrentSketchAsync();
+
+              if (geometry != null)
+              {
+                if (geometry.GeometryType == ArcGISGeometryType.Polygon ||
+                    geometry.GeometryType == ArcGISGeometryType.Polyline)
+                {
+                  await MapView.Active.ClearSketchAsync();
+                }
+              }
+
               break;
           }
         }

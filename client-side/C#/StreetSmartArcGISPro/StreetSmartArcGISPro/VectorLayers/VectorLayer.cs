@@ -31,7 +31,6 @@ using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Internal.Mapping.CommonControls;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -40,8 +39,8 @@ using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmart.Common.Interfaces.SLD;
+
 using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 
@@ -49,7 +48,6 @@ using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Unit = ArcGIS.Core.Geometry.Unit;
-using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -613,6 +611,11 @@ namespace StreetSmartArcGISPro.VectorLayers
       });
     }
 
+    public async Task<MapPoint> AddHeightToMapPointAsync(MapPoint mapPoint, MapView mapView)
+    {
+      return await _vectorLayerList.AddHeightToMapPointAsync(mapPoint, mapView);
+    }
+
     public async Task LoadMeasurementsAsync()
     {
       await ReloadSelectionAsync();
@@ -621,16 +624,17 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         _selection = new List<long>();
       }
+    }
 
-      foreach (KeyValuePair<string, Measurement> keyValue in _measurementList)
+    public async Task AddUpdateFeature(long? objectId, Geometry sketch)
+    {
+      if (objectId == null || _vectorLayerList.EditTool != EditTools.Verticles)
       {
-        Measurement measurement = keyValue.Value;
-        long? objectId = measurement?.ObjectId;
-
-        if (objectId != null)
-        {
-          _selection.Add((long) objectId);
-        }
+        await AddFeatureAsync(sketch);
+      }
+      else
+      {
+        await UpdateFeatureAsync((long) objectId, sketch);
       }
     }
 
@@ -647,7 +651,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
 
-        if (!(editingFeatureTemplate.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
+        if (!(editingFeatureTemplate?.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
         {
           editOperation.Create(Layer, geometry);
           await editOperation.ExecuteAsync();
@@ -670,28 +674,15 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task UpdateFeatureAsync(long uid, Geometry geometry)
     {
-      await QueuedTask.Run(() =>
+      var editOperation = new EditOperation
       {
-        using (FeatureClass featureClass = Layer.GetFeatureClass())
-        {
-          FeatureClassDefinition definition = featureClass?.GetDefinition();
-          string objectIdField = definition?.GetObjectIDField();
-          QueryFilter filter = new QueryFilter {WhereClause = $"{objectIdField} = {uid}"};
+        Name = $"Update feature {uid} in layer: {Name}",
+        SelectNewFeatures = true,
+        ShowModalMessageAfterFailure = false
+      };
 
-          using (RowCursor existsResult = featureClass?.Search(filter, false))
-          {
-            while (existsResult?.MoveNext() ?? false)
-            {
-              using (Row row = existsResult.Current)
-              {
-                Feature feature = row as Feature;
-                feature?.SetShape(geometry);
-                feature?.Store();
-              }
-            }
-          }
-        }
-      });
+      editOperation.Modify(Layer, uid, geometry);
+      await editOperation.ExecuteAsync();
     }
 
     private async Task ReloadSelectionAsync()
@@ -759,11 +750,13 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       bool contains = false;
       MapView mapView = _vectorLayerList.GetMapViewFromMap(args.Map);
+      _measurementList.ObjectId = null;
 
       foreach (var selection in args.Selection)
       {
         MapMember mapMember = selection.Key;
         FeatureLayer layer = mapMember as FeatureLayer;
+        _measurementList.ObjectId = selection.Value.Count >= 1 ? selection.Value[0] : (long?) null;
 
         if (layer == Layer)
         {
@@ -790,23 +783,13 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
     }
 
-    private async void OnRowChanged(RowChangedEventArgs args)
+    private void OnRowChanged(RowChangedEventArgs args)
     {
-      await QueuedTask.Run(async () =>
+      if (_vectorLayerList.EditTool == EditTools.Verticles)
       {
-        Row row = args.Row;
-        Feature feature = row as Feature;
-        Geometry geometry = feature?.GetShape();
-        long objectId = feature?.GetObjectID() ?? -1;
-        Measurement measurement = _measurementList.Get(objectId);
-        measurement = _measurementList.StartMeasurement(geometry, measurement, false, objectId, this);
-
-        if (measurement != null)
-        {
-          await measurement.UpdateMeasurementPointsAsync(geometry);
-          measurement.CloseMeasurement();
-        }
-      });
+        _measurementList.ObjectId = null;
+        _measurementList.Api.StopMeasurementMode();
+      }
     }
 
     private async void OnRowDeleted(RowChangedEventArgs args)
@@ -821,38 +804,24 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           _selection.Remove(objectId);
         }
-
-        if (GlobeSpotterConfiguration.MeasurePermissions)
-        {
-          Measurement measurement = _measurementList.Get(objectId);
-          measurement?.RemoveMeasurement();
-        }
       });
     }
 
     private async void OnRowCreated(RowChangedEventArgs args)
     {
-      await QueuedTask.Run(async () =>
+      Row row = args.Row;
+      Feature feature = row as Feature;
+      Geometry geometry = feature?.GetShape();
+      const double e = 0.1;
+
+      if (geometry?.GeometryType == GeometryType.Point)
       {
-        Row row = args.Row;
-        Feature feature = row as Feature;
-        Geometry geometry = feature?.GetShape();
-        const double e = 0.1;
-
-        if (geometry?.GeometryType == GeometryType.Point)
+        if (geometry is MapPoint srcPoint && Math.Abs(srcPoint.Z) < e)
         {
-          if (geometry is MapPoint srcPoint && Math.Abs(srcPoint.Z) < e)
-          {
-            MapPoint dstPoint = await _vectorLayerList.AddHeightToMapPointAsync(srcPoint, MapView.Active);
-            ElevationCapturing.ElevationConstantValue = dstPoint.Z;
-
-            if (geometry.HasZ)
-            {
-              feature.SetShape(dstPoint);
-            }
-          }
+          MapPoint dstPoint = await _vectorLayerList.AddHeightToMapPointAsync(srcPoint, MapView.Active);
+          ElevationCapturing.ElevationConstantValue = dstPoint.Z;
         }
-      });
+      }
     }
 
     private async void OnDrawCompleted(MapViewEventArgs args)

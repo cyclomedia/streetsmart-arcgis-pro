@@ -36,6 +36,7 @@ using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
 
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -195,7 +196,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       Measurement measurement = _measurementList.Sketch;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
-      _measurementList.StartMeasurement(geometry, measurement, true, null, vectorLayer);
+      _measurementList.StartMeasurement(geometry, measurement, true, vectorLayer);
     }
 
     public async Task StartSketchToolAsync(MapView mapView)
@@ -379,6 +380,19 @@ namespace StreetSmartArcGISPro.VectorLayers
         sketch.CloseMeasurement();
         _measurementList.SketchFinished();
       }
+
+      var features = _measurementList?.FeatureCollection?.Features;
+
+      if (features?.Count >= 1)
+      {
+        var geometry = features[0].Geometry;
+
+        if ((geometry.Type == StreetSmartGeometryType.Polygon || geometry.Type == StreetSmartGeometryType.LineString) &&
+            (EditTool == EditTools.Verticles || EditTool == EditTools.ModifyFeatureImpl))
+        {
+          _measurementList.Api.StopMeasurementMode();
+        }
+      }
     }
 
     #endregion
@@ -450,8 +464,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       if (geometry != null && EditTool == EditTools.ModifyFeatureImpl)
       {
         EditTool = EditTools.Verticles;
-        _measurementList.StartMeasurement(geometry, null, false, null, LastSelectedLayer);
-        await _measurementList.SketchModifiedAsync(geometry, LastSelectedLayer);
+        _measurementList.StartMeasurement(geometry, null, false, LastSelectedLayer);
+        await _measurementList.SketchModifiedAsync(mapView, LastSelectedLayer);
       }
       else if (geometry == null && EditTool == EditTools.Verticles)
       {
@@ -488,7 +502,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 await AddHeightToMeasurementAsync(geometry, mapView);
               }
 
-              await _measurementList.SketchModifiedAsync(geometry, thisVectorLayer);
+              await _measurementList.SketchModifiedAsync(mapView, thisVectorLayer);
             }
 
             break;
@@ -500,7 +514,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               await AddHeightToMeasurementAsync(geometry, mapView);
             }
 
-            await _measurementList.SketchModifiedAsync(geometry, thisVectorLayer);
+            await _measurementList.SketchModifiedAsync(mapView, thisVectorLayer);
             break;
           case EditTools.SketchPointTool:
             if (geometry.HasZ)

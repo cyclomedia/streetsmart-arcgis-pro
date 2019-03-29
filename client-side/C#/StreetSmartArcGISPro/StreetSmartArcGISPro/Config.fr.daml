@@ -23,7 +23,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
   <AddInInfo id="{BD021436-D851-4D91-8301-AC76733FD444}"
-             version="0.9.0"
+             version="0.9.5"
              desktopVersion="2.0">
     <Name>Street Smart for ArcGIS Pro</Name>
     <Description>
@@ -33,7 +33,7 @@
     <Image>Images\StreetSmartArcGISPro32.png</Image>
     <Author>CycloMedia</Author>
     <Company>CycloMedia</Company>
-    <Date>15/03/2019 12:00:00 PM, 2018</Date>
+    <Date>26/03/2019 12:00:00 PM, 2018</Date>
     <Subject>Content</Subject>
   </AddInInfo>
   <modules>
