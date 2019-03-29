@@ -230,6 +230,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       int wkid = spatialReference?.Wkid ?? 0;
       string mapName = map?.Name;
+      mapName = mapName?.Replace(" ", "_") ?? string.Empty;
       string fcNameWkid = string.Concat(FcName, mapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
@@ -583,11 +584,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           Map map = MapView?.Map;
 
-          if (map != null)
+          Layer thisLayer =
+            map?.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(
+              checkLayer => checkLayer.Name == fcName);
+
+          if (thisLayer != null)
           {
-            Layer thisLayer =
-              map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(
-                checkLayer => checkLayer.Name == fcName);
             map.RemoveLayer(thisLayer);
           }
         });
