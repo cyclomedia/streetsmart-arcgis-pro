@@ -102,7 +102,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       var layerList = ContainsKey(mapView) ? this[mapView] : null;
       return layerList?.Aggregate<VectorLayer, VectorLayer>(null,
-        (current, layerCheck) => layerCheck.Overlay.Id == layerId ? layerCheck : current);
+        (current, layerCheck) => (layerCheck?.Overlay?.Id ?? string.Empty) == layerId ? layerCheck : current);
     }
 
     public async Task LoadMeasurementsAsync(MapView mapView)
