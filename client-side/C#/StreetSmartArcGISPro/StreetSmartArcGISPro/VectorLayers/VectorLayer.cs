@@ -683,25 +683,31 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         await QueuedTask.Run(async () =>
         {
-          Selection selectionFeatures = Layer?.GetSelection();
-          _vectorLayerList.LastSelectedLayer = this;
-
-          using (RowCursor rowCursor = selectionFeatures?.Search())
+          try
           {
-            while (rowCursor?.MoveNext() ?? false)
-            {
-              IList<IViewer> viewers = await _measurementList.Api.GetViewers();
+            Selection selectionFeatures = Layer?.GetSelection();
+            _vectorLayerList.LastSelectedLayer = this;
 
-              foreach (IViewer viewer in viewers)
+            using (RowCursor rowCursor = selectionFeatures?.Search())
+            {
+              while (rowCursor?.MoveNext() ?? false)
               {
-                if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
+                IList<IViewer> viewers = await _measurementList.Api.GetViewers();
+
+                foreach (IViewer viewer in viewers)
                 {
-                  Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
-                  IJson json = JsonFactory.Create(properties);
-                  panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                  if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
+                  {
+                    Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
+                    IJson json = JsonFactory.Create(properties);
+                    panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                  }
                 }
               }
             }
+          }
+          catch (NullReferenceException)
+          {
           }
         });
       }
