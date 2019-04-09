@@ -101,6 +101,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private readonly MeasurementList _measurementList;
     private readonly Dispatcher _currentDispatcher;
     private readonly IList<VectorLayer> _vectorLayerInChange;
+    private readonly StoredLayerList _storedLayerList;
 
     private CrossCheck _crossCheck;
     private SpatialReference _lastSpatialReference;
@@ -112,6 +113,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     protected StreetSmart()
     {
+      _storedLayerList = StoredLayerList.Instance;
       ProjectClosedEvent.Subscribe(OnProjectClosed);
       _currentDispatcher = Dispatcher.CurrentDispatcher;
       _inRestart = false;
@@ -679,6 +681,20 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD);
           overlay = await Api.AddOverlay(overlay);
+          IList<IViewer> viewers = await Api.GetViewers();
+          StoredLayer layer = _storedLayerList.GetLayer(layerName);
+
+          if (layer == null)
+          {
+            _storedLayerList.Update(layerName, false);
+          }
+
+          foreach (IViewer viewer in viewers)
+          {
+            overlay.Visible = !_storedLayerList.GetVisibility(layerName);
+            viewer.ToggleOverlay(overlay);
+          }
+
           vectorLayer.Overlay = overlay;
         }
       }
@@ -804,6 +820,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;
         panoramaViewer.FeatureClick += OnFeatureClick;
+        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
       }
       else if (cyclViewer is IObliqueViewer obliqueViewer)
       {
@@ -815,6 +832,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         await UpdateVectorLayerAsync();
       }
+    }
+
+    private void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
+    {
+      ILayerInfo layerInfo = args.Value;
+      VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
+      _storedLayerList.Update(vectorLayer.Name, layerInfo.Visible);
     }
 
     private void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
@@ -900,6 +924,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       panoramaViewer.ImageChange -= OnImageChange;
       panoramaViewer.ViewChange -= OnViewChange;
       panoramaViewer.FeatureClick -= OnFeatureClick;
+      panoramaViewer.LayerVisibilityChange -= OnLayerVisibilityChanged;
     }
 
     private async void OnConfigurationPropertyChanged(object sender, PropertyChangedEventArgs args)

@@ -158,6 +158,8 @@
     <Compile Include="Configuration\File\ProjectList.cs" />
     <Compile Include="Configuration\File\LanguageSettings.cs" />
     <Compile Include="Configuration\File\Setting.cs" />
+    <Compile Include="Configuration\File\StoredLayer.cs" />
+    <Compile Include="Configuration\File\StoredLayerList.cs" />
     <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
     <Compile Include="Configuration\Remote\Recordings\Images.cs" />
     <Compile Include="Configuration\Remote\Recordings\Height.cs" />
