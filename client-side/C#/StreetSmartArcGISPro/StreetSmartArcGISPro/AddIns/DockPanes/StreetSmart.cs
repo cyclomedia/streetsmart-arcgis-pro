@@ -821,6 +821,22 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         panoramaViewer.ViewChange += OnViewChange;
         panoramaViewer.FeatureClick += OnFeatureClick;
         panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
+
+        foreach (StoredLayer layer in _storedLayerList)
+        {
+          switch (layer.Name)
+          {
+            case "addressLayer":
+              panoramaViewer.ToggleAddressesVisible(layer.Visible);
+              break;
+            case "surfaceCursorLayer":
+              panoramaViewer.Toggle3DCursor(layer.Visible);
+              break;
+            case "cyclorama-recordings":
+              panoramaViewer.ToggleRecordingsVisible(layer.Visible);
+              break;
+          }
+        }
       }
       else if (cyclViewer is IObliqueViewer obliqueViewer)
       {
@@ -838,7 +854,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       ILayerInfo layerInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
-      _storedLayerList.Update(vectorLayer.Name, layerInfo.Visible);
+      _storedLayerList.Update(vectorLayer?.Name ?? layerInfo.LayerId, layerInfo.Visible);
     }
 
     private void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
