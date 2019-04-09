@@ -835,6 +835,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         if (MapView != null && Layer != null && _cycloMediaGroupLayer != null && _addData == null)
         {
+          _addData = new FeatureCollection();
+          var project = ArcGISProject.Current;
+          bool hasEdits = project.HasEdits;
           const double epsilon = 0.0;
           var extent = MapView.Extent;
 
@@ -855,13 +858,18 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                 await SaveFeatureMembersAsync(_addData, thisEnvelope);
               }
 
-              _addData = null;
-              var project = ArcGISProject.Current;
               await PostEntryStepAsync(thisEnvelope);
-              await project.SaveEditsAsync();
+
+              if (!hasEdits)
+              {
+                await project.SaveEditsAsync();
+              }
+
               await QueuedTask.Run(() => Layer?.ClearDisplayCache());
             }
           }
+
+          _addData = null;
         }
       }
       else
