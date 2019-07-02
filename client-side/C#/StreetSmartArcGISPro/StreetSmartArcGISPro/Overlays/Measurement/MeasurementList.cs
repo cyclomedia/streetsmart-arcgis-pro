@@ -308,7 +308,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch);
+                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
                     await mapView.ClearSketchAsync();
                     measurement.Dispose();
                   }
@@ -336,16 +336,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch);
+                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
                     await mapView.ClearSketchAsync();
 
                     if (geometrySketch != null)
                     {
-                      await QueuedTask.Run(() =>
+                      await QueuedTask.Run(async() =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
                         Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
-                        mapView.SetCurrentSketchAsync(line);
+                        await mapView.SetCurrentSketchAsync(line);
                       });
                     }
 
@@ -406,16 +406,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   {
                     MapView mapView = MapView.Active;
                     Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch);
+                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
                     await mapView.ClearSketchAsync();
 
                     if (geometrySketch != null)
                     {
-                      await QueuedTask.Run(() =>
+                      await QueuedTask.Run(async() =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
                         Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
-                        mapView.SetCurrentSketchAsync(polygon);
+                        await mapView.SetCurrentSketchAsync(polygon);
                       });
                     }
 

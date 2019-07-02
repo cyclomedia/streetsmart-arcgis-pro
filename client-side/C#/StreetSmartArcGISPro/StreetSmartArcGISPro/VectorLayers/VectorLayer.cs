@@ -618,19 +618,19 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
     }
 
-    public async Task AddUpdateFeature(long? objectId, Geometry sketch)
+    public async Task AddUpdateFeature(long? objectId, Geometry sketch, Measurement measurement)
     {
       if (objectId == null || _vectorLayerList.EditTool != EditTools.Verticles)
       {
-        await AddFeatureAsync(sketch);
+        await AddFeatureAsync(sketch, measurement);
       }
       else
       {
-        await UpdateFeatureAsync((long) objectId, sketch);
+        await UpdateFeatureAsync((long) objectId, sketch, measurement);
       }
     }
 
-    public async Task AddFeatureAsync(Geometry geometry)
+    public async Task AddFeatureAsync(Geometry geometry, Measurement measurement)
     {
       await QueuedTask.Run(async () =>
       {
@@ -641,7 +641,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           ShowModalMessageAfterFailure = false
         };
 
-        geometry = await ToRealSpatialReference(geometry);
+        geometry = await ToRealSpatialReference(geometry, measurement);
         EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
 
         if (!(editingFeatureTemplate?.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
@@ -665,23 +665,24 @@ namespace StreetSmartArcGISPro.VectorLayers
       });
     }
 
-    public async Task<Geometry> ToRealSpatialReference(Geometry geometry)
+    public async Task<Geometry> ToRealSpatialReference(Geometry geometry, Measurement measurement)
     {
-      await QueuedTask.Run(() =>
+      await QueuedTask.Run(async () =>
       {
         SpatialReference spatialReference = Layer?.GetSpatialReference();
         GeometryType geometryType = geometry.GeometryType;
+        var points = await measurement.ToPointCollectionAsync(geometry);
 
         switch (geometryType)
         {
           case GeometryType.Polygon:
-            geometry = PolygonBuilder.CreatePolygon(geometry as Polygon, spatialReference);
+            geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
             break;
           case GeometryType.Polyline:
-            geometry = PolylineBuilder.CreatePolyline(geometry as Polyline, spatialReference);
+            geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
             break;
           case GeometryType.Point:
-            geometry = MapPointBuilder.CreateMapPoint(geometry as MapPoint, spatialReference);
+            geometry = MapPointBuilder.CreateMapPoint(points[0], spatialReference);
             break;
         }
       });
@@ -689,7 +690,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       return geometry;
     }
 
-    public async Task UpdateFeatureAsync(long uid, Geometry geometry)
+    public async Task UpdateFeatureAsync(long uid, Geometry geometry, Measurement measurement)
     {
       var editOperation = new EditOperation
       {
@@ -698,7 +699,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         ShowModalMessageAfterFailure = false
       };
 
-      geometry = await ToRealSpatialReference(geometry);
+      geometry = await ToRealSpatialReference(geometry, measurement);
       editOperation.Modify(Layer, uid, geometry);
       await editOperation.ExecuteAsync();
     }

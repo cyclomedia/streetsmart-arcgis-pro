@@ -137,22 +137,27 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       double xDir = direction.Direction?.X ?? 0.0;
       double yDir = direction.Direction?.Y ?? 0.0;
       MapView mapView = await Measurement.GetMeasurementView();
-      MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
-      if (ContainsKey(imageId))
+      if (mapView != null)
       {
-        this[imageId].Point = point;
-        this[imageId].ImageId = imageId;
-        this[imageId].XDir = xDir;
-        this[imageId].YDir = yDir;
-        this[imageId].LineNumber = i;
-        await this[imageId].RedrawObservationAsync();
-      }
-      else
-      {
-        MeasurementObservation measurementObservation = new MeasurementObservation(this, imageId, point, xDir, yDir, i);
-        Add(imageId, measurementObservation);
-        await measurementObservation.RedrawObservationAsync();
+        MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
+
+        if (ContainsKey(imageId))
+        {
+          this[imageId].Point = point;
+          this[imageId].ImageId = imageId;
+          this[imageId].XDir = xDir;
+          this[imageId].YDir = yDir;
+          this[imageId].LineNumber = i;
+          await this[imageId].RedrawObservationAsync();
+        }
+        else
+        {
+          MeasurementObservation measurementObservation =
+            new MeasurementObservation(this, imageId, point, xDir, yDir, i);
+          Add(imageId, measurementObservation);
+          await measurementObservation.RedrawObservationAsync();
+        }
       }
     }
 
@@ -265,25 +270,29 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         if (!result)
         {
           MapView mapView = await Measurement.GetMeasurementView();
-          Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
-          MapView thisView = MapView.Active;
-          Geometry geometry = await thisView.GetCurrentSketchAsync();
-          Updated = true;
-
-          if (geometry != null)
+          if (mapView != null)
           {
-            var ptColl = await Measurement.ToPointCollectionAsync(geometry);
+            Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
-            if (ptColl != null)
+            MapView thisView = MapView.Active;
+            Geometry geometry = await thisView.GetCurrentSketchAsync();
+            Updated = true;
+
+            if (geometry != null)
             {
-              if (PointId < ptColl.Count)
-              {
-                MapPoint pointC = ptColl[PointId];
+              var ptColl = await Measurement.ToPointCollectionAsync(geometry);
 
-                if (IsSame(pointC))
+              if (ptColl != null)
+              {
+                if (PointId < ptColl.Count)
                 {
- //                 Updated = false;
+                  MapPoint pointC = ptColl[PointId];
+
+                  if (IsSame(pointC))
+                  {
+                    // Updated = false;
+                  }
                 }
               }
             }

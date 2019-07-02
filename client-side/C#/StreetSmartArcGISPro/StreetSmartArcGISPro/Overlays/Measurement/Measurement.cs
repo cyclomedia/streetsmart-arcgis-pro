@@ -582,29 +582,31 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       MapView thisView = MapView.Active;
       Geometry geometry = await thisView.GetCurrentSketchAsync();
       List<MapPoint> points = new List<MapPoint>();
-      bool toUpdate = false;
+      bool toUpdate = geometry.PointCount != Count;
       IList<MapPoint> pointsGeometry = await ToPointCollectionAsync(geometry);
 
       if (!_measurementList.FromMap)
       {
-        for (int i = 0; i < Count; i++)
+        await QueuedTask.Run(async () =>
         {
-          MapPoint mapPoint = pointsGeometry?.Count > i ? pointsGeometry[i] : null;
-          MeasurementPoint mp = this.ElementAt(i).Value;
-          toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
+          ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
 
-          if (mp.Point != null)
+          for (int i = 0; i < Count; i++)
           {
-            points.Add(mp.Point);
+            MapPoint mapPoint = pointsGeometry?.Count > i ? pointsGeometry[i] : null;
+            MeasurementPoint mp = this.ElementAt(i).Value;
+            toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
+
+            if (mp.Point != null)
+            {
+              MapPoint point = mp.Point;
+              double z = spatialReference.ZScale / geometry.SpatialReference.ZScale * (point?.Z ?? 0);
+              points.Add(MapPointBuilder.CreateMapPoint(point.X, point.Y, z));
+            }
           }
-        }
 
-        if (toUpdate)
-        {
-          await QueuedTask.Run(() =>
+          if (toUpdate)
           {
-            ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
-
             if (IsGeometryType(ArcGISGeometryType.Polygon))
             {
               geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
@@ -616,12 +618,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             else if (geometry is MapPoint mapPoint)
             {
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
-              geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point, spatialReference);
+              double z = spatialReference.ZScale / geometry.SpatialReference.ZScale * (point?.Z ?? 0);
+              geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point.X, point.Y, z, spatialReference);
             }
 
-            thisView.SetCurrentSketchAsync(geometry);
-          });
-        }
+            await thisView.SetCurrentSketchAsync(geometry);
+          }
+        });
       }
     }
 
@@ -629,7 +632,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       var moduleStreetSmart = ModuleStreetSmart.Current;
       var vectorLayerList = await moduleStreetSmart.GetVectorLayerListAsync();
-      return vectorLayerList.GetMapViewFromLayer(VectorLayer.Layer);
+      return VectorLayer != null ? vectorLayerList.GetMapViewFromLayer(VectorLayer.Layer) : null;
     }
 
     #endregion
