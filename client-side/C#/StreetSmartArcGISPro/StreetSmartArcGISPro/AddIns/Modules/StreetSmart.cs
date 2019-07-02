@@ -333,7 +333,11 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       }
 
       Setting settings = ProjectList.Instance.GetSettings(args.MapView);
-      settings.PropertyChanged += OnSettingsPropertyChanged;
+
+      if (settings != null)
+      {
+        settings.PropertyChanged += OnSettingsPropertyChanged;
+      }
 
       if (addEvents)
       {
