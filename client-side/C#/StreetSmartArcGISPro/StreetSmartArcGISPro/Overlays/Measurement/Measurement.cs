@@ -582,7 +582,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       MapView thisView = MapView.Active;
       Geometry geometry = await thisView.GetCurrentSketchAsync();
       List<MapPoint> points = new List<MapPoint>();
-      bool toUpdate = geometry.PointCount != Count;
+      bool toUpdate = (geometry?.PointCount ?? 0) != Count;
       IList<MapPoint> pointsGeometry = await ToPointCollectionAsync(geometry);
 
       if (!_measurementList.FromMap)
@@ -600,7 +600,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             if (mp.Point != null)
             {
               MapPoint point = mp.Point;
-              double z = spatialReference.ZScale / geometry.SpatialReference.ZScale * (point?.Z ?? 0);
+              double z = spatialReference.ZScale / (geometry?.SpatialReference?.ZScale ?? 1) * (point?.Z ?? 0);
               points.Add(MapPointBuilder.CreateMapPoint(point.X, point.Y, z));
             }
           }
@@ -618,7 +618,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             else if (geometry is MapPoint mapPoint)
             {
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
-              double z = spatialReference.ZScale / geometry.SpatialReference.ZScale * (point?.Z ?? 0);
+              double z = spatialReference.ZScale / (geometry?.SpatialReference?.ZScale ?? 1) * (point?.Z ?? 0);
               geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point.X, point.Y, z, spatialReference);
             }
 
