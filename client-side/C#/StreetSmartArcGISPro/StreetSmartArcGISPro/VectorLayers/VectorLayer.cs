@@ -393,7 +393,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                     }
                   }
 
-                  GeoJsonChanged = await CreateSld(featureCollection);
+                  GeoJsonChanged = await CreateSld(featureCollection) || GeoJsonChanged;
                 }
               }
             }
