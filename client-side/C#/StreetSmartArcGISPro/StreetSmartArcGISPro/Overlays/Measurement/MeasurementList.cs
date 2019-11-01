@@ -117,7 +117,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public void CreateMeasurement(ArcGISGeometryType geometryType)
+    public async Task CreateMeasurement(ArcGISGeometryType geometryType)
     {
       if (Api != null)
       {
@@ -174,7 +174,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             FromMap = true;
 
             IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
-            Api.StartMeasurementMode(panoramaViewer, options);
+            await Api.StartMeasurementMode(panoramaViewer, options);
           }
         }
       }
@@ -201,7 +201,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
           {
             _drawingSketch = true;
-            measurement = StartMeasurement(geometry, measurement, true, vectorLayer);
+            measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
           }
 
           if (measurement != null)
@@ -212,7 +212,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    public Measurement StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, VectorLayer vectorLayer)
+    public async Task<Measurement> StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, VectorLayer vectorLayer)
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
@@ -233,7 +233,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             CloseOpenMeasurement();
             _lastVectorLayer = vectorLayer;
             _lastSketch = sketch;
-            CreateMeasurement(geometryType);
+            await CreateMeasurement(geometryType);
           }
         }
       }
