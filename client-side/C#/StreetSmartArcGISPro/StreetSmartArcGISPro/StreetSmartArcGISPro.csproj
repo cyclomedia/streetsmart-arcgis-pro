@@ -151,6 +151,9 @@
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddIns\Views\Converters\InverseBoolean.cs" />
+    <Compile Include="AddIns\Views\StreetSmartApi.xaml.cs">
+      <DependentUpon>StreetSmartApi.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Configuration\File\Agreement.cs" />
     <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
     <Compile Include="Configuration\File\ConstantsViewer.cs" />
@@ -247,6 +250,10 @@
     <Page Include="AddIns\Views\Login.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddIns\Views\StreetSmartApi.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="AddIns\Views\StreetSmart.xaml">
       <SubType>Designer</SubType>

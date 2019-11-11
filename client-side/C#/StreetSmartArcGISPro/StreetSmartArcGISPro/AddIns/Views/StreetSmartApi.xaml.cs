@@ -19,13 +19,13 @@
 namespace StreetSmartArcGISPro.AddIns.Views
 {
   /// <summary>
-  /// Interaction logic for streetSmart.xaml
+  /// Interaction logic for streetSmartApi.xaml
   /// </summary>
-  public partial class StreetSmart
+  public partial class StreetSmartApi
   {
     #region Constructor
 
-    public StreetSmart()
+    public StreetSmartApi()
     {
       InitializeComponent();
     }
