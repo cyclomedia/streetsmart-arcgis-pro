@@ -30,6 +30,12 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
   [XmlRoot(Namespace = "http://www.cyclomedia.com/atlas", IsNullable = false)]
   public class Recording
   {
+    #region Members
+
+    private bool? _hasDepthMap;
+
+    #endregion
+
     #region Fields
 
     public const string FieldId = "Id";                            // "Id"
@@ -115,7 +121,11 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
     public TileSchema TileSchema { get; set; }
 
     [XmlElement("hasDepthMap", Namespace = "http://www.cyclomedia.com/atlas")]
-    public bool? HasDepthMap { get; set; }
+    public bool HasDepthMap
+    {
+      get => _hasDepthMap ?? false;
+      set => _hasDepthMap = value;
+    }
 
     public static Dictionary<string, FieldType> Fields => new Dictionary<string, FieldType>
     {
@@ -141,6 +151,15 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
       {FieldPip2Yaw, FieldType.Double},
       {FieldHasDepthMap, FieldType.String}
     };
+
+    #endregion
+
+    #region Constructor
+
+    public Recording()
+    {
+      _hasDepthMap = null;
+    }
 
     #endregion
 
