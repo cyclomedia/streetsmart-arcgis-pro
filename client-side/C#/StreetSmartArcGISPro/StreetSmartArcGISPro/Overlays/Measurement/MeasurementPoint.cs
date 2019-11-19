@@ -130,12 +130,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async Task UpdateObservationAsync(IResultDirection direction, int i)
     {
+      IResultDirectionPanorama directionPan = direction as IResultDirectionPanorama;
       string imageId = direction.Id;
-      double x = direction.Position?.X ?? 0.0;
-      double y = direction.Position?.Y ?? 0.0;
-      double z = direction.Position?.Z ?? 0.0;
-      double xDir = direction.Direction?.X ?? 0.0;
-      double yDir = direction.Direction?.Y ?? 0.0;
+      double x = directionPan?.Position?.X ?? 0.0;
+      double y = directionPan?.Position?.Y ?? 0.0;
+      double z = directionPan?.Position?.Z ?? 0.0;
+      double xDir = directionPan?.Direction?.X ?? 0.0;
+      double yDir = directionPan?.Direction?.Y ?? 0.0;
       MapView mapView = await Measurement.GetMeasurementView();
 
       if (mapView != null)

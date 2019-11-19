@@ -16,21 +16,20 @@
  * License along with this library.
  */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+namespace StreetSmartArcGISPro.AddIns.Views
+{
+  /// <summary>
+  /// Interaction logic for streetSmartApi.xaml
+  /// </summary>
+  public partial class StreetSmartApi
+  {
+    #region Constructor
 
-[assembly: AssemblyTitle("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyDescription("Street Smart integration for ArcGIS Pro")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CycloMedia")]
-[assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2019")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+    public StreetSmartApi()
+    {
+      InitializeComponent();
+    }
 
-[assembly: ComVisible(false)]
-
-[assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
-
-[assembly: AssemblyVersion("1.1.0.*")]
-[assembly: AssemblyFileVersion("1.1.0")]
+    #endregion
+  }
+}

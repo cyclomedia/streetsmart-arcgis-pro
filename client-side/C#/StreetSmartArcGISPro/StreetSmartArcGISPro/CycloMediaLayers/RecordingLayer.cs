@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Resources;
 using System.Threading.Tasks;
 
@@ -36,13 +35,20 @@ using Envelope = ArcGIS.Core.Geometry.Envelope;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
+  public enum TypeOfLayer
+  {
+    YearPip = 1,
+    YearForbidden = 2,
+    YearDepthMap = 3,
+    YearNoDepthMap = 4
+  }
+
   public class RecordingLayer : CycloMediaLayer
   {
     #region Members
 
-    private static Dictionary<FeatureLayer, List<int>> _yearPip;
-    private static Dictionary<FeatureLayer, List<int>> _yearForbidden;
-    private static Dictionary<FeatureLayer, List<int>> _years;
+    private static Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>> _yearsVisible;
+    private static Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>> _uniqueValueGroups;
     private static double _minimumScale;
 
     private static readonly ConstantsRecordingLayer Constants;
@@ -72,49 +78,75 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       set => _minimumScale = value;
     }
 
-    private static Dictionary<FeatureLayer, List<int>> Years => _years ?? (_years = new Dictionary<FeatureLayer, List<int>>());
+    private static Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>> YearsVisible
+      => _yearsVisible ?? (_yearsVisible = new Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>>());
 
-    private static Dictionary<FeatureLayer, List<int>> YearPip => _yearPip ?? (_yearPip = new Dictionary<FeatureLayer, List<int>>());
+    private static Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>> UniqueValueGroups
+      => _uniqueValueGroups ?? (_uniqueValueGroups = new Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>>());
 
-    private static Dictionary<FeatureLayer, List<int>> YearForbidden => _yearForbidden ?? (_yearForbidden = new Dictionary<FeatureLayer, List<int>>());
-
-    protected List<int> GetYears(FeatureLayer layer)
+    private List<int> GetYearValue(FeatureLayer layer, TypeOfLayer type)
     {
       if (layer != null)
       {
-        if (!Years.ContainsKey(layer))
+        if (!YearsVisible.ContainsKey(layer))
         {
-          Years.Add(layer, new List<int>());
+          YearsVisible.Add(layer, new Dictionary<TypeOfLayer, List<int>>());
         }
       }
 
-      return layer == null ? null : Years[layer];
+      return layer == null ? null : GetValue(YearsVisible[layer], type);
     }
 
-    protected List<int> GetYearPip(FeatureLayer layer)
+    private List<int> GetValue(Dictionary<TypeOfLayer, List<int>> yearValue, TypeOfLayer type)
     {
-      if (layer != null)
+      if (!yearValue.ContainsKey(type))
       {
-        if (!YearPip.ContainsKey(layer))
-        {
-          YearPip.Add(layer, new List<int>());
-        }
+        yearValue.Add(type, new List<int>());
       }
 
-      return layer == null ? null : YearPip[layer];
+      return yearValue[type];
     }
 
-    protected List<int> GetYearForbidden(FeatureLayer layer)
+    private void AddValue(Dictionary<TypeOfLayer, List<int>> yearValue, TypeOfLayer type, int year)
     {
-      if (layer != null)
+      var toAdd = GetValue(yearValue, type);
+
+      if (!toAdd.Contains(year))
       {
-        if (!YearForbidden.ContainsKey(layer))
-        {
-          YearForbidden.Add(layer, new List<int>());
-        }
+        toAdd.Add(year);
+      }
+    }
+
+    private Dictionary<TypeOfLayer, CIMUniqueValueGroup> GetUniqueValueGroupYear(int year)
+    {
+      if (!UniqueValueGroups.ContainsKey(year))
+      {
+        UniqueValueGroups.Add(year, new Dictionary<TypeOfLayer, CIMUniqueValueGroup>());
       }
 
-      return layer == null ? null : YearForbidden[layer];
+      return UniqueValueGroups[year];
+    }
+
+    private CIMUniqueValueGroup GetUniqueValue(Dictionary<TypeOfLayer, CIMUniqueValueGroup> typeOfLayer, TypeOfLayer type)
+    {
+      if (!typeOfLayer.ContainsKey(type))
+      {
+        typeOfLayer.Add(type, null);
+      }
+
+      return typeOfLayer[type];
+    }
+
+    private CIMUniqueValueGroup GetUniqueValueGroup(int year, TypeOfLayer type)
+    {
+      return GetUniqueValue(GetUniqueValueGroupYear(year), type);
+    }
+
+    private void AddUniqueValueGroup(int year, TypeOfLayer type, CIMUniqueValueGroup uniqueValueGroup)
+    {
+      var typeOfLayer = GetUniqueValueGroupYear(year);
+      GetUniqueValue(typeOfLayer, type);
+      typeOfLayer[type] = uniqueValueGroup;
     }
 
     #endregion
@@ -157,11 +189,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       await QueuedTask.Run(() =>
       {
-        var added = new List<int>();
-        var pipAdded = new List<int>();
-        var forbiddenAdded = new List<int>();
-        bool hasDepthMap = false;
-        bool hasNoDepthMap = false;
+        var years = new Dictionary<TypeOfLayer, List<int>>();
 
         using (FeatureClass featureClass = Layer?.GetFeatureClass())
         {
@@ -171,7 +199,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             {
               FilterGeometry = envelope,
               SpatialRelationship = SpatialRelationship.Contains,
-              SubFields = $"{Recording.FieldRecordedAt},{Recording.FieldPip},{Recording.FieldIsAuthorized}"
+              SubFields = $"{Recording.FieldRecordedAt},{Recording.FieldPip},{Recording.FieldIsAuthorized},{Recording.FieldHasDepthMap}"
             };
 
             using (RowCursor existsResult = featureClass.Search(spatialFilter, false))
@@ -191,25 +219,16 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                   {
                     var dateTime = (DateTime) value;
                     int year = dateTime.Year;
-                    var years = GetYears(Layer);
-
-                    if (!years.Contains(year))
-                    {
-                      years.Add(year);
-                      added.Add(year);
-                    }
 
                     object pipValue = row?.GetOriginalValue(pipId);
 
                     if (pipValue != null)
                     {
                       bool pip = bool.Parse((string) pipValue);
-                      var yearPip = GetYearPip(Layer);
 
-                      if (pip && !yearPip.Contains(year))
+                      if (pip)
                       {
-                        yearPip.Add(year);
-                        pipAdded.Add(year);
+                        AddValue(years, TypeOfLayer.YearPip, year);
                       }
                     }
 
@@ -218,19 +237,16 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     if (forbiddenValue != null)
                     {
                       bool forbidden = !bool.Parse((string) forbiddenValue);
-                      var yearForbidden = GetYearForbidden(Layer);
 
-                      if (forbidden && !yearForbidden.Contains(year))
+                      if (forbidden)
                       {
-                        yearForbidden.Add(year);
-                        forbiddenAdded.Add(year);
+                        AddValue(years, TypeOfLayer.YearForbidden, year);
                       }
                     }
 
                     string depthMapValue = row?.GetOriginalValue(hasDepthMapId) as string;
                     bool depthMap = bool.Parse(string.IsNullOrEmpty(depthMapValue) ? false.ToString() : depthMapValue);
-                    hasDepthMap = depthMap || hasDepthMap;
-                    hasNoDepthMap = !depthMap || hasNoDepthMap;
+                    AddValue(years, depthMap ? TypeOfLayer.YearDepthMap : TypeOfLayer.YearNoDepthMap, year);
                   }
                 }
               }
@@ -242,152 +258,196 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         if (featureRenderer is CIMUniqueValueRenderer uniqueValueRenderer)
         {
-          foreach (var value in added)
+          TypeOfLayer[] typeOfLayers =
+            {TypeOfLayer.YearNoDepthMap, TypeOfLayer.YearDepthMap, TypeOfLayer.YearPip, TypeOfLayer.YearForbidden};
+          var groups = new List<CIMUniqueValueGroup>();
+          bool change = false;
+
+          foreach (var typeOfLayer in typeOfLayers)
           {
-            if (hasNoDepthMap)
+            List<int> typeValue = GetValue(years, typeOfLayer);
+            List<int> typeValuePast = GetYearValue(Layer, typeOfLayer);
+
+            foreach (var value in typeValue)
             {
-              CIMColor cimColor = CIMColor.CreateRGBColor(128, 176, 255);
-              CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
+              var uniqueValue = GetUniqueValueGroup(value, typeOfLayer);
 
-              CIMUniqueValue uniqueValue = new CIMUniqueValue
+              if (!typeValuePast.Contains(value))
               {
-                FieldValues = new[] {value.ToString(), false.ToString(), true.ToString(), false.ToString()}
-              };
+                if (uniqueValue == null)
+                {
+                  switch (typeOfLayer)
+                  {
+                    case TypeOfLayer.YearNoDepthMap:
+                      uniqueValue = CreateNoDepthValueGroup(value);
+                      break;
+                    case TypeOfLayer.YearDepthMap:
+                      uniqueValue = CreateDepthValueGroup(value);
+                      break;
+                    case TypeOfLayer.YearPip:
+                      uniqueValue = CreatePipValueGroup(value);
+                      break;
+                    case TypeOfLayer.YearForbidden:
+                      uniqueValue = CreateForbiddenValueGroup(value);
+                      break;
+                  }
 
-              var uniqueValueClass = new CIMUniqueValueClass
-              {
-                Editable = true,
-                Visible = true,
-                Values = new[] {uniqueValue},
-                Symbol = pointSymbolReference,
-                Label = value.ToString(CultureInfo.InvariantCulture)
-              };
+                  AddUniqueValueGroup(value, typeOfLayer, uniqueValue);
+                }
 
-              CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
-              {
-                Classes = new[] {uniqueValueClass},
-                Heading = string.Empty
-              };
+                change = true;
+                typeValuePast.Add(value);
+              }
 
-              var groups = uniqueValueRenderer.Groups?.ToList() ?? new List<CIMUniqueValueGroup>();
-              groups.Add(uniqueValueGroup);
-              uniqueValueRenderer.Groups = groups.ToArray();
-              Layer.SetRenderer(uniqueValueRenderer);
+              groups.Add(uniqueValue);
             }
 
-            if (hasDepthMap)
+            int i = 0;
+
+            while (i < typeValuePast.Count)
             {
-              CIMColor cimColor = CIMColor.CreateRGBColor(152, 194, 60);
-              CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
-              string depthString = _resourceManager.GetString("RecordingLayerDepthMap", _language.CultureInfo);
+              int value = typeValuePast[i];
 
-              CIMUniqueValue uniqueValue = new CIMUniqueValue
+              if (typeValue.Contains(value))
               {
-                FieldValues = new[] { value.ToString(), false.ToString(), true.ToString(), true.ToString() }
-              };
-
-              var uniqueValueClass = new CIMUniqueValueClass
+                i++;
+              }
+              else
               {
-                Editable = true,
-                Visible = true,
-                Values = new[] { uniqueValue },
-                Symbol = pointSymbolReference,
-                Label = $"{value} ({depthString})"
-              };
-
-              CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
-              {
-                Classes = new[] { uniqueValueClass },
-                Heading = string.Empty
-              };
-
-              var groups = uniqueValueRenderer.Groups?.ToList() ?? new List<CIMUniqueValueGroup>();
-              groups.Add(uniqueValueGroup);
-              uniqueValueRenderer.Groups = groups.ToArray();
-              Layer.SetRenderer(uniqueValueRenderer);
+                typeValuePast.Remove(value);
+                change = true;
+              }
             }
           }
 
-          foreach (var value in pipAdded)
+          if (change)
           {
-            // ToDo: Add a rotation to the PIP symbols
-            Color color = Color.FromArgb(255, Color.FromArgb(0x80B0FF));
-            CIMMarker marker = GetPipSymbol(color);
-            var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
-            var pointSymbolReference = pointSymbol.MakeSymbolReference();
-            string detailImagesString = _resourceManager.GetString("RecordingLayerDetailImages", _language.CultureInfo);
-
-            CIMUniqueValue uniqueValue = new CIMUniqueValue
-            {
-              FieldValues = new[] { value.ToString(), true.ToString(), true.ToString(), false.ToString() }
-            };
-
-            var uniqueValueClass = new CIMUniqueValueClass
-            {
-              Editable = true,
-              Visible = true,
-              Values = new[] { uniqueValue },
-              Symbol = pointSymbolReference,
-              Label = $"{value} ({detailImagesString})"
-            };
-
-            CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
-            {
-              Classes = new[] { uniqueValueClass },
-              Heading = string.Empty
-            };
-
-            var groups = uniqueValueRenderer.Groups?.ToList() ?? new List<CIMUniqueValueGroup>();
-            groups.Add(uniqueValueGroup);
-            uniqueValueRenderer.Groups = groups.ToArray();
-            Layer.SetRenderer(uniqueValueRenderer);
-          }
-
-          foreach (var value in forbiddenAdded)
-          {
-            Color color = Color.FromArgb(255, Color.FromArgb(0x80B0FF));
-            CIMMarker marker = GetForbiddenSymbol(color);
-            var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
-            var pointSymbolReference = pointSymbol.MakeSymbolReference();
-            string noAuthorizationString = _resourceManager.GetString("RecordingLayerNoAuthorization", _language.CultureInfo);
-
-            CIMUniqueValue uniqueValue = new CIMUniqueValue
-            {
-              FieldValues = new[] {value.ToString(), false.ToString(), false.ToString(), false.ToString()}
-            };
-
-            CIMUniqueValue uniqueValuePip = new CIMUniqueValue
-            {
-              FieldValues = new[] {value.ToString(), true.ToString(), false.ToString(), false.ToString()}
-            };
-
-            CIMUniqueValue depthMap = new CIMUniqueValue
-            {
-              FieldValues = new[] {value.ToString(), false.ToString(), false.ToString(), true.ToString()}
-            };
-
-            var uniqueValueClass = new CIMUniqueValueClass
-            {
-              Editable = true,
-              Visible = true,
-              Values = new[] { uniqueValue, uniqueValuePip, depthMap },
-              Symbol = pointSymbolReference,
-              Label = $"{value} ({noAuthorizationString})"
-            };
-
-            CIMUniqueValueGroup uniqueValueGroup = new CIMUniqueValueGroup
-            {
-              Classes = new[] { uniqueValueClass },
-              Heading = string.Empty
-            };
-
-            var groups = uniqueValueRenderer.Groups?.ToList() ?? new List<CIMUniqueValueGroup>();
-            groups.Add(uniqueValueGroup);
             uniqueValueRenderer.Groups = groups.ToArray();
             Layer.SetRenderer(uniqueValueRenderer);
           }
         }
       });
+    }
+
+    private CIMUniqueValueGroup CreateDepthValueGroup(int value)
+    {
+      CIMColor cimColor = CIMColor.CreateRGBColor(152, 194, 60);
+      CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
+
+      CIMUniqueValue uniqueValue = new CIMUniqueValue
+      {
+        FieldValues = new[] { value.ToString(), false.ToString(), true.ToString(), true.ToString() }
+      };
+
+      var uniqueValueClass = new CIMUniqueValueClass
+      {
+        Editable = true,
+        Visible = true,
+        Values = new[] { uniqueValue },
+        Symbol = pointSymbolReference,
+        Label = value.ToString(CultureInfo.InvariantCulture)
+      };
+
+      return new CIMUniqueValueGroup
+      {
+        Classes = new[] { uniqueValueClass },
+        Heading = string.Empty
+      };
+    }
+
+    private CIMUniqueValueGroup CreateNoDepthValueGroup(int value)
+    {
+      CIMColor cimColor = CIMColor.CreateRGBColor(128, 176, 255);
+      CIMSymbolReference pointSymbolReference = MakePointSymbol(cimColor);
+
+      CIMUniqueValue uniqueValue = new CIMUniqueValue
+      {
+        FieldValues = new[] { value.ToString(), false.ToString(), true.ToString(), false.ToString() }
+      };
+
+      var uniqueValueClass = new CIMUniqueValueClass
+      {
+        Editable = true,
+        Visible = true,
+        Values = new[] { uniqueValue },
+        Symbol = pointSymbolReference,
+        Label = value.ToString(CultureInfo.InvariantCulture)
+      };
+
+      return new CIMUniqueValueGroup
+      {
+        Classes = new[] { uniqueValueClass },
+        Heading = string.Empty
+      };
+    }
+
+    private CIMUniqueValueGroup CreatePipValueGroup(int value)
+    {
+      // ToDo: Add a rotation to the PIP symbols
+      Color color = Color.FromArgb(255, Color.FromArgb(0x80B0FF));
+      CIMMarker marker = GetPipSymbol(color);
+      var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
+      var pointSymbolReference = pointSymbol.MakeSymbolReference();
+      string detailImagesString = _resourceManager.GetString("RecordingLayerDetailImages", _language.CultureInfo);
+
+      CIMUniqueValue uniqueValue = new CIMUniqueValue
+      {
+        FieldValues = new[] { value.ToString(), true.ToString(), true.ToString(), false.ToString() }
+      };
+
+      var uniqueValueClass = new CIMUniqueValueClass
+      {
+        Editable = true,
+        Visible = true,
+        Values = new[] { uniqueValue },
+        Symbol = pointSymbolReference,
+        Label = $"{value} ({detailImagesString})"
+      };
+
+      return new CIMUniqueValueGroup
+      {
+        Classes = new[] { uniqueValueClass },
+        Heading = string.Empty
+      };
+    }
+
+    private CIMUniqueValueGroup CreateForbiddenValueGroup(int value)
+    {
+      Color color = Color.FromArgb(255, Color.FromArgb(0x80B0FF));
+      CIMMarker marker = GetForbiddenSymbol(color);
+      var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
+      var pointSymbolReference = pointSymbol.MakeSymbolReference();
+      string noAuthorizationString = _resourceManager.GetString("RecordingLayerNoAuthorization", _language.CultureInfo);
+
+      CIMUniqueValue uniqueValue = new CIMUniqueValue
+      {
+        FieldValues = new[] { value.ToString(), false.ToString(), false.ToString(), false.ToString() }
+      };
+
+      CIMUniqueValue uniqueValuePip = new CIMUniqueValue
+      {
+        FieldValues = new[] { value.ToString(), true.ToString(), false.ToString(), false.ToString() }
+      };
+
+      CIMUniqueValue depthMap = new CIMUniqueValue
+      {
+        FieldValues = new[] { value.ToString(), false.ToString(), false.ToString(), true.ToString() }
+      };
+
+      var uniqueValueClass = new CIMUniqueValueClass
+      {
+        Editable = true,
+        Visible = true,
+        Values = new[] { uniqueValue, uniqueValuePip, depthMap },
+        Symbol = pointSymbolReference,
+        Label = $"{value} ({noAuthorizationString})"
+      };
+
+      return new CIMUniqueValueGroup
+      {
+        Classes = new[] { uniqueValueClass },
+        Heading = string.Empty
+      };
     }
 
     private CIMSymbolReference MakePointSymbol(CIMColor cimColor)
@@ -413,14 +473,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected override void ClearYears()
     {
-      var years = GetYears(Layer);
-      years?.Clear();
+      TypeOfLayer[] typeOfLayers =
+        {TypeOfLayer.YearNoDepthMap, TypeOfLayer.YearDepthMap, TypeOfLayer.YearPip, TypeOfLayer.YearForbidden};
 
-      var yearPip = GetYearPip(Layer);
-      yearPip?.Clear();
-
-      var yearForbidden = GetYearForbidden(Layer);
-      yearForbidden?.Clear();
+      foreach (TypeOfLayer typeOfLayer in typeOfLayers)
+      {
+        var years = GetYearValue(Layer, typeOfLayer);
+        years?.Clear();
+      }
     }
 
     #endregion

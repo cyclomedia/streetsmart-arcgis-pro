@@ -196,7 +196,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       Measurement measurement = _measurementList.Sketch;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
-      _measurementList.StartMeasurement(geometry, measurement, true, vectorLayer);
+      await _measurementList.StartMeasurement(geometry, measurement, true, vectorLayer);
     }
 
     public async Task StartSketchToolAsync(MapView mapView)
@@ -464,7 +464,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       if (geometry != null && EditTool == EditTools.ModifyFeatureImpl)
       {
         EditTool = EditTools.Verticles;
-        _measurementList.StartMeasurement(geometry, null, false, LastSelectedLayer);
+        await _measurementList.StartMeasurement(geometry, null, false, LastSelectedLayer);
         await _measurementList.SketchModifiedAsync(mapView, LastSelectedLayer);
       }
       else if (geometry == null && EditTool == EditTools.Verticles)

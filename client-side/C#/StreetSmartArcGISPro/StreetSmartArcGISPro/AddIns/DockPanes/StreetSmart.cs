@@ -46,6 +46,7 @@ using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmart.Common.Interfaces.SLD;
 
+using StreetSmartArcGISPro.AddIns.Views;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Configuration.Resource;
@@ -55,6 +56,7 @@ using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
 
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using Login = StreetSmartArcGISPro.Configuration.File.Login;
 using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
@@ -83,6 +85,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private bool _replace;
     private bool _nearest;
     private bool _inRestart;
+    private bool _inRestartDock;
     private bool _inClose;
     private string _epsgCode;
     private ICoordinate _lookAt;
@@ -90,6 +93,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private MapView _mapView;
     private MapView _oldMapView;
     private readonly IList<string> _configurationPropertyChanged;
+    private IList<string> _toRestartImages;
+
+    private static bool _fromShow;
+    private static bool _fromConstructor;
 
     private readonly LanguageSettings _languageSettings;
     private readonly ApiKey _apiKey;
@@ -111,13 +118,25 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Constructor
 
+    static StreetSmart()
+    {
+      _fromShow = false;
+      _fromConstructor = false;
+    }
+
     protected StreetSmart()
     {
+      if (!_fromShow)
+      {
+        _fromConstructor = true;
+      }
+
       _storedLayerList = StoredLayerList.Instance;
       ProjectClosedEvent.Subscribe(OnProjectClosed);
       _currentDispatcher = Dispatcher.CurrentDispatcher;
       _inRestart = false;
       _inClose = false;
+      _inRestartDock = false;
       _vectorLayerInChange = new List<VectorLayer>();
 
       _languageSettings = LanguageSettings.Instance;
@@ -147,6 +166,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _mapView = MapView.Active;
       _oldMapView = MapView.Active;
 
+      _toRestartImages = new List<string>();
+
       if (_mapView != null)
       {
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
@@ -157,7 +178,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
       }
 
-      Initialize();
+      InitializeApi();
 
       MapClosedEvent.Subscribe(OnMapClosedEvent);
     }
@@ -287,6 +308,51 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       base.OnHidden();
     }
 
+    protected override async void OnShow(bool isVisible)
+    {
+      var contentControl = ((Views.StreetSmart)Content).StreetSmartApi;
+
+      if (isVisible && !_inRestartDock && (contentControl.Content == null || _fromConstructor))
+      {
+        _inRestartDock = true;
+
+        if (Api != null && MapView != null)
+        {
+          _measurementList.RemoveAll();
+
+          _vectorLayerList.LayerAdded -= OnAddVectorLayer;
+          _vectorLayerList.LayerRemoved -= OnRemoveVectorLayer;
+          _vectorLayerList.LayerUpdated -= OnUpdateVectorLayer;
+
+          if (_vectorLayerList.ContainsKey(MapView))
+          {
+            foreach (var vectorLayer in _vectorLayerList[MapView])
+            {
+              vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
+            }
+
+            foreach (var vectorLayer in _vectorLayerList[MapView])
+            {
+              vectorLayer.Overlay = null;
+            }
+          }
+
+          foreach (var viewer in _viewerList)
+          {
+            _toRestartImages.Add(viewer.Value.ImageId);
+          }
+
+          _viewerList.RemoveViewers();
+          await Api.Destroy(_options);
+        }
+
+        contentControl.Content = new StreetSmartApi();
+        Initialize();
+      }
+
+      base.OnShow(isVisible);
+    }
+
     #endregion
 
     #region Functions
@@ -323,18 +389,23 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _vectorLayerList = await streetSmartModule.GetVectorLayerListAsync(MapView.Active);
     }
 
+    private void InitializeApi()
+    {
+      string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+      IAPISettings settings = CefSettingsFactory.Create(cachePath);
+      settings.Locale = _languageSettings.Locale;
+      settings.SetDefaultBrowserSubprocessPath();
+      StreetSmartAPIFactory.Initialize(settings, true);
+    }
+
     private void Initialize()
     {
       if (_login.Credentials)
       {
-        string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
-        IAPISettings settings = CefSettingsFactory.Create(cachePath);
-        settings.Locale = _languageSettings.Locale;
-        settings.SetDefaultBrowserSubprocessPath();
         Api = _configuration.UseDefaultStreetSmartUrl
-          ? StreetSmartAPIFactory.Create(settings)
+          ? StreetSmartAPIFactory.Create()
           : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
-            ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation, settings)
+            ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
             : null;
 
         if (Api != null)
@@ -445,7 +516,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       MapPoint point = null;
 
-      if (Nearest)
+      if (Nearest && _toRestartImages.Count == 0)
       {
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
 
@@ -481,59 +552,79 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       _epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
       IList<ViewerType> viewerTypes = new List<ViewerType> { ViewerType.Panorama };
-      IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, Replace, true);
+      IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, _toRestartImages.Count == 0 && Replace, true);
       panoramaOptions.MeasureTypeButtonToggle = false;
       IViewerOptions viewerOptions = ViewerOptionsFactory.Create(viewerTypes, _epsgCode, panoramaOptions);
+      string toOpen;
 
-      try
+      do
       {
-        IList<IViewer> viewers = await Api.Open(_location, viewerOptions);
+        toOpen = _location;
 
-        if (Nearest && point != null)
+        if (_toRestartImages.Count > 0)
         {
-          if (_crossCheck == null)
+          toOpen = _toRestartImages[0];
+          _toRestartImages.Remove(toOpen);
+
+          if (toOpen == _location && _toRestartImages.Count > 0)
           {
-            _crossCheck = new CrossCheck();
+            toOpen = _toRestartImages[0];
+            _toRestartImages.Remove(toOpen);
           }
+        }
 
-          double size = _constants.CrossCheckSize;
-          await _crossCheck.UpdateAsync(point.X, point.Y, size);
+        try
+        {
+          IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
 
-          foreach (IViewer cyclViewer in viewers)
+          if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
           {
-            if (cyclViewer is IPanoramaViewer panoramaViewer)
+            if (_crossCheck == null)
             {
-              Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+              _crossCheck = new CrossCheck();
+            }
 
-              if (viewer != null)
+            double size = _constants.CrossCheckSize;
+            await _crossCheck.UpdateAsync(point.X, point.Y, size);
+
+            foreach (IViewer cyclViewer in viewers)
+            {
+              if (cyclViewer is IPanoramaViewer panoramaViewer)
               {
-                viewer.HasMarker = true;
-              }
-              else
-              {
-                IRecording recording = await panoramaViewer.GetRecording();
-                _openNearest.Add(recording.Id);
+                Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+
+                if (viewer != null)
+                {
+                  viewer.HasMarker = true;
+                }
+                else
+                {
+                  IRecording recording = await panoramaViewer.GetRecording();
+                  _openNearest.Add(recording.Id);
+                }
               }
             }
           }
+
+          Setting settings = ProjectList.Instance.GetSettings(_mapView);
+          MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
+
+          if (cycloSpatialReference != null)
+          {
+            _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
+                                    await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+          }
         }
-
-        Setting settings = ProjectList.Instance.GetSettings(_mapView);
-        MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
-
-        if (cycloSpatialReference != null)
+        catch (StreetSmartImageNotFoundException)
         {
-          _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
-                                  await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+          ResourceManager res = ThisResources.ResourceManager;
+          string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
+          MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
+            canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
         }
-      }
-      catch (StreetSmartImageNotFoundException)
-      {
-        ResourceManager res = ThisResources.ResourceManager;
-        string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
-        MessageBox.Show($"{canNotOpenImageTxt}: {_location} ({_epsgCode})",
-          canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
-      }
+      } while (_toRestartImages.Count > 0 || toOpen != _location);
+
+      _inRestartDock = false;
     }
 
     private async Task MoveToLocationAsync(IPanoramaViewer panoramaViewer)
@@ -637,6 +728,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     internal static StreetSmart Show()
     {
+      _fromShow = true;
       StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
 
       if (!(streetSmart?.IsVisible ?? true))
@@ -759,7 +851,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
           }
 
-          if (string.IsNullOrEmpty(Location))
+          if (string.IsNullOrEmpty(Location) && _toRestartImages.Count == 0)
           {
             DoHide();
           }

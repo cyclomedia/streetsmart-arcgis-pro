@@ -16,11 +16,6 @@
  * License along with this library.
  */
 
-using System.Collections.Generic;
-using System.ComponentModel;
-
-using StreetSmartArcGISPro.CycloMediaLayers;
-
 namespace StreetSmartArcGISPro.AddIns.Views
 {
   /// <summary>
@@ -28,51 +23,11 @@ namespace StreetSmartArcGISPro.AddIns.Views
   /// </summary>
   public partial class StreetSmart
   {
-    #region Members
-
-    private readonly List<CycloMediaLayer> _layers;
-
-    #endregion
-
     #region Constructor
 
     public StreetSmart()
     {
       InitializeComponent();
-      _layers = new List<CycloMediaLayer>();
-    }
-
-    #endregion
-
-    #region Events Properties
-
-    private void OnGroupLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {
-      if (sender is CycloMediaGroupLayer groupLayer && args.PropertyName == "Count")
-      {
-        foreach (CycloMediaLayer layer in groupLayer)
-        {
-          if (!_layers.Contains(layer))
-          {
-            _layers.Add(layer);
-            layer.PropertyChanged += OnLayerPropertyChanged;
-          }
-        }
-      }
-    }
-
-    private void OnLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {
-      if (sender is CycloMediaLayer layer)
-      {
-        switch (args.PropertyName)
-        {
-          case "Visible":
-          case "IsVisibleInstreetSmart":
-            // Todo about update
-            break;
-        }
-      }
     }
 
     #endregion
