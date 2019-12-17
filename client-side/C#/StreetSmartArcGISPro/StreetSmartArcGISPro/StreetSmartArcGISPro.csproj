@@ -334,6 +334,9 @@
     <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libGLESv2.dll">
       <Link>Install\swiftshader\libGLESv2.dll</Link>
     </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.dll">
+      <Link>Install\Newtonsoft.Json.dll</Link>
+    </AddInContent>
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
