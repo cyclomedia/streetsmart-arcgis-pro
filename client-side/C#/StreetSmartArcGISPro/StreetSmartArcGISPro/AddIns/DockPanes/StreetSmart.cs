@@ -784,7 +784,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           foreach (IViewer viewer in viewers)
           {
             overlay.Visible = !_storedLayerList.GetVisibility(layerName);
-            viewer.ToggleOverlay(overlay);
+            IPanoramaViewer panoramaViewer = viewer as IPanoramaViewer;
+            panoramaViewer?.ToggleOverlay(overlay);
           }
 
           vectorLayer.Overlay = overlay;
@@ -819,6 +820,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async Task InitApi()
     {
+      if (_constants.ShowDevTools)
+      {
+        Api.ShowDevTools();
+      }
+
       string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
 
       if (!epsgCode.Equals("EPSG:0"))

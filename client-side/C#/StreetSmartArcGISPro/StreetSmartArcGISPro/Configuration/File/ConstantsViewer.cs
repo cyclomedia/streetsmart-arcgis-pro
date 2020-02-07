@@ -52,6 +52,11 @@ namespace StreetSmartArcGISPro.Configuration.File
     public string AddressLanguageCode { get; set; }
 
     /// <summary>
+    /// Show dev tools
+    /// </summary>
+    public bool ShowDevTools { get; set; }
+
+    /// <summary>
     /// Address Database
     /// </summary>
     public string AddressDatabase { get; set; }
@@ -116,6 +121,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         CrossCheckSize = 10.0,
         MeasurementPointSize = 5.0,
         MeasurementFontSize = 8.0f,
+        ShowDevTools = false,
       };
 
       result.Save();
