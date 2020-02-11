@@ -331,8 +331,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         await QueuedTask.Run(() =>
         {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
-          double zScaleGeom = geometry.SpatialReference.ZScale;
-          zScale = zScaleGeom / (spatialReference?.ZScale ?? zScaleGeom);
+          double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
+          zScale = 1 / conversionFactor;
         });
 
         result = new List<MapPoint>();
@@ -600,7 +600,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             if (mp.Point != null)
             {
               MapPoint point = mp.Point;
-              double z = spatialReference.ZScale / (geometry?.SpatialReference?.ZScale ?? 1) * (point?.Z ?? 0);
+              double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
+              double z = conversionFactor * (point?.Z ?? 0);
               points.Add(MapPointBuilder.CreateMapPoint(point.X, point.Y, z));
             }
           }
@@ -618,7 +619,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             else if (geometry is MapPoint mapPoint)
             {
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
-              double z = spatialReference.ZScale / (geometry?.SpatialReference?.ZScale ?? 1) * (point?.Z ?? 0);
+              double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
+              double z = conversionFactor * (point?.Z ?? 0);
               geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point.X, point.Y, z, spatialReference);
             }
 
