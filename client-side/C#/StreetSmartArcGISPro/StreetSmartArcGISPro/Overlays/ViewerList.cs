@@ -85,6 +85,11 @@ namespace StreetSmartArcGISPro.Overlays
         Remove(panoramaViewer);
         ViewerRemoved?.Invoke(viewer);
       }
+
+      if (ActiveViewer == panoramaViewer)
+      {
+        ActiveViewer = null;
+      }
     }
 
     #region event listners
