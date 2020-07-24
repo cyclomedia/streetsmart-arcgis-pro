@@ -585,7 +585,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       bool toUpdate = (geometry?.PointCount ?? 0) != Count;
       IList<MapPoint> pointsGeometry = await ToPointCollectionAsync(geometry);
 
-      if (!_measurementList.FromMap)
+      if (!_measurementList.FromMap && VectorLayer != null)
       {
         await QueuedTask.Run(async () =>
         {

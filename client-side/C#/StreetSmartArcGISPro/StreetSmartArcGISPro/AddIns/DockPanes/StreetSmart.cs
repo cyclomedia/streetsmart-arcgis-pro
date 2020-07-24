@@ -884,7 +884,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
-        panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, false);
+        panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
 
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
