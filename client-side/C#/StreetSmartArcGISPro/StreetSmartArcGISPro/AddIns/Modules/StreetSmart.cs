@@ -144,6 +144,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       MapViewInitializedEvent.Subscribe(OnMapViewInitialized);
       MapClosedEvent.Subscribe(OnMapClosedDocument);
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+      AvailableCoordSystems.Init();
     }
 
     #endregion
@@ -168,6 +169,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       MapViewInitializedEvent.Unsubscribe(OnMapViewInitialized);
       MapClosedEvent.Unsubscribe(OnMapClosedDocument);
+      AvailableCoordSystems.Destroy();
       base.Uninitialize();
     }
 

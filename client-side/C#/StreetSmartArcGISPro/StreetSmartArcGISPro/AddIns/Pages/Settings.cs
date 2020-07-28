@@ -25,6 +25,7 @@ using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
 
 using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
+using StreetSmartArcGISPro.Utilities;
 
 using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 using FileProjectList = StreetSmartArcGISPro.Configuration.File.ProjectList;
@@ -43,13 +44,12 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     private readonly FileSettings _settings;
     private readonly FileProjectList _projectList;
+    private readonly AvailableCoordSystems _availableCoordSystems;
 
     private readonly SpatialReference _recordingLayerCoordinateSystem;
     private readonly SpatialReference _cycloramaViewerCoordinateSystem;
 
     private readonly int _overlayDrawDistance;
-
-    private List<SpatialReference> _existsInAreaSpatialReferences;
 
     #endregion
 
@@ -60,10 +60,18 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _projectList = FileProjectList.Instance;
       _settings = _projectList.GetSettings(MapView.Active);
 
+      _availableCoordSystems = AvailableCoordSystems.Instance;
+      _availableCoordSystems.PropertyChanged += OnAvailableCoordSystemPropertyChanged;
+
       _recordingLayerCoordinateSystem = _settings.RecordingLayerCoordinateSystem;
       _cycloramaViewerCoordinateSystem = _settings.CycloramaViewerCoordinateSystem;
 
       _overlayDrawDistance = _settings.OverlayDrawDistance;
+    }
+
+    ~Settings()
+    {
+      _availableCoordSystems.PropertyChanged -= OnAvailableCoordSystemPropertyChanged;
     }
 
     #endregion
@@ -73,18 +81,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     /// <summary>
     /// All supporting spatial references
     /// </summary>
-    public List<SpatialReference> ExistsInAreaSpatialReferences
-    {
-      get
-      {
-        if (_existsInAreaSpatialReferences == null)
-        {
-          CreateExistsInAreaSpatialReferences();
-        }
-
-        return _existsInAreaSpatialReferences;
-      }
-    }
+    public List<SpatialReference> ExistsInAreaSpatialReferences => _availableCoordSystems.ExistInAreaSpatialReferences;
 
     public List<int> ListOfOverlayDrawDistance
     {
@@ -189,36 +186,15 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private async void CreateExistsInAreaSpatialReferences()
+    private void OnAvailableCoordSystemPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      _existsInAreaSpatialReferences = new List<SpatialReference>();
-      SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
-
-      foreach (var spatialReference in spatialReferenceList)
+      if (args.PropertyName == "ExistInAreaSpatialReferences")
       {
-        bool exists = await spatialReference.ExistsInAreaAsync();
+        // ReSharper disable once ExplicitCallerInfoArgument
+        NotifyPropertyChanged("RecordingLayerCoordinateSystem");
 
-        if (exists && !_existsInAreaSpatialReferences.Contains(spatialReference))
-        {
-          _existsInAreaSpatialReferences.Add(spatialReference);
-        }
-
-        if (!exists && _existsInAreaSpatialReferences.Contains(spatialReference))
-        {
-          _existsInAreaSpatialReferences.Remove(spatialReference);
-        }
-
-        if (RecordingLayerCoordinateSystem != null && spatialReference == RecordingLayerCoordinateSystem)
-        {
-          // ReSharper disable once ExplicitCallerInfoArgument
-          NotifyPropertyChanged("RecordingLayerCoordinateSystem");
-        }
-
-        if (CycloramaViewerCoordinateSystem != null && spatialReference == CycloramaViewerCoordinateSystem)
-        {
-          // ReSharper disable once ExplicitCallerInfoArgument
-          NotifyPropertyChanged("CycloramaViewerCoordinateSystem");
-        }
+        // ReSharper disable once ExplicitCallerInfoArgument
+        NotifyPropertyChanged("CycloramaViewerCoordinateSystem");
       }
     }
 
