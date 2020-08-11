@@ -205,6 +205,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Utilities\AvailableCoordSystems.cs" />
     <Compile Include="Utilities\ImageExtensions.cs" />
     <Compile Include="Utilities\LocalizationProvider.cs" />
     <Compile Include="VectorLayers\EditTools.cs" />

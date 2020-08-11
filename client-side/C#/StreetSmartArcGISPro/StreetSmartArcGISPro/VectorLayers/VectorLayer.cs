@@ -423,7 +423,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
           CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
 
-          if (uniqueValueRendererRenderer != null)
+          if (uniqueValueRendererRenderer?.Groups != null)
           {
             var fields = uniqueValueRendererRenderer.Fields;
 
