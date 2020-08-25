@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
+using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
 using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
@@ -18,7 +18,7 @@ namespace StreetSmartArcGISPro.Utilities
 
     #region members
 
-    private List<SpatialReference> _existsInAreaSpatialReferences;
+    private Dictionary<MapView, List<SpatialReference>> _existsInAreaSpatialReferences;
 
     #endregion
 
@@ -26,11 +26,37 @@ namespace StreetSmartArcGISPro.Utilities
 
     public List<SpatialReference> ExistInAreaSpatialReferences
     {
-      get => _existsInAreaSpatialReferences;
+      get
+      {
+        List<SpatialReference> result = null;
+
+        if (MapView.Active != null && (_existsInAreaSpatialReferences?.ContainsKey(MapView.Active) ?? false))
+        {
+          result = _existsInAreaSpatialReferences[MapView.Active];
+        }
+
+        return result;
+      }
       set
       {
-        _existsInAreaSpatialReferences = value;
-        NotifyPropertyChanged();
+        if (MapView.Active != null && value != null)
+        {
+          if (_existsInAreaSpatialReferences?.ContainsKey(MapView.Active) ?? false)
+          {
+            _existsInAreaSpatialReferences[MapView.Active] = value;
+          }
+          else
+          {
+            if (_existsInAreaSpatialReferences == null)
+            {
+              _existsInAreaSpatialReferences = new Dictionary<MapView, List<SpatialReference>>();
+            }
+
+            _existsInAreaSpatialReferences.Add(MapView.Active, value);
+          }
+
+          NotifyPropertyChanged();
+        }
       }
     }
 
@@ -60,15 +86,27 @@ namespace StreetSmartArcGISPro.Utilities
 
     private void Start()
     {
-      MapViewCameraChangedEvent.Subscribe(CreateExistsInAreaSpatialReferences);
+      MapViewCameraChangedEvent.Subscribe(MapViewCameraChanged);
+      ActiveMapViewChangedEvent.Subscribe(ActiveMapViewChanged);
     }
 
     private void Stop()
     {
-      MapViewCameraChangedEvent.Unsubscribe(CreateExistsInAreaSpatialReferences);
+      MapViewCameraChangedEvent.Unsubscribe(MapViewCameraChanged);
+      ActiveMapViewChangedEvent.Unsubscribe(ActiveMapViewChanged);
     }
 
-    private async void CreateExistsInAreaSpatialReferences(MapViewCameraChangedEventArgs args)
+    private void MapViewCameraChanged(MapViewCameraChangedEventArgs args)
+    {
+      CreateExistsInAreaSpatialReferences();
+    }
+
+    private void ActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
+    {
+      CreateExistsInAreaSpatialReferences();
+    }
+
+    private async void CreateExistsInAreaSpatialReferences()
     {
       var existsInAreaSpatialReferences = new List<SpatialReference>();
       SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
