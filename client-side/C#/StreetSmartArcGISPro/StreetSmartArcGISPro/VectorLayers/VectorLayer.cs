@@ -70,6 +70,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     private SubscriptionToken _rowDeleted;
     private SubscriptionToken _rowCreated;
 
+    private IFeatureCollection _geoJsonOld;
     private IFeatureCollection _geoJson;
     private IList<long> _selection;
     private bool _updateMeasurements;
@@ -84,6 +85,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Layer = layer;
       Overlay = null;
       _selection = null;
+      _geoJsonOld = null;
       _updateMeasurements = false;
 
       StreetSmartModule streetSmart = StreetSmartModule.Current;
@@ -120,6 +122,24 @@ namespace StreetSmartArcGISPro.VectorLayers
     #endregion
 
     #region Functions
+
+    public async Task GeoJsonToOld()
+    {
+      await QueuedTask.Run(() =>
+      {
+        _geoJsonOld = GeoJson;
+        SpatialReference layerSpatRef = Layer?.GetSpatialReference();
+        GeoJson = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
+      });
+    }
+
+    public void GeoJsonToNew()
+    {
+      if (_geoJsonOld != null)
+      {
+        GeoJson = _geoJsonOld;
+      }
+    }
 
     public async Task<bool> InitializeEventsAsync()
     {
@@ -209,8 +229,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 try
                 {
-                  ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
-                  copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
+                  if (layerSpatRef != null)
+                  {
+                    ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
+                    copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
+                  }
                 }
                 catch (Exception)
                 {
@@ -759,7 +782,11 @@ namespace StreetSmartArcGISPro.VectorLayers
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
                     IJson json = JsonFactory.Create(properties);
-                    panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+
+                    if (Overlay != null)
+                    {
+                      panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                    }
                   }
                 }
               }
