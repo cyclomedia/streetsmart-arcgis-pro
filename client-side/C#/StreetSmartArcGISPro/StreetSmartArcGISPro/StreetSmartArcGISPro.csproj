@@ -121,6 +121,7 @@
     </Compile>
     <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
     <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
+    <Compile Include="AddIns\Views\Converters\ContainsSrItems.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
     <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />

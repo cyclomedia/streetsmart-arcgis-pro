@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+
 using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
 
 using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
 
@@ -19,6 +20,7 @@ namespace StreetSmartArcGISPro.Utilities
     #region members
 
     private Dictionary<MapView, List<SpatialReference>> _existsInAreaSpatialReferences;
+    private static AvailableCoordSystems _instance;
 
     #endregion
 
@@ -54,60 +56,19 @@ namespace StreetSmartArcGISPro.Utilities
 
             _existsInAreaSpatialReferences.Add(MapView.Active, value);
           }
-
-          NotifyPropertyChanged();
         }
       }
     }
 
-    public static AvailableCoordSystems Instance { get; private set; }
+    public static AvailableCoordSystems Instance => _instance ?? (_instance = new AvailableCoordSystems());
 
     #endregion
 
     #region functions
 
-    public static void Init()
+    public async Task CheckAvailableCoordinateSystems()
     {
-      if (Instance == null)
-      {
-        Instance = new AvailableCoordSystems();
-        Instance.Start();
-      }
-    }
-
-    public static void Destroy()
-    {
-      if (Instance != null)
-      {
-        Instance.Stop();
-        Instance = null;
-      }
-    }
-
-    private void Start()
-    {
-      MapViewCameraChangedEvent.Subscribe(MapViewCameraChanged);
-      ActiveMapViewChangedEvent.Subscribe(ActiveMapViewChanged);
-    }
-
-    private void Stop()
-    {
-      MapViewCameraChangedEvent.Unsubscribe(MapViewCameraChanged);
-      ActiveMapViewChangedEvent.Unsubscribe(ActiveMapViewChanged);
-    }
-
-    private void MapViewCameraChanged(MapViewCameraChangedEventArgs args)
-    {
-      CreateExistsInAreaSpatialReferences();
-    }
-
-    private void ActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
-    {
-      CreateExistsInAreaSpatialReferences();
-    }
-
-    private async void CreateExistsInAreaSpatialReferences()
-    {
+      ExistInAreaSpatialReferences = new List<SpatialReference>();
       var existsInAreaSpatialReferences = new List<SpatialReference>();
       SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
 
@@ -122,6 +83,9 @@ namespace StreetSmartArcGISPro.Utilities
       }
 
       ExistInAreaSpatialReferences = existsInAreaSpatialReferences;
+
+      // ReSharper disable once ExplicitCallerInfoArgument
+      NotifyPropertyChanged("ExistInAreaSpatialReferences");
     }
 
     private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)

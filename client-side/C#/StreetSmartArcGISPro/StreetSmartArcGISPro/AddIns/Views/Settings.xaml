@@ -30,6 +30,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <converters:CanMeasuring x:Key="CanMeasuringConverter" />
+      <converters:ContainsSrItems x:Key="ContainsSrItems" />
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
       </ResourceDictionary.MergedDictionaries>
@@ -44,12 +45,12 @@
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="SettingsCoordinateSystems" />
       <DockPanel Margin="5,5,5,0">
         <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsRecordingLayer" Width="120" Margin="0,5,5,0"/>
-        <ComboBox ItemsSource="{Binding Path=ExistsInAreaSpatialReferences}" SelectedItem="{Binding Path=RecordingLayerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+        <ComboBox IsEnabled="{Binding ExistsInAreaSpatialReferences, Converter={StaticResource ContainsSrItems}, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Path=ExistsInAreaSpatialReferences, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=RecordingLayerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
       <DockPanel Margin="5,5,5,0">
         <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsCycloramaViewer" Width="120" Margin="0,5,5,0"/>
-        <ComboBox ItemsSource="{Binding Path=ExistsInAreaSpatialReferences}" SelectedItem="{Binding Path=CycloramaViewerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+        <ComboBox IsEnabled="{Binding ExistsInAreaSpatialReferences, Converter={StaticResource ContainsSrItems}, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Path=ExistsInAreaSpatialReferences, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=CycloramaViewerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
         </ComboBox>
       </DockPanel>
       <StackPanel Margin="130,5,5,0">

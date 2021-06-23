@@ -23,17 +23,17 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
   <AddInInfo id="{BD021436-D851-4D91-8301-AC76733FD444}"
-             version="1.3.0"
+             version="1.3.1"
              desktopVersion="2.0">
     <Name>Street Smart for ArcGIS Pro</Name>
     <Description>
       Street Smart for ArcGIS Pro
-      Copyright © CycloMedia Technology 2020
+      Copyright © CycloMedia Technology 2021
     </Description>
     <Image>Images\StreetSmartArcGISPro32.png</Image>
     <Author>CycloMedia</Author>
     <Company>CycloMedia</Company>
-    <Date>27/01/2021 10:00:00 AM, 2020</Date>
+    <Date>23/06/2021 11:30:00 AM, 2021</Date>
     <Subject>Content</Subject>
   </AddInInfo>
   <modules>

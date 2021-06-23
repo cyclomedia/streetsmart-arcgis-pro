@@ -62,6 +62,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       _availableCoordSystems = AvailableCoordSystems.Instance;
       _availableCoordSystems.PropertyChanged += OnAvailableCoordSystemPropertyChanged;
+      _ = _availableCoordSystems.CheckAvailableCoordinateSystems();
 
       _recordingLayerCoordinateSystem = _settings.RecordingLayerCoordinateSystem;
       _cycloramaViewerCoordinateSystem = _settings.CycloramaViewerCoordinateSystem;
@@ -89,7 +90,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       {
         List<int> result = new List<int>();
 
-        for (int i = 5; i <= 100; i = i + 5)
+        for (int i = 5; i <= 100; i += 5)
         {
           result.Add(i);
         }
@@ -128,6 +129,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
           IsModified = true;
           _settings.CycloramaViewerCoordinateSystem = value;
           NotifyPropertyChanged();
+
           // ReSharper disable once ExplicitCallerInfoArgument
           NotifyPropertyChanged("CanMeasuring");
         }
@@ -191,10 +193,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       if (args.PropertyName == "ExistInAreaSpatialReferences")
       {
         // ReSharper disable once ExplicitCallerInfoArgument
-        NotifyPropertyChanged("RecordingLayerCoordinateSystem");
-
-        // ReSharper disable once ExplicitCallerInfoArgument
-        NotifyPropertyChanged("CycloramaViewerCoordinateSystem");
+        NotifyPropertyChanged("ExistsInAreaSpatialReferences");
       }
     }
 

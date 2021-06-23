@@ -16,21 +16,30 @@
  * License along with this library.
  */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Windows.Data;
 
-[assembly: AssemblyTitle("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyDescription("Street Smart integration for ArcGIS Pro")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CycloMedia")]
-[assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2021")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
 
-[assembly: ComVisible(false)]
+namespace StreetSmartArcGISPro.AddIns.Views.Converters
+{
+  class ContainsSrItems : IValueConverter
+  {
+    #region IValueConverter Members
 
-[assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      List<SpatialReference> spatialReferences = value as List<SpatialReference>;
+      return spatialReferences?.Count >= 1;
+    }
 
-[assembly: AssemblyVersion("1.3.1.*")]
-[assembly: AssemblyFileVersion("1.3.1")]
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      return value;
+    }
+
+    #endregion
+  }
+}
