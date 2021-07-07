@@ -121,6 +121,7 @@
     </Compile>
     <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
     <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
+    <Compile Include="AddIns\Views\Converters\ContainsSrItems.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
     <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
@@ -206,6 +207,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Utilities\AvailableCoordSystems.cs" />
+    <Compile Include="Utilities\HSVToRGBColor.cs" />
     <Compile Include="Utilities\ImageExtensions.cs" />
     <Compile Include="Utilities\LocalizationProvider.cs" />
     <Compile Include="VectorLayers\EditTools.cs" />
