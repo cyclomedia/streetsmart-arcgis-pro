@@ -90,7 +90,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       {
         List<int> result = new List<int>();
 
-        for (int i = 5; i <= 100; i += 5)
+        for (int i = 5; i <= 150; i += 5)
         {
           result.Add(i);
         }
