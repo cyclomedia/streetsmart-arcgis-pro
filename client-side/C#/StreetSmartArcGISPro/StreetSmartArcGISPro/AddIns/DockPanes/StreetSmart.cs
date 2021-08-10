@@ -392,27 +392,42 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void InitializeApi()
     {
       string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
-      IAPISettings settings = CefSettingsFactory.Create(cachePath);
-      settings.Locale = _languageSettings.Locale;
-      settings.SetDefaultBrowserSubprocessPath();
-      StreetSmartAPIFactory.Initialize(settings, true);
+      try
+      {
+        IAPISettings settings = CefSettingsFactory.Create(cachePath);
+        settings.Locale = _languageSettings.Locale;
+        settings.SetDefaultBrowserSubprocessPath();
+        StreetSmartAPIFactory.Initialize(settings, true);
+      }
+      catch(Exception e)
+      {
+        return;
+      }
     }
 
     private void Initialize()
     {
       if (_login.Credentials)
       {
-        Api = _configuration.UseDefaultStreetSmartUrl
-          ? StreetSmartAPIFactory.Create()
-          : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
-            ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
-            : null;
-
-        if (Api != null)
+        try
         {
-          Api.APIReady += ApiReady;
-          Api.ViewerAdded += ViewerAdded;
-          Api.ViewerRemoved += ViewerRemoved;
+          Api = _configuration.UseDefaultStreetSmartUrl
+            ? StreetSmartAPIFactory.Create()
+            : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
+              ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
+              : null;
+
+
+          if (Api != null)
+          {
+            Api.APIReady += ApiReady;
+            Api.ViewerAdded += ViewerAdded;
+            Api.ViewerRemoved += ViewerRemoved;
+          }
+        }
+        catch(Exception e)
+        {
+          return;
         }
       }
       else

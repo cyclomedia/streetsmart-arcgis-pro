@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
@@ -699,6 +700,40 @@ namespace StreetSmartArcGISPro.VectorLayers
         geometry = await ToRealSpatialReference(geometry, measurement);
         EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
 
+        double measurementX = 0;
+        double measurementY = 0;
+        double measurementZ = 0;
+
+        var serializer = new JavaScriptSerializer();
+        var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
+
+        try
+        {
+          measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["X"];
+          measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Y"];
+          measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Z"];
+        }
+        catch (Exception)
+        {
+          try
+          {
+            measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["X"];
+            measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Y"];
+            measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Z"];
+          }
+          catch (Exception)
+          {
+            try
+            {
+              measurementX = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["X"];
+              measurementY = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Y"];
+              measurementZ = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Z"];
+            }
+            catch (Exception)
+            { }
+          }
+        }
+
         if (!(editingFeatureTemplate?.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
         {
           editOperation.Create(Layer, geometry);
@@ -714,6 +749,26 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
 
           toAddFields.Add("Shape", geometry);
+
+          foreach (var value in Layer.GetFieldDescriptions())
+          {
+            switch(value.Name)
+            {
+              case "x":
+                toAddFields["x"] = measurementX;
+                break;
+              case "y":
+                toAddFields["y"] = measurementY;
+                break;
+              case "z":
+                toAddFields["z"] = measurementZ;
+                break;
+              case "ZGeom":
+                toAddFields["ZGeom"] = measurementZ;
+                break;
+            }
+          }          
+
           editOperation.Create(Layer, toAddFields);
           await editOperation.ExecuteAsync();
         }
