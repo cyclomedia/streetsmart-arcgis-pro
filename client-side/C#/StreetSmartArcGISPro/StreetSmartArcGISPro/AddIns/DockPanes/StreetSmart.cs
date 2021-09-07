@@ -797,6 +797,25 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           IFeatureCollection geoJson = vectorLayer.GeoJson;
           IStyledLayerDescriptor sld = vectorLayer.Sld;
 
+          // Feature property escape character sanitation.
+          foreach (var feature in geoJson.Features)
+          {
+            for (int i = 0; i < feature.Properties.Count; i++)
+            {
+              try
+              {
+                if(feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
+                {
+                  feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
+                }
+              }
+              catch(Exception e)
+              {
+                return;
+              }
+            }
+          }
+
           IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
           overlay = await Api.AddOverlay(overlay);
           StoredLayer layer = _storedLayerList.GetLayer(layerName);
