@@ -950,7 +950,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           LookAt = null;
         }
 
-        await MoveToLocationAsync(panoramaViewer);
+        try
+        {
+          await MoveToLocationAsync(panoramaViewer);
+        }
+        catch(Exception e) { }
 
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;

@@ -914,16 +914,21 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           _selection = selection.Value;
           contains = true;
-          await GenerateJsonAsync(mapView);
 
-          if (_vectorLayerList.EditTool != EditTools.SketchPointTool)
+          try
           {
-            await ReloadSelectionAsync();
+            await GenerateJsonAsync(mapView);
+
+            if (_vectorLayerList.EditTool != EditTools.SketchPointTool)
+            {
+              await ReloadSelectionAsync();
+            }
+            else
+            {
+              _updateMeasurements = true;
+            }
           }
-          else
-          {
-            _updateMeasurements = true;
-          }
+          catch(Exception) { }
         }
       }
 
