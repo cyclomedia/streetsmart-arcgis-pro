@@ -392,27 +392,42 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void InitializeApi()
     {
       string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
-      IAPISettings settings = CefSettingsFactory.Create(cachePath);
-      settings.Locale = _languageSettings.Locale;
-      settings.SetDefaultBrowserSubprocessPath();
-      StreetSmartAPIFactory.Initialize(settings, true);
+      try
+      {
+        IAPISettings settings = CefSettingsFactory.Create(cachePath);
+        settings.Locale = _languageSettings.Locale;
+        settings.SetDefaultBrowserSubprocessPath();
+        StreetSmartAPIFactory.Initialize(settings, true);
+      }
+      catch(Exception e)
+      {
+        return;
+      }
     }
 
     private void Initialize()
     {
       if (_login.Credentials)
       {
-        Api = _configuration.UseDefaultStreetSmartUrl
-          ? StreetSmartAPIFactory.Create()
-          : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
-            ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
-            : null;
-
-        if (Api != null)
+        try
         {
-          Api.APIReady += ApiReady;
-          Api.ViewerAdded += ViewerAdded;
-          Api.ViewerRemoved += ViewerRemoved;
+          Api = _configuration.UseDefaultStreetSmartUrl
+            ? StreetSmartAPIFactory.Create()
+            : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
+              ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
+              : null;
+
+
+          if (Api != null)
+          {
+            Api.APIReady += ApiReady;
+            Api.ViewerAdded += ViewerAdded;
+            Api.ViewerRemoved += ViewerRemoved;
+          }
+        }
+        catch(Exception e)
+        {
+          return;
         }
       }
       else
@@ -765,27 +780,49 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
         string srsName = cyclSpatRel?.SRSName;
 
-        string layerName = vectorLayer.Name;
-        IFeatureCollection geoJson = vectorLayer.GeoJson;
-        IStyledLayerDescriptor sld = vectorLayer.Sld;
-
         if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
         {
-          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD);
+          string layerName = vectorLayer.Name;
+          bool visible = _storedLayerList.GetVisibility(layerName);
+
+          if (visible)
+          {
+            vectorLayer.GeoJsonToNew();
+          }
+          else
+          {
+            await vectorLayer.GeoJsonToOld();
+          }
+
+          IFeatureCollection geoJson = vectorLayer.GeoJson;
+          IStyledLayerDescriptor sld = vectorLayer.Sld;
+
+          // Feature property escape character sanitation.
+          foreach (var feature in geoJson.Features)
+          {
+            for (int i = 0; i < feature.Properties.Count; i++)
+            {
+              try
+              {
+                if(feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
+                {
+                  feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
+                }
+              }
+              catch(Exception e)
+              {
+                return;
+              }
+            }
+          }
+
+          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
           overlay = await Api.AddOverlay(overlay);
-          IList<IViewer> viewers = await Api.GetViewers();
           StoredLayer layer = _storedLayerList.GetLayer(layerName);
 
           if (layer == null)
           {
             _storedLayerList.Update(layerName, false);
-          }
-
-          foreach (IViewer viewer in viewers)
-          {
-            overlay.Visible = !_storedLayerList.GetVisibility(layerName);
-            IPanoramaViewer panoramaViewer = viewer as IPanoramaViewer;
-            panoramaViewer?.ToggleOverlay(overlay);
           }
 
           vectorLayer.Overlay = overlay;
@@ -913,7 +950,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           LookAt = null;
         }
 
-        await MoveToLocationAsync(panoramaViewer);
+        try
+        {
+          await MoveToLocationAsync(panoramaViewer);
+        }
+        catch(Exception e) { }
 
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;
@@ -948,11 +989,16 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
+    private async void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
     {
       ILayerInfo layerInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
       _storedLayerList.Update(vectorLayer?.Name ?? layerInfo.LayerId, layerInfo.Visible);
+
+      if (vectorLayer != null)
+      {
+        await UpdateVectorLayer(vectorLayer);
+      }
     }
 
     private void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
@@ -1218,17 +1264,29 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (args.PropertyName)
           {
             case "GeoJson":
-              if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
-              {
-                _vectorLayerInChange.Add(vectorLayer);
-                await RemoveVectorLayerAsync(vectorLayer);
-                await AddVectorLayerAsync(vectorLayer);
-                _vectorLayerInChange.Remove(vectorLayer);
-              }
-
+              await UpdateVectorLayer(vectorLayer);
               break;
           }
         }
+      }
+    }
+
+    private async Task UpdateVectorLayer(VectorLayer vectorLayer)
+    {
+      if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
+      {
+        _vectorLayerInChange.Add(vectorLayer);
+
+        try
+        {
+          await RemoveVectorLayerAsync(vectorLayer);
+          await AddVectorLayerAsync(vectorLayer);
+        }
+        catch (Exception)
+        {
+        }
+
+        _vectorLayerInChange.Remove(vectorLayer);
       }
     }
 

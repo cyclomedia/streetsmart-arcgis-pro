@@ -16,25 +16,28 @@
  * License along with this library.
  */
 
-namespace StreetSmartArcGISPro.AddIns.Views
-{
-  /// <summary>
-  /// Interaction logic for streetSmartApi.xaml
-  /// </summary>
-  public partial class StreetSmartApi
-  {
-    #region Constructor
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Windows.Data;
 
-    public StreetSmartApi()
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
+
+namespace StreetSmartArcGISPro.AddIns.Views.Converters
+{
+  class ContainsSrItems : IValueConverter
+  {
+    #region IValueConverter Members
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      try
-      {
-        InitializeComponent();
-      }
-      catch(System.Exception e)
-      { 
-        return;
-      }
+      List<SpatialReference> spatialReferences = value as List<SpatialReference>;
+      return spatialReferences?.Count >= 1;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+      return value;
     }
 
     #endregion

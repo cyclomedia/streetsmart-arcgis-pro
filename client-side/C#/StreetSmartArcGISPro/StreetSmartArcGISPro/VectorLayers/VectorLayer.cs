@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
@@ -43,7 +44,8 @@ using StreetSmart.Common.Interfaces.SLD;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
-
+using StreetSmartArcGISPro.Utilities;
+using ColorConverter = StreetSmartArcGISPro.Utilities.ColorConverter;
 using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
@@ -69,6 +71,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     private SubscriptionToken _rowDeleted;
     private SubscriptionToken _rowCreated;
 
+    private IFeatureCollection _geoJsonOld;
     private IFeatureCollection _geoJson;
     private IList<long> _selection;
     private bool _updateMeasurements;
@@ -83,6 +86,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Layer = layer;
       Overlay = null;
       _selection = null;
+      _geoJsonOld = null;
       _updateMeasurements = false;
 
       StreetSmartModule streetSmart = StreetSmartModule.Current;
@@ -119,6 +123,24 @@ namespace StreetSmartArcGISPro.VectorLayers
     #endregion
 
     #region Functions
+
+    public async Task GeoJsonToOld()
+    {
+      await QueuedTask.Run(() =>
+      {
+        _geoJsonOld = GeoJson;
+        SpatialReference layerSpatRef = Layer?.GetSpatialReference();
+        GeoJson = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
+      });
+    }
+
+    public void GeoJsonToNew()
+    {
+      if (_geoJsonOld != null)
+      {
+        GeoJson = _geoJsonOld;
+      }
+    }
 
     public async Task<bool> InitializeEventsAsync()
     {
@@ -208,8 +230,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 try
                 {
-                  ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
-                  copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
+                  if (layerSpatRef != null)
+                  {
+                    ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
+                    copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
+                  }
                 }
                 catch (Exception)
                 {
@@ -534,11 +559,31 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private Color CimColorToWinColor(CIMColor cimColor)
     {
-      double[] colorValues = cimColor?.Values;
-      int red = colorValues != null && colorValues.Length >= 1 ? (int) colorValues[0] : 255;
-      int green = colorValues != null && colorValues.Length >= 2 ? (int) colorValues[1] : 255;
-      int blue = colorValues != null && colorValues.Length >= 3 ? (int) colorValues[2] : 255;
-      int alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
+      int red, green, blue, alpha;
+
+      if (cimColor is CIMHSVColor)
+      {
+        double[] colorValues = cimColor?.Values;
+        double h = colorValues != null && colorValues.Length >= 1 ? colorValues[0] : 0.0;
+        double s = colorValues != null && colorValues.Length >= 2 ? colorValues[1] : 0.0;
+        double v = colorValues != null && colorValues.Length >= 3 ? colorValues[2] : 0.0;
+        alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
+
+        Hsv data = new Hsv(h, s, v);
+        Rgb value = ColorConverter.HsvToRgb(data);
+        red = value.R;
+        green = value.G;
+        blue = value.B;
+      }
+      else
+      {
+        double[] colorValues = cimColor?.Values;
+        red = colorValues != null && colorValues.Length >= 1 ? (int) colorValues[0] : 255;
+        green = colorValues != null && colorValues.Length >= 2 ? (int) colorValues[1] : 255;
+        blue = colorValues != null && colorValues.Length >= 3 ? (int) colorValues[2] : 255;
+        alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
+      }
+
       return Color.FromArgb(alpha, red, green, blue);
     }
 
@@ -655,6 +700,40 @@ namespace StreetSmartArcGISPro.VectorLayers
         geometry = await ToRealSpatialReference(geometry, measurement);
         EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
 
+        double measurementX = 0;
+        double measurementY = 0;
+        double measurementZ = 0;
+
+        var serializer = new JavaScriptSerializer();
+        var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
+
+        try
+        {
+          measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["X"];
+          measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Y"];
+          measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Z"];
+        }
+        catch (Exception)
+        {
+          try
+          {
+            measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["X"];
+            measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Y"];
+            measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Z"];
+          }
+          catch (Exception)
+          {
+            try
+            {
+              measurementX = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["X"];
+              measurementY = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Y"];
+              measurementZ = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Z"];
+            }
+            catch (Exception)
+            { }
+          }
+        }
+
         if (!(editingFeatureTemplate?.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
         {
           editOperation.Create(Layer, geometry);
@@ -670,6 +749,26 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
 
           toAddFields.Add("Shape", geometry);
+
+          foreach (var value in Layer.GetFieldDescriptions())
+          {
+            switch(value.Name)
+            {
+              case "x":
+                toAddFields["x"] = measurementX;
+                break;
+              case "y":
+                toAddFields["y"] = measurementY;
+                break;
+              case "z":
+                toAddFields["z"] = measurementZ;
+                break;
+              case "ZGeom":
+                toAddFields["ZGeom"] = measurementZ;
+                break;
+            }
+          }          
+
           editOperation.Create(Layer, toAddFields);
           await editOperation.ExecuteAsync();
         }
@@ -738,7 +837,11 @@ namespace StreetSmartArcGISPro.VectorLayers
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
                     IJson json = JsonFactory.Create(properties);
-                    panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+
+                    if (Overlay != null)
+                    {
+                      panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                    }
                   }
                 }
               }
@@ -811,16 +914,21 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           _selection = selection.Value;
           contains = true;
-          await GenerateJsonAsync(mapView);
 
-          if (_vectorLayerList.EditTool != EditTools.SketchPointTool)
+          try
           {
-            await ReloadSelectionAsync();
+            await GenerateJsonAsync(mapView);
+
+            if (_vectorLayerList.EditTool != EditTools.SketchPointTool)
+            {
+              await ReloadSelectionAsync();
+            }
+            else
+            {
+              _updateMeasurements = true;
+            }
           }
-          else
-          {
-            _updateMeasurements = true;
-          }
+          catch(Exception) { }
         }
       }
 

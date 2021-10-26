@@ -327,12 +327,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (geometry != null)
       {
         double zScale = 1.0;
+        double modScale = 1.0;
 
         await QueuedTask.Run(() =>
         {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
           zScale = 1 / conversionFactor;
+          double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
+          modScale = 1 / modifierFactor;
         });
 
         result = new List<MapPoint>();
@@ -345,7 +348,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             {
               if (geometry is MapPoint mapPoint)
               {
-                result.Add(await AddZOffsetAsync(mapPoint, zScale));
+                result.Add(await AddZOffsetAsync(mapPoint, zScale * modScale));
               }
             }
 
@@ -362,7 +365,14 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 while (enumPoints.MoveNext())
                 {
                   MapPoint mapPointPart = enumPoints.Current;
-                  result.Add(await AddZOffsetAsync(mapPointPart, zScale));
+                  if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
+                  {
+                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
+                  }
+                  else
+                  {
+                    result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale));
+                  }
                 }
               }
             }
