@@ -363,6 +363,45 @@
     <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.dll">
       <Link>Install\Newtonsoft.Json.dll</Link>
     </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Core.Runtime.dll">
+      <Link>Install\CefSharp.Core.Runtime.dll</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Core.Runtime.xml">
+      <Link>Install\CefSharp.Core.Runtime.xml</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Core.xml">
+      <Link>Install\CefSharp.Core.xml</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Wpf.xml">
+      <Link>Install\CefSharp.Wpf.xml</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.xml">
+      <Link>Install\CefSharp.xml</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\LICENSE.txt">
+      <Link>Install\LICENSE.txt</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.xml">
+      <Link>Install\Newtonsoft.Json.xml</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\README.txt">
+      <Link>Install\README.txt</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\ReleaseNotes.txt">
+      <Link>Install\ReleaseNotes.txt</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\StreetSmart.Wpf.dll">
+      <Link>Install\StreetSmart.Wpf.dll</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\StreetSmart.Wpf.xml">
+      <Link>Install\StreetSmart.Wpf.xml</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\vk_swiftshader.dll">
+      <Link>Install\vk_swiftshader.dll</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\vulkan-1.dll">
+      <Link>Install\vulkan-1.dll</Link>
+    </AddInContent>
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
@@ -375,29 +414,11 @@
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
   </ItemGroup>
   <ItemGroup>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef.pak">
-      <Link>Install\cef.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_100_percent.pak">
-      <Link>Install\cef_100_percent.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_200_percent.pak">
-      <Link>Install\cef_200_percent.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_extensions.pak">
-      <Link>Install\cef_extensions.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\devtools_resources.pak">
-      <Link>Install\devtools_resources.pak</Link>
-    </AddInContent>
     <AddInContent Include="..\..\Libs\StreetSmart\icudtl.dat">
       <Link>Install\icudtl.dat</Link>
     </AddInContent>
     <AddInContent Include="..\..\Libs\StreetSmart\locales\en-US.pak">
       <Link>Install\locales\en-US.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\natives_blob.bin">
-      <Link>Install\natives_blob.bin</Link>
     </AddInContent>
     <AddInContent Include="..\..\Libs\StreetSmart\snapshot_blob.bin">
       <Link>Install\snapshot_blob.bin</Link>
@@ -571,6 +592,20 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="..\..\Libs\StreetSmart\chrome_100_percent.pak">
+      <Link>Install\chrome_100_percent.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\chrome_200_percent.pak">
+      <Link>Install\chrome_200_percent.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\resources.pak">
+      <Link>Install\resources.pak</Link>
+    </AddInContent>
+    <AddInContent Include="..\..\Libs\StreetSmart\vk_swiftshader_icd.json">
+      <Link>Install\vk_swiftshader_icd.json</Link>
+    </AddInContent>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
