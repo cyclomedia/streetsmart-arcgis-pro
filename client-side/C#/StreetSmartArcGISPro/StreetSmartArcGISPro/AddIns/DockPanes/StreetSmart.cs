@@ -1001,11 +1001,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
+    private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
     {
+      string id = await(sender as IPanoramaViewer).GetId();
       IFeatureInfo featureInfo = args.Value;
       VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId, MapView);
-      layer?.SelectFeature(featureInfo.FeatureProperties, MapView);
+      layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
     }
 
     private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)

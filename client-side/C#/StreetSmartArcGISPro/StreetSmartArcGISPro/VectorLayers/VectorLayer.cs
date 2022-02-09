@@ -76,6 +76,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     private IList<long> _selection;
     private bool _updateMeasurements;
 
+    private string _clickedViewerId;
+
     #endregion
 
     #region Constructor
@@ -605,10 +607,12 @@ namespace StreetSmartArcGISPro.VectorLayers
       return hasZ ? CoordinateFactory.Create(point.X, point.Y, z) : CoordinateFactory.Create(point.X, point.Y);
     }
 
-    public async void SelectFeature(IJson properties, MapView mapView)
+    public async void SelectFeature(IJson properties, MapView mapView, string id)
     {
       await QueuedTask.Run(() =>
       {
+        _clickedViewerId = id;
+
         using (FeatureClass featureClass = Layer.GetFeatureClass())
         {
           FeatureClassDefinition definition = featureClass?.GetDefinition();
@@ -830,16 +834,19 @@ namespace StreetSmartArcGISPro.VectorLayers
             {
               while (rowCursor?.MoveNext() ?? false)
               {
+
                 IList<IViewer> viewers = await _measurementList.Api.GetViewers();
 
                 foreach (IViewer viewer in viewers)
                 {
+                  string id = await viewer.GetId();
+                  
                   if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
                     IJson json = JsonFactory.Create(properties);
                     //GC: Added counter to make object info only show the first selection
-                    if (Overlay != null && counter == 0)
+                    if (Overlay != null && id == _clickedViewerId && counter == 0)
                     {
                       panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
                       counter += 1;
