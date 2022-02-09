@@ -816,6 +816,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task ReloadSelectionAsync()
     {
+      int counter = 0;
       if (Layer.SelectionCount >= 1 && _measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
       {
         await QueuedTask.Run(async () =>
@@ -837,10 +838,11 @@ namespace StreetSmartArcGISPro.VectorLayers
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
                     IJson json = JsonFactory.Create(properties);
-
-                    if (Overlay != null)
+                    //GC: Added counter to make object info only show the first selection
+                    if (Overlay != null && counter == 0)
                     {
                       panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                      counter += 1;
                     }
                   }
                 }
