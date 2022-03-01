@@ -76,6 +76,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     private IList<long> _selection;
     private bool _updateMeasurements;
 
+    private string _clickedViewerId;
+
     #endregion
 
     #region Constructor
@@ -119,6 +121,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     public string Name => Layer?.Name ?? string.Empty;
 
     public bool IsVisible => Layer != null && Layer.IsVisible;
+    //GC: Adding global counter variable to make sure that object infos are not bein overwritten
+    public static int Counter = 0;
 
     #endregion
 
@@ -605,10 +609,12 @@ namespace StreetSmartArcGISPro.VectorLayers
       return hasZ ? CoordinateFactory.Create(point.X, point.Y, z) : CoordinateFactory.Create(point.X, point.Y);
     }
 
-    public async void SelectFeature(IJson properties, MapView mapView)
+    public async void SelectFeature(IJson properties, MapView mapView, string id)
     {
       await QueuedTask.Run(() =>
       {
+        _clickedViewerId = id;
+
         using (FeatureClass featureClass = Layer.GetFeatureClass())
         {
           FeatureClassDefinition definition = featureClass?.GetDefinition();
@@ -816,6 +822,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task ReloadSelectionAsync()
     {
+      //private static int counter = 0;
       if (Layer.SelectionCount >= 1 && _measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
       {
         await QueuedTask.Run(async () =>
@@ -829,18 +836,22 @@ namespace StreetSmartArcGISPro.VectorLayers
             {
               while (rowCursor?.MoveNext() ?? false)
               {
+
                 IList<IViewer> viewers = await _measurementList.Api.GetViewers();
 
                 foreach (IViewer viewer in viewers)
                 {
+                  string id = await viewer.GetId();
+                  
                   if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
                     IJson json = JsonFactory.Create(properties);
-
-                    if (Overlay != null)
+                    //GC: Added counter to make object info only show the first selection
+                    if (Overlay != null && id == _clickedViewerId && Counter == 0)
                     {
                       panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                      Counter += 1;
                     }
                   }
                 }

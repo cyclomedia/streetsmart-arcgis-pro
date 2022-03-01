@@ -101,7 +101,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="StreetSmart.Wpf, Version=21.1.0.0, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\streetsmart-dotnet\DemoAPI\Demo.WPF.v73\x64\StreetSmart.Wpf.dll</HintPath>
+      <HintPath>..\..\Libs\StreetSmart\StreetSmart.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
