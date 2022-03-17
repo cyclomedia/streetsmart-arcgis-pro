@@ -187,6 +187,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         TOCSelectionChangedEvent.Subscribe(OnTocSelectionChanged);
         DrawStartedEvent.Subscribe(OnDrawStarted);
         DrawCompleteEvent.Subscribe(OnDrawCompleted);
+        ActiveTemplateChangedEvent.Subscribe(OnActiveTemplateChangedEvent);
         ActiveToolChangedEvent.Subscribe(OnActiveToolChangedEvent);
         EditCompletedEvent.Subscribe(OnEditCompleted);
       }
@@ -401,8 +402,12 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     protected async void OnActiveToolChangedEvent(ToolEventArgs args)
     {
+      var test = FrameworkApplication.ActiveTool;
+      //await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
       if (_currentToolId != args.CurrentID)
       {
+        //await FrameworkApplication.SetCurrentToolAsync("esri_editing_SketchPointTool");
+        //args.CurrentID == "esri_editing_SketchPointTool"
         _currentToolId = args.CurrentID;
 
         switch (_currentToolId)
@@ -448,6 +453,64 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           FrameworkApplication.State.Activate("streetSmartArcGISPro_measurementState");
         }
+      }
+    }
+
+    //GC: Added an additional function that fires every time a new template is selected to edit new features on the add-on
+    protected async void OnActiveTemplateChangedEvent(ActiveTemplateChangedEventArgs args)
+    {
+      //GC: Checks if the editing tool was turned off before changing templates
+      var active = FrameworkApplication.ActiveTool;
+      if(active == null)
+      {
+        //force the tool to change manually then go back and turn on the sketch tool
+        await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
+        await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+      }
+
+      switch (args.IncomingTemplate.DefaultToolID)
+      {
+        case "esri_editing_ModifyFeatureImpl":
+          EditTool = EditTools.ModifyFeatureImpl;
+          break;
+        case "esri_editing_ReshapeFeature":
+          EditTool = EditTools.ReshapeFeature;
+          break;
+        case "esri_editing_SketchLineTool":
+          EditTool = EditTools.SketchLineTool;
+          SketchFinished();
+          await StartSketchToolAsync(MapView.Active);
+          break;
+        case "esri_editing_SketchPolygonTool":
+          EditTool = EditTools.SketchPolygonTool;
+          SketchFinished();
+          await StartSketchToolAsync(MapView.Active);
+          break;
+        case "esri_editing_SketchPointTool":
+          //await FrameworkApplication.SetCurrentToolAsync("esri_editing_SketchPointTool")
+          EditTool = EditTools.SketchPointTool;
+          SketchFinished();
+          await StartSketchToolAsync(MapView.Active);
+          break;
+        default:
+          EditTool = EditTools.NoEditTool;
+          SketchFinished();
+
+          if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
+          {
+            _measurementList.Api.StopMeasurementMode();
+          }
+
+          break;
+      }
+
+      if (EditTool == EditTools.NoEditTool)
+      {
+        FrameworkApplication.State.Deactivate("streetSmartArcGISPro_measurementState");
+      }
+      else
+      {
+        FrameworkApplication.State.Activate("streetSmartArcGISPro_measurementState");
       }
     }
 
@@ -586,6 +649,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         LayersRemovedEvent.Unsubscribe(OnLayersRemoved);
         MapMemberPropertiesChangedEvent.Unsubscribe(OnMapMemberPropertiesChanged);
         TOCSelectionChangedEvent.Unsubscribe(OnTocSelectionChanged);
+        ActiveTemplateChangedEvent.Unsubscribe(OnActiveTemplateChangedEvent);
         ActiveToolChangedEvent.Unsubscribe(OnActiveToolChangedEvent);
         EditCompletedEvent.Unsubscribe(OnEditCompleted);
         DrawCompleteEvent.Unsubscribe(OnDrawCompleted);
