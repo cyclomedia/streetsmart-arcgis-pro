@@ -402,7 +402,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     protected async void OnActiveToolChangedEvent(ToolEventArgs args)
     {
-      var test = FrameworkApplication.ActiveTool;
       if (_currentToolId != args.CurrentID)
       {
         _currentToolId = args.CurrentID;
