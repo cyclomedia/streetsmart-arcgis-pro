@@ -500,6 +500,64 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
     }
 
+    //GC: Added an additional function that fires every time a new template is selected to edit new features on the add-on
+    protected async void OnActiveTemplateChangedEvent(ActiveTemplateChangedEventArgs args)
+    {
+      //GC: Checks if the editing tool was turned off before changing templates
+      var active = FrameworkApplication.ActiveTool;
+      if(active == null)
+      {
+        //force the tool to change manually then go back and turn on the sketch tool
+        await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
+        await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+      }
+
+      switch (args.IncomingTemplate.DefaultToolID)
+      {
+        case "esri_editing_ModifyFeatureImpl":
+          EditTool = EditTools.ModifyFeatureImpl;
+          break;
+        case "esri_editing_ReshapeFeature":
+          EditTool = EditTools.ReshapeFeature;
+          break;
+        case "esri_editing_SketchLineTool":
+          EditTool = EditTools.SketchLineTool;
+          SketchFinished();
+          await StartSketchToolAsync(MapView.Active);
+          break;
+        case "esri_editing_SketchPolygonTool":
+          EditTool = EditTools.SketchPolygonTool;
+          SketchFinished();
+          await StartSketchToolAsync(MapView.Active);
+          break;
+        case "esri_editing_SketchPointTool":
+          //await FrameworkApplication.SetCurrentToolAsync("esri_editing_SketchPointTool")
+          EditTool = EditTools.SketchPointTool;
+          SketchFinished();
+          await StartSketchToolAsync(MapView.Active);
+          break;
+        default:
+          EditTool = EditTools.NoEditTool;
+          SketchFinished();
+
+          if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
+          {
+            _measurementList.Api.StopMeasurementMode();
+          }
+
+          break;
+      }
+
+      if (EditTool == EditTools.NoEditTool)
+      {
+        FrameworkApplication.State.Deactivate("streetSmartArcGISPro_measurementState");
+      }
+      else
+      {
+        FrameworkApplication.State.Activate("streetSmartArcGISPro_measurementState");
+      }
+    }
+
     protected async void OnDrawStarted(MapViewEventArgs args)
     {
       MapView mapView = args.MapView;
