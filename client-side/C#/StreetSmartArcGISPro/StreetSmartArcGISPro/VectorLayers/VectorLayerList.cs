@@ -403,11 +403,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     protected async void OnActiveToolChangedEvent(ToolEventArgs args)
     {
       var test = FrameworkApplication.ActiveTool;
-      //await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
       if (_currentToolId != args.CurrentID)
       {
-        //await FrameworkApplication.SetCurrentToolAsync("esri_editing_SketchPointTool");
-        //args.CurrentID == "esri_editing_SketchPointTool"
         _currentToolId = args.CurrentID;
 
         switch (_currentToolId)
