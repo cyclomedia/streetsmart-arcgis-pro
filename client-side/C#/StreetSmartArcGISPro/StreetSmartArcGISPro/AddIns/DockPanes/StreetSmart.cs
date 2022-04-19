@@ -114,6 +114,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private SpatialReference _lastSpatialReference;
     private VectorLayerList _vectorLayerList;
 
+    //GC: adding global variable that shows if the map was changed to restart the API or not
+    public static bool _restart = false;
     #endregion
 
     #region Constructor
@@ -715,7 +717,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               {
                 foreach (var vectorLayer in _vectorLayerList[_mapView])
                 {
-                   vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+                  vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
                 }
               }
             }
@@ -726,7 +728,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
             else
             {
+              //GC: This is where the API is restarted after a new map is opened
               await OpenImageAsync();
+              if (_restart == true)
+              {
+                _restart = false;
+                await RestartStreetSmart(false);
+              }
             }
 
             break;
@@ -758,11 +766,18 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       if (_vectorLayerList.ContainsKey(MapView))
       {
+        //GC: create new list to keep track if duplicates are being added to the map
+        List<String> vectors = new List<String>();
         // ReSharper disable once ForCanBeConvertedToForeach
         for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
         {
           VectorLayer vectorLayer = _vectorLayerList[MapView][i];
-          await UpdateVectorLayerAsync(vectorLayer);
+          if (!vectors.Contains(vectorLayer.Name))
+          {
+            vectors.Add(vectorLayer.Name);
+            await UpdateVectorLayerAsync(vectorLayer);
+          }
+          //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
         }
       }
     }
@@ -916,8 +931,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
     {
       IViewer cyclViewer = args.Value;
-
-      if (cyclViewer is IPanoramaViewer panoramaViewer)
+      //GC: added an extra condition in order for the viewing cone to only be created once
+      if (cyclViewer is IPanoramaViewer panoramaViewer && _restart == false)
       {
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
@@ -1296,6 +1311,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (args.MapPane.MapView == MapView)
       {
         await CloseViewersAsync();
+        _restart = true;
       }
     }
 

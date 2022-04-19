@@ -634,7 +634,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point.X, point.Y, z, spatialReference);
             }
 
-            await thisView.SetCurrentSketchAsync(geometry);
+            await thisView.SetCurrentSketchAsync(geometry); //this is where the point on the map dissappears
           }
         });
       }

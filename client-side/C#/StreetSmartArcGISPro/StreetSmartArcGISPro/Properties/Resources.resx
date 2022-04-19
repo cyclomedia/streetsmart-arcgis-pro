@@ -215,7 +215,7 @@
     <value>Password</value>
   </data>
   <data name="LoginSuccessfully" xml:space="preserve">
-    <value>Login Successfully</value>
+    <value>Login Successful</value>
   </data>
   <data name="LoginUsername" xml:space="preserve">
     <value>Username</value>
@@ -236,7 +236,7 @@
     <value>Measuring supported</value>
   </data>
   <data name="SettingsOverlayDrawDistance" xml:space="preserve">
-    <value>Overlay draw distance</value>
+    <value>Overlay draw distance (meters)</value>
   </data>
   <data name="SettingsRecordingLayer" xml:space="preserve">
     <value>Recording layer</value>

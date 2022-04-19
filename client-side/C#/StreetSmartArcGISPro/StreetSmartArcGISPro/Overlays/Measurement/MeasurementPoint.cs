@@ -277,7 +277,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
             MapView thisView = MapView.Active;
-            Geometry geometry = await thisView.GetCurrentSketchAsync();
+            Geometry geometry = await thisView.GetCurrentSketchAsync(); //this is where the point on the map dissappears
             Updated = true;
 
             if (geometry != null)
