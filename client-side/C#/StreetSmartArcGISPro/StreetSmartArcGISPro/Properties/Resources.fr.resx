@@ -232,7 +232,7 @@ Type de produit:</value>
     <value>Général</value>
   </data>
   <data name="SettingsOverlayDrawDistance" xml:space="preserve">
-    <value>Superposition distance de tirage</value>
+    <value>Superposition distance de tirage (mètres)</value>
   </data>
   <data name="SettingsRecordingLayer" xml:space="preserve">
     <value>Calque enregistrement</value>

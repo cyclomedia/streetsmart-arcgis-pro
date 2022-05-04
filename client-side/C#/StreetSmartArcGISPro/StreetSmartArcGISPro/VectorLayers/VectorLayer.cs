@@ -121,7 +121,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     public string Name => Layer?.Name ?? string.Empty;
 
     public bool IsVisible => Layer != null && Layer.IsVisible;
-    //GC: Adding global counter variable to make sure that object infos are not bein overwritten
+    //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;
 
     #endregion
@@ -252,7 +252,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               using (IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator())
               {
                 IList<Segment> segments = new List<Segment>();
-
+                //this is where the pop-up keeps minimizing
                 while (polygonSegments.MoveNext())
                 {
                   ReadOnlySegmentCollection polygonSegment = polygonSegments.Current;
@@ -277,7 +277,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           foreach (var geom in geometries)
           {
             Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
-
+            //this is where the new pop-up attributes are made
             using (FeatureClass featureClass = Layer?.GetFeatureClass())
             {
               SpatialQueryFilter spatialFilter = new SpatialQueryFilter
@@ -421,7 +421,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                       }
                     }
                   }
-
+                  //this is where the point is made
                   GeoJsonChanged = await CreateSld(featureCollection) || GeoJsonChanged;
                 }
               }
@@ -485,7 +485,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
-
+        
         return !(oldSld?.Equals(Sld?.SLD) ?? false);
       });
     }
@@ -655,7 +655,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                       }
                     }
                   }
-
+                  //this is the function that generates the pop-ups
                   mapView.SelectFeatures(selectGeometry);
                 }
               }
@@ -822,7 +822,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task ReloadSelectionAsync()
     {
-      //private static int counter = 0;
       if (Layer.SelectionCount >= 1 && _measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
       {
         await QueuedTask.Run(async () =>
@@ -869,6 +868,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (_measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
         {
           // todo: add functionality for deselect a feature in a layer
+          var test = 0;
         }
       }
     }
@@ -928,6 +928,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           try
           {
+            //this is the function that updates the pop-ups or closes it
             await GenerateJsonAsync(mapView);
 
             if (_vectorLayerList.EditTool != EditTools.SketchPointTool)

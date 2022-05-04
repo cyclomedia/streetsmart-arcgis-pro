@@ -341,7 +341,7 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Login Successfully.
+        ///   Looks up a localized string similar to Login Successful.
         /// </summary>
         internal static string LoginSuccessfully {
             get {
@@ -449,7 +449,7 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Overlay draw distance.
+        ///   Looks up a localized string similar to Overlay draw distance (meters).
         /// </summary>
         internal static string SettingsOverlayDrawDistance {
             get {

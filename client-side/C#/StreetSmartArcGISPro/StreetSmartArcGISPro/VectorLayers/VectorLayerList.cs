@@ -28,6 +28,7 @@ using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -206,7 +207,9 @@ namespace StreetSmartArcGISPro.VectorLayers
       Layer layer = editingFeatureTemplate?.Layer;
       VectorLayer vectorLayer = GetLayer(layer, mapView);
 
-      if (vectorLayer != null)
+      var window = FrameworkApplication.ActiveWindow;
+      //GC: Added an additional requirement for measurement tool to activate
+      if (vectorLayer != null && ((PlugIn)window).Caption == "Create Features")
       {
         await StartMeasurementSketchAsync(vectorLayer, mapView);
       }
@@ -463,50 +466,52 @@ namespace StreetSmartArcGISPro.VectorLayers
         await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
         await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
       }
-
-      switch (args.IncomingTemplate.DefaultToolID)
+      
+      if (args.IncomingTemplate != null && args.IncomingTemplate.IsActive != false)
       {
-        case "esri_editing_ModifyFeatureImpl":
-          EditTool = EditTools.ModifyFeatureImpl;
-          break;
-        case "esri_editing_ReshapeFeature":
-          EditTool = EditTools.ReshapeFeature;
-          break;
-        case "esri_editing_SketchLineTool":
-          EditTool = EditTools.SketchLineTool;
-          SketchFinished();
-          await StartSketchToolAsync(MapView.Active);
-          break;
-        case "esri_editing_SketchPolygonTool":
-          EditTool = EditTools.SketchPolygonTool;
-          SketchFinished();
-          await StartSketchToolAsync(MapView.Active);
-          break;
-        case "esri_editing_SketchPointTool":
-          //await FrameworkApplication.SetCurrentToolAsync("esri_editing_SketchPointTool")
-          EditTool = EditTools.SketchPointTool;
-          SketchFinished();
-          await StartSketchToolAsync(MapView.Active);
-          break;
-        default:
-          EditTool = EditTools.NoEditTool;
-          SketchFinished();
+        switch (args.IncomingTemplate.DefaultToolID)
+        {
+          case "esri_editing_ModifyFeatureImpl":
+            EditTool = EditTools.ModifyFeatureImpl;
+            break;
+          case "esri_editing_ReshapeFeature":
+            EditTool = EditTools.ReshapeFeature;
+            break;
+          case "esri_editing_SketchLineTool":
+            EditTool = EditTools.SketchLineTool;
+            SketchFinished();
+            await StartSketchToolAsync(MapView.Active);
+            break;
+          case "esri_editing_SketchPolygonTool":
+            EditTool = EditTools.SketchPolygonTool;
+            SketchFinished();
+            await StartSketchToolAsync(MapView.Active);
+            break;
+          case "esri_editing_SketchPointTool":
+            EditTool = EditTools.SketchPointTool;
+            SketchFinished();
+            await StartSketchToolAsync(MapView.Active);
+            break;
+          default:
+            EditTool = EditTools.NoEditTool;
+            SketchFinished();
 
-          if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
-          {
-            _measurementList.Api.StopMeasurementMode();
-          }
+            if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
+            {
+              _measurementList.Api.StopMeasurementMode();
+            }
 
-          break;
-      }
+            break;
+        }
 
-      if (EditTool == EditTools.NoEditTool)
-      {
-        FrameworkApplication.State.Deactivate("streetSmartArcGISPro_measurementState");
-      }
-      else
-      {
-        FrameworkApplication.State.Activate("streetSmartArcGISPro_measurementState");
+        if (EditTool == EditTools.NoEditTool)
+        {
+          FrameworkApplication.State.Deactivate("streetSmartArcGISPro_measurementState");
+        }
+        else
+        {
+          FrameworkApplication.State.Activate("streetSmartArcGISPro_measurementState");
+        }
       }
     }
 
