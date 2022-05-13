@@ -142,7 +142,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       if (_geoJsonOld != null)
       {
-        GeoJson = _geoJsonOld;
+          // HBR: is not needed anymore
+//        GeoJson = _geoJsonOld;
       }
     }
 
