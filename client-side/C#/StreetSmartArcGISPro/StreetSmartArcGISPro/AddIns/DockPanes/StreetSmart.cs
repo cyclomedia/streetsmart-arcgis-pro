@@ -800,11 +800,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           string layerName = vectorLayer.Name;
           bool visible = _storedLayerList.GetVisibility(layerName);
 
-          if (visible)
-          {
-            vectorLayer.GeoJsonToNew();
-          }
-          else
+          if (!visible)
           {
             await vectorLayer.GeoJsonToOld();
           }
