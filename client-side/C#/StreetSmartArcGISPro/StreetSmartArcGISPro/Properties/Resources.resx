@@ -257,7 +257,7 @@
     <value>Street Smart</value>
   </data>
   <data name="RecordingLayerName" xml:space="preserve">
-    <value>Recordings</value>
+    <value>GeoCyclorama Recording Points</value>
   </data>
   <data name="RecordingLayerNoAuthorization" xml:space="preserve">
     <value>No Authorization</value>

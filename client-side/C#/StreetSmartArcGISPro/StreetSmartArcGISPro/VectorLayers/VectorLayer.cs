@@ -71,7 +71,6 @@ namespace StreetSmartArcGISPro.VectorLayers
     private SubscriptionToken _rowDeleted;
     private SubscriptionToken _rowCreated;
 
-    private IFeatureCollection _geoJsonOld;
     private IFeatureCollection _geoJson;
     private IList<long> _selection;
     private bool _updateMeasurements;
@@ -88,7 +87,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       Layer = layer;
       Overlay = null;
       _selection = null;
-      _geoJsonOld = null;
       _updateMeasurements = false;
 
       StreetSmartModule streetSmart = StreetSmartModule.Current;
@@ -132,18 +130,9 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       await QueuedTask.Run(() =>
       {
-        _geoJsonOld = GeoJson;
         SpatialReference layerSpatRef = Layer?.GetSpatialReference();
         GeoJson = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
       });
-    }
-
-    public void GeoJsonToNew()
-    {
-      if (_geoJsonOld != null)
-      {
-        GeoJson = _geoJsonOld;
-      }
     }
 
     public async Task<bool> InitializeEventsAsync()
