@@ -209,7 +209,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       var window = FrameworkApplication.ActiveWindow;
       //GC: Added an additional requirement for measurement tool to activate
-      if (vectorLayer != null && ((PlugIn)window).Caption == "Create Features")
+      if (vectorLayer != null && (((PlugIn)window).Caption == "Create Features" || ((PlugIn)window).Caption == "Créer des entités"))
       {
         await StartMeasurementSketchAsync(vectorLayer, mapView);
       }

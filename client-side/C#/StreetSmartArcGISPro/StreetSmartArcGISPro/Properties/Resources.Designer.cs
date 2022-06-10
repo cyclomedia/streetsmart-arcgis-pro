@@ -386,7 +386,7 @@ namespace StreetSmartArcGISPro.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Recordings.
+        ///   Looks up a localized string similar to GeoCyclorama Recording Points.
         /// </summary>
         internal static string RecordingLayerName {
             get {
