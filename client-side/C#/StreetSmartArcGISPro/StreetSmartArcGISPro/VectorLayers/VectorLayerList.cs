@@ -65,6 +65,9 @@ namespace StreetSmartArcGISPro.VectorLayers
     private bool _updateHeight;
     private bool _eventsInitialized;
 
+    //GC: adding global variable that check if the editing tool was closed or not
+    private static bool _closeMeasurement = false;
+
     #endregion
 
     #region Properties
@@ -439,9 +442,17 @@ namespace StreetSmartArcGISPro.VectorLayers
             //GC: Added new catch statements to fix the change location bug
             if (_currentToolId == "streetSmartArcGISPro_openImageTool" && (args.PreviousID == "esri_editing_SketchPointTool" || args.PreviousID == "esri_editing_SketchPolygonTool"
               || args.PreviousID == "esri_editing_SketchLineTool" || args.PreviousID == "esri_editing_ReshapeFeature" || args.PreviousID == "esri_editing_ModifyFeatureImpl"))
+            {
+              _closeMeasurement = true;
               await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
-            if (_currentToolId == "esri_mapping_exploreTool" && args.PreviousID == "streetSmartArcGISPro_openImageTool")
+            }
+              
+            if (_currentToolId == "esri_mapping_exploreTool" && args.PreviousID == "streetSmartArcGISPro_openImageTool" && _closeMeasurement == true)
+            {
+              _closeMeasurement = false;
               await FrameworkApplication.SetCurrentToolAsync("streetSmartArcGISPro_openImageTool");
+            }
+              
 
             if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
             {
