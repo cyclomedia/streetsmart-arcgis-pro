@@ -562,6 +562,12 @@ namespace StreetSmartArcGISPro.VectorLayers
         double v = colorValues != null && colorValues.Length >= 3 ? colorValues[2] : 0.0;
         alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
 
+        //GC: added catch statements that turns the s and v values to percentages because it was causing incorrect overlay colors
+        if (s > 1)
+          s = s / 100;
+        if (v > 1)
+          v = v / 100;
+
         Hsv data = new Hsv(h, s, v);
         Rgb value = ColorConverter.HsvToRgb(data);
         red = value.R;
