@@ -116,6 +116,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     //GC: adding global variable that shows if the map was changed to restart the API or not
     public static bool _restart = false;
+
+    //GC: global variable that checks if the selected overlay is invisible or not
+    private static bool _invisible = false;
     #endregion
 
     #region Constructor
@@ -977,7 +980,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (layer.Name)
           {
             case "addressLayer":
-              panoramaViewer.ToggleAddressesVisible(layer.Visible);
+              //GC: Remove Address Layer if cyclorama not in the Netherlands
+              if(this._epsgCode == "EPSG:28992")
+                panoramaViewer.ToggleAddressesVisible(layer.Visible);
+              else
+                await Api.RemoveOverlay("addressLayer");
               break;
             case "surfaceCursorLayer":
               panoramaViewer.Toggle3DCursor(layer.Visible);
@@ -1008,7 +1015,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (vectorLayer != null)
       {
-        await UpdateVectorLayer(vectorLayer);
+        await UpdateVectorLayer(vectorLayer, sender);
       }
     }
 
@@ -1276,14 +1283,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (args.PropertyName)
           {
             case "GeoJson":
-              await UpdateVectorLayer(vectorLayer);
+              await UpdateVectorLayer(vectorLayer, sender);
               break;
           }
         }
       }
     }
 
-    private async Task UpdateVectorLayer(VectorLayer vectorLayer)
+    private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender)
     {
       if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
       {
@@ -1291,8 +1298,37 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         try
         {
-          await RemoveVectorLayerAsync(vectorLayer);
-          await AddVectorLayerAsync(vectorLayer);
+          //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
+          if (sender is IPanoramaViewer panoramaViewer)
+          {
+            //checks if the overlay is invisible to call the vector layer reset function
+            if (_invisible)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+              _invisible = false;
+            }
+            else
+            {
+              //calls the toggle overlay function to turn on/off the overlay which should show up without having to move first
+              panoramaViewer.ToggleOverlay(vectorLayer.Overlay);
+            }
+
+          }
+          else
+          {
+            //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
+            if (vectorLayer.Overlay == null || vectorLayer.Overlay.Visible)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+            }
+            else
+            {
+              //turns the global variable ON if the selected overlay is invisible
+              _invisible = true;
+            }
+          }
         }
         catch (Exception)
         {
