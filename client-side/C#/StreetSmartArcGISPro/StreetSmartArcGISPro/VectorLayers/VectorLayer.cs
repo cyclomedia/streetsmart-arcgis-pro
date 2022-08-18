@@ -365,6 +365,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                             {
                               while (polyLineSegments.MoveNext())
                               {
+                                //polyLineSegments.MoveNext();
                                 ReadOnlySegmentCollection segments = polyLineSegments.Current;
                                 IList<ICoordinate> coordinates = new List<ICoordinate>();
 
@@ -385,7 +386,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                                     }
                                   }
                                 }
-
+                                //GC: polyline issue; coordinates needs to have a count of 10 or less to draw correctly...
                                 featureCollection.Features.Add(GeoJsonFactory.CreateLineFeature(coordinates));
                               }
                             }
@@ -453,17 +454,38 @@ namespace StreetSmartArcGISPro.VectorLayers
 
                 foreach (var uniqueValue in uniqueClass.Values)
                 {
+                  //string value = "";
+                  //string field = "";
+                  //for (int i = 0; i < fields.Length; i++)
+                  //{
+                  //  if (i == 0)
+                  //  {
+                  //    value += uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
+                  //    field += fields[i];
+                  //  }
+                  //  else
+                  //  {
+                  //    value += ", " + (uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty);
+                  //    field += ", " + fields[i];
+                  //  }
+                  //}
+                  //filter = SLDFactory.CreateEqualIsFilter(field, value);
                   for (int i = 0; i < fields.Length; i++)
                   {
                     string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
                     filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
+
+                    CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                    ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                    IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                    SLDFactory.AddRuleToStyle(Sld, rule);
                   }
                 }
 
-                CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-                IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                SLDFactory.AddRuleToStyle(Sld, rule);
+                //CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                //ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                //IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                //SLDFactory.AddRuleToStyle(Sld, rule);
               }
             }
           }
