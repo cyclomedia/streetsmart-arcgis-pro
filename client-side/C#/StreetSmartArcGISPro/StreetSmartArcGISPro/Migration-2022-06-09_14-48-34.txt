@@ -1,0 +1,10 @@
+Migration Status Report
+  Migrate project: C:\Users\GiorgyCastaneda\Projects\streetsmart-arcgis-pro - 3.0\client-side\C#\StreetSmartArcGISPro\StreetSmartArcGISPro\StreetSmartArcGISPro.csproj
+  StreetSmartArcGISPro.csproj
+   project folder: 
+   C:\Users\GiorgyCastaneda\Projects\streetsmart-arcgis-pro - 3.0\client-side\C#\StreetSmartArcGISPro\StreetSmartArcGISPro\
+   C:\Users\GiorgyCastaneda\Projects\streetsmart-arcgis-pro - 3.0\client-side\C#\StreetSmartArcGISPro\StreetSmartArcGISPro\
+   language: CS
+   Warning: this project [C:\Users\GiorgyCastaneda\Projects\streetsmart-arcgis-pro - 3.0\client-side\C#\StreetSmartArcGISPro\StreetSmartArcGISPro\] contains References to 'ArcGIS.Core', but the HintPath tag is wrong or missing.  Use the 'Pro Fix References utility' before migrating this project.
+   project type: NonArcGIS
+   project has WPF: PresentationFramework
