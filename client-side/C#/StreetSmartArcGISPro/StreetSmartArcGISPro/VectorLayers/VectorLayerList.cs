@@ -21,12 +21,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using ArcGIS.Core;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Events;
+using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
@@ -250,7 +252,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 {
                   changesLine = true;
                   MapPoint srcLinePoint = await AddHeightToMapPointAsync(point, mapView);
-                  mapLinePoints.Add(MapPointBuilder.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
+                  mapLinePoints.Add(MapPointBuilderEx.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
                 }
                 else
                 {
@@ -262,7 +264,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
-                  polyline = PolylineBuilder.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+                  polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
                 });
 
                 await mapView.SetCurrentSketchAsync(polyline);
@@ -308,7 +310,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
-                  polygon = PolygonBuilder.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+                  polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
                 });
 
                 await mapView.SetCurrentSketchAsync(polygon);
@@ -335,7 +337,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         double centerX = (envelope.XMax - envelope.XMin)/2 + envelope.XMin;
         double centerY = (envelope.YMax - envelope.YMin)/2 + envelope.YMin;
         double centerZ = (envelope.ZMax - envelope.ZMin)/2 + envelope.ZMin;
-        MapPoint srcPoint = MapPointBuilder.CreateMapPoint(centerX, centerY, centerZ);
+        MapPoint srcPoint = MapPointBuilderEx.CreateMapPoint(centerX, centerY, centerZ);
         MapPoint dstPoint = await AddHeightToMapPointAsync(srcPoint, mapView);
         ElevationCapturing.ElevationConstantValue = dstPoint.Z;
       });
@@ -360,7 +362,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           if (height != null)
           {
-            dstPoint = MapPointBuilder.CreateMapPoint(dstPoint.X, dstPoint.Y, (double) height, dstSpatialReference);
+            dstPoint = MapPointBuilderEx.CreateMapPoint(dstPoint.X, dstPoint.Y, (double) height, dstSpatialReference);
             ProjectionTransformation srcProjection = ProjectionTransformation.Create(dstSpatialReference,
               srcSpatialReference);
             srcPoint = GeometryEngine.Instance.ProjectEx(dstPoint, srcProjection) as MapPoint;

@@ -387,10 +387,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private async Task<MapPoint> AddZOffsetAsync(MapPoint mapPoint, double zScale)
     {
       return await QueuedTask.Run(async () => mapPoint.HasZ
-        ? MapPointBuilder.CreateMapPoint(mapPoint.X, mapPoint.Y,
+        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y,
           (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0),
           mapPoint.SpatialReference)
-        : MapPointBuilder.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
+        : MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
     }
 
     public async Task UpdateMeasurementPointsAsync(MapView mapView, Geometry inGeometry)
@@ -612,7 +612,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               MapPoint point = mp.Point;
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
-              points.Add(MapPointBuilder.CreateMapPoint(point.X, point.Y, z));
+              points.Add(MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z));
             }
           }
 
@@ -620,18 +620,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             if (IsGeometryType(ArcGISGeometryType.Polygon))
             {
-              geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+              geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
             }
             else if (IsGeometryType(ArcGISGeometryType.Polyline))
             {
-              geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+              geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
             }
             else if (geometry is MapPoint mapPoint)
             {
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
-              geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point.X, point.Y, z, spatialReference);
+              geometry = point == null ? null : MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z, spatialReference);
             }
 
             await thisView.SetCurrentSketchAsync(geometry); //this is where the point on the map dissappears

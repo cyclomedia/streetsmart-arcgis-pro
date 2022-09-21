@@ -53,7 +53,7 @@ namespace StreetSmartArcGISPro.Overlays
 
         SpatialReference mapSpatialReference = map?.SpatialReference;
         SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
-        MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
+        MapPoint point = MapPointBuilderEx.CreateMapPoint(x, y, spatialReference);
         MapPoint mapPoint;
 
         if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)

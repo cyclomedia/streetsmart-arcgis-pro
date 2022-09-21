@@ -46,6 +46,7 @@ using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialRefe
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
+using ArcGIS.Core.Data.Exceptions;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
@@ -308,7 +309,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         string featureClassUrl = $@"{project.DefaultGeodatabasePath}\{fcName}";
         Uri uri = new Uri(featureClassUrl);
-        FeatureLayer result = LayerFactory.Instance.CreateFeatureLayer(uri, layerContainer);
+        //new 3.0 code
+        var layerParams = new FeatureLayerCreationParams(uri);
+        FeatureLayer result = LayerFactory.Instance.CreateLayer<FeatureLayer>(layerParams, layerContainer);
         result.SetName(Name);
         result.SetMinScale(MinimumScale);
         result.SetVisibility(true);
@@ -477,7 +480,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             double xMax = x + searchBox;
             double yMin = y - searchBox;
             double yMax = y + searchBox;
-            Envelope envelope = EnvelopeBuilder.CreateEnvelope(xMin, xMax, yMin, yMax);
+            Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, xMax, yMin, yMax);
 
             SpatialQueryFilter spatialFilter = new SpatialQueryFilter
             {
@@ -714,7 +717,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                         Dictionary<string, object> toAddFields = Recording.Fields.ToDictionary(fieldId => fieldId.Key,
                           fieldId => recording.FieldToItem(fieldId.Key));
 
-                        MapPoint newPoint = MapPointBuilder.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
+                        MapPoint newPoint = MapPointBuilderEx.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
                         toAddFields.Add(Recording.ShapeFieldName, newPoint);
                         editOperation.Create(Layer, toAddFields);
                       }

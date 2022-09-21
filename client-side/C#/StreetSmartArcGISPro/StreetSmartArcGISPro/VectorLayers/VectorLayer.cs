@@ -22,19 +22,21 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
+using System.Web;
+//using System.Web.Script.Serialization;
 
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Events;
 using ArcGIS.Core.Geometry;
+using ArcGIS.Core.Internal.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
+using Nancy.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -216,7 +218,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               double yMin = y - distance;
               double yMax = y + distance;
 
-              Envelope envelope = EnvelopeBuilder.CreateEnvelope(xMin, yMin, xMax, yMax, cyclSpatRef);
+              Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, yMin, xMax, yMax, cyclSpatRef);
               Envelope copyEnvelope = envelope;
 
               if (layerSpatRef?.Wkid != 0 && cyclSpatRef?.Wkid != 0)
@@ -235,7 +237,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
               }
 
-              Polygon copyPolygon = PolygonBuilder.CreatePolygon(copyEnvelope, layerSpatRef);
+              Polygon copyPolygon = PolygonBuilderEx.CreatePolygon(copyEnvelope, layerSpatRef);
               ReadOnlyPartCollection polygonParts = copyPolygon.Parts;
 
               using (IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator())
@@ -735,7 +737,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
         }
 
-        if (!(editingFeatureTemplate?.GetDefinition() is CIMFeatureTemplate definition) || definition.DefaultValues == null)
+        if (!(editingFeatureTemplate?.GetDefinition() is CIMRowTemplate definition) || definition.DefaultValues == null)
         {
           editOperation.Create(Layer, geometry);
           await editOperation.ExecuteAsync();
@@ -787,13 +789,13 @@ namespace StreetSmartArcGISPro.VectorLayers
         switch (geometryType)
         {
           case GeometryType.Polygon:
-            geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+            geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
             break;
           case GeometryType.Polyline:
-            geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+            geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
             break;
           case GeometryType.Point:
-            geometry = MapPointBuilder.CreateMapPoint(points[0], spatialReference);
+            geometry = MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
             break;
         }
       });
@@ -910,7 +912,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       MapView mapView = _vectorLayerList.GetMapViewFromMap(args.Map);
       _measurementList.ObjectId = null;
 
-      foreach (var selection in args.Selection)
+      foreach (var selection in args.Selection.ToDictionary())
       {
         MapMember mapMember = selection.Key;
         FeatureLayer layer = mapMember as FeatureLayer;

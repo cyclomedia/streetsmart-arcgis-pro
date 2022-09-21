@@ -45,7 +45,7 @@ using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmart.Common.Interfaces.SLD;
-
+using StreetSmart.WPF;
 using StreetSmartArcGISPro.AddIns.Views;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
@@ -183,8 +183,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           settings.PropertyChanged += OnSettingsPropertyChanged;
         }
       }
-
+	  
+	  //New API call
       InitializeApi();
+      WpfApi = new WpfApi();
+      WpfApi.PropertyChanged += OnApiAdded;
 
       MapClosedEvent.Subscribe(OnMapClosedEvent);
     }
@@ -194,6 +197,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     #region Properties
 
     public IStreetSmartAPI Api { get; private set; }
+
+    public WpfApi WpfApi { get; set; }
 
     public string Location
     {
@@ -363,6 +368,25 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Functions
 
+    private void OnApiAdded(object sender, PropertyChangedEventArgs args)
+    {
+      if (args != null)
+      {
+        if (args.PropertyName == "Api")
+        {
+          Api = WpfApi.Api;
+          Api.APIReady += ApiReady;
+          Api.ViewerAdded += ViewerAdded;
+          Api.ViewerRemoved += ViewerRemoved;
+
+          if (!string.IsNullOrEmpty(_configuration.StreetSmartLocation))
+          {
+            Api.RestartStreetSmart(_configuration.StreetSmartLocation);
+          }
+        }
+      }
+    }
+
     private async Task CloseViewersAsync()
     {
       if (!_inClose)
@@ -417,18 +441,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         try
         {
-          Api = _configuration.UseDefaultStreetSmartUrl
-            ? StreetSmartAPIFactory.Create()
-            : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
-              ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
-              : null;
-
-
-          if (Api != null)
+          if (Api != null && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
           {
-            Api.APIReady += ApiReady;
-            Api.ViewerAdded += ViewerAdded;
-            Api.ViewerRemoved += ViewerRemoved;
+            Api.RestartStreetSmart(_configuration.StreetSmartLocation);
           }
         }
         catch(Exception e)
@@ -552,7 +567,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         await QueuedTask.Run(() =>
         {
-          point = MapPointBuilder.CreateMapPoint(x, y, _lastSpatialReference);
+          point = MapPointBuilderEx.CreateMapPoint(x, y, _lastSpatialReference);
         });
 
         if (_lastSpatialReference != null && thisSpatialReference.Wkid != _lastSpatialReference.Wkid)
@@ -1344,6 +1359,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         _vectorLayerInChange.Remove(vectorLayer);
       }else if(switcher == true && vectorLayer.Overlay != null)
+      {
+        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
+        this._panorama.ToggleOverlay(vectorLayer.Overlay);
+      }
+      else if (switcher == true && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
         this._panorama.ToggleOverlay(vectorLayer.Overlay);

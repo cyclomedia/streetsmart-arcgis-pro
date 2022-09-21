@@ -28,6 +28,6 @@
 -->
   <Grid>
     <streetSmart:StreetSmartGUI
-      Api="{Binding Api, Mode=OneWay}" />
+      WpfApi="{Binding WpfApi, Mode=OneWay}" />
   </Grid>
 </UserControl>

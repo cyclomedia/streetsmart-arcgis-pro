@@ -55,7 +55,7 @@ namespace StreetSmartArcGISPro.Utilities
 
       await QueuedTask.Run(() =>
       {
-        MapPoint mapPoint = MapPointBuilder.CreateMapPoint(x, y, z, gsSpatialReference);
+        MapPoint mapPoint = MapPointBuilderEx.CreateMapPoint(x, y, z, gsSpatialReference);
 
         if (mapSpatialReference != null && gsSpatialReference != null &&
             gsSpatialReference.Wkid != mapSpatialReference.Wkid)

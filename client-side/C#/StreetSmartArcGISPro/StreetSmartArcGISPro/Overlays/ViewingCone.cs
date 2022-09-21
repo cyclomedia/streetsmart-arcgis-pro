@@ -123,7 +123,7 @@ namespace StreetSmartArcGISPro.Overlays
         {
           SpatialReference mapSpatialReference = mapView?.Map?.SpatialReference;
           SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
-          MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
+          MapPoint point = MapPointBuilderEx.CreateMapPoint(x, y, spatialReference);
 
           if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)
           {
@@ -210,7 +210,7 @@ namespace StreetSmartArcGISPro.Overlays
             polygonPointList.Add(point1);
             polygonPointList.Add(point2);
             polygonPointList.Add(_mapPoint);
-            Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
+            Polygon polygon = PolygonBuilderEx.CreatePolygon(polygonPointList);
 
             Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
             CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
