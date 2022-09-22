@@ -99,6 +99,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
                 FileName = fileName,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
+                UseShellExecute = true //new code added for .net 6 that allows pdf to open
               };
 
               _process = Process.Start(processInfo);

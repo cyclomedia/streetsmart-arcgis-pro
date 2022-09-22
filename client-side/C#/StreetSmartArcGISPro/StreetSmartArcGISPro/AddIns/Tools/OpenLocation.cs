@@ -85,7 +85,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           var pointMapMin = activeView.ScreenToMap(pointScreenMin);
           var pointMapMax = activeView.ScreenToMap(pointScreenMax);
 
-          Envelope envelope = EnvelopeBuilder.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
+          Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
           var features = activeView.GetFeatures(envelope);
 
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
@@ -129,9 +129,10 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
             else
             {
-              foreach (var feature in features)
+              //3.0 code change
+              foreach (var feature in features.ToDictionary())
               {
-                Layer layer = feature.Key;
+                Layer layer = (Layer)feature.Key;
                 CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
 
                 if (cycloMediaLayer != null)

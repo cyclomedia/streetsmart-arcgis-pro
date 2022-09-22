@@ -113,13 +113,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private CrossCheck _crossCheck;
     private SpatialReference _lastSpatialReference;
     private VectorLayerList _vectorLayerList;
-
-    //GC: adding global variable that shows if the map was changed to restart the API or not
+	
+	//GC: adding global variable that shows if the map was changed to restart the API or not
     public static bool _restart = false;
-    //GC: global variable that checks if the selected overlay is invisible or not
-    private static bool _invisible = false;
-    //GC: global variable that adds the panorama viewer to 'this' value
-    private IPanoramaViewer _panorama;
+
     #endregion
 
     #region Constructor
@@ -183,8 +180,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           settings.PropertyChanged += OnSettingsPropertyChanged;
         }
       }
-	  
-	  //New API call
+	//New API call
       InitializeApi();
       WpfApi = new WpfApi();
       WpfApi.PropertyChanged += OnApiAdded;
@@ -736,7 +732,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               {
                 foreach (var vectorLayer in _vectorLayerList[_mapView])
                 {
-                  vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+                   vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
                 }
               }
             }
@@ -747,13 +743,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
             else
             {
-              //GC: This is where the API is restarted after a new map is opened
               await OpenImageAsync();
-              if (_restart == true)
-              {
-                _restart = false;
-                await RestartStreetSmart(false);
-              }
             }
 
             break;
@@ -785,18 +775,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       if (_vectorLayerList.ContainsKey(MapView))
       {
-        //GC: create new list to keep track if duplicates are being added to the map
-        List<String> vectors = new List<String>();
         // ReSharper disable once ForCanBeConvertedToForeach
         for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
         {
           VectorLayer vectorLayer = _vectorLayerList[MapView][i];
-          if (!vectors.Contains(vectorLayer.Name))
-          {
-            vectors.Add(vectorLayer.Name);
-            await UpdateVectorLayerAsync(vectorLayer);
-          }
-          //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
+          await UpdateVectorLayerAsync(vectorLayer);
         }
       }
     }
@@ -815,10 +798,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         string srsName = cyclSpatRel?.SRSName;
 
         if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
-        {//GC: create transparency value here
+        {
           string layerName = vectorLayer.Name;
           bool visible = _storedLayerList.GetVisibility(layerName);
-          double transparency = vectorLayer.Layer.Transparency;
 
           if (!visible)
           {
@@ -947,13 +929,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
     {
       IViewer cyclViewer = args.Value;
-      //GC: added an extra condition in order for the viewing cone to only be created once
-      if (cyclViewer is IPanoramaViewer panoramaViewer && _restart == false)
+
+      if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
-        this._panorama = panoramaViewer;
 
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
@@ -998,11 +979,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (layer.Name)
           {
             case "addressLayer":
-              //GC: Remove Address Layer if cyclorama not in the Netherlands
-              if(this._epsgCode == "EPSG:28992")
-                panoramaViewer.ToggleAddressesVisible(layer.Visible);
-              else
-                await Api.RemoveOverlay("addressLayer");
+              panoramaViewer.ToggleAddressesVisible(layer.Visible);
               break;
             case "surfaceCursorLayer":
               panoramaViewer.Toggle3DCursor(layer.Visible);
@@ -1033,7 +1010,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (vectorLayer != null)
       {
-        await UpdateVectorLayer(vectorLayer, sender, false);
+        await UpdateVectorLayer(vectorLayer);
       }
     }
 
@@ -1293,7 +1270,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     }
 
     private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {//GC: this is where map layer transparency and layer list toggle can be found
+    {
       if (GlobeSpotterConfiguration.AddLayerWfs)
       {
         if (sender is VectorLayer vectorLayer)
@@ -1301,19 +1278,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (args.PropertyName)
           {
             case "GeoJson":
-              await UpdateVectorLayer(vectorLayer, sender, false);
+              await UpdateVectorLayer(vectorLayer);
               break;
-          }
-          //GC: checks if the layer list visibilty is different from the overlay list visibilty
-          if(vectorLayer.Overlay != null && (vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
-          {
-            await UpdateVectorLayer(vectorLayer, sender, true);
           }
         }
       }
     }
 
-    private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender, bool switcher)
+    private async Task UpdateVectorLayer(VectorLayer vectorLayer)
     {
       if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
       {
@@ -1321,52 +1293,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         try
         {
-          //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
-          if (sender is IPanoramaViewer panoramaViewer)
-          {
-            //checks if the overlay is invisible to call the vector layer reset function
-            if (_invisible)
-            {
-              await RemoveVectorLayerAsync(vectorLayer);
-              await AddVectorLayerAsync(vectorLayer);
-              _invisible = false;
-            }
-            else
-            {
-              //calls the toggle overlay function to turn on/off the overlay which should show up without having to move first
-              panoramaViewer.ToggleOverlay(vectorLayer.Overlay);
-            }
-
-          }
-          else
-          {
-            //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
-            if (vectorLayer.Overlay == null || vectorLayer.Overlay.Visible)
-            {
-              await RemoveVectorLayerAsync(vectorLayer);
-              await AddVectorLayerAsync(vectorLayer);
-            }
-            else
-            {
-              //turns the global variable ON if the selected overlay is invisible
-              _invisible = true;
-            }
-          }
+          await RemoveVectorLayerAsync(vectorLayer);
+          await AddVectorLayerAsync(vectorLayer);
         }
         catch (Exception)
         {
         }
 
         _vectorLayerInChange.Remove(vectorLayer);
-      }else if(switcher == true && vectorLayer.Overlay != null)
-      {
-        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        this._panorama.ToggleOverlay(vectorLayer.Overlay);
-      }
-      else if (switcher == true && vectorLayer.Overlay != null)
-      {
-        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        this._panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 
@@ -1375,7 +1309,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (args.MapPane.MapView == MapView)
       {
         await CloseViewersAsync();
-        _restart = true;
       }
     }
 

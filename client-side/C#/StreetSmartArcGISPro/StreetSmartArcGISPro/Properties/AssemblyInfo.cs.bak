@@ -1,14 +1,4 @@
-﻿<UserControl x:Class="StreetSmartArcGISPro.AddIns.Views.StreetSmartApi"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:streetSmart="clr-namespace:StreetSmart.Wpf;assembly=StreetSmart.Wpf"
-             mc:Ignorable="d"
-             d:DesignHeight="300"
-             d:DesignWidth="300">
-<!--
- /*
+﻿/*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
@@ -25,9 +15,22 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
--->
-  <Grid>
-    <streetSmart:StreetSmartGUI
-      WpfApi="{Binding WpfApi, Mode=OneWay}" />
-  </Grid>
-</UserControl>
+
+using System.Reflection;
+using System.Runtime.InteropServices;
+
+[assembly: AssemblyTitle("Street Smart for ArcGIS Pro")]
+[assembly: AssemblyDescription("Street Smart integration for ArcGIS Pro")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("CycloMedia")]
+[assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
+[assembly: AssemblyCopyright("Copyright © CycloMedia 2021")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+[assembly: ComVisible(false)]
+
+[assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
+
+[assembly: AssemblyVersion("1.3.3")]
+[assembly: AssemblyFileVersion("1.3.3")]

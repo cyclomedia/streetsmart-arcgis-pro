@@ -344,7 +344,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       await QueuedTask.Run(async() =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
-                        Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
+                        Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
                         await mapView.SetCurrentSketchAsync(line);
                       });
                     }
@@ -414,7 +414,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       await QueuedTask.Run(async() =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
-                        Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
+                        Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
                         await mapView.SetCurrentSketchAsync(polygon);
                       });
                     }
