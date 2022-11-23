@@ -52,36 +52,36 @@
     <PackageReference Include="System.Windows.Extensions" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
-	  <Reference Include="ArcGIS.Core">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Core">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Editing">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Extensions">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Framework">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Mapping">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Catalog">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Catalog\ArcGIS.Desktop.Catalog.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Layouts">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Layout\ArcGIS.Desktop.Layouts.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
+    <Reference Include="ArcGIS.Core">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Core">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Editing">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Extensions">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Framework">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Mapping">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
+	<Reference Include="ArcGIS.Desktop.Catalog">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Catalog\ArcGIS.Desktop.Catalog.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
+	<Reference Include="ArcGIS.Desktop.Layouts">
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Layout\ArcGIS.Desktop.Layouts.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
 	<Reference Include="ESRI.ArcGIS.ItemIndex">
 	<HintPath>C:\Program Files\ArcGIS\Pro\bin\ESRI.ArcGIS.ItemIndex.dll</HintPath>
 	  <Private>False</Private>
@@ -102,7 +102,8 @@
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.CleanAddIn" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.ConvertToRelativePath" />
   -->
-	<Import Project="C:\Users\admin\AppData\Local\Programs\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('C:\Users\admin\AppData\Local\Programs\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets') &#xD;&#xA;		  AND !Exists('Esri.ArcGISPro.Extensions.targets')" /><!--
+  <Import Project="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets') &#xD;&#xA;		  AND !Exists('Esri.ArcGISPro.Extensions.targets')" />
+  <!--
   <Target Name="BeforeBuild">
 	 <Error Text="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets not found." Condition="!Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
   </Target>
