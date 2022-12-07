@@ -903,7 +903,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         _options = _configuration.UseDefaultConfigurationUrl
           ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
             addressSettings, element)
-          : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
+          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
             _configuration.ConfigurationUrlLocation, addressSettings, element);
 
         try
