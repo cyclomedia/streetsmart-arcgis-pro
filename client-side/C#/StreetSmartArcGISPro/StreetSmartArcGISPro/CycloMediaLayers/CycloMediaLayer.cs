@@ -231,6 +231,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       int wkid = spatialReference?.Wkid ?? 0;
       string mapName = map?.Name;
       mapName = mapName?.Replace(" ", "_") ?? string.Empty;
+      mapName = mapName?.Replace(".", "_") ?? string.Empty; //GC: fixed crash when map name used a period
       string fcNameWkid = string.Concat(FcName, mapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);

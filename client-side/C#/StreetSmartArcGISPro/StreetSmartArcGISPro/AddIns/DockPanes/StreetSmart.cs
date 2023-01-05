@@ -1268,7 +1268,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     }
 
     private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {
+    {//GC: this is where layer list toggle can be found
       if (GlobeSpotterConfiguration.AddLayerWfs)
       {
         if (sender is VectorLayer vectorLayer)
@@ -1278,6 +1278,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             case "GeoJson":
               await UpdateVectorLayer(vectorLayer);
               break;
+          }
+          //GC: checks if the layer list visibilty is different from the overlay list visibilty
+          //fixes Pro crashing bug because the overlay was null
+          if (vectorLayer.Overlay != null)
+          {
+            if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+            {
+              await UpdateVectorLayer(vectorLayer, sender, true);
+            }
           }
         }
       }
@@ -1291,8 +1300,42 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         try
         {
-          await RemoveVectorLayerAsync(vectorLayer);
-          await AddVectorLayerAsync(vectorLayer);
+          //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
+          if (sender is IPanoramaViewer panoramaViewer)
+          {
+            //checks if the overlay is invisible to call the vector layer reset function
+            if (_invisible)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+              _invisible = false;
+            }
+            else
+            {
+              //calls the toggle overlay function to turn on/off the overlay which should show up without having to move first
+              panoramaViewer.ToggleOverlay(vectorLayer.Overlay);
+            }
+
+          }
+          else
+          {
+            //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
+            //another crash fix because the overlay was undefined
+            if (vectorLayer.Overlay == null)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+            }else if(vectorLayer.Overlay.Visible)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+            }
+            else
+            {
+              //turns the global variable ON if the selected overlay is invisible
+              _invisible = true;
+            }
+          }
         }
         catch (Exception)
         {

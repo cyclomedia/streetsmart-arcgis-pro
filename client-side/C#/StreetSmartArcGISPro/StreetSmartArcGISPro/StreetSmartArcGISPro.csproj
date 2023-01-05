@@ -99,7 +99,7 @@
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="StreetSmart.Wpf, Version=21.1.0.0, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
+    <Reference Include="StreetSmart.Wpf, Version=22.8.2, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libs\StreetSmart\StreetSmart.Wpf.dll</HintPath>
       <Private>True</Private>
@@ -363,6 +363,7 @@
     <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.dll">
       <Link>Install\Newtonsoft.Json.dll</Link>
     </AddInContent>
+    <Content Include="ReleaseNotes.txt" />
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
@@ -571,6 +572,10 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
