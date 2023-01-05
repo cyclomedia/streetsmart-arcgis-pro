@@ -116,6 +116,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     //GC: adding global variable that shows if the map was changed to restart the API or not
     public static bool _restart = false;
+    //GC: global variable that checks if the selected overlay is invisible or not
+    private static bool _invisible = false;
+    //GC: global variable that adds the panorama viewer to 'this' value
+    private IPanoramaViewer _panorama;
     #endregion
 
     #region Constructor
@@ -796,9 +800,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         string srsName = cyclSpatRel?.SRSName;
 
         if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
-        {
+        {//GC: create transparency value here
           string layerName = vectorLayer.Name;
           bool visible = _storedLayerList.GetVisibility(layerName);
+          double transparency = vectorLayer.Layer.Transparency;
 
           if (!visible)
           {
@@ -933,6 +938,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
+        this._panorama = panoramaViewer;
 
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
@@ -977,7 +983,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (layer.Name)
           {
             case "addressLayer":
-              panoramaViewer.ToggleAddressesVisible(layer.Visible);
+              //GC: Remove Address Layer if cyclorama not in the Netherlands
+              if(this._epsgCode == "EPSG:28992")
+                panoramaViewer.ToggleAddressesVisible(layer.Visible);
+              else
+                await Api.RemoveOverlay("addressLayer");
               break;
             case "surfaceCursorLayer":
               panoramaViewer.Toggle3DCursor(layer.Visible);
@@ -1008,7 +1018,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (vectorLayer != null)
       {
-        await UpdateVectorLayer(vectorLayer);
+        await UpdateVectorLayer(vectorLayer, sender, false);
       }
     }
 
@@ -1276,7 +1286,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           switch (args.PropertyName)
           {
             case "GeoJson":
-              await UpdateVectorLayer(vectorLayer);
+              await UpdateVectorLayer(vectorLayer, sender, false);
               break;
           }
           //GC: checks if the layer list visibilty is different from the overlay list visibilty
@@ -1292,7 +1302,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private async Task UpdateVectorLayer(VectorLayer vectorLayer)
+    private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender, bool switcher)
     {
       if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
       {
@@ -1342,6 +1352,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
 
         _vectorLayerInChange.Remove(vectorLayer);
+      }else if(switcher == true && vectorLayer.Overlay != null)
+      {
+        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
+        this._panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 
