@@ -903,7 +903,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         _options = _configuration.UseDefaultConfigurationUrl
           ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
             addressSettings, element)
-          : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
+          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
             _configuration.ConfigurationUrlLocation, addressSettings, element);
 
         try
@@ -1305,6 +1305,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               break;
           }
           //GC: checks if the layer list visibilty is different from the overlay list visibilty
+          //fixed Pro crash bug because overlay was undefined
           if (vectorLayer.Overlay != null)
           {
             if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
