@@ -1305,9 +1305,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               break;
           }
           //GC: checks if the layer list visibilty is different from the overlay list visibilty
-          if(vectorLayer.Overlay != null && (vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+          if (vectorLayer.Overlay != null)
           {
-            await UpdateVectorLayer(vectorLayer, sender, true);
+            if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+            {
+              await UpdateVectorLayer(vectorLayer, sender, true);
+            }
           }
         }
       }
