@@ -1278,7 +1278,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     }
 
     private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {//GC: this is where map layer transparency and layer list toggle can be found
+    {//GC: this is where layer list toggle can be found
       if (GlobeSpotterConfiguration.AddLayerWfs)
       {
         if (sender is VectorLayer vectorLayer)
@@ -1290,9 +1290,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               break;
           }
           //GC: checks if the layer list visibilty is different from the overlay list visibilty
-          if(vectorLayer.Overlay != null && (vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+          //fixes Pro crashing bug because the overlay was null
+          if (vectorLayer.Overlay != null)
           {
-            await UpdateVectorLayer(vectorLayer, sender, true);
+            if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+            {
+              await UpdateVectorLayer(vectorLayer, sender, true);
+            }
           }
         }
       }
@@ -1326,7 +1330,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           else
           {
             //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
-            if (vectorLayer.Overlay == null || vectorLayer.Overlay.Visible)
+            //another crash fix because the overlay was undefined
+            if (vectorLayer.Overlay == null)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+            }else if(vectorLayer.Overlay.Visible)
             {
               await RemoveVectorLayerAsync(vectorLayer);
               await AddVectorLayerAsync(vectorLayer);
