@@ -38,6 +38,7 @@ using StreetSmartArcGISPro.VectorLayers;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using System.Diagnostics.Metrics;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -244,6 +245,107 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     #endregion
 
     #region streetSmart events
+    
+    public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
+    {
+
+    }
+
+    public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
+    {
+      foreach (IFeature feature in FeatureCollection.Features)
+      {
+        IGeometry geometry = feature.Geometry;
+        StreetSmartGeometryType geometryType = geometry.Type;
+        IStreetSmartAPI api = sender as IStreetSmartAPI;
+        Measurement measurement;
+
+        if (feature.Properties is IMeasurementProperties properties)
+        {
+          if (Count == 0)
+          {
+            measurement = new Measurement(properties, feature.Geometry, api)
+            {
+              VectorLayer = _lastVectorLayer
+            };
+
+            Add(properties.Id, measurement);
+            measurement.Open();
+
+            if (_lastSketch)
+            {
+              measurement.SetSketch();
+            }
+          }
+          else
+          {
+            measurement = this.ElementAt(0).Value;
+          }
+
+          MapView mapView = MapView.Active;
+          Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+
+          switch (geometryType)
+          {
+            case StreetSmartGeometryType.Point:
+              RemoveLineStringPoints(measurement);
+              RemovePolygonPoints(measurement);
+              await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+              await mapView.ClearSketchAsync();
+              measurement.Dispose();
+              break;
+            case StreetSmartGeometryType.LineString:
+              RemovePointPoints(measurement);
+              RemovePolygonPoints(measurement);
+              await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+              await mapView.ClearSketchAsync();
+
+              if (geometrySketch != null)
+              {
+                await QueuedTask.Run(async () =>
+                {
+                  List<MapPoint> points = new List<MapPoint>();
+                  Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+                  await mapView.SetCurrentSketchAsync(line);
+                });
+              }
+
+              measurement.Dispose();
+              break;
+          }
+        }
+      }
+
+      if (FeatureCollection.Type == FeatureType.Unknown)
+      {
+        if (Count == 1)
+        {
+          string currentTool = FrameworkApplication.CurrentTool;
+
+          switch (currentTool)
+          {
+            case "esri_editing_SketchLineTool":
+            case "esri_editing_SketchPolygonTool":
+            case "esri_editing_SketchPointTool":
+              await FrameworkApplication.SetCurrentToolAsync(string.Empty);
+              break;
+            case "esri_editing_ModifyFeatureImpl":
+              var geometry = await MapView.Active.GetCurrentSketchAsync();
+
+              if (geometry != null)
+              {
+                if (geometry.GeometryType == ArcGISGeometryType.Polygon ||
+                    geometry.GeometryType == ArcGISGeometryType.Polyline)
+                {
+                  await MapView.Active.ClearSketchAsync();
+                }
+              }
+
+              break;
+          }
+        }
+      }
+    }
 
     public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {

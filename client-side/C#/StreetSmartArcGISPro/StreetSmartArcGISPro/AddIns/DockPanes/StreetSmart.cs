@@ -912,6 +912,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           GlobeSpotterConfiguration.Load();
           _measurementList.Api = Api;
           Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
+          Api.MeasurementStarted += _measurementList.OnMeasurementStarted;
+          Api.MeasurementStopped += _measurementList.OnMeasurementStopped;
 
           _vectorLayerList.LayerAdded += OnAddVectorLayer;
           _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
