@@ -715,28 +715,28 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           try
           {
-            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["X"];
-            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Y"];
-            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Z"];
+            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
+            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
+            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
           }
           catch (Exception)
           {
             try
             {
-              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["X"];
-              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Y"];
-              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Z"];
+              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
+              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
+              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
             }
             catch (Exception)
             {
               try
               {
                 measurementX =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["X"];
+                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
                 measurementY =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Y"];
+                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
                 measurementZ =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Z"];
+                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
               }
               catch (Exception)
               {

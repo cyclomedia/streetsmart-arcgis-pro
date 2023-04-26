@@ -245,14 +245,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     #endregion
 
     #region streetSmart events
-    
+
     public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
     {
-
+      FeatureCollection = args.Value;
     }
 
     public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
     {
+      FeatureCollection = args.Value;
+
       foreach (IFeature feature in FeatureCollection.Features)
       {
         IGeometry geometry = feature.Geometry;
@@ -292,6 +294,24 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               RemovePolygonPoints(measurement);
               await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
               await mapView.ClearSketchAsync();
+              measurement.Dispose();
+              break;
+            case StreetSmartGeometryType.Polygon:
+              RemovePointPoints(measurement);
+              RemoveLineStringPoints(measurement);
+              await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+              await mapView.ClearSketchAsync();
+
+              if (geometrySketch != null)
+              {
+                await QueuedTask.Run(async () =>
+                {
+                  List<MapPoint> points = new List<MapPoint>();
+                  Polygon surface = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+                  await mapView.SetCurrentSketchAsync(surface);
+                });
+              }
+
               measurement.Dispose();
               break;
             case StreetSmartGeometryType.LineString:
@@ -544,8 +564,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       }
                       else if (polySrcCount > i && pylyDstCount <= i)
                       {
-                        measurement.RemovePoint(i - j);
-                        j++;
+                        /*measurement.RemovePoint(i - j); //this is where the number on the map gets removed
+                        j++;*/
+
+                        measurement.RemovePoint(i); //GC: fixed where the measurement points were not getting deleted correctly
 
                         if (measurement.Count > Math.Min(i, pylyDstCount - 1))
                         {

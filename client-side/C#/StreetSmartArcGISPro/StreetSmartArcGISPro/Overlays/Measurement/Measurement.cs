@@ -600,6 +600,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         await QueuedTask.Run(async () =>
         {
           ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
+          ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
+
+          //Client.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Record Inserted Successfully')", true);
 
           for (int i = 0; i < Count; i++)
           {
