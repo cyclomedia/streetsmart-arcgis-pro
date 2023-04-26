@@ -567,7 +567,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                         /*measurement.RemovePoint(i - j); //this is where the number on the map gets removed
                         j++;*/
 
-                        measurement.RemovePoint(i); //GC: fixed where the measurement points were not getting deleted correctly
+                        measurement.RemovePoint(i); //GC: fixed where polygon edit won't cancel correctly
 
                         if (measurement.Count > Math.Min(i, pylyDstCount - 1))
                         {
