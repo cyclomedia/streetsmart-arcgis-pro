@@ -914,6 +914,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
           Api.MeasurementStarted += _measurementList.OnMeasurementStarted;
           Api.MeasurementStopped += _measurementList.OnMeasurementStopped;
+          Api.MeasurementSaved += _measurementList.OnMeasurementSaved;
 
           _vectorLayerList.LayerAdded += OnAddVectorLayer;
           _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;

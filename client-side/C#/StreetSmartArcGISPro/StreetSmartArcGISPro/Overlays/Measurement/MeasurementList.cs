@@ -174,7 +174,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             measurement2.IsDisposed = false;
             FromMap = true;
 
-            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
+            //IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
+            //creates the save measurement button
+            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType, MeasureMethods.DepthMap, true);
             await Api.StartMeasurementMode(panoramaViewer, options);
           }
         }
@@ -251,7 +253,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       FeatureCollection = args.Value;
     }
 
-    public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
+    public async void OnMeasurementSaved(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
 
@@ -335,6 +337,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
         }
       }
+    }
+
+    public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
+    {
+      FeatureCollection = args.Value;
 
       if (FeatureCollection.Type == FeatureType.Unknown)
       {
@@ -498,7 +505,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     }
 
                     measurement.Geometry = geometry;
-                    await measurement.UpdateMap();
+                    //await measurement.UpdateMap();
+                    //GC: added task delay to allow the line feature to be completed 
+                    await Task.Delay(500).ContinueWith(_ =>
+                    {
+                      measurement.UpdateMap();
+                    });
                   }
                   else
                   {
@@ -567,6 +579,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                         /*measurement.RemovePoint(i - j); //this is where the number on the map gets removed
                         j++;*/
 
+                        //this is where the number on the map gets removed
                         measurement.RemovePoint(i); //GC: fixed where polygon edit won't cancel correctly
 
                         if (measurement.Count > Math.Min(i, pylyDstCount - 1))
@@ -577,7 +590,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     }
 
                     measurement.Geometry = geometry;
-                    await measurement.UpdateMap();
+                    //await measurement.UpdateMap();
+                    //GC: added task delay to allow the polygon feature to be completed 
+                    await Task.Delay(500).ContinueWith(_ =>
+                    {
+                      measurement.UpdateMap();
+                    });
                   }
                   else
                   {

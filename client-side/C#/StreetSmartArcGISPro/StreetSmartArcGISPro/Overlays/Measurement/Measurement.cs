@@ -41,6 +41,8 @@ using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
 using StreetSmartSpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using ArcGIS.Desktop.Core.Geoprocessing;
+using ArcGIS.Desktop.Framework.Dialogs;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -602,7 +604,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
           ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
 
-          //Client.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Record Inserted Successfully')", true);
+          if(spatialReference.Wkid != mapSpatialReference.Wkid)
+          {
+            string message = "The map SRS does not match with the cyclorama SRS so the point will not be created. Please match up the SRS and try again.";
+            string title = "Alert";
+            MessageBox.Show(message, title);
+            return;
+          }
 
           for (int i = 0; i < Count; i++)
           {
