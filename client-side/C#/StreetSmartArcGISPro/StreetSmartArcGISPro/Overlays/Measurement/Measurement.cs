@@ -604,7 +604,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
           ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
 
-          if(spatialReference.Wkid != mapSpatialReference.Wkid)
+          //GC: Added an alert message when SRS do not match up and creating features
+          if (spatialReference.Wkid != mapSpatialReference.Wkid)
           {
             string message = "The map SRS does not match with the cyclorama SRS so the point will not be created. Please match up the SRS and try again.";
             string title = "Alert";
