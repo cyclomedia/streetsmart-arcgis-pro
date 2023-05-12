@@ -330,11 +330,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         double zScale = 1.0;
         double modScale = 1.0;
+        var srs = geometry.SpatialReference;
 
         await QueuedTask.Run(() =>
         {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
+          if (srs?.ZUnit != spatialReference?.ZUnit)
+          {
+            conversionFactor = srs.ZUnit.ConversionFactor;
+          }
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           modScale = 1 / modifierFactor;
@@ -373,7 +378,14 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   }
                   else
                   {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale));
+                    if(mapPointPart.Z > 5)
+                    {
+                      result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale));
+                    }
+                    else
+                    {
+                      result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale * modScale));
+                    }
                   }
                 }
               }
