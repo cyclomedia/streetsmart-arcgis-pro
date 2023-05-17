@@ -378,14 +378,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   }
                   else
                   {
-                    if(mapPointPart.Z > 5)
-                    {
-                      result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale));
-                    }
-                    else
-                    {
-                      result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale * modScale));
-                    }
+                    result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale));
                   }
                 }
               }
@@ -615,6 +608,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
           ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
+          ArcGISSpatialReference srs = geometry.SpatialReference; //new spatial reference with the correct units
 
           //GC: Added an alert message when SRS do not match up and creating features
           if (spatialReference.Wkid != mapSpatialReference.Wkid)
@@ -644,18 +638,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             if (IsGeometryType(ArcGISGeometryType.Polygon))
             {
-              geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+              geometry = PolygonBuilderEx.CreatePolygon(points, srs);
             }
             else if (IsGeometryType(ArcGISGeometryType.Polyline))
             {
-              geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+              geometry = PolylineBuilderEx.CreatePolyline(points, srs);
             }
             else if (geometry is MapPoint mapPoint)
             {
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
-              geometry = point == null ? null : MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z, spatialReference);
+              geometry = point == null ? null : MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z, srs);
             }
 
             await thisView.SetCurrentSketchAsync(geometry); //this is where the point on the map dissappears
