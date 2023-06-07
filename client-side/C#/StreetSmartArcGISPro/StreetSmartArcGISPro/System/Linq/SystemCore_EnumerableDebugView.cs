@@ -16,21 +16,19 @@
  * License along with this library.
  */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+using ArcGIS.Core.Geometry;
 
-[assembly: AssemblyTitle("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyDescription("Street Smart integration for ArcGIS Pro")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CycloMedia")]
-[assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2022")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+namespace System.Linq
+{
+  internal class SystemCore_EnumerableDebugView<T>
+  {
+    private ReadOnlyPointCollection points;
 
-[assembly: ComVisible(false)]
+    public SystemCore_EnumerableDebugView(ReadOnlyPointCollection points)
+    {
+      this.points = points;
+    }
 
-[assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
-
-[assembly: AssemblyVersion("1.7.0")]
-[assembly: AssemblyFileVersion("1.7.0")]
+    public object Items { get; internal set; }
+  }
+}

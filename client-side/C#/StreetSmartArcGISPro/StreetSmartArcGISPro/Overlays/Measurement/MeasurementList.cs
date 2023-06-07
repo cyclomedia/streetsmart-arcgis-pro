@@ -26,6 +26,7 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Editing.Events;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -39,6 +40,8 @@ using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using System.Diagnostics.Metrics;
+using System.Collections;
+using ArcGIS.Desktop.Internal.Mapping;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -65,6 +68,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public EventWaitHandle InUpdateMeasurementMode { get; set; }
 
     public IFeatureCollection FeatureCollection { get; set; }
+    public int stop_count { get; private set; }
+    public bool start_check { get; private set; } = false;
 
     #endregion
 
@@ -251,6 +256,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
+      if(this.start_check == false)
+      {
+        this.start_check = true;
+      }
     }
 
     public async void OnMeasurementSaved(object sender, IEventArgs<IFeatureCollection> args)
@@ -342,6 +351,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
+      IStreetSmartAPI api = sender as IStreetSmartAPI;
+      /*object editor = new EditCompletingEventArgs;
+        editor.CancelEdit();*/
 
       if (FeatureCollection.Type == FeatureType.Unknown)
       {
@@ -371,6 +383,57 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               break;
           }
         }
+      }
+
+      var validGeom = (bool) FeatureCollection.Features[0].Properties.ElementAt(10).Value;
+      var measureDetails = FeatureCollection.Features[0].Properties.ElementAt(4);
+      var measureCount = ((System.Collections.Generic.List<StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails>)measureDetails.Value).Count;
+      //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
+      if ((validGeom == true || validGeom == false && measureCount == 1) 
+        && api != null && await api.GetApiReadyState() && this.start_check == true && (this.FromMap == false || this.FromMap == true && validGeom == true 
+        && this.Open != null && this._drawingSketch && this._lastSketch == true))
+      {
+        api.StopMeasurementMode();
+        var states = FrameworkApplication.State;
+        this.start_check = false;
+        //this.RemoveAll();
+
+        foreach (IFeature feature in FeatureCollection.Features)
+        {
+          IGeometry geometry = feature.Geometry;
+          StreetSmartGeometryType geometryType = geometry.Type;
+          Measurement measurement;
+          if (feature.Properties is IMeasurementProperties properties)
+          {
+            if (Count == 0)
+            {
+              measurement = new Measurement(properties, feature.Geometry, api)
+              {
+                VectorLayer = _lastVectorLayer
+              };
+              Add(properties.Id, measurement);
+              measurement.Open();
+              if (_lastSketch)
+              {
+                measurement.SetSketch();
+              }
+            }
+            else
+            {
+              measurement = this.ElementAt(0).Value;
+            }
+            MapView mapView = MapView.Active;
+            Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+
+            RemoveLineStringPoints(measurement);
+            RemovePolygonPoints(measurement);
+            RemovePointPoints(measurement);
+            await mapView.ClearSketchAsync();
+          }
+        }
+        //object editor = new EditCompletingEventArgs;
+        //editor.CancelEdit();
+        //FrameworkApplication.State.Deactivate("esri_editing_editingCurrently");
       }
     }
 
@@ -411,8 +474,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             measurement.Properties = properties;
           }
-
-          if (measurement.Geometry == null)
+          //GC: check if the feature has the same geometry type as the previous when switching between shapes
+          if (measurement.Geometry == null || measurement.Geometry != feature.Geometry)
           {
             measurement.Geometry = feature.Geometry;
           }

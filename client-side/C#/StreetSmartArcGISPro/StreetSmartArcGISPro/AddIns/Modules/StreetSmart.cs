@@ -177,7 +177,15 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     internal bool InsideScale(MapView mapView)
     {
-      return GetCycloMediaGroupLayer(mapView).InsideScale;
+      //GC: added a new catch statement for mapView when opening attribute table while editing
+      if (mapView != null)
+      {
+        return GetCycloMediaGroupLayer(mapView).InsideScale;
+      }
+      else
+      {
+        return false;
+      }
     }
 
     private bool ContainsCycloMediaLayer(MapView mapView)
