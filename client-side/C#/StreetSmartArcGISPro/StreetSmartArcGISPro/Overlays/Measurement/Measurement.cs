@@ -55,6 +55,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     private ArcGISGeometryType _geometryType;
     private IGeometry _geometry;
+    private int pointCount = 0;
 
     #endregion
 
@@ -325,6 +326,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public async Task<List<MapPoint>> ToPointCollectionAsync(Geometry geometry)
     {
       List<MapPoint> result = null;
+      ArcGISGeometryType geometryType = geometry.GeometryType;
 
       if (geometry != null)
       {
@@ -342,7 +344,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }*/
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
-          if (spatialReference?.ZUnit == null)
+          //GC: adding if statement for features missing z reference since it gets put underground
+          if (spatialReference?.ZUnit == null && ((this.Count >= 2 && geometryType == ArcGISGeometryType.Polyline) || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
           {
             zScale = 1 / modifierFactor;
           }
@@ -350,7 +353,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         });
 
         result = new List<MapPoint>();
-        ArcGISGeometryType geometryType = geometry.GeometryType;
+        
         //if z-unit is null or feet, then the z-offset should only be 3.28
         switch (geometryType)
         {
@@ -376,18 +379,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 while (enumPoints.MoveNext())
                 {
                   MapPoint mapPointPart = enumPoints.Current;
-                  if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
+                  /*if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
                   {
                     result.Add(await AddZOffsetAsync(mapPointPart, zScale));
                   }
                   else
                   {
                     result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }
+                  }*/
+                  result.Add(await AddZOffsetAsync(mapPointPart, zScale));
                 }
               }
             }
-
             break;
         }
       }

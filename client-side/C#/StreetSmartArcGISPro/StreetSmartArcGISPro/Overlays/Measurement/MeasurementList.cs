@@ -265,12 +265,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public async void OnMeasurementSaved(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
+      IStreetSmartAPI api = sender as IStreetSmartAPI;
 
       foreach (IFeature feature in FeatureCollection.Features)
       {
         IGeometry geometry = feature.Geometry;
         StreetSmartGeometryType geometryType = geometry.Type;
-        IStreetSmartAPI api = sender as IStreetSmartAPI;
         Measurement measurement;
 
         if (feature.Properties is IMeasurementProperties properties)
@@ -346,6 +346,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
         }
       }
+      api.StopMeasurementMode();
+      await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
     }
 
     public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
@@ -388,16 +390,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       var validGeom = (bool) FeatureCollection.Features[0].Properties.ElementAt(10).Value;
       var measureDetails = FeatureCollection.Features[0].Properties.ElementAt(4);
       var measureCount = ((System.Collections.Generic.List<StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails>)measureDetails.Value).Count;
-      //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
-      if ((validGeom == true || validGeom == false && measureCount == 1) 
+      //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button or measurement is saved
+      if ((validGeom == true || validGeom == false && measureCount == 1 || validGeom == false && measureCount == 2) 
         && api != null && await api.GetApiReadyState() && this.start_check == true && (this.FromMap == false || this.FromMap == true && validGeom == true 
-        && this.Open != null && this._drawingSketch && this._lastSketch == true))
+        /*&& this.Open != null*/ && this._drawingSketch && this._lastSketch == true))
       {
         api.StopMeasurementMode();
         var states = FrameworkApplication.State;
         this.start_check = false;
         //this.RemoveAll();
-
         foreach (IFeature feature in FeatureCollection.Features)
         {
           IGeometry geometry = feature.Geometry;
@@ -431,6 +432,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             await mapView.ClearSketchAsync();
           }
         }
+        await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
         //object editor = new EditCompletingEventArgs;
         //editor.CancelEdit();
         //FrameworkApplication.State.Deactivate("esri_editing_editingCurrently");
@@ -441,249 +443,255 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
+      var errors = FeatureCollection.Features[0].Properties.ElementAt(9);
+      var errorCount = ((System.Collections.Generic.List<int>)errors.Value).Count;
 
-      foreach (IFeature feature in FeatureCollection.Features)
+      //GC: add new if statement that catches when error points are trying to be made
+      if (errorCount == 0)
       {
-        if (feature.Properties is IMeasurementProperties properties)
+        foreach (IFeature feature in FeatureCollection.Features)
         {
-          Measurement measurement;
-
-          if (Count == 0)
+          if (feature.Properties is IMeasurementProperties properties)
           {
-            measurement = new Measurement(properties, feature.Geometry, api)
-            {
-              VectorLayer = _lastVectorLayer
-            };
+            Measurement measurement;
 
-            Add(properties.Id, measurement);
-            measurement.Open();
-
-            if (_lastSketch)
+            if (Count == 0)
             {
-              measurement.SetSketch();
+              measurement = new Measurement(properties, feature.Geometry, api)
+              {
+                VectorLayer = _lastVectorLayer
+              };
+
+              Add(properties.Id, measurement);
+              measurement.Open();
+
+              if (_lastSketch)
+              {
+                measurement.SetSketch();
+              }
             }
-          }
-          else
-          {
-            measurement = this.ElementAt(0).Value;
-          }
-
-          measurement.ObservationLines = properties.ObservationLines;
-
-          if (measurement.Properties == null)
-          {
-            measurement.Properties = properties;
-          }
-          //GC: check if the feature has the same geometry type as the previous when switching between shapes
-          if (measurement.Geometry == null || measurement.Geometry != feature.Geometry)
-          {
-            measurement.Geometry = feature.Geometry;
-          }
-
-          if (!measurement.UpdateMeasurement)
-          {
-            measurement.UpdateMeasurement = true;
-            IGeometry geometry = feature.Geometry;
-            StreetSmartGeometryType geometryType = geometry.Type;
-
-            switch (geometryType)
+            else
             {
-              case StreetSmartGeometryType.Point:
-                RemoveLineStringPoints(measurement);
-                RemovePolygonPoints(measurement);
+              measurement = this.ElementAt(0).Value;
+            }
 
-                if (geometry is IPoint pointDst)
-                {
-                  if (measurement.Count >= 1 && measurement[0].Point != null &&
-                      (pointDst.X == null || pointDst.Y == null) && measurement.MeasurementId != properties.Id &&
-                      measurement.VectorLayer != null && !FromMap)
+            measurement.ObservationLines = properties.ObservationLines;
+
+            if (measurement.Properties == null)
+            {
+              measurement.Properties = properties;
+            }
+            //GC: check if the feature has the same geometry type as the previous when switching between shapes
+            if (measurement.Geometry == null || measurement.Geometry != feature.Geometry)
+            {
+              measurement.Geometry = feature.Geometry;
+            }
+
+            if (!measurement.UpdateMeasurement)
+            {
+              measurement.UpdateMeasurement = true;
+              IGeometry geometry = feature.Geometry;
+              StreetSmartGeometryType geometryType = geometry.Type;
+
+              switch (geometryType)
+              {
+                case StreetSmartGeometryType.Point:
+                  RemoveLineStringPoints(measurement);
+                  RemovePolygonPoints(measurement);
+
+                  if (geometry is IPoint pointDst)
                   {
-                    MapView mapView = MapView.Active;
-                    Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
-                    await mapView.ClearSketchAsync();
-                    measurement.Dispose();
-                  }
-                  else
-                  {
-                    measurement.MeasurementId = properties.Id;
-                    await measurement.UpdatePointAsync(0, feature);
-                    measurement.Geometry = geometry;
-                    FromMap = false;
-                  }
-                }
-
-                await measurement.UpdateMap();
-
-                break;
-              case StreetSmartGeometryType.LineString:
-                RemovePointPoints(measurement);
-                RemovePolygonPoints(measurement);
-
-                if (geometry is ILineString lineDst)
-                {
-                  if (measurement.Count >= 1 && measurement[0].Point != null &&
-                      lineDst.Count == 0 && measurement.MeasurementId != properties.Id &&
-                      measurement.VectorLayer != null && !FromMap)
-                  {
-                    MapView mapView = MapView.Active;
-                    Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
-                    await mapView.ClearSketchAsync();
-
-                    if (geometrySketch != null)
+                    if (measurement.Count >= 1 && measurement[0].Point != null &&
+                        (pointDst.X == null || pointDst.Y == null) && measurement.MeasurementId != properties.Id &&
+                        measurement.VectorLayer != null && !FromMap)
                     {
-                      await QueuedTask.Run(async() =>
-                      {
-                        List<MapPoint> points = new List<MapPoint>();
-                        Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
-                        await mapView.SetCurrentSketchAsync(line);
-                      });
+                      MapView mapView = MapView.Active;
+                      Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+                      await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+                      await mapView.ClearSketchAsync();
+                      measurement.Dispose();
                     }
-
-                    measurement.Dispose();
-                  }
-                  else if (measurement.Geometry is ILineString lineSrc)
-                  {
-                    measurement.MeasurementId = properties.Id;
-
-                    for (int i = 0; i < Math.Max(lineDst.Count, lineSrc.Count); i++)
+                    else
                     {
-                      measurement.RemoveObservations(i, feature);
-
-                      if (lineSrc.Count > i && lineDst.Count > i)
-                      {
-                        await measurement.UpdatePointAsync(i, feature);
-                      }
-                      else if (lineSrc.Count <= i && lineDst.Count > i)
-                      {
-                        measurement.AddPoint(lineSrc.Count);
-                        await measurement.UpdatePointAsync(i, feature);
-                      }
-                      else if (lineSrc.Count > i && lineDst.Count <= i)
-                      {
-                        measurement.RemovePoint(i);
-                        await measurement.UpdatePointAsync(Math.Min(i, lineDst.Count - 1), feature);
-                      }
+                      measurement.MeasurementId = properties.Id;
+                      await measurement.UpdatePointAsync(0, feature);
+                      measurement.Geometry = geometry;
+                      FromMap = false;
                     }
-
-                    measurement.Geometry = geometry;
-                    //await measurement.UpdateMap();
-                    //GC: added task delay to allow the line feature to be completed 
-                    await Task.Delay(250).ContinueWith(_ =>
-                    {
-                      measurement.UpdateMap();
-                    });
                   }
-                  else
+
+                  await measurement.UpdateMap();
+
+                  break;
+                case StreetSmartGeometryType.LineString:
+                  RemovePointPoints(measurement);
+                  RemovePolygonPoints(measurement);
+
+                  if (geometry is ILineString lineDst)
                   {
-                    measurement.MeasurementId = properties.Id;
-
-                    for (int i = 0; i < lineDst.Count; i++)
+                    if (measurement.Count >= 1 && measurement[0].Point != null &&
+                        lineDst.Count == 0 && measurement.MeasurementId != properties.Id &&
+                        measurement.VectorLayer != null && !FromMap)
                     {
-                      measurement.AddPoint(i);
-                      await measurement.UpdatePointAsync(i, feature);
-                    }
+                      MapView mapView = MapView.Active;
+                      Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+                      await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+                      await mapView.ClearSketchAsync();
 
-                    measurement.Geometry = geometry;
-                    await measurement.UpdateMap();
-                  }
-                }
-
-                break;
-              case StreetSmartGeometryType.Polygon:
-                RemovePointPoints(measurement);
-                RemoveLineStringPoints(measurement);
-
-                if (geometry is IPolygon polyDst)
-                {
-                  if (measurement.Count >= 1 && measurement[measurement.ElementAt(0).Key].Point != null &&
-                      polyDst[0].Count == 0 && measurement.MeasurementId != properties.Id &&
-                      measurement.VectorLayer != null && !FromMap)
-                  {
-                    MapView mapView = MapView.Active;
-                    Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
-                    await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
-                    await mapView.ClearSketchAsync();
-
-                    if (geometrySketch != null)
-                    {
-                      await QueuedTask.Run(async() =>
+                      if (geometrySketch != null)
                       {
-                        List<MapPoint> points = new List<MapPoint>();
-                        Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
-                        await mapView.SetCurrentSketchAsync(polygon);
-                      });
-                    }
-
-                    measurement.Dispose();
-                  }
-                  else if (measurement.Geometry is IPolygon polySrc)
-                  {
-                    measurement.MeasurementId = properties.Id;
-                    int polySrcCount = polySrc[0].Count;
-                    int pylyDstCount = polyDst[0].Count;
-                    int j = 0;
-
-                    for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
-                    {
-                      measurement.RemoveObservations(i, feature);
-                      if (polySrcCount > i && pylyDstCount > i)
-                      {
-                        await measurement.UpdatePointAsync(i, feature);
-                      }
-                      else if (polySrcCount <= i && pylyDstCount > i)
-                      {
-                        measurement.AddPoint(polySrcCount++);
-                        await measurement.UpdatePointAsync(i, feature);
-                      }
-                      else if (polySrcCount > i && pylyDstCount <= i)
-                      {
-                        /*measurement.RemovePoint(i - j); //this is where the number on the map gets removed
-                        j++;*/
-
-                        //this is where the number on the map gets removed
-                        measurement.RemovePoint(i); //GC: fixed where polygon edit won't cancel correctly
-
-                        if (measurement.Count > Math.Min(i, pylyDstCount - 1))
+                        await QueuedTask.Run(async () =>
                         {
-                          await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
+                          List<MapPoint> points = new List<MapPoint>();
+                          Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+                          await mapView.SetCurrentSketchAsync(line);
+                        });
+                      }
+
+                      measurement.Dispose();
+                    }
+                    else if (measurement.Geometry is ILineString lineSrc)
+                    {
+                      measurement.MeasurementId = properties.Id;
+
+                      for (int i = 0; i < Math.Max(lineDst.Count, lineSrc.Count); i++)
+                      {
+                        measurement.RemoveObservations(i, feature);
+
+                        if (lineSrc.Count > i && lineDst.Count > i)
+                        {
+                          await measurement.UpdatePointAsync(i, feature);
+                        }
+                        else if (lineSrc.Count <= i && lineDst.Count > i)
+                        {
+                          measurement.AddPoint(lineSrc.Count);
+                          await measurement.UpdatePointAsync(i, feature);
+                        }
+                        else if (lineSrc.Count > i && lineDst.Count <= i)
+                        {
+                          measurement.RemovePoint(i);
+                          await measurement.UpdatePointAsync(Math.Min(i, lineDst.Count - 1), feature);
                         }
                       }
-                    }
 
-                    measurement.Geometry = geometry;
-                    //await measurement.UpdateMap();
-                    //GC: added task delay to allow the polygon feature to be completed 
-                    await Task.Delay(250).ContinueWith(_ =>
+                      measurement.Geometry = geometry;
+                      //await measurement.UpdateMap();
+                      //GC: added task delay to allow the line feature to be completed 
+                      await Task.Delay(250).ContinueWith(_ =>
+                      {
+                        measurement.UpdateMap();
+                      });
+                    }
+                    else
                     {
-                      measurement.UpdateMap();
-                    });
+                      measurement.MeasurementId = properties.Id;
+
+                      for (int i = 0; i < lineDst.Count; i++)
+                      {
+                        measurement.AddPoint(i);
+                        await measurement.UpdatePointAsync(i, feature);
+                      }
+
+                      measurement.Geometry = geometry;
+                      await measurement.UpdateMap();
+                    }
                   }
-                  else
+
+                  break;
+                case StreetSmartGeometryType.Polygon:
+                  RemovePointPoints(measurement);
+                  RemoveLineStringPoints(measurement);
+
+                  if (geometry is IPolygon polyDst)
                   {
-                    measurement.MeasurementId = properties.Id;
-                    int pylyDstCount = polyDst[0].Count;
-
-                    for (int i = 0; i < pylyDstCount; i++)
+                    if (measurement.Count >= 1 && measurement[measurement.ElementAt(0).Key].Point != null &&
+                        polyDst[0].Count == 0 && measurement.MeasurementId != properties.Id &&
+                        measurement.VectorLayer != null && !FromMap)
                     {
-                      measurement.AddPoint(i);
-                      await measurement.UpdatePointAsync(i, feature);
+                      MapView mapView = MapView.Active;
+                      Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+                      await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+                      await mapView.ClearSketchAsync();
+
+                      if (geometrySketch != null)
+                      {
+                        await QueuedTask.Run(async () =>
+                        {
+                          List<MapPoint> points = new List<MapPoint>();
+                          Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+                          await mapView.SetCurrentSketchAsync(polygon);
+                        });
+                      }
+
+                      measurement.Dispose();
                     }
+                    else if (measurement.Geometry is IPolygon polySrc)
+                    {
+                      measurement.MeasurementId = properties.Id;
+                      int polySrcCount = polySrc[0].Count;
+                      int pylyDstCount = polyDst[0].Count;
+                      int j = 0;
 
-                    measurement.Geometry = geometry;
-                    await measurement.UpdateMap();
+                      for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
+                      {
+                        measurement.RemoveObservations(i, feature);
+                        if (polySrcCount > i && pylyDstCount > i)
+                        {
+                          await measurement.UpdatePointAsync(i, feature);
+                        }
+                        else if (polySrcCount <= i && pylyDstCount > i)
+                        {
+                          measurement.AddPoint(polySrcCount++);
+                          await measurement.UpdatePointAsync(i, feature);
+                        }
+                        else if (polySrcCount > i && pylyDstCount <= i)
+                        {
+                          /*measurement.RemovePoint(i - j); //this is where the number on the map gets removed
+                          j++;*/
+
+                          //this is where the number on the map gets removed
+                          measurement.RemovePoint(i); //GC: fixed where polygon edit won't cancel correctly
+
+                          if (measurement.Count > Math.Min(i, pylyDstCount - 1))
+                          {
+                            await measurement.UpdatePointAsync(Math.Min(i, pylyDstCount - 1), feature);
+                          }
+                        }
+                      }
+
+                      measurement.Geometry = geometry;
+                      //await measurement.UpdateMap();
+                      //GC: added task delay to allow the polygon feature to be completed 
+                      await Task.Delay(250).ContinueWith(_ =>
+                      {
+                        measurement.UpdateMap();
+                      });
+                    }
+                    else
+                    {
+                      measurement.MeasurementId = properties.Id;
+                      int pylyDstCount = polyDst[0].Count;
+
+                      for (int i = 0; i < pylyDstCount; i++)
+                      {
+                        measurement.AddPoint(i);
+                        await measurement.UpdatePointAsync(i, feature);
+                      }
+
+                      measurement.Geometry = geometry;
+                      await measurement.UpdateMap();
+                    }
                   }
-                }
 
-                break;
+                  break;
+              }
+
+              measurement.UpdateMeasurement = false;
             }
-
-            measurement.UpdateMeasurement = false;
-          }
-          else
-          {
-            measurement.DoChange = true;
+            else
+            {
+              measurement.DoChange = true;
+            }
           }
         }
       }

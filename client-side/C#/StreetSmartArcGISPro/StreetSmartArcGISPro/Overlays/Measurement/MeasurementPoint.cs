@@ -277,12 +277,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             Point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, mapView);
 
             MapView thisView = MapView.Active;
-            Geometry geometry = await thisView.GetCurrentSketchAsync(); //this is where the point on the map dissappears
+            Geometry geometry = await thisView.GetCurrentSketchAsync(); //this is where the point on the map dissappears and where z values are created wrong
             Updated = true;
 
             if (geometry != null)
             {
-              var ptColl = await Measurement.ToPointCollectionAsync(geometry);
+              var ptColl = await Measurement.ToPointCollectionAsync(Point); //using Point instead of geometry because it was wrong
 
               if (ptColl != null)
               {

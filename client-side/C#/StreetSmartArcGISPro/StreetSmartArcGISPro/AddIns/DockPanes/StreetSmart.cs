@@ -1370,11 +1370,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
         this._panorama.ToggleOverlay(vectorLayer.Overlay);
       }
-      else if (switcher == true && vectorLayer.Overlay != null)
-      {
-        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        this._panorama.ToggleOverlay(vectorLayer.Overlay);
-      }
     }
 
     private async void OnMapClosedEvent(MapClosedEventArgs args)
