@@ -326,13 +326,14 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public async Task<List<MapPoint>> ToPointCollectionAsync(Geometry geometry)
     {
       List<MapPoint> result = null;
-      ArcGISGeometryType geometryType = geometry.GeometryType;
 
       if (geometry != null)
       {
         double zScale = 1.0;
         double modScale = 1.0;
         var srs = geometry.SpatialReference;
+        var geoPointCount = geometry.PointCount;
+        ArcGISGeometryType geometryType = geometry.GeometryType;
 
         await QueuedTask.Run(() =>
         { 
@@ -345,7 +346,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
-          if (spatialReference?.ZUnit == null && ((this.Count >= 2 && geometryType == ArcGISGeometryType.Polyline) || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
+          if (spatialReference?.ZUnit == null && ((this.Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline) 
+          || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon)
           {
             zScale = 1 / modifierFactor;
           }

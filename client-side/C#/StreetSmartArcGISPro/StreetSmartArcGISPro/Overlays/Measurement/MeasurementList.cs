@@ -346,8 +346,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
         }
       }
-      api.StopMeasurementMode();
-      await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
+      //api.StopMeasurementMode();
+      //await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
     }
 
     public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
@@ -387,13 +387,20 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
       }
 
-      var validGeom = (bool) FeatureCollection.Features[0].Properties.ElementAt(10).Value;
+      var validGeom = (bool)FeatureCollection.Features[0].Properties.ElementAt(10).Value;
       var measureDetails = FeatureCollection.Features[0].Properties.ElementAt(4);
+      //var reliability = (string) FeatureCollection.Features[0].Properties.ElementAt(8).Value;
+      //var relString = reliability.GetString();
       var measureCount = ((System.Collections.Generic.List<StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails>)measureDetails.Value).Count;
-      //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button or measurement is saved
-      if ((validGeom == true || validGeom == false && measureCount == 1 || validGeom == false && measureCount == 2) 
-        && api != null && await api.GetApiReadyState() && this.start_check == true && (this.FromMap == false || this.FromMap == true && validGeom == true 
-        /*&& this.Open != null*/ && this._drawingSketch && this._lastSketch == true))
+      //GC: new if statement that saves the feature if the old save button is pressed
+      if (validGeom == true && this.FromMap == false && measureCount != 0 && api != null && await api.GetApiReadyState() && this.start_check == true)
+      {
+        this.OnMeasurementSaved(sender, args);
+      }
+      //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
+      else if ((validGeom == true || validGeom == false && measureCount < 3)
+        && api != null && await api.GetApiReadyState() && this.start_check == true && (this.FromMap == false || (this.FromMap == true && validGeom == false) || this.FromMap == true && validGeom == true
+        && this.Open != null && this._drawingSketch && this._lastSketch == true && measureCount != 0 /*&& reliability != false*/)) 
       {
         api.StopMeasurementMode();
         var states = FrameworkApplication.State;
