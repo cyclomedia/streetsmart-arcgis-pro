@@ -282,7 +282,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
             if (geometry != null)
             {
-              var ptColl = await Measurement.ToPointCollectionAsync(Point); //using Point instead of geometry because it was wrong
+              var ptColl = await Measurement.ToPointCollectionAsync(geometry); //geometry and point have different z values
 
               if (ptColl != null)
               {

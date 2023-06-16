@@ -346,8 +346,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
-          if (spatialReference?.ZUnit == null && ((this.Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline) 
-          || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon)
+          if (spatialReference?.ZUnit == null && (((this.Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline) 
+          || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
           {
             zScale = 1 / modifierFactor;
           }
