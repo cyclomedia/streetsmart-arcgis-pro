@@ -708,72 +708,81 @@ namespace StreetSmartArcGISPro.VectorLayers
         double measurementZ = 0;
 
         var serializer = new JavaScriptSerializer();
-        var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
 
-        try
+        if (measurement.Count >= 1)
         {
-          measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["X"];
-          measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Y"];
-          measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["Z"];
-        }
-        catch (Exception)
-        {
+          var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
+
           try
           {
-            measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["X"];
-            measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Y"];
-            measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["Z"];
+            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
+            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
+            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
           }
           catch (Exception)
           {
             try
             {
-              measurementX = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["X"];
-              measurementY = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Y"];
-              measurementZ = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Z"];
+              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
+              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
+              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
             }
             catch (Exception)
-            { }
-          }
-        }
-
-        if (!(editingFeatureTemplate?.GetDefinition() is CIMRowTemplate definition) || definition.DefaultValues == null)
-        {
-          editOperation.Create(Layer, geometry);
-          await editOperation.ExecuteAsync();
-        }
-        else
-        {
-          Dictionary<string, object> toAddFields = new Dictionary<string, object>();
-
-          foreach (var value in definition.DefaultValues)
-          {
-            toAddFields.Add(value.Key, value.Value);
-          }
-
-          toAddFields.Add("Shape", geometry);
-
-          foreach (var value in Layer.GetFieldDescriptions())
-          {
-            switch(value.Name)
             {
-              case "x":
-                toAddFields["x"] = measurementX;
-                break;
-              case "y":
-                toAddFields["y"] = measurementY;
-                break;
-              case "z":
-                toAddFields["z"] = measurementZ;
-                break;
-              case "ZGeom":
-                toAddFields["ZGeom"] = measurementZ;
-                break;
+              try
+              {
+                measurementX =
+                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                measurementY =
+                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                measurementZ =
+                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+              }
+              catch (Exception)
+              {
+              }
             }
-          }          
+          }
 
-          editOperation.Create(Layer, toAddFields);
-          await editOperation.ExecuteAsync();
+          if (!(editingFeatureTemplate?.GetDefinition() is CIMRowTemplate definition) ||
+              definition.DefaultValues == null)
+          {
+            editOperation.Create(Layer, geometry);
+            await editOperation.ExecuteAsync();
+          }
+          else
+          {
+            Dictionary<string, object> toAddFields = new Dictionary<string, object>();
+
+            foreach (var value in definition.DefaultValues)
+            {
+              toAddFields.Add(value.Key, value.Value);
+            }
+
+            toAddFields.Add("Shape", geometry);
+
+            foreach (var value in Layer.GetFieldDescriptions())
+            {
+              switch (value.Name)
+              {
+                case "x":
+                  toAddFields["x"] = measurementX;
+                  break;
+                case "y":
+                  toAddFields["y"] = measurementY;
+                  break;
+                case "z":
+                  toAddFields["z"] = measurementZ;
+                  break;
+                case "ZGeom":
+                  toAddFields["ZGeom"] = measurementZ;
+                  break;
+              }
+            }
+
+            editOperation.Create(Layer, toAddFields);
+            await editOperation.ExecuteAsync();
+          }
         }
       });
     }
@@ -782,21 +791,28 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       await QueuedTask.Run(async () =>
       {
-        SpatialReference spatialReference = Layer?.GetSpatialReference();
-        GeometryType geometryType = geometry.GeometryType;
-        var points = await measurement.ToPointCollectionAsync(geometry);
-
-        switch (geometryType)
+        if (geometry != null)
         {
-          case GeometryType.Polygon:
-            geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
-            break;
-          case GeometryType.Polyline:
-            geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
-            break;
-          case GeometryType.Point:
-            geometry = MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
-            break;
+          SpatialReference spatialReference = Layer?.GetSpatialReference();
+          GeometryType geometryType = geometry.GeometryType;
+          var points = await measurement.ToPointCollectionAsync(geometry);
+
+          switch (geometryType)
+          {
+            case GeometryType.Polygon:
+              geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+              break;
+            case GeometryType.Polyline:
+              geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+              break;
+            case GeometryType.Point:
+              if (points.Count >= 1)
+              {
+                geometry = MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
+              }
+
+              break;
+          }
         }
       });
 

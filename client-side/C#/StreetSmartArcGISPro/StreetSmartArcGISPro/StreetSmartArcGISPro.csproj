@@ -49,7 +49,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
     <PackageReference Include="Nancy" Version="2.0.0" />
-    <PackageReference Include="StreetSmart.WPF" Version="22.19.4" />
+    <PackageReference Include="StreetSmart.WPF" Version="23.2.0" />
     <PackageReference Include="System.Windows.Extensions" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>

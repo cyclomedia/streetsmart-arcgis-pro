@@ -912,6 +912,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           GlobeSpotterConfiguration.Load();
           _measurementList.Api = Api;
           Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
+          Api.MeasurementStarted += _measurementList.OnMeasurementStarted;
+          Api.MeasurementStopped += _measurementList.OnMeasurementStopped;
+          Api.MeasurementSaved += _measurementList.OnMeasurementSaved;
 
           _vectorLayerList.LayerAdded += OnAddVectorLayer;
           _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
@@ -1363,11 +1366,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         _vectorLayerInChange.Remove(vectorLayer);
       }else if(switcher == true && vectorLayer.Overlay != null)
-      {
-        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        this._panorama.ToggleOverlay(vectorLayer.Overlay);
-      }
-      else if (switcher == true && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
         this._panorama.ToggleOverlay(vectorLayer.Overlay);
