@@ -351,24 +351,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               measurement.Dispose();
               break;
           }
-
-          var layerName = measurement.VectorLayer.Name;
-          var searchThisLayer = mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-          
-          //returns number of features created
-          var numIds = await QueuedTask.Run<List<long>>(() =>
-          {
-            var listOfMapMemberDictionaries = mapView.Map.GetSelection();
-            return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
-          });
-          //should restart STreet Smart if the first feature was created so it isn't invisible
-          /*if (numIds[0] == 1)
-          {
-            Dispatcher.CurrentDispatcher.Invoke(() =>
-            {
-              api.RestartStreetSmart();
-            });
-          }*/
         }
       }
       //api.StopMeasurementMode();
@@ -415,6 +397,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       var validGeom = (bool)FeatureCollection.Features[0].Properties.ElementAt(10).Value;
       var measureDetails = FeatureCollection.Features[0].Properties.ElementAt(4);
       var measureCount = ((System.Collections.Generic.List<StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails>)measureDetails.Value).Count;
+      string currentTool2 = FrameworkApplication.CurrentTool;
       //var reliability = (string) FeatureCollection.Features[0].Properties.ElementAt(8).Value;
       //var relString = reliability.GetString();
 
@@ -424,7 +407,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         this.OnMeasurementSaved(sender, args);
       }
       //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
-      else if (this._lastVectorLayer != null && (validGeom == true || validGeom == false && measureCount < 3)
+      else if (this._lastVectorLayer != null && (validGeom == true || validGeom == false && measureCount < 3) && currentTool2 != "esri_editing_ModifyFeatureImpl"
         && api != null && await api.GetApiReadyState() && this.start_check == true && (this.FromMap == false || (this.FromMap == true && validGeom == false) || this.FromMap == true && validGeom == true
         && this.Open != null && this._drawingSketch && this._lastSketch == true && measureCount != 0 /*&& reliability != false*/)) 
       {
@@ -466,9 +449,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
         }
         await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
-        //object editor = new EditCompletingEventArgs;
-        //editor.CancelEdit();
-        //FrameworkApplication.State.Deactivate("esri_editing_editingCurrently");
       }
     }
 
@@ -480,8 +460,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       var errorCount = ((System.Collections.Generic.List<int>)errors.Value).Count;
 
       //GC: add new if statement that catches when error points are trying to be made
-      if (errorCount == 0)
-      {
+      /*if (errorCount == 0)
+      {*/
         foreach (IFeature feature in FeatureCollection.Features)
         {
           if (feature.Properties is IMeasurementProperties properties)
@@ -727,7 +707,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             }
           }
         }
-      }
+      //}
 
       FromMap = false;
 
