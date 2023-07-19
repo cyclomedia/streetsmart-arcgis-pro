@@ -428,7 +428,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         IAPISettings settings = CefSettingsFactory.Create(cachePath);
         settings.Locale = _languageSettings.Locale;
         settings.SetDefaultBrowserSubprocessPath();
-        StreetSmartAPIFactory.Initialize(settings, true);
+        StreetSmartAPIFactory.Initialize(settings);
       }
       catch(Exception e)
       {

@@ -28,7 +28,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
     #region Constants
 
     // ReSharper disable InconsistentNaming
-    private const string baseUrl = "https://atlasapi.cyclomedia.com/staging";
+    private const string baseUrl = "https://atlasapi.cyclomedia.com/api";
     private const string configurationRequest = "/configuration/configuration/api_pro";
     private const string spatialReferencesXml = "/spatialreferences/SpatialReferences.xml";
     private const string recordingRequest =
@@ -74,7 +74,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
     /// <summary>
     /// Recordings URL
     /// </summary>
-    protected string RecordingServiceUrl => $"{BaseUrl}/api/recordings/wfs";
+    protected string RecordingServiceUrl => $"{BaseUrl}/recordings/wfs";
 
     #endregion
 
