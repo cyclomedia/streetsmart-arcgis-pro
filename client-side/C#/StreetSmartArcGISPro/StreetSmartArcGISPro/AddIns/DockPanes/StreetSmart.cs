@@ -747,7 +747,16 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               await CloseViewersAsync();
             }
-
+            else
+            {
+              //GC: This is where the API is restarted after a new map is opened
+              await OpenImageAsync();
+              /*if (_restart == true)
+              {
+                _restart = false;
+                await RestartStreetSmart(false);
+              }*/
+            }
             break;
         }
       }

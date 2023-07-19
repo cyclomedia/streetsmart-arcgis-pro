@@ -442,8 +442,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       }
                       else if (polySrcCount > i && pylyDstCount <= i)
                       {
-                        measurement.RemovePoint(i - j);
-                        j++;
+                        /*measurement.RemovePoint(i - j); //this is where the number on the map gets removed
+                        j++;*/
+
+                        measurement.RemovePoint(i); //GC: fixed where the measurement points were not getting deleted correctly
 
                         if (measurement.Count > Math.Min(i, pylyDstCount - 1))
                         {
