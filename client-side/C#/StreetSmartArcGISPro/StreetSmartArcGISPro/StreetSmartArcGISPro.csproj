@@ -11,6 +11,9 @@
     <SignAssembly>False</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="D:\Users\HBr\.nuget\packages\streetsmart.wpf\23.8.2\contentFiles\any\net6.0-windows7.0\ReleaseNotes.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="StreetSmartArcGISPro.csproj.bak" />
   </ItemGroup>
   <ItemGroup>
