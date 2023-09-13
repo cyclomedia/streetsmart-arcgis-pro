@@ -34,6 +34,7 @@ using ArcGIS.Desktop.Core.Events;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -427,7 +428,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         IAPISettings settings = CefSettingsFactory.Create(cachePath);
         settings.Locale = _languageSettings.Locale;
         settings.SetDefaultBrowserSubprocessPath();
-        StreetSmartAPIFactory.Initialize(settings, true);
+        StreetSmartAPIFactory.Initialize(settings);
       }
       catch(Exception e)
       {
@@ -611,6 +612,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         try
         {
+          EventLog.Write(EventLog.EventType.Information, $"StreetSmart: (OpenImageAsync) Open image: {toOpen}");
           IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
 
           if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)

@@ -47,6 +47,8 @@ using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.Spatial
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using ArcGIS.Core.Data.Exceptions;
+using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmart.Common.Interfaces.Data;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
@@ -665,6 +667,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           FeatureMembers featureMembers = featureCollection.FeatureMembers;
           Recording[] recordings = featureMembers?.Recordings;
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) Start writing number of recordings: {recordings?.Length ?? 0}");
 
           if (Layer != null && recordings != null)
           {
@@ -715,12 +718,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     {
                       if (Filter(recording))
                       {
+                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMedialayer) Start writing recording to database: {recording.ImageId}");
                         Dictionary<string, object> toAddFields = Recording.Fields.ToDictionary(fieldId => fieldId.Key,
                           fieldId => recording.FieldToItem(fieldId.Key));
 
                         MapPoint newPoint = MapPointBuilderEx.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
                         toAddFields.Add(Recording.ShapeFieldName, newPoint);
                         editOperation.Create(Layer, toAddFields);
+                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMedialayer) Finished writing recording to database: {recording.ImageId}");
                       }
                     }
                     else
@@ -735,6 +740,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                 foreach (var row in exists)
                 {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMedialayer) delete element from database: {row.Value}, {row.Key}");
                   editOperation.Delete(Layer, row.Value);
                 }
               }
@@ -856,10 +862,13 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             if (thisEnvelope != null)
             {
               _addData = FeatureCollection.Load(thisEnvelope, WfsRequest);
+              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) loaded features: {_addData.NumberOfFeatures}");
 
               if (_addData != null && _addData.NumberOfFeatures >= 1)
               {
-                await SaveFeatureMembersAsync(_addData, thisEnvelope);
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) start saving features: {_addData.NumberOfFeatures}");
+                bool value = await SaveFeatureMembersAsync(_addData, thisEnvelope);
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) finished writing features, result: {value}");
               }
 
               await PostEntryStepAsync(thisEnvelope);

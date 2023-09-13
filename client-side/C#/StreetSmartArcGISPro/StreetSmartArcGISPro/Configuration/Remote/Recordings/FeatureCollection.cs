@@ -21,6 +21,7 @@ using System.IO;
 using System.Xml.Serialization;
 
 using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
 {
@@ -77,12 +78,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
         catch
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) Error loading features");
         }
       }
 
@@ -103,12 +105,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
         catch
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) Error loading features");
         }
       }
 
