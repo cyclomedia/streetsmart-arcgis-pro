@@ -48,7 +48,6 @@ using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Poin
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using ArcGIS.Core.Data.Exceptions;
 using ArcGIS.Desktop.Framework.Utilities;
-using StreetSmart.Common.Interfaces.Data;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
@@ -652,7 +651,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    public async Task<bool> SaveFeatureMembersAsync(FeatureCollection featureCollection, Envelope envelope)
+    public async Task<EditOperation> SaveFeatureMembersAsync(FeatureCollection featureCollection, Envelope envelope)
     {
       return await QueuedTask.Run(() =>
       {
@@ -748,7 +747,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           }
         }
 
-        return editOperation.IsEmpty ? Task.FromResult(true) : editOperation.ExecuteAsync();
+        return editOperation;
       });
     }
 
@@ -867,8 +866,23 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
               if (_addData != null && _addData.NumberOfFeatures >= 1)
               {
                 EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) start saving features: {_addData.NumberOfFeatures}");
-                bool value = await SaveFeatureMembersAsync(_addData, thisEnvelope);
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) finished writing features, result: {value}");
+                EditOperation editOperation = await SaveFeatureMembersAsync(_addData, thisEnvelope);
+
+                if (editOperation.IsEmpty)
+                {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) there are no features to write to the layer");
+                }
+                else
+                {
+                  bool value = await editOperation.ExecuteAsync();
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) finished writing features, result: {value}");
+
+                  if (value == false)
+                  {
+                    string errorMessage = editOperation.ErrorMessage;
+                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) the error message is: {errorMessage}");
+                  }
+                }
               }
 
               await PostEntryStepAsync(thisEnvelope);
