@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ArcGIS defaultAssembly="StreetSmartArcGISPro.dll" defaultNamespace="StreetSmartArcGISPro" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Users/admin/AppData/Local/Programs/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-  <AddInInfo id="{34D5B2FF-2566-4346-9C41-CB901D8811E1}" version="1.7.4" desktopVersion="3.0.36030">
+  <AddInInfo id="{34D5B2FF-2566-4346-9C41-CB901D8811E1}" version="1.7.5" desktopVersion="3.0.36030">
     <Name>Street Smart for ArcGIS Pro</Name>
     <Description>
       Street Smart for ArcGIS Pro
@@ -9,7 +9,7 @@
     <Image>Images\StreetSmartArcGISPro32.png</Image>
     <Author>CycloMedia</Author>
     <Company>CycloMedia</Company>
-    <Date>09/26/2023 11:00:00 AM, 2023</Date>
+    <Date>09/29/2023 11:00:00 AM, 2023</Date>
     <Subject>Content</Subject>
   </AddInInfo>
   <modules>

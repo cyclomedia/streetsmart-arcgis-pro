@@ -120,14 +120,14 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
         else
         {
           string errorPdfTxt = res.GetString("HelpNoPdfViewerInstalledOnYourSystem", language.CultureInfo);
-          EventLog.Write(EventLog.EventType.Error, $"StreetSmart: (OnClick) {errorPdfTxt}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (OnClick) {errorPdfTxt}");
           MessageBox.Show(errorPdfTxt);
         }
       }
       catch (Exception ex)
       {
         string errorTxt = res.GetString("HelpErrorOpenHelpDocument", language.CultureInfo);
-        EventLog.Write(EventLog.EventType.Error, $"StreetSmart: (OnClick) {errorTxt}");
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (OnClick) {errorTxt}");
         MessageBox.Show(ex.Message, errorTxt);
       }
     }

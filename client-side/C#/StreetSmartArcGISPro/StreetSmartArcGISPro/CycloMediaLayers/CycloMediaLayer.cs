@@ -867,11 +867,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             if (thisEnvelope != null)
             {
               _addData = FeatureCollection.Load(thisEnvelope, WfsRequest);
-              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) loaded features: {_addData.NumberOfFeatures}");
 
               if (_addData != null && _addData.NumberOfFeatures >= 1)
               {
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) start saving features: {_addData.NumberOfFeatures}");
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer) loaded features, start saving: {_addData.NumberOfFeatures}");
                 EditOperation editOperation = await SaveFeatureMembersAsync(_addData, thisEnvelope);
 
                 if (editOperation.IsEmpty)

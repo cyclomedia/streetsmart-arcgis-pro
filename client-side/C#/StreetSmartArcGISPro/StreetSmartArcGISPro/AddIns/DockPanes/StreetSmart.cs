@@ -612,7 +612,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         try
         {
-          EventLog.Write(EventLog.EventType.Information, $"StreetSmart: (OpenImageAsync) Open image: {toOpen}");
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (OpenImageAsync) Open image: {toOpen}");
           IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
 
           if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
