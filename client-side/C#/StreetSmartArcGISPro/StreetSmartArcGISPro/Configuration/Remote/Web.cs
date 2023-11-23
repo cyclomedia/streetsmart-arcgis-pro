@@ -88,12 +88,12 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     public Stream SpatialReferences()
     {
-      return GetRequest(SpatialReferenceUrl, GetStreamCallback, TypeDownloadConfig.XML) as Stream;
+      return GetRequest(SpatialReferenceUrl, GetStreamCallback, TypeDownloadConfig.XML, false) as Stream;
     }
 
     public Stream GlobeSpotterConfiguration()
     {
-      const string authorizationItem = @"<Authorization />";
+      const string authorizationItem = "";
       return PostRequest(ConfigurationUrl, GetStreamCallback, authorizationItem, TypeDownloadConfig.XML) as Stream;
     }
 
@@ -120,13 +120,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     #region Web request functions
 
-    private object GetRequest(string remoteLocation, AsyncCallback asyncCallback, TypeDownloadConfig typeDownloadConfig)
+    private object GetRequest(string remoteLocation, AsyncCallback asyncCallback, TypeDownloadConfig typeDownloadConfig, bool useAuthorisation = true)
     {
       object result = null;
       bool download = false;
       int retry = 0;
       var configId = (int) typeDownloadConfig;
-      WebRequest request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Get, 0);
+      WebRequest request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Get, 0, useAuthorisation);
       var state = new State {Request = request};
 
       while (download == false && retry < _retryTimeService[configId])
@@ -181,14 +181,14 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       return result;
     }
 
-    private object PostRequest(string remoteLocation, AsyncCallback asyncCallback, string postItem, TypeDownloadConfig typeDownloadConfig)
+    private object PostRequest(string remoteLocation, AsyncCallback asyncCallback, string postItem, TypeDownloadConfig typeDownloadConfig, bool useAuthorisation = true)
     {
       object result = null;
       bool download = false;
       int retry = 0;
       var configId = (int) typeDownloadConfig;
       var bytes = (new UTF8Encoding()).GetBytes(postItem);
-      WebRequest request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Post, bytes.Length);
+      WebRequest request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Post, bytes.Length, useAuthorisation);
       var state = new State {Request = request};
 
       lock (this)
@@ -275,7 +275,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       return result;
     }
 
-    private WebRequest OpenWebRequest(string remoteLocation, string webRequest, int length)
+    private WebRequest OpenWebRequest(string remoteLocation, string webRequest, int length, bool useAuthorization = true)
     {
       IWebProxy proxy;
 
@@ -299,6 +299,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         proxy = WebRequest.GetSystemWebProxy();
       }
 
+      string credentials1 = Base64Encode($"{_login.Username}:{_login.Password}");
+      string credentials = $"Basic {credentials1}";
+
       var request = (HttpWebRequest) WebRequest.Create(remoteLocation);
       request.Credentials = new NetworkCredential(_login.Username, _login.Password);
       request.Method = webRequest;
@@ -309,12 +312,24 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       request.PreAuthenticate = true;
       request.ContentType = "text/xml";
       request.Headers.Add("ApiKey", _apiKey.Value);
+
+      if (useAuthorization)
+      {
+        request.Headers.Add("authorization", credentials);
+      }
+
       request.ServicePoint.ConnectionLeaseTimeout = LeaseTimeOut;
       request.ServicePoint.MaxIdleTime = LeaseTimeOut;
       return request;
     }
 
     #endregion
+
+    public static string Base64Encode(string plainText)
+    {
+      var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+      return Convert.ToBase64String(plainTextBytes);
+    }
 
     #region Callback functions
 
