@@ -617,7 +617,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
           ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
-          ArcGISSpatialReference srs = geometry.SpatialReference; //new spatial reference with the correct units
+          ArcGISSpatialReference srs = geometry?.SpatialReference; //new spatial reference with the correct units
 
           //GC: Added an alert message when SRS do not match up and creating features
           if (spatialReference.Wkid != mapSpatialReference.Wkid)
@@ -663,7 +663,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             if (IsGeometryType(ArcGISGeometryType.Polygon))
             { //GC: added if statements to let it work without a z reference
-              if (spatialReference.ZUnit == null)
+              if (spatialReference.ZUnit == null || srs == null)
               {
                 geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
               }
@@ -674,7 +674,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             }
             else if (IsGeometryType(ArcGISGeometryType.Polyline))
             {
-              if (spatialReference.ZUnit == null)
+              if (spatialReference.ZUnit == null || srs == null)
               {
                 geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
               }
@@ -688,7 +688,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
-              if (spatialReference.ZUnit == null)
+              if (spatialReference.ZUnit == null || srs == null)
               {
                 geometry = point == null ? null : MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z, spatialReference);
               }
