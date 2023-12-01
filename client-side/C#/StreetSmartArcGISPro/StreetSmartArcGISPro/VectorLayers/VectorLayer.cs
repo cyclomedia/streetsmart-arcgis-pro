@@ -315,7 +315,9 @@ namespace StreetSmartArcGISPro.VectorLayers
                           if (copyGeometry is MapPoint point)
                           {
                             ICoordinate coordinate = await GeoJsonCoordAsync(point);
-                            featureCollection.Features.Add(GeoJsonFactory.CreatePointFeature(coordinate));
+                            var featurePoint = GeoJsonFactory.CreatePointFeature(coordinate);
+                            AddFieldValueToFeature(featurePoint, fieldValues);
+                            featureCollection.Features.Add(featurePoint);
                           }
 
                           break;
@@ -354,7 +356,9 @@ namespace StreetSmartArcGISPro.VectorLayers
                               }
                             }
 
-                            featureCollection.Features.Add(GeoJsonFactory.CreatePolygonFeature(polygonCoordinates));
+                            var featurePolygon = GeoJsonFactory.CreatePolygonFeature(polygonCoordinates);
+                            AddFieldValueToFeature(featurePolygon, fieldValues);
+                            featureCollection.Features.Add(featurePolygon);
                           }
 
                           break;
@@ -388,7 +392,10 @@ namespace StreetSmartArcGISPro.VectorLayers
                                   }
                                 }
 
-                                featureCollection.Features.Add(GeoJsonFactory.CreateLineFeature(coordinates));
+                                var featureLine = GeoJsonFactory.CreateLineFeature(coordinates);
+                                AddFieldValueToFeature(featureLine, fieldValues);
+                                featureCollection.Features.Add(featureLine);
+
                               }
                             }
                           }
@@ -396,19 +403,6 @@ namespace StreetSmartArcGISPro.VectorLayers
                           break;
                         case GeometryType.Unknown:
                           break;
-                      }
-
-                      foreach (var fieldValue in fieldValues)
-                      {
-                        if (featureCollection.Features.Count >= 1)
-                        {
-                          if (!featureCollection.Features[featureCollection.Features.Count - 1].Properties
-                            .ContainsKey(fieldValue.Key))
-                          {
-                            featureCollection.Features[featureCollection.Features.Count - 1].Properties
-                              .Add(fieldValue.Key, fieldValue.Value);
-                          }
-                        }
                       }
                     }
                   }
@@ -426,6 +420,17 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
 
       return featureCollection;
+    }
+
+    private void AddFieldValueToFeature(IFeature feature, Dictionary<string, string> fieldValues)
+    {
+      foreach (var fieldValue in fieldValues)
+      {
+        if (!feature.Properties.ContainsKey(fieldValue.Key))
+        {
+          feature.Properties.Add(fieldValue.Key, fieldValue.Value);
+        }
+      }
     }
 
     private async Task<bool> CreateSld(IFeatureCollection featureCollection)

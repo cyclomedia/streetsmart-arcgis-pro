@@ -30,6 +30,7 @@ using StreetSmartArcGISPro.Utilities;
 
 using Microsoft.Win32;
 using StreetSmartArcGISPro.Configuration.File;
+using EventLog = ArcGIS.Desktop.Framework.Utilities.EventLog;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
@@ -119,12 +120,14 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
         else
         {
           string errorPdfTxt = res.GetString("HelpNoPdfViewerInstalledOnYourSystem", language.CultureInfo);
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (OnClick) {errorPdfTxt}");
           MessageBox.Show(errorPdfTxt);
         }
       }
       catch (Exception ex)
       {
         string errorTxt = res.GetString("HelpErrorOpenHelpDocument", language.CultureInfo);
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (OnClick) {errorTxt}");
         MessageBox.Show(ex.Message, errorTxt);
       }
     }

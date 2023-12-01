@@ -24,7 +24,7 @@ using System.Text;
 using System.Threading;
 
 using ArcGIS.Core.Geometry;
-
+using ArcGIS.Desktop.Framework.Utilities;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Resource;
 
@@ -104,6 +104,8 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       string dateString = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:00-00:00");
       string recordingItem = string.Format(_ci, wfsRequest, epsgCode, envelope.XMin, envelope.YMin, envelope.XMax,
         envelope.YMax, dateString);
+      EventLog.Write(EventLog.EventType.Information,
+        $"Street Smart: (Web) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
       return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML) as Stream;
     }
 
