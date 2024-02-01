@@ -105,7 +105,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       string recordingItem = string.Format(_ci, wfsRequest, epsgCode, envelope.XMin, envelope.YMin, envelope.XMax,
         envelope.YMax, dateString);
       EventLog.Write(EventLog.EventType.Information,
-        $"Street Smart: (Web) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
+        $"Street Smart: (Web.cs) (GetByBbox) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
       return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML) as Stream;
     }
 
