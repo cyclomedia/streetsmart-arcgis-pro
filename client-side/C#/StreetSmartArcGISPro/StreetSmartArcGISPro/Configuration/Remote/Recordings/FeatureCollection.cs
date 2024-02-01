@@ -78,13 +78,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) Loaded features: {features?.NumberOfFeatures ?? 0}");
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) (Load (Envelope)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
         catch
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) Error loading features");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) (Load (Envelope)) Error loading features");
         }
       }
 
@@ -105,13 +105,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) Loaded features: {features?.NumberOfFeatures ?? 0}");
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
         catch
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) Error loading features");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Error loading features");
         }
       }
 

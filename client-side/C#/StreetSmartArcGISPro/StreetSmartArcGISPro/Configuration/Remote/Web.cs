@@ -61,13 +61,17 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
         #region Constructor
 
-        private Web()
-        {
-            _login = Login.Instance;
-            _apiKey = ApiKey.Instance;
-            _ci = CultureInfo.InvariantCulture;
-            ServicePointManager.DefaultConnectionLimit = DefaultConnectionLimit;
-        }
+    public Stream GetByBbox(Envelope envelope, string wfsRequest)
+    {
+      string epsgCode = $"EPSG:{envelope.SpatialReference.Wkid}";
+      epsgCode = mySpatialReferenceList.Instance.ToKnownSrsName(epsgCode);
+      string dateString = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:00-00:00");
+      string recordingItem = string.Format(_ci, wfsRequest, epsgCode, envelope.XMin, envelope.YMin, envelope.XMax,
+        envelope.YMax, dateString);
+      EventLog.Write(EventLog.EventType.Information,
+        $"Street Smart: (Web.cs) (GetByBbox) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
+      return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML) as Stream;
+    }
 
         #endregion
 
