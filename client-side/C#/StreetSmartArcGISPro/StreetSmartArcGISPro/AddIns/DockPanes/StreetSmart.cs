@@ -1490,7 +1490,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (args.MapPane.MapView == MapView)
       {
         await CloseViewersAsync();
-        _restart = true;
+    //    _restart = true;
       }
     }
 
