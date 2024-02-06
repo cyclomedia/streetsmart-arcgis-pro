@@ -86,7 +86,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         /// <summary>
         /// Configuration URL
         /// </summary>
-        protected string ConfigurationUrl { get; set; }
+        protected string ConfigurationUrl { get; private set; }
 
         /// <summary>
         /// Spatialreferences URL
@@ -96,7 +96,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         /// <summary>
         /// Recordings URL
         /// </summary>
-        protected string RecordingServiceUrl { get; set; }
+        protected string RecordingServiceUrl { get; private set; }
 
         #endregion
 
