@@ -72,6 +72,14 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         $"Street Smart: (Web.cs) (GetByBbox) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
       return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML) as Stream;
     }
+        private Web()
+        {
+            _login = Login.Instance;
+            _apiKey = ApiKey.Instance;
+            _ci = CultureInfo.InvariantCulture;
+            ServicePointManager.DefaultConnectionLimit = DefaultConnectionLimit;
+            CreateUrls();
+        }
 
         #endregion
 

@@ -49,6 +49,7 @@ using StreetSmart.Common.Interfaces.SLD;
 using StreetSmart.WPF;
 using StreetSmartArcGISPro.AddIns.Views;
 using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.Overlays;
@@ -383,7 +384,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           Api.ViewerAdded += ViewerAdded;
           Api.ViewerRemoved += ViewerRemoved;
 
-          if (!string.IsNullOrEmpty(_configuration.StreetSmartLocation))
+          if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
           {
             Api.RestartStreetSmart(_configuration.StreetSmartLocation);
           }
@@ -970,7 +971,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
             addressSettings, element)
           : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            _configuration.ConfigurationUrlLocation, addressSettings, element);
+            Web.Instance.ConfigServiceUrl, addressSettings, element);
 
         try
         {
