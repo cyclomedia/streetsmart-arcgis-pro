@@ -34,6 +34,7 @@ using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using Nancy.Json;
@@ -172,6 +173,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView)
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync)");
       Map map = mapView?.Map;
       SpatialReference mapSpatRef = map?.SpatialReference;
 
@@ -419,6 +421,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         GeoJson = featureCollection;
       }
 
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
       return featureCollection;
     }
 

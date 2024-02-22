@@ -16,12 +16,18 @@
  * License along with this library.
  */
 
+using System;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Models;
 using StreetSmartArcGISPro.Utilities;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
+using StreetSmartArcGISPro.Configuration.Resource;
 using static StreetSmartArcGISPro.Utilities.WebUtils;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 
@@ -37,7 +43,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         // ReSharper disable InconsistentNaming        
         private const string baseUrl = "https://atlasapi.cyclomedia.com/api";
         private const string _userInfoConfigurationRequest = "/configuration/userinfo";
-        private const string _appConfigurationRequestPrefix = "/configuration/configuration/";
+        private const string _appConfigurationRequestPrefix = "/configuration";
         private const string spatialReferencesXml = "/spatialreferences/SpatialReferences.xml";
         private const string recordingRequest =
           "{0}?service=WFS&version=1.1.0&request=GetFeature&srsname={1}&featureid={2}&TYPENAME=atlas:Recording";
@@ -47,24 +53,25 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
         #region Members
 
-        protected readonly FileConfiguration Configuration;
+        protected FileConfiguration Configuration;
         private XmlSerializer xmlSerializer;
 
-        private readonly string _configId;
+        private string _configId;
 
         #endregion
 
         #region Constructor
 
-        protected Urls()
+        public void CreateUrls()
         {
             Configuration = FileConfiguration.Instance;
 
             _configId = FetchConfigIdFromUserInfoConfiguration();
-            ConfigurationUrl = $"{BaseUrl}{_appConfigurationRequestPrefix}{_configId}";
+            ConfigServiceUrl = $"{BaseUrl}{_appConfigurationRequestPrefix}";
+            ConfigurationUrl = $"{ConfigServiceUrl}{_appConfigurationRequestPrefix}/{_configId}";
 
             var globeSpotterConfig = FetchConfigurationByConfigId();
-            RecordingServiceUrl = globeSpotterConfig.ServicesConfiguration.RecordingLocationService.OnlineResource.ResourceLink.Replace("?", "");
+            RecordingServiceUrl = globeSpotterConfig?.ServicesConfiguration?.RecordingLocationService?.OnlineResource?.ResourceLink?.Replace("?", "") ?? string.Empty;
         }
 
         #endregion
@@ -76,7 +83,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         /// </summary>
         private string BaseUrl => Configuration.UseDefaultConfigurationUrl
           ? baseUrl
-          : Configuration.ConfigurationUrlLocation.Replace(@"/configuration", string.Empty);
+          : Configuration.ConfigurationUrlLocation.Replace(_appConfigurationRequestPrefix, string.Empty);
 
         /// <summary>
         /// UserInfo Configuration URL
@@ -87,6 +94,11 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         /// Configuration URL
         /// </summary>
         protected string ConfigurationUrl { get; private set; }
+
+        /// <summary>
+        /// Configuration URL
+        /// </summary>
+        public string ConfigServiceUrl { get; private set; }
 
         /// <summary>
         /// Spatialreferences URL
@@ -112,6 +124,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
             string configId = string.Empty;
             try
             {
+                // var userInfoConfigStream = await TestRequest(UserInfoConfigurationUrl, Login.Instance, ApiKey.Instance);
                 var userInfoConfigStream = 
                     GetRequest(
                         UserInfoConfigurationUrl,
@@ -134,12 +147,33 @@ namespace StreetSmartArcGISPro.Configuration.Remote
                     userInfoConfigStream.Close();
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
 
             }
             return configId;
         }
+/*
+        public async Task<Stream> TestRequest(string url, Login login, ApiKey apiKey)
+        {
+          Stream result = null;
+          HttpClient client = new HttpClient();
+          client.BaseAddress = new Uri(url);
+          client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
+          client.DefaultRequestHeaders.Accept.Clear();
+          client.DefaultRequestHeaders.Add("ApiKey", apiKey.Value);
+          var user = login.Username;
+          var password = login.Password;
+          var base64String = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}"));
+          client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64String);
+          HttpResponseMessage response = await client.GetAsync("/");
+          if (response.IsSuccessStatusCode == true)
+          {
+            result = response.Content.ReadAsStreamAsync().Result;
+          }
+          return result;
+        }
+*/
 
         private GlobeSpotterConfiguration FetchConfigurationByConfigId()
         {
@@ -167,7 +201,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
                     configStream.Close();
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
 
             }

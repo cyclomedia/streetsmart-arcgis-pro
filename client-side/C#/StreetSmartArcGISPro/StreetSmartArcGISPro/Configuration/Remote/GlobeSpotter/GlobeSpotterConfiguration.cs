@@ -142,6 +142,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
     {
       try
       {
+        Web.CreateUrls();
         Stream streetSmartConf = Web.GlobeSpotterConfiguration();
 
         if (streetSmartConf != null)

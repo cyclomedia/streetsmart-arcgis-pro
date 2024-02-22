@@ -67,6 +67,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
             _apiKey = ApiKey.Instance;
             _ci = CultureInfo.InvariantCulture;
             ServicePointManager.DefaultConnectionLimit = DefaultConnectionLimit;
+            CreateUrls();
         }
 
         #endregion
