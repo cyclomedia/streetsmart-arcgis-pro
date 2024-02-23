@@ -479,21 +479,17 @@ namespace StreetSmartArcGISPro.VectorLayers
                       value = value.Replace("'", "");
                     }
                     filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
-                    /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                    ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-                    IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                    SLDFactory.AddRuleToStyle(Sld, rule);*/
+
                     CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
                     ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
                     IRule rule = SLDFactory.CreateRule(symbolizer, filter);
                     SLDFactory.AddRuleToStyle(Sld, rule);
                   }
                 }
-
-                //CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                //ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-                //IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                //SLDFactory.AddRuleToStyle(Sld, rule);
+                /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                SLDFactory.AddRuleToStyle(Sld, rule);*/
               }
             }
           }
