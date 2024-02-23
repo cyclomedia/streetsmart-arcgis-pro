@@ -268,6 +268,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
       }
 
+      var project = ArcGISProject.Current;
+
+      //making sure project editing is turned on so recordings appear on map
+      if (!project.IsEditingEnabled)
+      {
+        await project.SetIsEditingEnabledAsync(true);
+      }
+
       if (Layer == null)
       {
         await CreateFeatureLayerAsync();
@@ -277,7 +285,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         await MakeEmptyAsync();
         await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
-        var project = ArcGISProject.Current;
         await project.SaveEditsAsync();
       }
 
