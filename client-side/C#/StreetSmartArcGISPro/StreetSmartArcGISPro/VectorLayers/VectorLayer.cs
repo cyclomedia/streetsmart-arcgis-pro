@@ -432,7 +432,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         if (!feature.Properties.ContainsKey(fieldValue.Key))
         {
-          //GC: made to fix apostraphe error for symbology
+          //GC: made to fix apostrophe error for symbology
           if (fieldValue.Value.Contains("'"))
           {
             feature.Properties.Add(fieldValue.Key, fieldValue.Value.Replace("'", ""));
@@ -441,17 +441,6 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             feature.Properties.Add(fieldValue.Key, fieldValue.Value);
           }
-        }
-      }
-    }
-
-    private void AddFieldValueToFeature(IFeature feature, Dictionary<string, string> fieldValues)
-    {
-      foreach (var fieldValue in fieldValues)
-      {
-        if (!feature.Properties.ContainsKey(fieldValue.Key))
-        {
-          feature.Properties.Add(fieldValue.Key, fieldValue.Value);
         }
       }
     }
@@ -486,19 +475,23 @@ namespace StreetSmartArcGISPro.VectorLayers
                   for (int i = 0; i < fields.Length; i++)
                   {
                     string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
-                    //GC: made to fix apostraphe error for symbology
+                    //GC: made to fix apostrophe error for symbology
                     if (value.Contains("'"))
                     {
                       value = value.Replace("'", "");
                     }
                     filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
+
+                    CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                    ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                    IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                    SLDFactory.AddRuleToStyle(Sld, rule);
                   }
                 }
-
-                CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
                 ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
                 IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                SLDFactory.AddRuleToStyle(Sld, rule);
+                SLDFactory.AddRuleToStyle(Sld, rule);*/
               }
             }
           }
