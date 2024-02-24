@@ -16,21 +16,31 @@
  * License along with this library.
  */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
-[assembly: AssemblyTitle("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyDescription("Street Smart integration for ArcGIS Pro")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CycloMedia")]
-[assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2024")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+namespace StreetSmartArcGISPro.Configuration.Remote.Models
+{
+    [XmlRoot("UserInfo", Namespace = "http://atlas.cyclomedia.com")]
+    public class UserInfo
+    {
+        [XmlArray("Packages")]
+        [XmlArrayItem("Package")]
+        public List<Package> Packages { get; set; }
+    }
 
-[assembly: ComVisible(false)]
+    public class Package
+    {
+        [XmlElement("ConfigId")]
+        public string ConfigId { get; set; }
 
-[assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
+        [XmlElement("Name")]
+        public string Name { get; set; }
 
-[assembly: AssemblyVersion("1.7.8")]
-[assembly: AssemblyFileVersion("1.7.8")]
+        [XmlElement("Description")]
+        public string Description { get; set; }
+
+        [XmlElement("ApiPackage")]
+        public bool ApiPackage { get; set; }
+    }
+}

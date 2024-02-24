@@ -47,6 +47,7 @@ using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.Spatial
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using ArcGIS.Core.Data.Exceptions;
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
@@ -269,6 +270,13 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
       }
 
+      var project = ArcGISProject.Current;
+
+      if (!project.IsEditingEnabled)
+      {
+        await project.SetIsEditingEnabledAsync(true);
+      }
+
       if (Layer == null)
       {
         await CreateFeatureLayerAsync();
@@ -278,7 +286,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         await MakeEmptyAsync();
         await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
-        var project = ArcGISProject.Current;
         await project.SaveEditsAsync();
       }
 
@@ -650,7 +657,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    public async Task<bool> SaveFeatureMembersAsync(FeatureCollection featureCollection, Envelope envelope)
+    public async Task<EditOperation> SaveFeatureMembersAsync(FeatureCollection featureCollection, Envelope envelope)
     {
       return await QueuedTask.Run(() =>
       {
@@ -665,6 +672,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           FeatureMembers featureMembers = featureCollection.FeatureMembers;
           Recording[] recordings = featureMembers?.Recordings;
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Start writing number of recordings: {recordings?.Length ?? 0}");
 
           if (Layer != null && recordings != null)
           {
@@ -715,12 +723,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     {
                       if (Filter(recording))
                       {
+                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Start writing recording to database: {recording.ImageId}");
                         Dictionary<string, object> toAddFields = Recording.Fields.ToDictionary(fieldId => fieldId.Key,
                           fieldId => recording.FieldToItem(fieldId.Key));
 
                         MapPoint newPoint = MapPointBuilderEx.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
                         toAddFields.Add(Recording.ShapeFieldName, newPoint);
                         editOperation.Create(Layer, toAddFields);
+                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Finished writing recording to database: {recording.ImageId}");
                       }
                     }
                     else
@@ -735,6 +745,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                 foreach (var row in exists)
                 {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) delete element from database: {row.Value}, {row.Key}");
                   editOperation.Delete(Layer, row.Value);
                 }
               }
@@ -742,7 +753,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           }
         }
 
-        return editOperation.IsEmpty ? Task.FromResult(true) : editOperation.ExecuteAsync();
+        return editOperation;
       });
     }
 
@@ -859,7 +870,24 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
               if (_addData != null && _addData.NumberOfFeatures >= 1)
               {
-                await SaveFeatureMembersAsync(_addData, thisEnvelope);
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) loaded features, start saving: {_addData.NumberOfFeatures}");
+                EditOperation editOperation = await SaveFeatureMembersAsync(_addData, thisEnvelope);
+
+                if (editOperation.IsEmpty)
+                {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) there are no features to write to the layer");
+                }
+                else
+                {
+                  bool value = await editOperation.ExecuteAsync();
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) finished writing features, result: {value}");
+
+                  if (value == false)
+                  {
+                    string errorMessage = editOperation.ErrorMessage;
+                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) the error message is: {errorMessage}");
+                  }
+                }
               }
 
               await PostEntryStepAsync(thisEnvelope);

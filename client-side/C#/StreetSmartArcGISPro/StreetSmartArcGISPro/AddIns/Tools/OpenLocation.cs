@@ -25,6 +25,7 @@ using System.Windows.Input;
 
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 
 using StreetSmartArcGISPro.Configuration.File;
@@ -160,6 +161,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
         if (streetSmart != null)
         {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (OpenLocation.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
           streetSmart.MapView = activeView;
           streetSmart.LookAt = null;
           streetSmart.Replace = replace;
