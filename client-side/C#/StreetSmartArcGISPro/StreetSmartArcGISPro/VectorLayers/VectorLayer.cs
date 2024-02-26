@@ -473,6 +473,11 @@ namespace StreetSmartArcGISPro.VectorLayers
                   for (int i = 0; i < fields.Length; i++)
                   {
                     string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
+                    //GC: made to fix apostrophe error for symbology
+                    if(value.Contains("'"))
+                    {
+                      value = value.Replace("'", "");
+                    }
                     filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
 
                     CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
@@ -481,11 +486,10 @@ namespace StreetSmartArcGISPro.VectorLayers
                     SLDFactory.AddRuleToStyle(Sld, rule);
                   }
                 }
-
-                //CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                //ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-                //IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                //SLDFactory.AddRuleToStyle(Sld, rule);
+                /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                SLDFactory.AddRuleToStyle(Sld, rule);*/
               }
             }
           }
