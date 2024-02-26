@@ -37,6 +37,7 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using CefSharp.DevTools.CSS;
 using Nancy.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
@@ -424,14 +425,22 @@ namespace StreetSmartArcGISPro.VectorLayers
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
       return featureCollection;
     }
-
+    //fix missing line feature bug with this new method
     private void AddFieldValueToFeature(IFeature feature, Dictionary<string, string> fieldValues)
     {
       foreach (var fieldValue in fieldValues)
       {
         if (!feature.Properties.ContainsKey(fieldValue.Key))
         {
-          feature.Properties.Add(fieldValue.Key, fieldValue.Value);
+          //GC: made to fix apostrophe error for symbology
+          if (fieldValue.Value.Contains("'"))
+          {
+            feature.Properties.Add(fieldValue.Key, fieldValue.Value.Replace("'", ""));
+          }
+          else
+          {
+            feature.Properties.Add(fieldValue.Key, fieldValue.Value);
+          }
         }
       }
     }
@@ -466,14 +475,23 @@ namespace StreetSmartArcGISPro.VectorLayers
                   for (int i = 0; i < fields.Length; i++)
                   {
                     string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
+                    //GC: made to fix apostrophe error for symbology
+                    if (value.Contains("'"))
+                    {
+                      value = value.Replace("'", "");
+                    }
                     filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
+
+                    CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                    ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                    IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                    SLDFactory.AddRuleToStyle(Sld, rule);
                   }
                 }
-
-                CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
                 ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
                 IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                SLDFactory.AddRuleToStyle(Sld, rule);
+                SLDFactory.AddRuleToStyle(Sld, rule);*/
               }
             }
           }
