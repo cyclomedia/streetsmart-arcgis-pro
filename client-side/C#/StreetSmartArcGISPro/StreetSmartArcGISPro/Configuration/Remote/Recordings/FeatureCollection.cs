@@ -82,9 +82,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
             featuresStream.Close();
           }
         }
-        catch
+        catch(Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) (Load (Envelope)) Error loading features");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) (Load (Envelope)) Error loading features, Exception: {ex}");
         }
       }
 
@@ -109,9 +109,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
             featuresStream.Close();
           }
         }
-        catch
+        catch(Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Error loading features");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Error loading features, Exception: {ex}");
         }
       }
 
