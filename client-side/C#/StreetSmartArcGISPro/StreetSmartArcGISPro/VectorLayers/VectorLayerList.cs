@@ -20,8 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using ArcGIS.Core;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
@@ -30,7 +28,6 @@ using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -43,9 +40,9 @@ using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryTy
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
-  #region Delegates
+    #region Delegates
 
-  public delegate void VectorLayerDelegate(VectorLayer layer);
+    public delegate void VectorLayerDelegate(VectorLayer layer);
   public delegate void VectorUpdatedDelegate();
 
   #endregion
