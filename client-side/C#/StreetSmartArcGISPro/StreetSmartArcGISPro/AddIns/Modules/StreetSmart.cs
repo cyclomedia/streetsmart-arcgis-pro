@@ -16,6 +16,7 @@
  * License along with this library.
  */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -24,6 +25,7 @@ using System.Threading.Tasks;
 
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -36,6 +38,7 @@ using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
 
 using Project = ArcGIS.Desktop.Core.Project;
+using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
 {
@@ -144,6 +147,12 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       MapViewInitializedEvent.Subscribe(OnMapViewInitialized);
       MapClosedEvent.Subscribe(OnMapClosedDocument);
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+      ApplicationStartupEvent.Subscribe(OnApplicationStartupEvent);
+    }
+
+    private void OnApplicationStartupEvent(EventArgs args)
+    {
+      DockPaneStreetSmart.Init();
     }
 
     #endregion
