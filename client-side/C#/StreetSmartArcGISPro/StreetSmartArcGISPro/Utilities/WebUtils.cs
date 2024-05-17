@@ -1,13 +1,11 @@
-﻿using StreetSmartArcGISPro.Configuration.Remote;
-using StreetSmartArcGISPro.Configuration.Resource;
+﻿using CefSharp.DevTools.Debugger;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace StreetSmartArcGISPro.Utilities
 {
@@ -32,8 +30,8 @@ namespace StreetSmartArcGISPro.Utilities
         }
 
         public static object GetRequest(
-            string remoteLocation, 
-            AsyncCallback asyncCallback, 
+            string remoteLocation,
+            AsyncCallback asyncCallback,
             TypeDownloadConfig typeDownloadConfig,
             Configuration.File.Configuration fileConfiguration,
             Configuration.File.Login login,
@@ -102,9 +100,9 @@ namespace StreetSmartArcGISPro.Utilities
 
         public static object PostRequest
             (
-                string remoteLocation, 
-                AsyncCallback asyncCallback, 
-                string postItem, 
+                string remoteLocation,
+                AsyncCallback asyncCallback,
+                string postItem,
                 TypeDownloadConfig typeDownloadConfig,
                 Configuration.File.Configuration fileConfiguration,
                 Configuration.File.Login login,
@@ -204,10 +202,10 @@ namespace StreetSmartArcGISPro.Utilities
         }
 
         private static WebRequest OpenWebRequest(
-            string remoteLocation, 
-            string webRequest, 
-            int length, 
-            Configuration.File.Configuration fileConfiguration, 
+            string remoteLocation,
+            string webRequest,
+            int length,
+            Configuration.File.Configuration fileConfiguration,
             Configuration.File.Login login,
             Configuration.Resource.ApiKey apiKey,
             bool useAuthorization = true
@@ -251,7 +249,16 @@ namespace StreetSmartArcGISPro.Utilities
 
             if (useAuthorization)
             {
-                request.Headers.Add("authorization", credentials);
+                if (Login.Instance.IsOAuth)
+                {
+                    var bearer = Login.Instance.Bearer;
+                    
+                    request.Headers.Add("authorization", "Bearer " + bearer);
+                }
+                else
+                {
+                    request.Headers.Add("authorization", credentials);
+                }
             }
 
             request.ServicePoint.ConnectionLeaseTimeout = LeaseTimeOut;

@@ -52,55 +52,12 @@
     <None Include="StreetSmartArcGISPro.csproj.DotSettings" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.2.0.49743" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.7" />
     <PackageReference Include="Nancy" Version="2.0.0" />
-    <PackageReference Include="StreetSmart.WPF" Version="24.1.0" />
-    <PackageReference Include="System.Windows.Extensions" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
-      <Reference Include="ArcGIS.Core">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin')">$(localAppData)\Programs\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Core">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Core')">$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Editing">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Editing')">$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Extensions">
-		  <HintPath Condition="Exists('C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions')">C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\DesktopExtensions')">$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Framework">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin')">$(localAppData)\Programs\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Mapping">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Mapping')">$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Catalog">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Catalog\ArcGIS.Desktop.Catalog.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Catalog')">$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Catalog\ArcGIS.Desktop.Catalog.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ArcGIS.Desktop.Layouts">
-		  <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Layout\ArcGIS.Desktop.Layouts.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Layout')">$(localAppData)\Programs\ArcGIS\Pro\bin\Extensions\Layout\ArcGIS.Desktop.Layouts.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-	  <Reference Include="ESRI.ArcGIS.ItemIndex">
-	      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ESRI.ArcGIS.ItemIndex.dll</HintPath>
-		  <HintPath Condition="Exists('$(localAppData)\Programs\ArcGIS\Pro\bin')">$(localAppData)\Programs\ArcGIS\Pro\bin\ESRI.ArcGIS.ItemIndex.dll</HintPath>
-	      <Private>False</Private>
-      </Reference>
+    <ProjectReference Include="..\..\..\..\..\streetsmart-dotnet\StreetSmartAPI\StreetSmart.API\WPF\StreetSmart.WPF.NET6.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.fr.Designer.cs">

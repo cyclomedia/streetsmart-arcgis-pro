@@ -31,123 +31,123 @@ using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
-  internal class RecordingLayer : Button
-  {
-    #region Members
-
-    private MapView _mapView;
-
-    #endregion
-
-    #region Properties
-
-    private string RecordingLayerName
+    internal class RecordingLayer : Button
     {
-      get
-      {
-        ResourceManager resourceManager = Properties.Resources.ResourceManager;
-        LanguageSettings language = LanguageSettings.Instance;
-        return resourceManager.GetString("RecordingLayerName", language.CultureInfo);
-      }
-    }
+        #region Members
 
-    #endregion
+        private MapView _mapView;
 
-    #region Constructors
+        #endregion
 
-    protected RecordingLayer()
-    {
-      IsChecked = false;
-      _mapView = MapView.Active;
+        #region Properties
 
-      ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
-
-      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      CycloMediaGroupLayer groupLayer = streetSmart.GetCycloMediaGroupLayer(_mapView);
-
-      if (groupLayer != null)
-      {
-        CheckCheckedState(groupLayer);
-        groupLayer.PropertyChanged += OnLayerPropertyChanged;
-      }
-    }
-
-    #endregion
-
-    #region Overrides
-
-    protected override async void OnClick()
-    {
-      OnUpdate();
-      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-
-      if (IsChecked)
-      {
-        await streetSmart.RemoveLayerAsync(RecordingLayerName, _mapView);
-      }
-      else
-      {
-        await streetSmart.AddLayersAsync(RecordingLayerName, _mapView);
-      }
-    }
-
-    #endregion
-
-    #region Event handlers
-
-    private void OnLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {
-      if (sender is CycloMediaGroupLayer groupLayer && args.PropertyName == "Count")
-      {
-        IsChecked = groupLayer.Aggregate(false, (current, layer) => layer.Name == RecordingLayerName || current);
-      }
-    }
-
-    private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
-    {
-      _mapView = args.IncomingView;
-      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-
-      CycloMediaGroupLayer outGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.OutgoingView);
-
-      if (outGroupLayer != null)
-      {
-        outGroupLayer.PropertyChanged -= OnLayerPropertyChanged;
-      }
-
-      if (args.IncomingView != null)
-      {
-        CycloMediaGroupLayer inGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.IncomingView);
-
-        if (inGroupLayer != null)
+        private string RecordingLayerName
         {
-          CheckCheckedState(inGroupLayer);
-          inGroupLayer.PropertyChanged += OnLayerPropertyChanged;
+            get
+            {
+                ResourceManager resourceManager = Properties.Resources.ResourceManager;
+                LanguageSettings language = LanguageSettings.Instance;
+                return resourceManager.GetString("RecordingLayerName", language.CultureInfo);
+            }
         }
-      }
-    }
 
-    #endregion
+        #endregion
 
-    #region Functions
+        #region Constructors
 
-    private void CheckCheckedState(CycloMediaGroupLayer groupLayer)
-    {
-      IsChecked = false;
-
-      foreach (var layer in groupLayer)
-      {
-        if (layer.IsRemoved)
+        protected RecordingLayer()
         {
-          IsChecked = layer.Name != RecordingLayerName && IsChecked;
-        }
-        else
-        {
-          IsChecked = layer.Name == RecordingLayerName || IsChecked;
-        }
-      }
-    }
+            IsChecked = false;
+            _mapView = MapView.Active;
 
-    #endregion
-  }
+            ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+
+            ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
+            CycloMediaGroupLayer groupLayer = streetSmart.GetCycloMediaGroupLayer(_mapView);
+
+            if (groupLayer != null)
+            {
+                CheckCheckedState(groupLayer);
+                groupLayer.PropertyChanged += OnLayerPropertyChanged;
+            }
+        }
+
+        #endregion
+
+        #region Overrides
+
+        protected override async void OnClick()
+        {
+            OnUpdate();
+            ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
+
+            if (IsChecked)
+            {
+                await streetSmart.RemoveLayerAsync(RecordingLayerName, _mapView);
+            }
+            else
+            {
+                await streetSmart.AddLayersAsync(RecordingLayerName, _mapView);
+            }
+        }
+
+        #endregion
+
+        #region Event handlers
+
+        private void OnLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (sender is CycloMediaGroupLayer groupLayer && args.PropertyName == "Count")
+            {
+                IsChecked = groupLayer.Aggregate(false, (current, layer) => layer.Name == RecordingLayerName || current);
+            }
+        }
+
+        private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
+        {
+            _mapView = args.IncomingView;
+            ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
+
+            CycloMediaGroupLayer outGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.OutgoingView);
+
+            if (outGroupLayer != null)
+            {
+                outGroupLayer.PropertyChanged -= OnLayerPropertyChanged;
+            }
+
+            if (args.IncomingView != null)
+            {
+                CycloMediaGroupLayer inGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.IncomingView);
+
+                if (inGroupLayer != null)
+                {
+                    CheckCheckedState(inGroupLayer);
+                    inGroupLayer.PropertyChanged += OnLayerPropertyChanged;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Functions
+
+        private void CheckCheckedState(CycloMediaGroupLayer groupLayer)
+        {
+            IsChecked = false;
+
+            foreach (var layer in groupLayer)
+            {
+                if (layer.IsRemoved)
+                {
+                    IsChecked = layer.Name != RecordingLayerName && IsChecked;
+                }
+                else
+                {
+                    IsChecked = layer.Name == RecordingLayerName || IsChecked;
+                }
+            }
+        }
+
+        #endregion
+    }
 }

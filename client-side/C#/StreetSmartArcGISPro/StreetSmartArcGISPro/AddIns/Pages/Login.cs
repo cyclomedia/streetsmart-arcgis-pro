@@ -26,105 +26,148 @@ using FileLogin = StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
-  internal class Login : Page, INotifyPropertyChanged
-  {
-    #region Events
-
-    public new event PropertyChangedEventHandler PropertyChanged;
-
-    #endregion
-
-    #region Members
-
-    private readonly FileLogin _login;
-
-    private readonly string _username;
-    private readonly string _password;
-
-    #endregion
-
-    #region Constructors
-
-    protected Login()
+    internal class Login : Page, INotifyPropertyChanged
     {
-      _login = FileLogin.Instance;
-      _username = _login.Username;
-      _password = _login.Password;
-    }
+        #region Events
 
-    #endregion
+        public new event PropertyChangedEventHandler PropertyChanged;
 
-    #region Properties
+        #endregion
 
-    public string Username
-    {
-      get => _login.Username;
-      set
-      {
-        if (_login.Username != value)
+        #region Members
+
+        private readonly FileLogin _login;
+
+        private readonly Configuration _configuration;
+        private readonly string _username;
+        private readonly string _password;
+        private readonly bool _isOAuth;
+        private readonly bool _isSignedInWithOAuth;
+
+        #endregion
+
+        #region Constructors
+
+        protected Login()
         {
-          IsModified = true;
-          _login.Username = value;
-          NotifyPropertyChanged();
+            _login = FileLogin.Instance;
+            _username = _login.Username;
+            _password = _login.Password;
+            _isOAuth = _login.IsOAuth;
+            _isSignedInWithOAuth = _login.IsSignedInWithOAuth;
         }
-      }
-    }
 
-    public string Password
-    {
-      get => _login.Password;
-      set
-      {
-        if (_login.Password != value)
+        #endregion
+
+        #region Properties
+
+        public string Username
         {
-          IsModified = true;
-          _login.Password = value;
-          NotifyPropertyChanged();
+            get => _login.Username;
+            set
+            {
+                if (_login.Username != value)
+                {
+                    IsModified = true;
+                    _login.Username = value;
+                    NotifyPropertyChanged();
+                }
+            }
         }
-      }
+
+        public string Password
+        {
+            get => _login.Password;
+            set
+            {
+                if (_login.Password != value)
+                {
+                    IsModified = true;
+                    _login.Password = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsOAuth
+        {
+            get => _login.IsOAuth;
+            set
+            {
+               /* if (_configuration != null)
+                    if (_configuration.UseDefaultStreetSmartUrl)
+                    {
+                        if (!_login.IsOAuth)
+                        {
+                            IsModified = true;
+                            _login.IsOAuth = false;
+                            NotifyPropertyChanged();
+                        }
+                    }*/
+                if ((_login.IsOAuth != value))
+                {
+                    IsModified = true;
+                    _login.IsOAuth = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        public bool IsSignedInWithOAuth
+        {
+            get => _login.IsSignedInWithOAuth;
+            set
+            {
+                if ((_login.IsSignedInWithOAuth != value))
+                {
+                    IsModified = true;
+                    _login.IsSignedInWithOAuth = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+        public bool Credentials => _login.Credentials;
+
+        #endregion
+
+        #region Overrides
+
+        protected override Task CommitAsync()
+        {
+            if (_login.Username != _username || _login.Password != _password || _login.IsOAuth != _isOAuth || _login.IsSignedInWithOAuth != _isSignedInWithOAuth)
+            {
+                Save();
+            }
+
+            return base.CommitAsync();
+        }
+
+        protected override Task CancelAsync()
+        {
+            _login.Username = _username;
+            _login.Password = _password;
+            _login.IsOAuth = _isOAuth;
+            _login.IsSignedInWithOAuth = _isSignedInWithOAuth;
+
+            Save();
+            return base.CancelAsync();
+        }
+
+        #endregion
+
+        #region Functions
+
+        protected override void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Save()
+        {
+            _login.Save();
+            // ReSharper disable once ExplicitCallerInfoArgument
+            NotifyPropertyChanged("Credentials");
+        }
+
+        #endregion
     }
-
-    public bool Credentials => _login.Credentials;
-
-    #endregion
-
-    #region Overrides
-
-    protected override Task CommitAsync()
-    {
-      if (_login.Username != _username || _login.Password != _password)
-      {
-        Save();
-      }
-
-      return base.CommitAsync();
-    }
-
-    protected override Task CancelAsync()
-    {
-      _login.Username = _username;
-      _login.Password = _password;
-
-      Save();
-      return base.CancelAsync();
-    }
-
-    #endregion
-
-    #region Functions
-
-    protected override void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public void Save()
-    {
-      _login.Save();
-      // ReSharper disable once ExplicitCallerInfoArgument
-      NotifyPropertyChanged("Credentials");
-    }
-
-    #endregion
-  }
 }
