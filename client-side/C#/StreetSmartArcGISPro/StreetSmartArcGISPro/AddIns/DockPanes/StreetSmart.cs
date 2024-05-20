@@ -63,6 +63,7 @@ using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using StreetSmartArcGISPro.AddIns.Pages;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
@@ -364,7 +365,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                     }
 
                     _viewerList.RemoveViewers();
-                    _options.LoginOauth = false;
+                    _options.DoOAuthLogoutOnDestroy = true;
                     await Api.Destroy(_options);
                 }
 
@@ -391,6 +392,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                     Api.APIReady += ApiReady;
                     Api.ViewerAdded += ViewerAdded;
                     Api.ViewerRemoved += ViewerRemoved;
+                    Api.BearerTokenChanged += BearerTokenChanged;
 
                     if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
                     {
@@ -565,7 +567,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                     }
 
                     _options.SRS = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-                    _options.LoginOauth = false;
                     await Api.Destroy(_options);
                 }
 
@@ -841,13 +842,16 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
             try
             {
-                _options.LoginOauth = false;
+                _login.IsSignedInWithOAuth = false;
+                _login.Bearer = null;
+                _options.DoOAuthLogoutOnDestroy = true;
                 QueuedTask.Run(async () => await Api.Destroy(_options));
 
                 return true;
             }
             catch
             {
+                // TODO: logger
                 return false;
             }
         }
@@ -1033,11 +1037,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                 {
                     EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiInit) Start api init");
                     await Api.Init(_options);
-                    if (_options.LoginOauth == true)
+
+                    if (_login.IsOAuth)
                     {
                         _streetSmart.Api = Api;
                         _login.IsSignedInWithOAuth = true;
+                        _login.Bearer = await Api.GetBearerToken();
+                        _login.Check();
                     }
+
                     if (MapView != null)
                     {
                         GlobeSpotterConfiguration.Load();
@@ -1077,11 +1085,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                     string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
                     MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
                     DoHide();
-                    if (_options.LoginOauth == true)
+
+                    if (_login.IsOAuth)
                     {
                         _login.IsSignedInWithOAuth = false;
-                        _login.IsOAuth = true;
-                        _login.Save();
                     }
                 }
             }
@@ -1257,6 +1264,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                     await Api.CloseViewer(await viewers[0].GetId());
                 }
             }
+        }
+
+        private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
+        {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
+
+          Login.Instance.Bearer = args.Value.BearerToken;
         }
 
         private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)

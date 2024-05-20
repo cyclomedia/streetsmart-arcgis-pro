@@ -76,6 +76,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
         private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
+        //TODO: remove this
         public StreetSmartAPI Api { get; set; }
         public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
         {
@@ -155,11 +156,12 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
         private async void OnProjectOpenedEvent(ProjectEventArgs args)
         {
-            if (Login.Instance.IsOAuth)
+            if (Login.Instance.IsSignedInWithOAuth)
             {
-                Login.Instance.Bearer = await Api.GetBearerToken();
+                //Login.Instance.Bearer = Api != null ? await Api.GetBearerToken() : string.Empty;
+                //Login.Instance.Check();
             }
-            Login.Instance.Save();
+            //Login.Instance.Save();
         }
         private void OnApplicationStartupEvent(EventArgs args)
         {

@@ -136,10 +136,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
                 else
                     streetSmart = DockPaneStreetSmart.ActivateStreet();
 
-                UpdateUI(true, true);
-
-                ((dynamic)DataContext).IsSignedInWithOAuth = true;
-                ((dynamic)DataContext).Save();
+                UpdateUI(((dynamic)DataContext).IsOAuth, ((dynamic)DataContext).IsSignedInWithOAuthrue);
             }
             catch (Exception ex)
             {
@@ -154,9 +151,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
                     streetSmart = FrameworkApplication.DockPaneManager.Find("streetSmartArcGISPro_streetSmartDockPane") as DockPaneStreetSmart;
 
                 streetSmart.Destroy();
-                ((dynamic)DataContext).IsSignedInWithOAuth = false;
-                ((dynamic)DataContext).Save();
-                UpdateUI(true, false);
+                UpdateUI(((dynamic)DataContext).IsOAuth, ((dynamic)DataContext).IsSignedInWithOAuthrue);
             }
             catch (Exception ex)
             {

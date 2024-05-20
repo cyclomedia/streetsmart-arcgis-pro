@@ -83,7 +83,6 @@ namespace StreetSmartArcGISPro.Configuration.File
         [XmlIgnore]
         public string Password { get; set; }
 
-        [XmlIgnore]
         public bool IsOAuth { get; set; }
 
         [XmlIgnore]
@@ -119,7 +118,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         {
             get
             {
-                var ct1 = Encrypt(CheckWord, Salt, Encoding.UTF8.GetBytes($"{Username};{Password};{IsOAuth};{IsSignedInWithOAuth}"));
+                var ct1 = Encrypt(CheckWord, Salt, Encoding.UTF8.GetBytes($"{Username};{Password}"));
                 return Convert.ToBase64String(ct1);
             }
             set
@@ -130,8 +129,6 @@ namespace StreetSmartArcGISPro.Configuration.File
                 var values = result.Split(';');
                 Username = values.Length >= 1 ? values[0] : string.Empty;
                 Password = values.Length >= 2 ? values[1] : string.Empty;
-                IsOAuth = values.Length >= 3 ? Convert.ToBoolean(values[2]) : false;
-                IsSignedInWithOAuth = values.Length >= 4 ? Convert.ToBoolean(values[3]) : false;
             }
         }
 
@@ -185,22 +182,14 @@ namespace StreetSmartArcGISPro.Configuration.File
 
         public bool Check()
         {
-            return Credentials = (!string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password) && GlobeSpotterConfiguration.CheckCredentials()) || (IsOAuth && CheckIfCanLoadEndpoints());// && IsSignedInWithOAuth);
+            return Credentials = (IsOAuth || (!string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password))) && GlobeSpotterConfiguration.CheckCredentials();
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        private bool CheckIfCanLoadEndpoints()
-        {
-            if (IsOAuth && IsSignedInWithOAuth)
-            {
-                GlobeSpotterConfiguration.Load();
-            }
-            return true;
-        }
+       
         /// <summary>
         /// Performs encryption with random IV (prepended to output), and includes hash of plaintext for verification.
         /// </summary>
