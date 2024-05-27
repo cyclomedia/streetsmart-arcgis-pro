@@ -34,8 +34,16 @@ using SystemIOFile = System.IO.File;
 namespace StreetSmartArcGISPro.Configuration.File
 {
     [XmlRoot("Login")]
-    public class Login: INotifyPropertyChanged
+    public class Login : INotifyPropertyChanged
     {
+        public enum OAuthStatus
+        {
+            SigningIn,
+            SignedIn,
+            SigningOut,
+            SignedOut
+        }
+
         #region Events
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -43,10 +51,8 @@ namespace StreetSmartArcGISPro.Configuration.File
         #endregion
 
         #region Constants
-
         private const string CheckWord = "1234567890!";
         private const int HashSize = 32; // SHA256
-
         #endregion
 
         #region Members
@@ -57,7 +63,10 @@ namespace StreetSmartArcGISPro.Configuration.File
         private static Login _login;
 
         private bool _credentials;
-
+        private bool _isOAuth;
+        private bool _isOAuthChecked;
+        private OAuthStatus _oAuthAuthenticationStatus;
+        private bool _isFromSettingsPage;
         #endregion
 
         #region Constructors
@@ -71,6 +80,10 @@ namespace StreetSmartArcGISPro.Configuration.File
         public Login()
         {
             Credentials = false;
+            IsOAuth = false;
+            OAuthAuthenticationStatus = OAuthStatus.SignedOut;
+            IsFromSettingsPage = false;
+            IsOAuthChecked = false;
         }
 
         #endregion
@@ -83,11 +96,59 @@ namespace StreetSmartArcGISPro.Configuration.File
         [XmlIgnore]
         public string Password { get; set; }
 
-        public bool IsOAuth { get; set; }
+        public bool IsOAuth
+        {
+            get => _isOAuth;
+            set
+            {
+                if (_isOAuth != value)
+                {
+                    _isOAuth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public bool IsOAuthChecked
+        {
+            get => _isOAuthChecked;
+            set
+            {
+                if (_isOAuthChecked != value)
+                {
+                    _isOAuthChecked = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         [XmlIgnore]
-        public bool IsSignedInWithOAuth { get; set; }
-       
+        public bool IsFromSettingsPage
+        {
+            get => _isFromSettingsPage;
+            set
+            {
+                if (_isFromSettingsPage != value)
+                {
+                    _isFromSettingsPage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public OAuthStatus OAuthAuthenticationStatus
+        {
+            get => _oAuthAuthenticationStatus;
+            set
+            {
+                if (_oAuthAuthenticationStatus != value)
+                {
+                    _oAuthAuthenticationStatus = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         [XmlIgnore]
         public string Bearer { get; set; }
 
@@ -189,7 +250,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-       
+
         /// <summary>
         /// Performs encryption with random IV (prepended to output), and includes hash of plaintext for verification.
         /// </summary>
@@ -273,7 +334,7 @@ namespace StreetSmartArcGISPro.Configuration.File
             {
                 aes.Mode = CipherMode.CBC;
                 // ReSharper disable once CSharpWarnings::CS0618
-                aes.Key = pdb.GetBytes(aes.KeySize/8);
+                aes.Key = pdb.GetBytes(aes.KeySize / 8);
             }
 
             return aes;
@@ -290,7 +351,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
             return result;
         }
-
+       
         #endregion
     }
 }

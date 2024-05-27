@@ -27,6 +27,12 @@
  * License along with this library.
  */
 -->
+    <UserControl.CommandBindings>
+        <CommandBinding Command="util:CustomCommands.OAuthToBeVisibleCommand" Executed="OAuthToBeVisible"/>
+    </UserControl.CommandBindings>
+    <UserControl.InputBindings>
+        <KeyBinding Command="util:CustomCommands.OAuthToBeVisibleCommand" Key="O" Modifiers="Control"/>
+    </UserControl.InputBindings>
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:LoginStatus x:Key="LoginStatusConverter" />
@@ -37,7 +43,7 @@
     </UserControl.Resources>
     <Grid>
         <StackPanel Grid.Row="0" Margin="5,10,5,0">
-            <StackPanel x:Name="LoginElementsGroup">
+            <StackPanel x:Name="LoginElementsGroup" Visibility="{Binding IsLoginElementsVisible, UpdateSourceTrigger=PropertyChanged}">
                 <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
                 <DockPanel Margin="5,5,5,0">
                     <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,5,5,0"/>
@@ -60,9 +66,9 @@
                     </Grid>
                 </StackPanel>
             </StackPanel>
-            <CheckBox x:Name="OAuthCheckBox" Content="OAuth" Margin="5" Checked="OAuthCheckBox_Checked" Unchecked="OAuthCheckBox_Unchecked"/>
-            <Button x:Name="SignInButton" Content="Sign In" Click="SignInButton_Click" Margin="5" Visibility="Collapsed"/>
-            <Button x:Name="SignOutButton" Content="Sign Out" Click="SignOutButton_Click" Margin="5" Visibility="Collapsed"/>
+            <CheckBox util:LocalizationProvider.ContentId="LoginOAuth" Margin="5" IsChecked="{Binding IsOAuth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Visibility="{Binding IsOAuthVisible, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsOAuthEnabled, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button util:LocalizationProvider.ContentId="LoginSignInOAuth" Command="{Binding SignInCommand}" Margin="5" Width="60" HorizontalAlignment="Left" IsEnabled="{Binding IsSignInVisible, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsOAuthButtonsVisible, UpdateSourceTrigger=PropertyChanged}" />
+            <Button util:LocalizationProvider.ContentId="LoginSignOutOAuth"  Command="{Binding SignOutCommand}" Margin="5" Width="60" HorizontalAlignment="Left" IsEnabled="{Binding IsSignOutVisible, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsOAuthButtonsVisible, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
     </Grid>
 </UserControl>

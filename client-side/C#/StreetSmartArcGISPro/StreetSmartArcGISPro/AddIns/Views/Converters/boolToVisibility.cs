@@ -23,20 +23,21 @@ using System.Windows.Data;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
-  internal class BoolToVisibility : IValueConverter
-  {
-    #region IMultiValueConverter Members
-
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    class BoolToVisibility : IValueConverter
     {
-      return value != null && (bool) value ? Visibility.Visible : Visibility.Hidden;
-    }
+        #region IMultiValueConverter Members
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-      throw new NotSupportedException();
-    }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value != null && (bool)value ? Visibility.Visible : Visibility.Hidden;
+        }
 
-    #endregion
-  }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if ((Visibility)value == Visibility.Visible) return true;
+            else return false;
+        }
+
+        #endregion
+    }
 }

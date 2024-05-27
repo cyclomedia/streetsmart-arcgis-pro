@@ -39,9 +39,8 @@ using StreetSmartArcGISPro.VectorLayers;
 
 using Project = ArcGIS.Desktop.Core.Project;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using StreetSmartAPI = StreetSmart.Common.Interfaces.API.IStreetSmartAPI;
-using System.Windows;
 using ArcGIS.Desktop.Core.Events;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
 {
@@ -76,8 +75,6 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
         private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
-        //TODO: remove this
-        public StreetSmartAPI Api { get; set; }
         public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
         {
             CycloMediaGroupLayer result = null;
@@ -156,17 +153,28 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
         private async void OnProjectOpenedEvent(ProjectEventArgs args)
         {
-            if (Login.Instance.IsSignedInWithOAuth)
+            if (!Login.Instance.IsOAuth && Login.Instance.Credentials)
             {
-                //Login.Instance.Bearer = Api != null ? await Api.GetBearerToken() : string.Empty;
-                //Login.Instance.Check();
+                DockPaneStreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find("streetSmartArcGISPro_streetSmartDockPane") as DockPaneStreetSmart;
+                //streetSmart.Api.RestartStreetSmart();
+                await streetSmart.Destroy(false);
+                if (streetSmart.Api != null)
+                    await QueuedTask.Run(async () => await streetSmart.InitialApi());
+                else
+                    streetSmart = DockPaneStreetSmart.ActivateStreet();
+                Login.Instance.Check();
             }
-            //Login.Instance.Save();
+
+            if (Login.Instance.OAuthAuthenticationStatus == Login.OAuthStatus.SignedIn)
+            {
+                Login.Instance.Check();
+            }
         }
         private void OnApplicationStartupEvent(EventArgs args)
         {
             if (Login.Instance.IsOAuth)
             {
+                Login.Instance.IsFromSettingsPage = false;
                 DockPaneStreetSmart streetSmart = DockPaneStreetSmart.ActivateStreet();
             }
         }

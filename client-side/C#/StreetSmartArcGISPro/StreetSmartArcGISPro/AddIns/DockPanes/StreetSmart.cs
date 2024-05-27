@@ -63,7 +63,6 @@ using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
-using StreetSmartArcGISPro.AddIns.Pages;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
@@ -365,7 +364,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                     }
 
                     _viewerList.RemoveViewers();
-                    _options.DoOAuthLogoutOnDestroy = true;
                     await Api.Destroy(_options);
                 }
 
@@ -750,13 +748,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            if (Api != null && await Api.GetApiReadyState()) //|| (Api != null)) && Login.Instance.IsFromOAuthToBasic == true)
+            if (_login.Credentials && Api != null && await Api.GetApiReadyState()) //|| (Api != null)) && Login.Instance.IsFromOAuthToBasic == true)
             {
                 switch (propertyName)
                 {
                     case "Location":
-                        //if (Login.Instance.IsFromOAuthToBasic == true)
-                        //    Login.Instance.IsFromOAuthToBasic = false;
                         string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
 
                         if (_oldMapView != _mapView)
@@ -838,20 +834,19 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             return streetSmart;
         }
 
-        public bool Destroy()
+        public async Task<bool> Destroy(bool DoOAuthLogoutOnDestroy)
         {
             try
             {
-                _login.IsSignedInWithOAuth = false;
                 _login.Bearer = null;
-                _options.DoOAuthLogoutOnDestroy = true;
-                QueuedTask.Run(async () => await Api.Destroy(_options));
 
+                _options.DoOAuthLogoutOnDestroy = DoOAuthLogoutOnDestroy;
+                await QueuedTask.Run(async () => await Api.Destroy(_options));
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                // TODO: logger
+                EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Destroy) {ex}");
                 return false;
             }
         }
@@ -1021,11 +1016,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                   AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
                 IDomElement element = DomElementFactory.Create();
                 if (_login.IsOAuth)
-                    _options = _configuration.UseDefaultConfigurationUrl
-                     ? OptionsFactory.Create(null, null, "DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale,
-                       null, addressSettings, element, loginOauth: true)
-                     : OptionsFactory.Create(null, null, "DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale,
-                       Web.Instance.ConfigServiceUrl, addressSettings, element, loginOauth: true);
+                    if (_login.IsFromSettingsPage)
+                        _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: false);
+                    else
+                        _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: true);
                 else
                     _options = _configuration.UseDefaultConfigurationUrl
                      ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
@@ -1040,10 +1034,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
                     if (_login.IsOAuth)
                     {
-                        _streetSmart.Api = Api;
-                        _login.IsSignedInWithOAuth = true;
+                        _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedIn;
                         _login.Bearer = await Api.GetBearerToken();
-                        _login.Check();
                     }
 
                     if (MapView != null)
@@ -1080,15 +1072,27 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                 }
                 catch (StreetSmartLoginFailedException)
                 {
-                    EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ApiInit) Login failed");
-                    ResourceManager res = ThisResources.ResourceManager;
-                    string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
-                    MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
-                    DoHide();
-
+                    if (_login.IsFromSettingsPage)
+                    {
+                        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ApiInit) Login failed");
+                        ResourceManager res = ThisResources.ResourceManager;
+                        string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
+                        MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+                        DoHide();
+                    }
+                    else
+                    {
+                        Notification toast = new Notification();
+                        ResourceManager res = ThisResources.ResourceManager;
+                        toast.Title = res.GetString("StreetSmartOnLoginFailedTitle", _languageSettings.CultureInfo);
+                        toast.Message = res.GetString("StreetSmartOnLoginFailedMessage", _languageSettings.CultureInfo);
+                        toast.ImageSource = Application.Current.Resources["ToastLicensing32"] as System.Windows.Media.ImageSource;
+                        FrameworkApplication.AddNotification(toast);
+                    }
                     if (_login.IsOAuth)
                     {
-                        _login.IsSignedInWithOAuth = false;
+                        await Api.Destroy(_options);
+                        _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedOut;
                     }
                 }
             }
@@ -1268,9 +1272,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
         {
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
-
-          Login.Instance.Bearer = args.Value.BearerToken;
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
+            Login.Instance.Bearer = args.Value.BearerToken;
         }
 
         private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)
