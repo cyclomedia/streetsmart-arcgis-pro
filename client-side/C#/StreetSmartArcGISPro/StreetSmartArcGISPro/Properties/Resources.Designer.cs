@@ -357,7 +357,18 @@ namespace StreetSmartArcGISPro.Properties {
                 return ResourceManager.GetString("LoginUsername", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Open Location is not supported in Scene.
+        /// </summary>
+        internal static string OpenLocationNotSupportedInScene
+        {
+            get
+            {
+                return ResourceManager.GetString("OpenLocationNotSupportedInScene", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Depth map.
         /// </summary>
