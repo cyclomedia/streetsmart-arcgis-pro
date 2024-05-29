@@ -66,1523 +66,1523 @@ using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
-    internal class StreetSmart : DockPane, INotifyPropertyChanged
+  internal class StreetSmart : DockPane, INotifyPropertyChanged
+  {
+    #region Constants
+
+    private const string DockPaneId = "streetSmartArcGISPro_streetSmartDockPane";
+
+    #endregion
+
+    #region Events
+
+    public new event PropertyChangedEventHandler PropertyChanged;
+
+    #endregion
+
+    #region Members
+
+    private string _location;
+    private bool _isActive;
+    private bool _replace;
+    private bool _nearest;
+    private bool _inRestart;
+    private bool _inRestartDock;
+    private bool _inClose;
+    private string _epsgCode;
+    private ICoordinate _lookAt;
+    private IOptions _options;
+    private MapView _mapView;
+    private MapView _oldMapView;
+    private readonly IList<string> _configurationPropertyChanged;
+    private IList<string> _toRestartImages;
+
+    private static bool _fromShow;
+    private static bool _fromConstructor;
+
+    private readonly LanguageSettings _languageSettings;
+    private readonly ApiKey _apiKey;
+    private readonly FileConfiguration _configuration;
+    private readonly ConstantsViewer _constants;
+    private readonly Login _login;
+    private readonly List<string> _openNearest;
+    private readonly ViewerList _viewerList;
+    private readonly MeasurementList _measurementList;
+    private readonly Dispatcher _currentDispatcher;
+    private readonly IList<VectorLayer> _vectorLayerInChange;
+    private readonly StoredLayerList _storedLayerList;
+
+    private CrossCheck _crossCheck;
+    private SpatialReference _lastSpatialReference;
+    private VectorLayerList _vectorLayerList;
+
+    //GC: adding global variable that shows if the map was changed to restart the API or not
+    public static bool _restart = false;
+    //GC: global variable that checks if the selected overlay is invisible or not
+    private static bool _invisible = false;
+    //GC: global variable that adds the panorama viewer to 'this' value
+    private IPanoramaViewer _panorama;
+    private ModulestreetSmart _streetSmart;
+
+    #endregion
+
+    #region Constructor
+
+    static StreetSmart()
     {
-        #region Constants
+      _fromShow = false;
+      _fromConstructor = false;
+    }
 
-        private const string DockPaneId = "streetSmartArcGISPro_streetSmartDockPane";
+    protected StreetSmart()
+    {
+      if (!_fromShow)
+      {
+        _fromConstructor = true;
+      }
 
-        #endregion
+      _storedLayerList = StoredLayerList.Instance;
+      ProjectClosedEvent.Subscribe(OnProjectClosed);
+      _currentDispatcher = Dispatcher.CurrentDispatcher;
+      _inRestart = false;
+      _inClose = false;
+      _inRestartDock = false;
+      _vectorLayerInChange = new List<VectorLayer>();
+      _streetSmart = (ModulestreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{LanguageSettings.Instance.Locale}");
+      _languageSettings = LanguageSettings.Instance;
+      _languageSettings.PropertyChanged += OnLanguageSettingsChanged;
 
-        #region Events
+      _apiKey = ApiKey.Instance;
+      _constants = ConstantsViewer.Instance;
 
-        public new event PropertyChangedEventHandler PropertyChanged;
+      _login = Login.Instance;
+      _login.PropertyChanged += OnLoginPropertyChanged;
 
-        #endregion
+      _configuration = FileConfiguration.Instance;
+      _configuration.PropertyChanged += OnConfigurationPropertyChanged;
 
-        #region Members
+      _openNearest = new List<string>();
+      _crossCheck = null;
+      _lastSpatialReference = null;
+      _configurationPropertyChanged = new List<string>();
 
-        private string _location;
-        private bool _isActive;
-        private bool _replace;
-        private bool _nearest;
-        private bool _inRestart;
-        private bool _inRestartDock;
-        private bool _inClose;
-        private string _epsgCode;
-        private ICoordinate _lookAt;
-        private IOptions _options;
-        private MapView _mapView;
-        private MapView _oldMapView;
-        private readonly IList<string> _configurationPropertyChanged;
-        private IList<string> _toRestartImages;
+      GetVectorLayerListAsync();
 
-        private static bool _fromShow;
-        private static bool _fromConstructor;
+      ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
+      _viewerList = streetSmartModule.ViewerList;
+      _measurementList = streetSmartModule.MeasurementList;
 
-        private readonly LanguageSettings _languageSettings;
-        private readonly ApiKey _apiKey;
-        private readonly FileConfiguration _configuration;
-        private readonly ConstantsViewer _constants;
-        private readonly Login _login;
-        private readonly List<string> _openNearest;
-        private readonly ViewerList _viewerList;
-        private readonly MeasurementList _measurementList;
-        private readonly Dispatcher _currentDispatcher;
-        private readonly IList<VectorLayer> _vectorLayerInChange;
-        private readonly StoredLayerList _storedLayerList;
+      _epsgCode = string.Empty;
+      _mapView = MapView.Active;
+      _oldMapView = MapView.Active;
 
-        private CrossCheck _crossCheck;
-        private SpatialReference _lastSpatialReference;
-        private VectorLayerList _vectorLayerList;
+      _toRestartImages = new List<string>();
 
-        //GC: adding global variable that shows if the map was changed to restart the API or not
-        public static bool _restart = false;
-        //GC: global variable that checks if the selected overlay is invisible or not
-        private static bool _invisible = false;
-        //GC: global variable that adds the panorama viewer to 'this' value
-        private IPanoramaViewer _panorama;
-        private ModulestreetSmart _streetSmart;
+      if (_mapView != null)
+      {
+        Setting settings = ProjectList.Instance.GetSettings(_mapView);
 
-        #endregion
-
-        #region Constructor
-
-        static StreetSmart()
+        if (settings != null)
         {
-            _fromShow = false;
-            _fromConstructor = false;
+          settings.PropertyChanged += OnSettingsPropertyChanged;
         }
+      }
 
-        protected StreetSmart()
+      //New API call
+      InitializeApi();
+      WpfApi = new WpfApi();
+      WpfApi.PropertyChanged += OnApiAdded;
+
+      MapClosedEvent.Subscribe(OnMapClosedEvent);
+    }
+
+    #endregion
+
+    #region Properties
+
+    public IStreetSmartAPI Api { get; set; }
+
+    public WpfApi WpfApi { get; set; }
+
+    public string Location
+    {
+      get => _location;
+      set
+      {
+        if (_location != null && value != null && _location == value)
         {
-            if (!_fromShow)
+          _location = value;
+          NotifyPropertyChanged();
+        }
+        if (_location != value)
+        {
+          _location = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public bool IsActive
+    {
+      get => _isActive;
+      set
+      {
+        if (_isActive != value)
+        {
+          _isActive = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public bool Replace
+    {
+      get => _replace;
+      set
+      {
+        if (_replace != value)
+        {
+          _replace = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public bool Nearest
+    {
+      get => _nearest;
+      set
+      {
+        if (_nearest != value)
+        {
+          _nearest = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public ICoordinate LookAt
+    {
+      get => _lookAt;
+      set
+      {
+        _lookAt = value;
+        NotifyPropertyChanged();
+      }
+    }
+
+    public MapView MapView
+    {
+      get => _mapView;
+      set
+      {
+        if (_mapView != value)
+        {
+          _oldMapView = _mapView;
+
+          if (_mapView != null)
+          {
+            Setting outSettings = ProjectList.Instance.GetSettings(_mapView);
+
+            if (outSettings != null)
             {
-                _fromConstructor = true;
+              outSettings.PropertyChanged -= OnSettingsPropertyChanged;
+            }
+          }
+
+          if (value != null)
+          {
+            Setting inSettings = ProjectList.Instance.GetSettings(value);
+            _mapView = value;
+
+            if (inSettings != null)
+            {
+              inSettings.PropertyChanged += OnSettingsPropertyChanged;
+            }
+          }
+
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region Overrides
+
+    protected override void OnActivate(bool isActive)
+    {
+      IsActive = isActive || _isActive;
+      base.OnActivate(isActive);
+    }
+
+    protected override async void OnHidden()
+    {
+      IsActive = false;
+      _location = string.Empty;
+      _replace = false;
+      _nearest = false;
+
+      await CloseViewersAsync();
+
+      base.OnHidden();
+    }
+
+    protected override async void OnShow(bool isVisible)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnShow):{isVisible}");
+      var contentControl = ((Views.StreetSmart)Content).StreetSmartApi;
+
+      if (isVisible && !_inRestartDock && (contentControl.Content == null || _fromConstructor))
+      {
+        _inRestartDock = true;
+
+        if (Api != null && MapView != null)
+        {
+          _measurementList.RemoveAll();
+
+          _vectorLayerList.LayerAdded -= OnAddVectorLayer;
+          _vectorLayerList.LayerRemoved -= OnRemoveVectorLayer;
+          _vectorLayerList.LayerUpdated -= OnUpdateVectorLayer;
+
+          if (_vectorLayerList.ContainsKey(MapView))
+          {
+            foreach (var vectorLayer in _vectorLayerList[MapView])
+            {
+              vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
             }
 
-            _storedLayerList = StoredLayerList.Instance;
-            ProjectClosedEvent.Subscribe(OnProjectClosed);
-            _currentDispatcher = Dispatcher.CurrentDispatcher;
-            _inRestart = false;
-            _inClose = false;
-            _inRestartDock = false;
-            _vectorLayerInChange = new List<VectorLayer>();
-            _streetSmart = (ModulestreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{LanguageSettings.Instance.Locale}");
-            _languageSettings = LanguageSettings.Instance;
-            _languageSettings.PropertyChanged += OnLanguageSettingsChanged;
-
-            _apiKey = ApiKey.Instance;
-            _constants = ConstantsViewer.Instance;
-
-            _login = Login.Instance;
-            _login.PropertyChanged += OnLoginPropertyChanged;
-
-            _configuration = FileConfiguration.Instance;
-            _configuration.PropertyChanged += OnConfigurationPropertyChanged;
-
-            _openNearest = new List<string>();
-            _crossCheck = null;
-            _lastSpatialReference = null;
-            _configurationPropertyChanged = new List<string>();
-
-            GetVectorLayerListAsync();
-
-            ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
-            _viewerList = streetSmartModule.ViewerList;
-            _measurementList = streetSmartModule.MeasurementList;
-
-            _epsgCode = string.Empty;
-            _mapView = MapView.Active;
-            _oldMapView = MapView.Active;
-
-            _toRestartImages = new List<string>();
-
-            if (_mapView != null)
+            foreach (var vectorLayer in _vectorLayerList[MapView])
             {
-                Setting settings = ProjectList.Instance.GetSettings(_mapView);
-
-                if (settings != null)
-                {
-                    settings.PropertyChanged += OnSettingsPropertyChanged;
-                }
+              vectorLayer.Overlay = null;
             }
+          }
 
-            //New API call
-            InitializeApi();
-            WpfApi = new WpfApi();
-            WpfApi.PropertyChanged += OnApiAdded;
+          foreach (var viewer in _viewerList)
+          {
+            _toRestartImages.Add(viewer.Value.ImageId);
+          }
 
-            MapClosedEvent.Subscribe(OnMapClosedEvent);
+          _viewerList.RemoveViewers();
+          await Api.Destroy(_options);
         }
 
-        #endregion
+        contentControl.Content = new StreetSmartApi();
+        Initialize();
+      }
 
-        #region Properties
+      base.OnShow(isVisible);
+    }
 
-        public IStreetSmartAPI Api { get; set; }
+    #endregion
 
-        public WpfApi WpfApi { get; set; }
+    #region Functions
 
-        public string Location
+    private void OnApiAdded(object sender, PropertyChangedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnApiAdded):{_configuration.StreetSmartLocation}");
+
+      if (args != null)
+      {
+        if (args.PropertyName == "Api")
         {
-            get => _location;
-            set
-            {
-                if (_location != null && value != null && _location == value)
-                {
-                    _location = value;
-                    NotifyPropertyChanged();
-                }
-                if (_location != value)
-                {
-                    _location = value;
-                    NotifyPropertyChanged();
-                }
-            }
+          Api = WpfApi.Api;
+          Api.APIReady += ApiReady;
+          Api.ViewerAdded += ViewerAdded;
+          Api.ViewerRemoved += ViewerRemoved;
+          Api.BearerTokenChanged += BearerTokenChanged;
+
+          if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
+          {
+            Api.RestartStreetSmart(_configuration.StreetSmartLocation);
+          }
         }
+      }
+    }
 
-        public bool IsActive
+    private async Task CloseViewersAsync()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync)");
+
+      if (!_inClose)
+      {
+        _inClose = true;
+
+        if (Api != null && await Api.GetApiReadyState())
         {
-            get => _isActive;
-            set
-            {
-                if (_isActive != value)
-                {
-                    _isActive = value;
-                    NotifyPropertyChanged();
-                }
-            }
-        }
+          IList<IViewer> viewers = await Api.GetViewers();
 
-        public bool Replace
-        {
-            get => _replace;
-            set
-            {
-                if (_replace != value)
-                {
-                    _replace = value;
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-
-        public bool Nearest
-        {
-            get => _nearest;
-            set
-            {
-                if (_nearest != value)
-                {
-                    _nearest = value;
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-
-        public ICoordinate LookAt
-        {
-            get => _lookAt;
-            set
-            {
-                _lookAt = value;
-                NotifyPropertyChanged();
-            }
-        }
-
-        public MapView MapView
-        {
-            get => _mapView;
-            set
-            {
-                if (_mapView != value)
-                {
-                    _oldMapView = _mapView;
-
-                    if (_mapView != null)
-                    {
-                        Setting outSettings = ProjectList.Instance.GetSettings(_mapView);
-
-                        if (outSettings != null)
-                        {
-                            outSettings.PropertyChanged -= OnSettingsPropertyChanged;
-                        }
-                    }
-
-                    if (value != null)
-                    {
-                        Setting inSettings = ProjectList.Instance.GetSettings(value);
-                        _mapView = value;
-
-                        if (inSettings != null)
-                        {
-                            inSettings.PropertyChanged += OnSettingsPropertyChanged;
-                        }
-                    }
-
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-
-        #endregion
-
-        #region Overrides
-
-        protected override void OnActivate(bool isActive)
-        {
-            IsActive = isActive || _isActive;
-            base.OnActivate(isActive);
-        }
-
-        protected override async void OnHidden()
-        {
-            IsActive = false;
-            _location = string.Empty;
-            _replace = false;
-            _nearest = false;
-
-            await CloseViewersAsync();
-
-            base.OnHidden();
-        }
-
-        protected override async void OnShow(bool isVisible)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnShow):{isVisible}");
-            var contentControl = ((Views.StreetSmart)Content).StreetSmartApi;
-
-            if (isVisible && !_inRestartDock && (contentControl.Content == null || _fromConstructor))
-            {
-                _inRestartDock = true;
-
-                if (Api != null && MapView != null)
-                {
-                    _measurementList.RemoveAll();
-
-                    _vectorLayerList.LayerAdded -= OnAddVectorLayer;
-                    _vectorLayerList.LayerRemoved -= OnRemoveVectorLayer;
-                    _vectorLayerList.LayerUpdated -= OnUpdateVectorLayer;
-
-                    if (_vectorLayerList.ContainsKey(MapView))
-                    {
-                        foreach (var vectorLayer in _vectorLayerList[MapView])
-                        {
-                            vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-                        }
-
-                        foreach (var vectorLayer in _vectorLayerList[MapView])
-                        {
-                            vectorLayer.Overlay = null;
-                        }
-                    }
-
-                    foreach (var viewer in _viewerList)
-                    {
-                        _toRestartImages.Add(viewer.Value.ImageId);
-                    }
-
-                    _viewerList.RemoveViewers();
-                    await Api.Destroy(_options);
-                }
-
-                contentControl.Content = new StreetSmartApi();
-                Initialize();
-            }
-
-            base.OnShow(isVisible);
-        }
-
-        #endregion
-
-        #region Functions
-
-        private void OnApiAdded(object sender, PropertyChangedEventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnApiAdded):{_configuration.StreetSmartLocation}");
-
-            if (args != null)
-            {
-                if (args.PropertyName == "Api")
-                {
-                    Api = WpfApi.Api;
-                    Api.APIReady += ApiReady;
-                    Api.ViewerAdded += ViewerAdded;
-                    Api.ViewerRemoved += ViewerRemoved;
-                    Api.BearerTokenChanged += BearerTokenChanged;
-
-                    if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
-                    {
-                        Api.RestartStreetSmart(_configuration.StreetSmartLocation);
-                    }
-                }
-            }
-        }
-
-        private async Task CloseViewersAsync()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync)");
-
-            if (!_inClose)
-            {
-                _inClose = true;
-
-                if (Api != null && await Api.GetApiReadyState())
-                {
-                    IList<IViewer> viewers = await Api.GetViewers();
-
-                    if (viewers.Count >= 1)
-                    {
-                        try
-                        {
-                            await Api.CloseViewer(await viewers[0].GetId());
-                        }
-                        catch (StreetSmartCloseViewerException)
-                        {
-                        }
-                    }
-                }
-
-                _inClose = false;
-            }
-        }
-
-        private async void GetVectorLayerListAsync()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (GetVectorLayerListAsync)");
-            ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
-            _vectorLayerList = await streetSmartModule.GetVectorLayerListAsync(MapView.Active);
-        }
-
-        private void InitializeApi()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi)");
-            string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
-
+          if (viewers.Count >= 1)
+          {
             try
             {
-                IAPISettings settings = CefSettingsFactory.Create(cachePath);
-                settings.Locale = _languageSettings.Locale;
-                settings.SetDefaultBrowserSubprocessPath();
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi): Cache: {cachePath}, locale: {_languageSettings.Locale}");
-                StreetSmartAPIFactory.Initialize(settings);
+              await Api.CloseViewer(await viewers[0].GetId());
             }
-            catch (Exception e)
+            catch (StreetSmartCloseViewerException)
             {
-                EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitializeApi): exception: {e}");
-                return;
             }
+          }
         }
 
-        private void Initialize()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Initialize): {_configuration.StreetSmartLocation}");
+        _inClose = false;
+      }
+    }
 
-            if (_login.Credentials)
-            {
-                try
-                {
-                    if (Api != null && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
-                    {
-                        Api.RestartStreetSmart(_configuration.StreetSmartLocation);
-                    }
-                }
-                catch (Exception e)
-                {
-                    EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Initialize): Error: {e}");
-                    return;
-                }
-            }
-            else
-            {
-                DoHide();
-            }
+    private async void GetVectorLayerListAsync()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (GetVectorLayerListAsync)");
+      ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
+      _vectorLayerList = await streetSmartModule.GetVectorLayerListAsync(MapView.Active);
+    }
+
+    private void InitializeApi()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi)");
+      string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+
+      try
+      {
+        IAPISettings settings = CefSettingsFactory.Create(cachePath);
+        settings.Locale = _languageSettings.Locale;
+        settings.SetDefaultBrowserSubprocessPath();
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi): Cache: {cachePath}, locale: {_languageSettings.Locale}");
+        StreetSmartAPIFactory.Initialize(settings);
+      }
+      catch (Exception e)
+      {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitializeApi): exception: {e}");
+        return;
+      }
+    }
+
+    private void Initialize()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Initialize): {_configuration.StreetSmartLocation}");
+
+      if (_login.Credentials)
+      {
+        try
+        {
+          if (Api != null && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
+          {
+            Api.RestartStreetSmart(_configuration.StreetSmartLocation);
+          }
         }
-
-        private void Restart()
+        catch (Exception e)
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Restart)");
-
-            if (_login.Credentials)
-            {
-                if (Api == null)
-                {
-                    Initialize();
-                }
-                else if (_configuration.UseDefaultStreetSmartUrl)
-                {
-                    Api.RestartStreetSmart();
-                }
-                else if (!string.IsNullOrEmpty(_configuration.StreetSmartLocation))
-                {
-                    Api.RestartStreetSmart(_configuration.StreetSmartLocation);
-                }
-            }
-            else
-            {
-                DoHide();
-            }
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Initialize): Error: {e}");
+          return;
         }
+      }
+      else
+      {
+        DoHide();
+      }
+    }
 
-        private void DoHide()
+    private void Restart()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Restart)");
+
+      if (_login.Credentials)
+      {
+        if (Api == null)
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (DoHide)");
-
-            try
-            {
-                if (!Login.Instance.IsOAuth)
-                    _currentDispatcher.Invoke(Hide, DispatcherPriority.ContextIdle);
-            }
-            catch (TaskCanceledException)
-            {
-                EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (DoHide) TaskCanceledException");
-            }
+          Initialize();
         }
-
-        private async Task RestartStreetSmart(bool reloadApi)
+        else if (_configuration.UseDefaultStreetSmartUrl)
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RestartStreetSmart) {reloadApi}");
-
-            if (Api == null || await Api.GetApiReadyState())
-            {
-                _inRestart = true;
-                _measurementList.RemoveAll();
-
-                _vectorLayerList.LayerAdded -= OnAddVectorLayer;
-                _vectorLayerList.LayerRemoved -= OnRemoveVectorLayer;
-                _vectorLayerList.LayerUpdated -= OnUpdateVectorLayer;
-
-                if (MapView != null)
-                    if (_vectorLayerList.ContainsKey(MapView))
-                    {
-                        foreach (var vectorLayer in _vectorLayerList[MapView])
-                        {
-                            vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-                        }
-
-                        foreach (var vectorLayer in _vectorLayerList[MapView])
-                        {
-                            IOverlay overlay = vectorLayer.Overlay;
-
-                            if (overlay != null && Api != null)
-                            {
-                                await Api.RemoveOverlay(overlay.Id);
-                                vectorLayer.Overlay = null;
-                            }
-                        }
-                    }
-
-                _viewerList.RemoveViewers();
-
-                if (Api != null && await Api.GetApiReadyState())
-                {
-                    IList<IViewer> viewers = await Api.GetViewers();
-
-                    foreach (IViewer viewer in viewers)
-                    {
-                        await Api.CloseViewer(await viewer.GetId());
-                    }
-
-                    _options.SRS = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-                    await Api.Destroy(_options);
-                }
-
-                if (reloadApi || Api == null)
-                {
-                    Restart();
-                }
-                else
-                {
-                    await InitApi();
-                }
-
-                _inRestart = false;
-            }
+          Api.RestartStreetSmart();
         }
-
-        private async Task OpenImageAsync()
+        else if (!string.IsNullOrEmpty(_configuration.StreetSmartLocation))
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync)");
-            MapPoint point = null;
+          Api.RestartStreetSmart(_configuration.StreetSmartLocation);
+        }
+      }
+      else
+      {
+        DoHide();
+      }
+    }
 
-            if (Nearest && _toRestartImages.Count == 0)
+    private void DoHide()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (DoHide)");
+
+      try
+      {
+        if (!Login.Instance.IsOAuth)
+          _currentDispatcher.Invoke(Hide, DispatcherPriority.ContextIdle);
+      }
+      catch (TaskCanceledException)
+      {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (DoHide) TaskCanceledException");
+      }
+    }
+
+    private async Task RestartStreetSmart(bool reloadApi)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RestartStreetSmart) {reloadApi}");
+
+      if (Api == null || await Api.GetApiReadyState())
+      {
+        _inRestart = true;
+        _measurementList.RemoveAll();
+
+        _vectorLayerList.LayerAdded -= OnAddVectorLayer;
+        _vectorLayerList.LayerRemoved -= OnRemoveVectorLayer;
+        _vectorLayerList.LayerUpdated -= OnUpdateVectorLayer;
+
+        if (MapView != null)
+          if (_vectorLayerList.ContainsKey(MapView))
+          {
+            foreach (var vectorLayer in _vectorLayerList[MapView])
             {
-                Setting settings = ProjectList.Instance.GetSettings(_mapView);
-
-                MySpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
-                SpatialReference thisSpatialReference = spatialReference.ArcGisSpatialReference ??
-                                                        await spatialReference.CreateArcGisSpatialReferenceAsync();
-
-                string[] splitLoc = _location.Split(',');
-                CultureInfo ci = CultureInfo.InvariantCulture;
-                double x = double.Parse(splitLoc.Length >= 1 ? splitLoc[0] : "0.0", ci);
-                double y = double.Parse(splitLoc.Length >= 2 ? splitLoc[1] : "0.0", ci);
-
-                await QueuedTask.Run(() =>
-                {
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Create map point {x}, {y}");
-                    point = MapPointBuilderEx.CreateMapPoint(x, y, _lastSpatialReference);
-                });
-
-                if (_lastSpatialReference != null && thisSpatialReference.Wkid != _lastSpatialReference.Wkid)
-                {
-                    await QueuedTask.Run(() =>
-                    {
-                        ProjectionTransformation projection = ProjectionTransformation.Create(_lastSpatialReference,
-                thisSpatialReference);
-                        point = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
-                    });
-
-                    if (point != null)
-                    {
-
-                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Create location {point.X} {point.Y}");
-                        _location = string.Format(ci, "{0},{1}", point.X, point.Y);
-                    }
-                }
+              vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
             }
 
-            _epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-            IList<ViewerType> viewerTypes = new List<ViewerType> { ViewerType.Panorama };
-            IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, _toRestartImages.Count == 0 && Replace, true);
-            panoramaOptions.MeasureTypeButtonToggle = false;
-            IViewerOptions viewerOptions = ViewerOptionsFactory.Create(viewerTypes, _epsgCode, panoramaOptions);
-            string toOpen;
-
-            do
+            foreach (var vectorLayer in _vectorLayerList[MapView])
             {
-                toOpen = _location;
+              IOverlay overlay = vectorLayer.Overlay;
 
-                if (_toRestartImages.Count > 0)
-                {
-                    toOpen = _toRestartImages[0];
-                    _toRestartImages.Remove(toOpen);
-
-                    if (toOpen == _location && _toRestartImages.Count > 0)
-                    {
-                        toOpen = _toRestartImages[0];
-                        _toRestartImages.Remove(toOpen);
-                    }
-                }
-
-                try
-                {
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
-                    IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
-
-                    if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
-                    {
-                        if (_crossCheck == null)
-                        {
-                            _crossCheck = new CrossCheck();
-                        }
-
-                        double size = _constants.CrossCheckSize;
-                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open cross check: {point.X}, {point.Y}");
-                        await _crossCheck.UpdateAsync(point.X, point.Y, size);
-
-                        foreach (IViewer cyclViewer in viewers)
-                        {
-                            if (cyclViewer is IPanoramaViewer panoramaViewer)
-                            {
-                                Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
-                                if (viewer != null)
-                                {
-                                    viewer.HasMarker = true;
-                                }
-                                else
-                                {
-                                    IRecording recording = await panoramaViewer.GetRecording();
-                                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Add to open nearest: {recording.Id}");
-                                    _openNearest.Add(recording.Id);
-                                }
-                            }
-                        }
-                    }
-
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) get settings");
-                    Setting settings = ProjectList.Instance.GetSettings(_mapView);
-                    MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
-
-                    if (cycloSpatialReference != null)
-                    {
-                        _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
-                                                await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
-                    }
-                }
-                catch (StreetSmartImageNotFoundException)
-                {
-                    EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage");
-                    ResourceManager res = ThisResources.ResourceManager;
-                    string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
-                    MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
-                      canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            } while (_toRestartImages.Count > 0 || toOpen != _location);
-
-            _inRestartDock = false;
-        }
-
-        private async Task MoveToLocationAsync(IPanoramaViewer panoramaViewer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (MoveToLocationAsync)");
-            IRecording recording = await panoramaViewer.GetRecording();
-            ICoordinate coordinate = recording.XYZ;
-
-            if (coordinate != null)
-            {
-                double x = coordinate.X ?? 0.0;
-                double y = coordinate.Y ?? 0.0;
-                double z = coordinate.Z ?? 0.0;
-                MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, MapView);
-                Envelope envelope = _mapView?.Extent;
-
-                if (point != null && envelope != null)
-                {
-                    const double percent = 10.0;
-                    double xBorder = (envelope.XMax - envelope.XMin) * percent / 100;
-                    double yBorder = (envelope.YMax - envelope.YMin) * percent / 100;
-                    bool inside = point.X > envelope.XMin + xBorder && point.X < envelope.XMax - xBorder &&
-                                  point.Y > envelope.YMin + yBorder && point.Y < envelope.YMax - yBorder;
-
-                    if (!inside)
-                    {
-                        Camera camera = new Camera
-                        {
-                            X = point.X,
-                            Y = point.Y,
-                            Z = point.Z,
-                            SpatialReference = point.SpatialReference
-                        };
-
-                        await QueuedTask.Run(() => { _mapView.PanTo(camera); });
-                    }
-                }
-            }
-        }
-
-        protected override async void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-            if (_login.Credentials && Api != null && await Api.GetApiReadyState()) //|| (Api != null)) && Login.Instance.IsFromOAuthToBasic == true)
-            {
-                switch (propertyName)
-                {
-                    case "Location":
-                        string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-
-                        if (_oldMapView != _mapView)
-                        {
-                            if (_oldMapView != null && _vectorLayerList.ContainsKey(_oldMapView))
-                            {
-                                foreach (var vectorLayer in _vectorLayerList[_oldMapView])
-                                {
-                                    vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-                                }
-
-                                foreach (var vectorLayer in _vectorLayerList[_oldMapView])
-                                {
-                                    IOverlay overlay = vectorLayer.Overlay;
-
-                                    if (overlay != null && Api != null)
-                                    {
-                                        await Api.RemoveOverlay(overlay.Id);
-                                        vectorLayer.Overlay = null;
-                                    }
-                                }
-                            }
-
-                            if (_mapView != null && _vectorLayerList.ContainsKey(_mapView))
-                            {
-                                foreach (var vectorLayer in _vectorLayerList[_mapView])
-                                {
-                                    vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
-                                }
-                            }
-                        }
-
-                        //if (!string.IsNullOrEmpty(_epsgCode) && _epsgCode != newEpsgCode)
-                        if (_epsgCode != newEpsgCode)
-                        {
-                            await RestartStreetSmart(false);
-                        }
-                        else
-                        {
-                            //GC: This is where the API is restarted after a new map is opened
-                            await OpenImageAsync();
-                            if (_restart == true)
-                            {
-                                _restart = false;
-                                await RestartStreetSmart(false);
-                            }
-                        }
-
-                        break;
-                    case "IsActive":
-                        if (!IsActive)
-                        {
-                            await CloseViewersAsync();
-                        }
-                        else
-                        {
-                            //GC: This is where the API is restarted after a new map is opened
-                            //await OpenImageAsync();
-                            if (_restart == true)
-                            {
-                                _restart = false;
-                                await RestartStreetSmart(true);
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-        internal static StreetSmart ActivateStreet()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Show)");
-            _fromShow = true;
-            StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
-
-            if (!(streetSmart?.IsVisible ?? true))
-            {
-                streetSmart.Activate();
-            }
-            return streetSmart;
-        }
-
-        public async Task<bool> Destroy(bool DoOAuthLogoutOnDestroy)
-        {
-            try
-            {
-                _login.Bearer = null;
-
-                _options.DoOAuthLogoutOnDestroy = DoOAuthLogoutOnDestroy;
-                await QueuedTask.Run(async () => await Api.Destroy(_options));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Destroy) {ex}");
-                return false;
-            }
-        }
-
-        internal static StreetSmart Show()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Show)");
-            _fromShow = true;
-            StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
-
-            if (!(streetSmart?.IsVisible ?? true))
-            {
-                streetSmart.Activate();
-            }
-
-            return streetSmart;
-        }
-
-        private async Task UpdateVectorLayerAsync()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
-            if (_vectorLayerList.ContainsKey(MapView))
-            {
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
-                //GC: create new list to keep track if duplicates are being added to the map
-                List<String> vectors = new List<String>();
-                // ReSharper disable once ForCanBeConvertedToForeach
-                for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
-                {
-                    VectorLayer vectorLayer = _vectorLayerList[MapView][i];
-                    if (!vectors.Contains(vectorLayer.Name))
-                    {
-                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer");
-                        vectors.Add(vectorLayer.Name);
-                        await UpdateVectorLayerAsync(vectorLayer);
-                    }
-                    //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
-                }
-            }
-        }
-
-        private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
-            await vectorLayer.GenerateJsonAsync(_mapView);
-        }
-
-        private async Task AddVectorLayerAsync(VectorLayer vectorLayer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (AddVectorLayerAsync)");
-
-            if (vectorLayer.Layer.Map == _mapView.Map)
-            {
-                Setting settings = ProjectList.Instance.GetSettings(_mapView);
-                MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
-                string srsName = cyclSpatRel?.SRSName;
-
-                if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
-                {//GC: create transparency value here
-                    string layerName = vectorLayer.Name;
-                    bool visible = _storedLayerList.GetVisibility(layerName);
-                    double transparency = vectorLayer.Layer.Transparency;
-
-                    if (!visible)
-                    {
-                        await vectorLayer.GeoJsonToOld();
-                    }
-
-                    IFeatureCollection geoJson = vectorLayer.GeoJson;
-                    IStyledLayerDescriptor sld = vectorLayer.Sld;
-
-                    // Feature property escape character sanitation.
-                    foreach (var feature in geoJson.Features)
-                    {
-                        for (int i = 0; i < feature.Properties.Count; i++)
-                        {
-                            try
-                            {
-                                if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
-                                {
-                                    feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                return;
-                            }
-                        }
-                    }
-
-                    IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
-                    overlay = await Api.AddOverlay(overlay);
-                    StoredLayer layer = _storedLayerList.GetLayer(layerName);
-
-                    if (layer == null)
-                    {
-                        _storedLayerList.Update(layerName, false);
-                    }
-                    vectorLayer.Overlay = overlay;
-
-                    //GC: trying to show layers created for the first time
-                    var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-
-                    //returns number of features created
-                    var numIds = await QueuedTask.Run<List<long>>(() =>
-                    {
-                        var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
-                        return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
-                    });
-                    //should reset the image if the first feature was created so it isn't invisible
-                    if (numIds[0] == 1)
-                    {
-                        await OpenImageAsync();
-                    }
-                }
-            }
-        }
-
-        private async Task RemoveVectorLayerAsync(VectorLayer vectorLayer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (RemoveVectorLayerAsync)");
-            IOverlay overlay = vectorLayer?.Overlay;
-
-            if (overlay != null)
-            {
+              if (overlay != null && Api != null)
+              {
                 await Api.RemoveOverlay(overlay.Id);
                 vectorLayer.Overlay = null;
+              }
             }
+          }
+
+        _viewerList.RemoveViewers();
+
+        if (Api != null && await Api.GetApiReadyState())
+        {
+          IList<IViewer> viewers = await Api.GetViewers();
+
+          foreach (IViewer viewer in viewers)
+          {
+            await Api.CloseViewer(await viewer.GetId());
+          }
+
+          _options.SRS = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
+          await Api.Destroy(_options);
         }
 
-        #endregion
-
-        #region Event handlers
-
-        private void OnProjectClosed(ProjectEventArgs args)
+        if (reloadApi || Api == null)
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (OnProjectClosed)");
-            DoHide();
+          Restart();
+        }
+        else
+        {
+          await InitApi();
         }
 
-        private async void ApiReady(object sender, EventArgs args)
+        _inRestart = false;
+      }
+    }
+
+    private async Task OpenImageAsync()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync)");
+      MapPoint point = null;
+
+      if (Nearest && _toRestartImages.Count == 0)
+      {
+        Setting settings = ProjectList.Instance.GetSettings(_mapView);
+
+        MySpatialReference spatialReference = settings.CycloramaViewerCoordinateSystem;
+        SpatialReference thisSpatialReference = spatialReference.ArcGisSpatialReference ??
+                                                await spatialReference.CreateArcGisSpatialReferenceAsync();
+
+        string[] splitLoc = _location.Split(',');
+        CultureInfo ci = CultureInfo.InvariantCulture;
+        double x = double.Parse(splitLoc.Length >= 1 ? splitLoc[0] : "0.0", ci);
+        double y = double.Parse(splitLoc.Length >= 2 ? splitLoc[1] : "0.0", ci);
+
+        await QueuedTask.Run(() =>
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
-            await InitApi();
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Create map point {x}, {y}");
+          point = MapPointBuilderEx.CreateMapPoint(x, y, _lastSpatialReference);
+        });
+
+        if (_lastSpatialReference != null && thisSpatialReference.Wkid != _lastSpatialReference.Wkid)
+        {
+          await QueuedTask.Run(() =>
+          {
+            ProjectionTransformation projection = ProjectionTransformation.Create(_lastSpatialReference,
+              thisSpatialReference);
+            point = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
+          });
+
+          if (point != null)
+          {
+
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Create location {point.X} {point.Y}");
+            _location = string.Format(ci, "{0},{1}", point.X, point.Y);
+          }
         }
-        public async Task InitialApi()
+      }
+
+      _epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
+      IList<ViewerType> viewerTypes = new List<ViewerType> { ViewerType.Panorama };
+      IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, _toRestartImages.Count == 0 && Replace, true);
+      panoramaOptions.MeasureTypeButtonToggle = false;
+      IViewerOptions viewerOptions = ViewerOptionsFactory.Create(viewerTypes, _epsgCode, panoramaOptions);
+      string toOpen;
+
+      do
+      {
+        toOpen = _location;
+
+        if (_toRestartImages.Count > 0)
         {
-            await InitApi();
+          toOpen = _toRestartImages[0];
+          _toRestartImages.Remove(toOpen);
+
+          if (toOpen == _location && _toRestartImages.Count > 0)
+          {
+            toOpen = _toRestartImages[0];
+            _toRestartImages.Remove(toOpen);
+          }
         }
-        private async Task InitApi()
+
+        try
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi)");
-            if (_constants.ShowDevTools)
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
+          IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
+
+          if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
+          {
+            if (_crossCheck == null)
             {
-                Api.ShowDevTools();
+              _crossCheck = new CrossCheck();
             }
 
-            string epsgCode = "EPSG:4326";
-            if (_mapView != null)
+            double size = _constants.CrossCheckSize;
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open cross check: {point.X}, {point.Y}");
+            await _crossCheck.UpdateAsync(point.X, point.Y, size);
+
+            foreach (IViewer cyclViewer in viewers)
             {
-                epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-            }
-
-            if (!epsgCode.Equals("EPSG:0"))
-            {
-                IAddressSettings addressSettings =
-                  AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
-                IDomElement element = DomElementFactory.Create();
-                if (_login.IsOAuth)
-                    if (_login.IsFromSettingsPage)
-                        _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: false);
-                    else
-                        _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: true);
-                else
-                    _options = _configuration.UseDefaultConfigurationUrl
-                     ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
-                       addressSettings, element)
-                     : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
-                       Web.Instance.ConfigServiceUrl, addressSettings, element);
-
-                try
-                {
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiInit) Start api init");
-                    await Api.Init(_options);
-
-                    if (_login.IsOAuth)
-                    {
-                        _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedIn;
-                        _login.Bearer = await Api.GetBearerToken();
-                    }
-
-                    if (MapView != null)
-                    {
-                        GlobeSpotterConfiguration.Load();
-                        _measurementList.Api = Api;
-                        Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
-                        Api.MeasurementStarted += _measurementList.OnMeasurementStarted;
-                        Api.MeasurementStopped += _measurementList.OnMeasurementStopped;
-                        Api.MeasurementSaved += _measurementList.OnMeasurementSaved;
-
-                        _vectorLayerList.LayerAdded += OnAddVectorLayer;
-                        _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
-                        _vectorLayerList.LayerUpdated += OnUpdateVectorLayer;
-
-                        if (_vectorLayerList.ContainsKey(MapView))
-                        {
-                            foreach (var vectorLayer in _vectorLayerList[MapView])
-                            {
-                                vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(Location) && _toRestartImages.Count == 0)
-                        {
-                            DoHide();
-                        }
-                        else
-                        {
-                            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiInit) Open image Async");
-                            await OpenImageAsync();
-                        }
-                    }
-                }
-                catch (StreetSmartLoginFailedException)
-                {
-                    if (_login.IsFromSettingsPage)
-                    {
-                        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ApiInit) Login failed");
-                        ResourceManager res = ThisResources.ResourceManager;
-                        string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
-                        MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
-                        DoHide();
-                    }
-                    else
-                    {
-                        Notification toast = new Notification();
-                        ResourceManager res = ThisResources.ResourceManager;
-                        toast.Title = res.GetString("StreetSmartOnLoginFailedTitle", _languageSettings.CultureInfo);
-                        toast.Message = res.GetString("StreetSmartOnLoginFailedMessage", _languageSettings.CultureInfo);
-                        toast.ImageSource = Application.Current.Resources["ToastLicensing32"] as System.Windows.Media.ImageSource;
-                        FrameworkApplication.AddNotification(toast);
-                    }
-                    if (_login.IsOAuth)
-                    {
-                        await Api.Destroy(_options);
-                        _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedOut;
-                    }
-                }
-            }
-        }
-
-        private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
-            IViewer cyclViewer = args.Value;
-            //GC: added an extra condition in order for the viewing cone to only be created once
-            if (cyclViewer is IPanoramaViewer panoramaViewer && _restart == false)
-            {
-                panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
-                panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
-                panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
-                this._panorama = panoramaViewer;
-
-                Setting settings = ProjectList.Instance.GetSettings(_mapView);
-                Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
-
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) function get recording from panorama");
-                IRecording recording = await panoramaViewer.GetRecording();
-                string imageId = recording.Id;
-                _viewerList.Add(panoramaViewer, imageId);
-
-                // ToDo: set culture: date and time
+              if (cyclViewer is IPanoramaViewer panoramaViewer)
+              {
                 Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-                ICoordinate coordinate = recording.XYZ;
-                IOrientation orientation = await panoramaViewer.GetOrientation();
-                Color color = await panoramaViewer.GetViewerColor();
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
-                await viewer.SetAsync(coordinate, orientation, color, _mapView);
 
-                if (_openNearest.Contains(imageId))
+                if (viewer != null)
                 {
-                    // ToDo: get pitch and draw marker in the Cyclorama
-                    viewer.HasMarker = true;
-                    _openNearest.Remove(imageId);
+                  viewer.HasMarker = true;
                 }
-
-                if (LookAt != null)
+                else
                 {
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) look at coordinate");
-                    await panoramaViewer.LookAtCoordinate(LookAt);
-                    LookAt = null;
+                  IRecording recording = await panoramaViewer.GetRecording();
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Add to open nearest: {recording.Id}");
+                  _openNearest.Add(recording.Id);
                 }
-
-                try
-                {
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location");
-                    await MoveToLocationAsync(panoramaViewer);
-                }
-                catch (Exception e) { }
-
-                panoramaViewer.ImageChange += OnImageChange;
-                panoramaViewer.ViewChange += OnViewChange;
-                panoramaViewer.FeatureClick += OnFeatureClick;
-                panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
-
-                foreach (StoredLayer layer in _storedLayerList)
-                {
-                    switch (layer.Name)
-                    {
-                        case "addressLayer":
-                            //GC: Remove Address Layer if cyclorama not in the Netherlands
-                            if (this._epsgCode == "EPSG:28992")
-                            {
-                                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) add address layer");
-                                panoramaViewer.ToggleAddressesVisible(layer.Visible);
-                            }
-                            else
-                            {
-                                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) remove address layer");
-                                await Api.RemoveOverlay("addressLayer");
-                            }
-                            break;
-                        case "surfaceCursorLayer":
-                            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle surface cursor layer");
-                            panoramaViewer.Toggle3DCursor(layer.Visible);
-                            break;
-                        case "cyclorama-recordings":
-                            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle cyclorama recordings");
-                            panoramaViewer.ToggleRecordingsVisible(layer.Visible);
-                            break;
-                    }
-                }
-
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Finished panorama");
+              }
             }
-            else if (cyclViewer is IObliqueViewer obliqueViewer)
-            {
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle oblique");
-                obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomIn, false);
-                obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomOut, false);
-            }
+          }
 
-            if (GlobeSpotterConfiguration.AddLayerWfs)
-            {
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Toggle vector layer async");
-                await UpdateVectorLayerAsync();
-            }
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) get settings");
+          Setting settings = ProjectList.Instance.GetSettings(_mapView);
+          MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
+
+          if (cycloSpatialReference != null)
+          {
+            _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
+                                    await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+          }
         }
-
-        private async void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
+        catch (StreetSmartImageNotFoundException)
         {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
-            ILayerInfo layerInfo = args.Value;
-            VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
-            _storedLayerList.Update(vectorLayer?.Name ?? layerInfo.LayerId, layerInfo.Visible);
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage");
+          ResourceManager res = ThisResources.ResourceManager;
+          string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
+          MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
+            canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+      } while (_toRestartImages.Count > 0 || toOpen != _location);
 
-            if (vectorLayer != null)
+      _inRestartDock = false;
+    }
+
+    private async Task MoveToLocationAsync(IPanoramaViewer panoramaViewer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (MoveToLocationAsync)");
+      IRecording recording = await panoramaViewer.GetRecording();
+      ICoordinate coordinate = recording.XYZ;
+
+      if (coordinate != null)
+      {
+        double x = coordinate.X ?? 0.0;
+        double y = coordinate.Y ?? 0.0;
+        double z = coordinate.Z ?? 0.0;
+        MapPoint point = await CoordSystemUtils.CycloramaToMapPointAsync(x, y, z, MapView);
+        Envelope envelope = _mapView?.Extent;
+
+        if (point != null && envelope != null)
+        {
+          const double percent = 10.0;
+          double xBorder = (envelope.XMax - envelope.XMin) * percent / 100;
+          double yBorder = (envelope.YMax - envelope.YMin) * percent / 100;
+          bool inside = point.X > envelope.XMin + xBorder && point.X < envelope.XMax - xBorder &&
+                        point.Y > envelope.YMin + yBorder && point.Y < envelope.YMax - yBorder;
+
+          if (!inside)
+          {
+            Camera camera = new Camera
             {
-                await UpdateVectorLayer(vectorLayer, sender, false);
+              X = point.X,
+              Y = point.Y,
+              Z = point.Z,
+              SpatialReference = point.SpatialReference
+            };
+
+            await QueuedTask.Run(() => { _mapView.PanTo(camera); });
+          }
+        }
+      }
+    }
+
+    protected override async void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+      if (_login.Credentials && Api != null && await Api.GetApiReadyState()) //|| (Api != null)) && Login.Instance.IsFromOAuthToBasic == true)
+      {
+        switch (propertyName)
+        {
+          case "Location":
+            string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
+
+            if (_oldMapView != _mapView)
+            {
+              if (_oldMapView != null && _vectorLayerList.ContainsKey(_oldMapView))
+              {
+                foreach (var vectorLayer in _vectorLayerList[_oldMapView])
+                {
+                  vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
+                }
+
+                foreach (var vectorLayer in _vectorLayerList[_oldMapView])
+                {
+                  IOverlay overlay = vectorLayer.Overlay;
+
+                  if (overlay != null && Api != null)
+                  {
+                    await Api.RemoveOverlay(overlay.Id);
+                    vectorLayer.Overlay = null;
+                  }
+                }
+              }
+
+              if (_mapView != null && _vectorLayerList.ContainsKey(_mapView))
+              {
+                foreach (var vectorLayer in _vectorLayerList[_mapView])
+                {
+                  vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+                }
+              }
             }
-        }
 
-        private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnFeatureClick)");
-            string id = await (sender as IPanoramaViewer).GetId();
-            IFeatureInfo featureInfo = args.Value;
-            VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId, MapView);
-            layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
-        }
-
-        private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewerRemoved)");
-            IViewer cyclViewer = args.Value;
-
-            if (cyclViewer is IPanoramaViewer panoramaViewer)
+            //if (!string.IsNullOrEmpty(_epsgCode) && _epsgCode != newEpsgCode)
+            if (_epsgCode != newEpsgCode)
             {
-                RemovePanoramaViewer(panoramaViewer);
+              await RestartStreetSmart(false);
             }
             else
             {
-                IList<IViewer> viewers = await Api.GetViewers();
-                IList<IViewer> removeList = new List<IViewer>();
-
-                foreach (var keyValueViewer in _viewerList)
-                {
-                    IViewer viewer = keyValueViewer.Key;
-                    bool exists = viewers.Aggregate(false, (current, viewer2) => viewer2 == viewer || current);
-
-                    if (!exists)
-                    {
-                        removeList.Add(viewer);
-                    }
-                }
-
-                foreach (var viewerRemove in removeList)
-                {
-                    if (viewerRemove is IPanoramaViewer panoramaViewer2)
-                    {
-                        RemovePanoramaViewer(panoramaViewer2);
-                    }
-                }
+              //GC: This is where the API is restarted after a new map is opened
+              await OpenImageAsync();
+              if (_restart == true)
+              {
+                _restart = false;
+                await RestartStreetSmart(false);
+              }
             }
 
-            if (Api != null && !_inRestart)
+            break;
+          case "IsActive":
+            if (!IsActive)
             {
-                IList<IViewer> viewers = await Api.GetViewers();
-                int nrViewers = viewers.Count;
-
-                if (nrViewers == 0)
-                {
-                    _inClose = false;
-                    DoHide();
-                    _lastSpatialReference = null;
-                }
-                else if (_inClose)
-                {
-                    await Api.CloseViewer(await viewers[0].GetId());
-                }
+              await CloseViewersAsync();
             }
-        }
-
-        private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
-            Login.Instance.Bearer = args.Value.BearerToken;
-        }
-
-        private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RemovePanoramaViewer)");
-            Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-            panoramaViewer.ImageChange -= OnImageChange;
-
-            if (viewer != null)
+            else
             {
-                bool hasMarker = viewer.HasMarker;
-                _viewerList.Delete(panoramaViewer);
-
-                if (hasMarker)
-                {
-                    List<Viewer> markerViewers = _viewerList.MarkerViewers;
-
-                    if (markerViewers.Count == 0 && _crossCheck != null)
-                    {
-                        _crossCheck.Dispose();
-                        _crossCheck = null;
-                    }
-                }
+              //GC: This is where the API is restarted after a new map is opened
+              //await OpenImageAsync();
+              if (_restart == true)
+              {
+                _restart = false;
+                await RestartStreetSmart(true);
+              }
             }
-
-            panoramaViewer.ImageChange -= OnImageChange;
-            panoramaViewer.ViewChange -= OnViewChange;
-            panoramaViewer.FeatureClick -= OnFeatureClick;
-            panoramaViewer.LayerVisibilityChange -= OnLayerVisibilityChanged;
+            break;
         }
-
-        private async void OnConfigurationPropertyChanged(object sender, PropertyChangedEventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnConfigurationPropertyChanged)");
-            switch (args.PropertyName)
-            {
-                case "Save":
-                    if (_configurationPropertyChanged.Count >= 1)
-                    {
-                        bool restart = false;
-
-                        foreach (string configurationProperty in _configurationPropertyChanged)
-                        {
-                            switch (configurationProperty)
-                            {
-                                case "UseDefaultStreetSmartUrl":
-                                case "StreetSmartLocation":
-                                case "UseProxyServer":
-                                case "ProxyAddress":
-                                case "ProxyPort":
-                                case "ProxyBypassLocalAddresses":
-                                case "ProxyUseDefaultCredentials":
-                                case "ProxyUsername":
-                                case "ProxyPassword":
-                                case "ProxyDomain":
-                                    restart = true;
-                                    break;
-                            }
-                        }
-
-                        await RestartStreetSmart(restart);
-                        _configurationPropertyChanged.Clear();
-                    }
-
-                    break;
-                default:
-                    _configurationPropertyChanged.Add(args.PropertyName);
-                    break;
-            }
-        }
-
-        private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLoginPropertyChanged)");
-
-            switch (args.PropertyName)
-            {
-                case "Credentials":
-                    if (!_login.Credentials && Api != null && await Api.GetApiReadyState())
-                    {
-                        DoHide();
-                    }
-
-                    if (_login.Credentials)
-                    {
-                        await RestartStreetSmart(false);
-                    }
-
-                    break;
-            }
-        }
-
-        private async void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnSettingsPropertyChanged)");
-
-            switch (args.PropertyName)
-            {
-                case "CycloramaViewerCoordinateSystem":
-                    await RestartStreetSmart(false);
-                    break;
-                case "OverlayDrawDistance":
-                    if (Api != null && await Api.GetApiReadyState())
-                    {
-                        Setting settings = ProjectList.Instance.GetSettings(_mapView);
-                        Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
-                    }
-
-                    break;
-            }
-        }
-
-        private async void OnLanguageSettingsChanged(object sender, PropertyChangedEventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLanguageSettingsChanged)");
-
-            switch (args.PropertyName)
-            {
-                case "Language":
-                    CefSettingsFactory.SetLanguage(_languageSettings.Locale);
-                    await RestartStreetSmart(false);
-                    break;
-            }
-        }
-
-        private async void OnImageChange(object sender, EventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnImageChanged)");
-
-            if (sender is IPanoramaViewer panoramaViewer && Api != null)
-            {
-                Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
-                if (viewer != null)
-                {
-                    IRecording recording = await panoramaViewer.GetRecording();
-                    IOrientation orientation = await panoramaViewer.GetOrientation();
-                    Color color = await panoramaViewer.GetViewerColor();
-
-                    ICoordinate coordinate = recording.XYZ;
-                    string imageId = recording.Id;
-
-                    viewer.ImageId = imageId;
-                    await viewer.SetAsync(coordinate, orientation, color, _mapView);
-
-                    await MoveToLocationAsync(panoramaViewer);
-
-                    if (viewer.HasMarker)
-                    {
-                        viewer.HasMarker = false;
-                        List<Viewer> markerViewers = _viewerList.MarkerViewers;
-
-                        if (markerViewers.Count == 0 && _crossCheck != null)
-                        {
-                            _crossCheck.Dispose();
-                            _crossCheck = null;
-                        }
-                    }
-
-                    if (GlobeSpotterConfiguration.AddLayerWfs)
-                    {
-                        await UpdateVectorLayerAsync();
-                    }
-                }
-            }
-        }
-
-        private async void OnViewChange(object sender, IEventArgs<IOrientation> args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewChange)");
-
-            if (sender is IPanoramaViewer panoramaViewer)
-            {
-                _viewerList.ActiveViewer = panoramaViewer;
-                Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
-                if (viewer != null)
-                {
-                    IOrientation orientation = args.Value;
-                    await viewer.UpdateAsync(orientation);
-                }
-            }
-        }
-
-        private async void OnUpdateVectorLayer()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnUpdateVectorLayer)");
-
-            if (GlobeSpotterConfiguration.AddLayerWfs)
-            {
-                await UpdateVectorLayerAsync();
-            }
-        }
-
-        private async void OnAddVectorLayer(VectorLayer vectorLayer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnAddVectorLayer)");
-
-            if (GlobeSpotterConfiguration.AddLayerWfs && vectorLayer.Layer.Map == MapView.Map)
-            {
-                vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
-                await UpdateVectorLayerAsync(vectorLayer);
-            }
-        }
-
-        private async void OnRemoveVectorLayer(VectorLayer vectorLayer)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnRemoveVectorLayer)");
-
-            if (GlobeSpotterConfiguration.AddLayerWfs && vectorLayer.Layer.Map == MapView.Map)
-            {
-                vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-                await RemoveVectorLayerAsync(vectorLayer);
-            }
-        }
-
-        private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-        {//GC: this is where map layer transparency and layer list toggle can be found
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
-
-            if (GlobeSpotterConfiguration.AddLayerWfs)
-            {
-                if (sender is VectorLayer vectorLayer)
-                {
-                    switch (args.PropertyName)
-                    {
-                        case "GeoJson":
-                            await UpdateVectorLayer(vectorLayer, sender, false);
-                            break;
-                    }
-                    //GC: checks if the layer list visibilty is different from the overlay list visibilty
-                    //fixed Pro crash bug because overlay was undefined
-                    if (vectorLayer.Overlay != null)
-                    {
-                        if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
-                        {
-                            await UpdateVectorLayer(vectorLayer, sender, true);
-                        }
-                    }
-                }
-            }
-        }
-
-        private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender, bool switcher)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) switcher: {switcher}");
-
-            if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
-            {
-                _vectorLayerInChange.Add(vectorLayer);
-
-                try
-                {
-                    //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
-                    if (sender is IPanoramaViewer panoramaViewer)
-                    {
-                        //checks if the overlay is invisible to call the vector layer reset function
-                        if (_invisible)
-                        {
-                            await RemoveVectorLayerAsync(vectorLayer);
-                            await AddVectorLayerAsync(vectorLayer);
-                            _invisible = false;
-                        }
-                        else
-                        {
-                            //calls the toggle overlay function to turn on/off the overlay which should show up without having to move first
-                            panoramaViewer.ToggleOverlay(vectorLayer.Overlay);
-                        }
-
-                    }
-                    else
-                    {
-                        //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
-                        if (vectorLayer.Overlay == null || vectorLayer.Overlay.Visible)
-                        {
-                            await RemoveVectorLayerAsync(vectorLayer);
-                            await AddVectorLayerAsync(vectorLayer);
-                        }
-                        else
-                        {
-                            //turns the global variable ON if the selected overlay is invisible
-                            _invisible = true;
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                }
-
-                _vectorLayerInChange.Remove(vectorLayer);
-            }
-            else if (switcher == true && vectorLayer.Overlay != null)
-            {
-                //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-                this._panorama.ToggleOverlay(vectorLayer.Overlay);
-            }
-        }
-
-        private async void OnMapClosedEvent(MapClosedEventArgs args)
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnMapClosedEvent)");
-
-            if (args.MapPane.MapView == MapView)
-            {
-                await CloseViewersAsync();
-                //    _restart = true;
-            }
-        }
-
-        #endregion
+      }
     }
+    internal static StreetSmart ActivateStreet()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Show)");
+      _fromShow = true;
+      StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
+
+      if (!(streetSmart?.IsVisible ?? true))
+      {
+        streetSmart.Activate();
+      }
+      return streetSmart;
+    }
+
+    public async Task<bool> Destroy(bool DoOAuthLogoutOnDestroy)
+    {
+      try
+      {
+        _login.Bearer = null;
+
+        _options.DoOAuthLogoutOnDestroy = DoOAuthLogoutOnDestroy;
+        await QueuedTask.Run(async () => await Api.Destroy(_options));
+        return true;
+      }
+      catch (Exception ex)
+      {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Destroy) {ex}");
+        return false;
+      }
+    }
+
+    internal static StreetSmart Show()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Show)");
+      _fromShow = true;
+      StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
+
+      if (!(streetSmart?.IsVisible ?? true))
+      {
+        streetSmart.Activate();
+      }
+
+      return streetSmart;
+    }
+
+    private async Task UpdateVectorLayerAsync()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
+      if (_vectorLayerList.ContainsKey(MapView))
+      {
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
+        //GC: create new list to keep track if duplicates are being added to the map
+        List<String> vectors = new List<String>();
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+        {
+          VectorLayer vectorLayer = _vectorLayerList[MapView][i];
+          if (!vectors.Contains(vectorLayer.Name))
+          {
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer");
+            vectors.Add(vectorLayer.Name);
+            await UpdateVectorLayerAsync(vectorLayer);
+          }
+          //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
+        }
+      }
+    }
+
+    private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
+      await vectorLayer.GenerateJsonAsync(_mapView);
+    }
+
+    private async Task AddVectorLayerAsync(VectorLayer vectorLayer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (AddVectorLayerAsync)");
+
+      if (vectorLayer.Layer.Map == _mapView.Map)
+      {
+        Setting settings = ProjectList.Instance.GetSettings(_mapView);
+        MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
+        string srsName = cyclSpatRel?.SRSName;
+
+        if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
+        {//GC: create transparency value here
+          string layerName = vectorLayer.Name;
+          bool visible = _storedLayerList.GetVisibility(layerName);
+          double transparency = vectorLayer.Layer.Transparency;
+
+          if (!visible)
+          {
+            await vectorLayer.GeoJsonToOld();
+          }
+
+          IFeatureCollection geoJson = vectorLayer.GeoJson;
+          IStyledLayerDescriptor sld = vectorLayer.Sld;
+
+          // Feature property escape character sanitation.
+          foreach (var feature in geoJson.Features)
+          {
+            for (int i = 0; i < feature.Properties.Count; i++)
+            {
+              try
+              {
+                if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
+                {
+                  feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
+                }
+              }
+              catch (Exception e)
+              {
+                return;
+              }
+            }
+          }
+
+          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
+          overlay = await Api.AddOverlay(overlay);
+          StoredLayer layer = _storedLayerList.GetLayer(layerName);
+
+          if (layer == null)
+          {
+            _storedLayerList.Update(layerName, false);
+          }
+          vectorLayer.Overlay = overlay;
+
+          //GC: trying to show layers created for the first time
+          var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+
+          //returns number of features created
+          var numIds = await QueuedTask.Run<List<long>>(() =>
+          {
+            var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
+            return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
+          });
+          //should reset the image if the first feature was created so it isn't invisible
+          if (numIds[0] == 1)
+          {
+            await OpenImageAsync();
+          }
+        }
+      }
+    }
+
+    private async Task RemoveVectorLayerAsync(VectorLayer vectorLayer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (RemoveVectorLayerAsync)");
+      IOverlay overlay = vectorLayer?.Overlay;
+
+      if (overlay != null)
+      {
+        await Api.RemoveOverlay(overlay.Id);
+        vectorLayer.Overlay = null;
+      }
+    }
+
+    #endregion
+
+    #region Event handlers
+
+    private void OnProjectClosed(ProjectEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (OnProjectClosed)");
+      DoHide();
+    }
+
+    private async void ApiReady(object sender, EventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
+      await InitApi();
+    }
+    public async Task InitialApi()
+    {
+      await InitApi();
+    }
+    private async Task InitApi()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi)");
+      if (_constants.ShowDevTools)
+      {
+        Api.ShowDevTools();
+      }
+
+      string epsgCode = "EPSG:4326";
+      if (_mapView != null)
+      {
+        epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
+      }
+
+      if (!epsgCode.Equals("EPSG:0"))
+      {
+        IAddressSettings addressSettings =
+          AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
+        IDomElement element = DomElementFactory.Create();
+        if (_login.IsOAuth)
+          if (_login.IsFromSettingsPage)
+            _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: false);
+          else
+            _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: true);
+        else
+          _options = _configuration.UseDefaultConfigurationUrl
+           ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
+             addressSettings, element)
+           : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
+             Web.Instance.ConfigServiceUrl, addressSettings, element);
+
+        try
+        {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiInit) Start api init");
+          await Api.Init(_options);
+
+          if (_login.IsOAuth)
+          {
+            _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedIn;
+            _login.Bearer = await Api.GetBearerToken();
+          }
+
+          if (MapView != null)
+          {
+            GlobeSpotterConfiguration.Load();
+            _measurementList.Api = Api;
+            Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
+            Api.MeasurementStarted += _measurementList.OnMeasurementStarted;
+            Api.MeasurementStopped += _measurementList.OnMeasurementStopped;
+            Api.MeasurementSaved += _measurementList.OnMeasurementSaved;
+
+            _vectorLayerList.LayerAdded += OnAddVectorLayer;
+            _vectorLayerList.LayerRemoved += OnRemoveVectorLayer;
+            _vectorLayerList.LayerUpdated += OnUpdateVectorLayer;
+
+            if (_vectorLayerList.ContainsKey(MapView))
+            {
+              foreach (var vectorLayer in _vectorLayerList[MapView])
+              {
+                vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+              }
+            }
+
+            if (string.IsNullOrEmpty(Location) && _toRestartImages.Count == 0)
+            {
+              DoHide();
+            }
+            else
+            {
+              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiInit) Open image Async");
+              await OpenImageAsync();
+            }
+          }
+        }
+        catch (StreetSmartLoginFailedException)
+        {
+          if (_login.IsFromSettingsPage)
+          {
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ApiInit) Login failed");
+            ResourceManager res = ThisResources.ResourceManager;
+            string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
+            MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+            DoHide();
+          }
+          else
+          {
+            Notification toast = new Notification();
+            ResourceManager res = ThisResources.ResourceManager;
+            toast.Title = res.GetString("StreetSmartOnLoginFailedTitle", _languageSettings.CultureInfo);
+            toast.Message = res.GetString("StreetSmartOnLoginFailedMessage", _languageSettings.CultureInfo);
+            toast.ImageSource = Application.Current.Resources["ToastLicensing32"] as System.Windows.Media.ImageSource;
+            FrameworkApplication.AddNotification(toast);
+          }
+          if (_login.IsOAuth)
+          {
+            await Api.Destroy(_options);
+            _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedOut;
+          }
+        }
+      }
+    }
+
+    private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
+      IViewer cyclViewer = args.Value;
+      //GC: added an extra condition in order for the viewing cone to only be created once
+      if (cyclViewer is IPanoramaViewer panoramaViewer && _restart == false)
+      {
+        panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
+        panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
+        panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
+        this._panorama = panoramaViewer;
+
+        Setting settings = ProjectList.Instance.GetSettings(_mapView);
+        Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
+
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) function get recording from panorama");
+        IRecording recording = await panoramaViewer.GetRecording();
+        string imageId = recording.Id;
+        _viewerList.Add(panoramaViewer, imageId);
+
+        // ToDo: set culture: date and time
+        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+        ICoordinate coordinate = recording.XYZ;
+        IOrientation orientation = await panoramaViewer.GetOrientation();
+        Color color = await panoramaViewer.GetViewerColor();
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
+        await viewer.SetAsync(coordinate, orientation, color, _mapView);
+
+        if (_openNearest.Contains(imageId))
+        {
+          // ToDo: get pitch and draw marker in the Cyclorama
+          viewer.HasMarker = true;
+          _openNearest.Remove(imageId);
+        }
+
+        if (LookAt != null)
+        {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) look at coordinate");
+          await panoramaViewer.LookAtCoordinate(LookAt);
+          LookAt = null;
+        }
+
+        try
+        {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location");
+          await MoveToLocationAsync(panoramaViewer);
+        }
+        catch (Exception e) { }
+
+        panoramaViewer.ImageChange += OnImageChange;
+        panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.FeatureClick += OnFeatureClick;
+        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
+
+        foreach (StoredLayer layer in _storedLayerList)
+        {
+          switch (layer.Name)
+          {
+            case "addressLayer":
+              //GC: Remove Address Layer if cyclorama not in the Netherlands
+              if (this._epsgCode == "EPSG:28992")
+              {
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) add address layer");
+                panoramaViewer.ToggleAddressesVisible(layer.Visible);
+              }
+              else
+              {
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) remove address layer");
+                await Api.RemoveOverlay("addressLayer");
+              }
+              break;
+            case "surfaceCursorLayer":
+              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle surface cursor layer");
+              panoramaViewer.Toggle3DCursor(layer.Visible);
+              break;
+            case "cyclorama-recordings":
+              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle cyclorama recordings");
+              panoramaViewer.ToggleRecordingsVisible(layer.Visible);
+              break;
+          }
+        }
+
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Finished panorama");
+      }
+      else if (cyclViewer is IObliqueViewer obliqueViewer)
+      {
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle oblique");
+        obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomIn, false);
+        obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomOut, false);
+      }
+
+      if (GlobeSpotterConfiguration.AddLayerWfs)
+      {
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Toggle vector layer async");
+        await UpdateVectorLayerAsync();
+      }
+    }
+
+    private async void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
+      ILayerInfo layerInfo = args.Value;
+      VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
+      _storedLayerList.Update(vectorLayer?.Name ?? layerInfo.LayerId, layerInfo.Visible);
+
+      if (vectorLayer != null)
+      {
+        await UpdateVectorLayer(vectorLayer, sender, false);
+      }
+    }
+
+    private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnFeatureClick)");
+      string id = await (sender as IPanoramaViewer).GetId();
+      IFeatureInfo featureInfo = args.Value;
+      VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId, MapView);
+      layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
+    }
+
+    private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewerRemoved)");
+      IViewer cyclViewer = args.Value;
+
+      if (cyclViewer is IPanoramaViewer panoramaViewer)
+      {
+        RemovePanoramaViewer(panoramaViewer);
+      }
+      else
+      {
+        IList<IViewer> viewers = await Api.GetViewers();
+        IList<IViewer> removeList = new List<IViewer>();
+
+        foreach (var keyValueViewer in _viewerList)
+        {
+          IViewer viewer = keyValueViewer.Key;
+          bool exists = viewers.Aggregate(false, (current, viewer2) => viewer2 == viewer || current);
+
+          if (!exists)
+          {
+            removeList.Add(viewer);
+          }
+        }
+
+        foreach (var viewerRemove in removeList)
+        {
+          if (viewerRemove is IPanoramaViewer panoramaViewer2)
+          {
+            RemovePanoramaViewer(panoramaViewer2);
+          }
+        }
+      }
+
+      if (Api != null && !_inRestart)
+      {
+        IList<IViewer> viewers = await Api.GetViewers();
+        int nrViewers = viewers.Count;
+
+        if (nrViewers == 0)
+        {
+          _inClose = false;
+          DoHide();
+          _lastSpatialReference = null;
+        }
+        else if (_inClose)
+        {
+          await Api.CloseViewer(await viewers[0].GetId());
+        }
+      }
+    }
+
+    private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
+      Login.Instance.Bearer = args.Value.BearerToken;
+    }
+
+    private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RemovePanoramaViewer)");
+      Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+      panoramaViewer.ImageChange -= OnImageChange;
+
+      if (viewer != null)
+      {
+        bool hasMarker = viewer.HasMarker;
+        _viewerList.Delete(panoramaViewer);
+
+        if (hasMarker)
+        {
+          List<Viewer> markerViewers = _viewerList.MarkerViewers;
+
+          if (markerViewers.Count == 0 && _crossCheck != null)
+          {
+            _crossCheck.Dispose();
+            _crossCheck = null;
+          }
+        }
+      }
+
+      panoramaViewer.ImageChange -= OnImageChange;
+      panoramaViewer.ViewChange -= OnViewChange;
+      panoramaViewer.FeatureClick -= OnFeatureClick;
+      panoramaViewer.LayerVisibilityChange -= OnLayerVisibilityChanged;
+    }
+
+    private async void OnConfigurationPropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnConfigurationPropertyChanged)");
+      switch (args.PropertyName)
+      {
+        case "Save":
+          if (_configurationPropertyChanged.Count >= 1)
+          {
+            bool restart = false;
+
+            foreach (string configurationProperty in _configurationPropertyChanged)
+            {
+              switch (configurationProperty)
+              {
+                case "UseDefaultStreetSmartUrl":
+                case "StreetSmartLocation":
+                case "UseProxyServer":
+                case "ProxyAddress":
+                case "ProxyPort":
+                case "ProxyBypassLocalAddresses":
+                case "ProxyUseDefaultCredentials":
+                case "ProxyUsername":
+                case "ProxyPassword":
+                case "ProxyDomain":
+                  restart = true;
+                  break;
+              }
+            }
+
+            await RestartStreetSmart(restart);
+            _configurationPropertyChanged.Clear();
+          }
+
+          break;
+        default:
+          _configurationPropertyChanged.Add(args.PropertyName);
+          break;
+      }
+    }
+
+    private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLoginPropertyChanged)");
+
+      switch (args.PropertyName)
+      {
+        case "Credentials":
+          if (!_login.Credentials && Api != null && await Api.GetApiReadyState())
+          {
+            DoHide();
+          }
+
+          if (_login.Credentials)
+          {
+            await RestartStreetSmart(false);
+          }
+
+          break;
+      }
+    }
+
+    private async void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnSettingsPropertyChanged)");
+
+      switch (args.PropertyName)
+      {
+        case "CycloramaViewerCoordinateSystem":
+          await RestartStreetSmart(false);
+          break;
+        case "OverlayDrawDistance":
+          if (Api != null && await Api.GetApiReadyState())
+          {
+            Setting settings = ProjectList.Instance.GetSettings(_mapView);
+            Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
+          }
+
+          break;
+      }
+    }
+
+    private async void OnLanguageSettingsChanged(object sender, PropertyChangedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLanguageSettingsChanged)");
+
+      switch (args.PropertyName)
+      {
+        case "Language":
+          CefSettingsFactory.SetLanguage(_languageSettings.Locale);
+          await RestartStreetSmart(false);
+          break;
+      }
+    }
+
+    private async void OnImageChange(object sender, EventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnImageChanged)");
+
+      if (sender is IPanoramaViewer panoramaViewer && Api != null)
+      {
+        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+
+        if (viewer != null)
+        {
+          IRecording recording = await panoramaViewer.GetRecording();
+          IOrientation orientation = await panoramaViewer.GetOrientation();
+          Color color = await panoramaViewer.GetViewerColor();
+
+          ICoordinate coordinate = recording.XYZ;
+          string imageId = recording.Id;
+
+          viewer.ImageId = imageId;
+          await viewer.SetAsync(coordinate, orientation, color, _mapView);
+
+          await MoveToLocationAsync(panoramaViewer);
+
+          if (viewer.HasMarker)
+          {
+            viewer.HasMarker = false;
+            List<Viewer> markerViewers = _viewerList.MarkerViewers;
+
+            if (markerViewers.Count == 0 && _crossCheck != null)
+            {
+              _crossCheck.Dispose();
+              _crossCheck = null;
+            }
+          }
+
+          if (GlobeSpotterConfiguration.AddLayerWfs)
+          {
+            await UpdateVectorLayerAsync();
+          }
+        }
+      }
+    }
+
+    private async void OnViewChange(object sender, IEventArgs<IOrientation> args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewChange)");
+
+      if (sender is IPanoramaViewer panoramaViewer)
+      {
+        _viewerList.ActiveViewer = panoramaViewer;
+        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+
+        if (viewer != null)
+        {
+          IOrientation orientation = args.Value;
+          await viewer.UpdateAsync(orientation);
+        }
+      }
+    }
+
+    private async void OnUpdateVectorLayer()
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnUpdateVectorLayer)");
+
+      if (GlobeSpotterConfiguration.AddLayerWfs)
+      {
+        await UpdateVectorLayerAsync();
+      }
+    }
+
+    private async void OnAddVectorLayer(VectorLayer vectorLayer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnAddVectorLayer)");
+
+      if (GlobeSpotterConfiguration.AddLayerWfs && vectorLayer.Layer.Map == MapView.Map)
+      {
+        vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+        await UpdateVectorLayerAsync(vectorLayer);
+      }
+    }
+
+    private async void OnRemoveVectorLayer(VectorLayer vectorLayer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnRemoveVectorLayer)");
+
+      if (GlobeSpotterConfiguration.AddLayerWfs && vectorLayer.Layer.Map == MapView.Map)
+      {
+        vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
+        await RemoveVectorLayerAsync(vectorLayer);
+      }
+    }
+
+    private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
+    {//GC: this is where map layer transparency and layer list toggle can be found
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
+
+      if (GlobeSpotterConfiguration.AddLayerWfs)
+      {
+        if (sender is VectorLayer vectorLayer)
+        {
+          switch (args.PropertyName)
+          {
+            case "GeoJson":
+              await UpdateVectorLayer(vectorLayer, sender, false);
+              break;
+          }
+          //GC: checks if the layer list visibilty is different from the overlay list visibilty
+          //fixed Pro crash bug because overlay was undefined
+          if (vectorLayer.Overlay != null)
+          {
+            if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+            {
+              await UpdateVectorLayer(vectorLayer, sender, true);
+            }
+          }
+        }
+      }
+    }
+
+    private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender, bool switcher)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) switcher: {switcher}");
+
+      if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
+      {
+        _vectorLayerInChange.Add(vectorLayer);
+
+        try
+        {
+          //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
+          if (sender is IPanoramaViewer panoramaViewer)
+          {
+            //checks if the overlay is invisible to call the vector layer reset function
+            if (_invisible)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+              _invisible = false;
+            }
+            else
+            {
+              //calls the toggle overlay function to turn on/off the overlay which should show up without having to move first
+              panoramaViewer.ToggleOverlay(vectorLayer.Overlay);
+            }
+
+          }
+          else
+          {
+            //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
+            if (vectorLayer.Overlay == null || vectorLayer.Overlay.Visible)
+            {
+              await RemoveVectorLayerAsync(vectorLayer);
+              await AddVectorLayerAsync(vectorLayer);
+            }
+            else
+            {
+              //turns the global variable ON if the selected overlay is invisible
+              _invisible = true;
+            }
+          }
+        }
+        catch (Exception)
+        {
+        }
+
+        _vectorLayerInChange.Remove(vectorLayer);
+      }
+      else if (switcher == true && vectorLayer.Overlay != null)
+      {
+        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
+        this._panorama.ToggleOverlay(vectorLayer.Overlay);
+      }
+    }
+
+    private async void OnMapClosedEvent(MapClosedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnMapClosedEvent)");
+
+      if (args.MapPane.MapView == MapView)
+      {
+        await CloseViewersAsync();
+        //    _restart = true;
+      }
+    }
+
+    #endregion
+  }
 }

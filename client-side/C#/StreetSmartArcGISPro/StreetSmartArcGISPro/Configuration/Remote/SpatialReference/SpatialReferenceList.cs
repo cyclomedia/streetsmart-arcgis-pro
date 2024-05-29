@@ -25,107 +25,107 @@ using System.Xml.Serialization;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 {
-    [XmlType(AnonymousType = true, Namespace = "https://www.globespotter.com/gsc")]
-    [XmlRoot("SpatialReferences", Namespace = "https://www.globespotter.com/gsc", IsNullable = false)]
-    public class SpatialReferenceList : List<SpatialReference>
+  [XmlType(AnonymousType = true, Namespace = "https://www.globespotter.com/gsc")]
+  [XmlRoot("SpatialReferences", Namespace = "https://www.globespotter.com/gsc", IsNullable = false)]
+  public class SpatialReferenceList : List<SpatialReference>
+  {
+    #region Members
+
+    private static readonly XmlSerializer XmlSpatialReferenceList;
+    private static readonly Web Web;
+
+    private static SpatialReferenceList _spatialReferenceList;
+
+    #endregion
+
+    #region Constructor
+
+    static SpatialReferenceList()
     {
-        #region Members
-
-        private static readonly XmlSerializer XmlSpatialReferenceList;
-        private static readonly Web Web;
-
-        private static SpatialReferenceList _spatialReferenceList;
-
-        #endregion
-
-        #region Constructor
-
-        static SpatialReferenceList()
-        {
-            XmlSpatialReferenceList = new XmlSerializer(typeof(SpatialReferenceList));
-            Web = Web.Instance;
-        }
-
-        #endregion
-
-        #region properties
-
-        public SpatialReference[] SpatialReference
-        {
-            get => ToArray();
-            set
-            {
-                if (value != null)
-                {
-                    AddRange(value);
-                }
-            }
-        }
-
-        public static SpatialReferenceList Instance
-        {
-            get
-            {
-                if (_spatialReferenceList == null || _spatialReferenceList.Count == 0)
-                {
-                    try
-                    {
-                        Load();
-                    }
-                    // ReSharper disable once EmptyGeneralCatchClause
-                    catch
-                    {
-                    }
-                }
-
-                return _spatialReferenceList ?? (_spatialReferenceList = new SpatialReferenceList());
-            }
-        }
-
-        #endregion
-
-        #region Functions
-
-        public SpatialReference GetItem(string srsName)
-        {
-            return this.Aggregate<SpatialReference, SpatialReference>
-              (null, (current, spatialReference) => spatialReference.SRSName == srsName ? spatialReference : current);
-        }
-
-        public SpatialReference GetCompatibleSrsNameItem(string srsName)
-        {
-            return this.Aggregate<SpatialReference, SpatialReference>
-              (null, (current, spatialReference) => spatialReference.CompatibleSRSNames == srsName ? spatialReference : current);
-        }
-
-        public string ToKnownSrsName(string srsName)
-        {
-            SpatialReference spatRef = GetCompatibleSrsNameItem(srsName);
-            return (spatRef == null) ? srsName : spatRef.SRSName;
-        }
-
-        public static SpatialReferenceList Load()
-        {
-            try
-            {
-                Stream spatialRef = Web.SpatialReferences();
-
-                if (spatialRef != null)
-                {
-                    spatialRef.Position = 0;
-                    _spatialReferenceList = (SpatialReferenceList)XmlSpatialReferenceList.Deserialize(spatialRef);
-                    spatialRef.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                // ignored
-                EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Load) {ex}");
-            }
-
-            return _spatialReferenceList;
-        }
-
-        #endregion
+      XmlSpatialReferenceList = new XmlSerializer(typeof(SpatialReferenceList));
+      Web = Web.Instance;
     }
+
+    #endregion
+
+    #region properties
+
+    public SpatialReference[] SpatialReference
+    {
+      get => ToArray();
+      set
+      {
+        if (value != null)
+        {
+          AddRange(value);
+        }
+      }
+    }
+
+    public static SpatialReferenceList Instance
+    {
+      get
+      {
+        if (_spatialReferenceList == null || _spatialReferenceList.Count == 0)
+        {
+          try
+          {
+            Load();
+          }
+          // ReSharper disable once EmptyGeneralCatchClause
+          catch
+          {
+          }
+        }
+
+        return _spatialReferenceList ?? (_spatialReferenceList = new SpatialReferenceList());
+      }
+    }
+
+    #endregion
+
+    #region Functions
+
+    public SpatialReference GetItem(string srsName)
+    {
+      return this.Aggregate<SpatialReference, SpatialReference>
+        (null, (current, spatialReference) => spatialReference.SRSName == srsName ? spatialReference : current);
+    }
+
+    public SpatialReference GetCompatibleSrsNameItem(string srsName)
+    {
+      return this.Aggregate<SpatialReference, SpatialReference>
+        (null, (current, spatialReference) => spatialReference.CompatibleSRSNames == srsName ? spatialReference : current);
+    }
+
+    public string ToKnownSrsName(string srsName)
+    {
+      SpatialReference spatRef = GetCompatibleSrsNameItem(srsName);
+      return (spatRef == null) ? srsName : spatRef.SRSName;
+    }
+
+    public static SpatialReferenceList Load()
+    {
+      try
+      {
+        Stream spatialRef = Web.SpatialReferences();
+
+        if (spatialRef != null)
+        {
+          spatialRef.Position = 0;
+          _spatialReferenceList = (SpatialReferenceList)XmlSpatialReferenceList.Deserialize(spatialRef);
+          spatialRef.Close();
+        }
+      }
+      catch (Exception ex)
+      {
+        // ignored
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Load) {ex}");
+      }
+
+      return _spatialReferenceList;
+    }
+
+    #endregion
+  }
 }

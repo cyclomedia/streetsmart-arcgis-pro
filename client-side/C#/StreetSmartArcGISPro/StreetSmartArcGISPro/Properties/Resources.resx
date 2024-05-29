@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+	<!-- 
     Microsoft ResX Schema 
     
     Version 2.0
@@ -59,69 +59,69 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="FocusMode16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Images\FocusMode16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StreetSmartOnLoginFailed" xml:space="preserve">
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string" />
+							<xsd:attribute name="name" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+	<data name="FocusMode16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\Images\FocusMode16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="StreetSmartOnLoginFailed" xml:space="preserve">
     <value>Can not login to Street Smart</value>
   </data>
 	<data name="StreetSmartOnLoginFailedTitle" xml:space="preserve">
@@ -130,100 +130,100 @@
 	<data name="StreetSmartOnLoginFailedMessage" xml:space="preserve">
     <value>You need to LogIn to StreetSmart in Settings->StreetSmart->Login</value>
   </data>
-  <data name="SystemSearch16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Images\SystemSearch16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UserTrash16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Images\UserTrash16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StreetSmartCanNotOpenImage" xml:space="preserve">
+	<data name="SystemSearch16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\Images\SystemSearch16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UserTrash16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\Images\UserTrash16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="StreetSmartCanNotOpenImage" xml:space="preserve">
     <value>Can not open the image</value>
   </data>
-  <data name="LanguageLanguage" xml:space="preserve">
+	<data name="LanguageLanguage" xml:space="preserve">
     <value>Language</value>
   </data>
-  <data name="AboutVersion" xml:space="preserve">
+	<data name="AboutVersion" xml:space="preserve">
     <value>version</value>
   </data>
-  <data name="AgreementAcceptance" xml:space="preserve">
+	<data name="AgreementAcceptance" xml:space="preserve">
     <value>I have read and agree to the terms of use.</value>
   </data>
-  <data name="ConfigurationAddress" xml:space="preserve">
+	<data name="ConfigurationAddress" xml:space="preserve">
     <value>Address</value>
   </data>
-  <data name="ConfigurationBypassProxy" xml:space="preserve">
+	<data name="ConfigurationBypassProxy" xml:space="preserve">
     <value>Bypass proxy server for local addresses</value>
   </data>
-  <data name="ConfigurationConfigurationUrl" xml:space="preserve">
+	<data name="ConfigurationConfigurationUrl" xml:space="preserve">
     <value>Configuration url</value>
   </data>
-  <data name="ConfigurationDomain" xml:space="preserve">
+	<data name="ConfigurationDomain" xml:space="preserve">
     <value>Domain</value>
   </data>
-  <data name="ConfigurationLocation" xml:space="preserve">
+	<data name="ConfigurationLocation" xml:space="preserve">
     <value>Location</value>
   </data>
-  <data name="ConfigurationPassword" xml:space="preserve">
+	<data name="ConfigurationPassword" xml:space="preserve">
     <value>Password</value>
   </data>
-  <data name="ConfigurationPort" xml:space="preserve">
+	<data name="ConfigurationPort" xml:space="preserve">
     <value>Port</value>
   </data>
-  <data name="ConfigurationProxyServer" xml:space="preserve">
+	<data name="ConfigurationProxyServer" xml:space="preserve">
     <value>Proxy server</value>
   </data>
-  <data name="ConfigurationStreetSmartLocation" xml:space="preserve">
+	<data name="ConfigurationStreetSmartLocation" xml:space="preserve">
     <value>Street Smart location</value>
   </data>
-  <data name="ConfigurationUseDefault" xml:space="preserve">
+	<data name="ConfigurationUseDefault" xml:space="preserve">
     <value>Use default</value>
   </data>
-  <data name="ConfigurationUseDefaultCredentials" xml:space="preserve">
+	<data name="ConfigurationUseDefaultCredentials" xml:space="preserve">
     <value>Use default credentials</value>
   </data>
-  <data name="ConfigurationUseProxyServer" xml:space="preserve">
+	<data name="ConfigurationUseProxyServer" xml:space="preserve">
     <value>Use a proxy server</value>
   </data>
-  <data name="ConfigurationUsername" xml:space="preserve">
+	<data name="ConfigurationUsername" xml:space="preserve">
     <value>Username</value>
   </data>
-  <data name="ImageIdSearchDate" xml:space="preserve">
+	<data name="ImageIdSearchDate" xml:space="preserve">
     <value>Date:</value>
   </data>
-  <data name="ImageIdSearchImageId" xml:space="preserve">
+	<data name="ImageIdSearchImageId" xml:space="preserve">
     <value>ImageId:</value>
   </data>
-  <data name="ImageIdSearchLocation" xml:space="preserve">
+	<data name="ImageIdSearchLocation" xml:space="preserve">
     <value>Location:</value>
   </data>
-  <data name="ImageIdSearchProductType" xml:space="preserve">
+	<data name="ImageIdSearchProductType" xml:space="preserve">
     <value>Product type:</value>
   </data>
-  <data name="ImageIdSearchTime" xml:space="preserve">
+	<data name="ImageIdSearchTime" xml:space="preserve">
     <value>Time:</value>
   </data>
-  <data name="LanguageGeneral" xml:space="preserve">
+	<data name="LanguageGeneral" xml:space="preserve">
     <value>General</value>
   </data>
-  <data name="LoginCheck" xml:space="preserve">
+	<data name="LoginCheck" xml:space="preserve">
     <value>Check</value>
   </data>
-  <data name="LoginCheckText" xml:space="preserve">
+	<data name="LoginCheckText" xml:space="preserve">
     <value>Check the username and password combination</value>
   </data>
-  <data name="LoginFailed" xml:space="preserve">
+	<data name="LoginFailed" xml:space="preserve">
     <value>Login Failed</value>
   </data>
-  <data name="LoginLogin" xml:space="preserve">
+	<data name="LoginLogin" xml:space="preserve">
     <value>Login</value>
   </data>
-  <data name="LoginPassword" xml:space="preserve">
+	<data name="LoginPassword" xml:space="preserve">
     <value>Password</value>
   </data>
-  <data name="LoginSuccessfully" xml:space="preserve">
+	<data name="LoginSuccessfully" xml:space="preserve">
     <value>Login Successful</value>
   </data>
-  <data name="LoginUsername" xml:space="preserve">
+	<data name="LoginUsername" xml:space="preserve">
     <value>Username</value>
   </data>
 	<data name="LoginOAuth" xml:space="preserve">
@@ -238,49 +238,49 @@
 	<data name="SettingsCoordinateSystems" xml:space="preserve">
     <value>Coordinate systems</value>
   </data>
-  <data name="SettingsCycloramaViewer" xml:space="preserve">
+	<data name="SettingsCycloramaViewer" xml:space="preserve">
     <value>Cyclorama viewer</value>
   </data>
-  <data name="SettingsGeneral" xml:space="preserve">
+	<data name="SettingsGeneral" xml:space="preserve">
     <value>General</value>
   </data>
-  <data name="SettingsMeasurementNotSupported" xml:space="preserve">
+	<data name="SettingsMeasurementNotSupported" xml:space="preserve">
     <value>Measuring not supported</value>
   </data>
-  <data name="SettingsMeasurementSupported" xml:space="preserve">
+	<data name="SettingsMeasurementSupported" xml:space="preserve">
     <value>Measuring supported</value>
   </data>
-  <data name="SettingsOverlayDrawDistance" xml:space="preserve">
+	<data name="SettingsOverlayDrawDistance" xml:space="preserve">
     <value>Overlay draw distance (meters)</value>
   </data>
-  <data name="SettingsRecordingLayer" xml:space="preserve">
+	<data name="SettingsRecordingLayer" xml:space="preserve">
     <value>Recording layer</value>
   </data>
-  <data name="SettingsSetsOverlayDrawDistance" xml:space="preserve">
+	<data name="SettingsSetsOverlayDrawDistance" xml:space="preserve">
     <value>Sets the overlay draw distance in the cyclorama.</value>
   </data>
-  <data name="LoginStatus" xml:space="preserve">
+	<data name="LoginStatus" xml:space="preserve">
     <value>Status</value>
   </data>
-  <data name="RecordingLayerDepthMap" xml:space="preserve">
+	<data name="RecordingLayerDepthMap" xml:space="preserve">
     <value>Depth map</value>
   </data>
-  <data name="RecordingLayerDetailImages" xml:space="preserve">
+	<data name="RecordingLayerDetailImages" xml:space="preserve">
     <value>Detail images</value>
   </data>
-  <data name="RecordingLayerGroupName" xml:space="preserve">
+	<data name="RecordingLayerGroupName" xml:space="preserve">
     <value>Street Smart</value>
   </data>
-  <data name="RecordingLayerName" xml:space="preserve">
+	<data name="RecordingLayerName" xml:space="preserve">
     <value>GeoCyclorama Recording Points</value>
   </data>
-  <data name="RecordingLayerNoAuthorization" xml:space="preserve">
+	<data name="RecordingLayerNoAuthorization" xml:space="preserve">
     <value>No Authorization</value>
   </data>
-  <data name="HelpErrorOpenHelpDocument" xml:space="preserve">
+	<data name="HelpErrorOpenHelpDocument" xml:space="preserve">
     <value>An error while opening the help document</value>
   </data>
-  <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
+	<data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
     <value>There is no pdf viewer installed on your system</value>
   </data>
 </root>

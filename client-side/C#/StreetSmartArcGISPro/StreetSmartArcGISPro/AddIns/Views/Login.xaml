@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300"
              d:DesignWidth="300">
-    <!--
+  <!--
  /*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
@@ -27,48 +27,48 @@
  * License along with this library.
  */
 -->
-    <UserControl.CommandBindings>
-        <CommandBinding Command="util:CustomCommands.OAuthToBeVisibleCommand" Executed="OAuthToBeVisible"/>
-    </UserControl.CommandBindings>
-    <UserControl.InputBindings>
-        <KeyBinding Command="util:CustomCommands.OAuthToBeVisibleCommand" Key="O" Modifiers="Control"/>
-    </UserControl.InputBindings>
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <converters:LoginStatus x:Key="LoginStatusConverter" />
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-    <Grid>
-        <StackPanel Grid.Row="0" Margin="5,10,5,0">
-            <StackPanel x:Name="LoginElementsGroup" Visibility="{Binding IsLoginElementsVisible, UpdateSourceTrigger=PropertyChanged}">
-                <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
-                <DockPanel Margin="5,5,5,0">
-                    <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,5,5,0"/>
-                    <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0"/>
-                </DockPanel>
-                <DockPanel Margin="5,5,5,0">
-                    <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,5,5,0"/>
-                    <PasswordBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded"/>
-                </DockPanel>
-                <StackPanel Margin="5,5,5,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginStatus" Width="100" Margin="0,5,5,0"/>
-                        <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
-                        <Button Grid.Column="2" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginCheck" util:LocalizationProvider.TooltipId="LoginCheckText" Width="60" Click="OnCheckButtonClicked" />
-                    </Grid>
-                </StackPanel>
-            </StackPanel>
-            <CheckBox util:LocalizationProvider.ContentId="LoginOAuth" Margin="5" IsChecked="{Binding IsOAuth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Visibility="{Binding IsOAuthVisible, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsOAuthEnabled, UpdateSourceTrigger=PropertyChanged}"/>
-            <Button util:LocalizationProvider.ContentId="LoginSignInOAuth" Command="{Binding SignInCommand}" Margin="5" Width="60" HorizontalAlignment="Left" IsEnabled="{Binding IsSignInVisible, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsOAuthButtonsVisible, UpdateSourceTrigger=PropertyChanged}" />
-            <Button util:LocalizationProvider.ContentId="LoginSignOutOAuth"  Command="{Binding SignOutCommand}" Margin="5" Width="60" HorizontalAlignment="Left" IsEnabled="{Binding IsSignOutVisible, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsOAuthButtonsVisible, UpdateSourceTrigger=PropertyChanged}" />
+  <UserControl.CommandBindings>
+    <CommandBinding Command="util:CustomCommands.OAuthToBeVisibleCommand" Executed="OAuthToBeVisible"/>
+  </UserControl.CommandBindings>
+  <UserControl.InputBindings>
+    <KeyBinding Command="util:CustomCommands.OAuthToBeVisibleCommand" Key="O" Modifiers="Control"/>
+  </UserControl.InputBindings>
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <converters:LoginStatus x:Key="LoginStatusConverter" />
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <Grid>
+    <StackPanel Grid.Row="0" Margin="5,10,5,0">
+      <StackPanel x:Name="LoginElementsGroup" Visibility="{Binding IsLoginElementsVisible, UpdateSourceTrigger=PropertyChanged}">
+        <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
+        <DockPanel Margin="5,5,5,0">
+          <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,5,5,0"/>
+          <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0"/>
+        </DockPanel>
+        <DockPanel Margin="5,5,5,0">
+          <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,5,5,0"/>
+          <PasswordBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded"/>
+        </DockPanel>
+        <StackPanel Margin="5,5,5,0">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginStatus" Width="100" Margin="0,5,5,0"/>
+            <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
+            <Button Grid.Column="2" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginCheck" util:LocalizationProvider.TooltipId="LoginCheckText" Width="60" Click="OnCheckButtonClicked" />
+          </Grid>
         </StackPanel>
-    </Grid>
+      </StackPanel>
+      <CheckBox util:LocalizationProvider.ContentId="LoginOAuth" Margin="5" IsChecked="{Binding IsOAuth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Visibility="{Binding IsOAuthVisible, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsOAuthEnabled, UpdateSourceTrigger=PropertyChanged}"/>
+      <Button util:LocalizationProvider.ContentId="LoginSignInOAuth" Command="{Binding SignInCommand}" Margin="5" Width="60" HorizontalAlignment="Left" IsEnabled="{Binding IsSignInVisible, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsOAuthButtonsVisible, UpdateSourceTrigger=PropertyChanged}" />
+      <Button util:LocalizationProvider.ContentId="LoginSignOutOAuth"  Command="{Binding SignOutCommand}" Margin="5" Width="60" HorizontalAlignment="Left" IsEnabled="{Binding IsSignOutVisible, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsOAuthButtonsVisible, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+  </Grid>
 </UserControl>
