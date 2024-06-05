@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.123.0.6\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.123.0.6\build\chromiumembeddedframework.runtime.win-x86.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.123.0.6\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.123.0.6\build\chromiumembeddedframework.runtime.win-x64.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,6 +16,8 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,52 +61,20 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ArcGIS.Desktop.Extensions">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
+    <Reference Include="CefSharp, Version=123.0.60.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.123.0.60\lib\net462\CefSharp.dll</HintPath>
     </Reference>
-    <Reference Include="ArcGIS.Desktop.Framework">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="CefSharp.Core, Version=123.0.60.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.123.0.60\lib\net462\CefSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ArcGIS.Desktop.Editing">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
-    </Reference>
-    <Reference Include="ArcGIS.Core">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Core">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Mapping">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CefSharp, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.BrowserSubprocess.Core, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.BrowserSubprocess.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core.Runtime, Version=90.6.70.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Core.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Wpf, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Wpf.dll</HintPath>
+    <Reference Include="CefSharp.Wpf, Version=123.0.60.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Wpf.123.0.60\lib\net462\CefSharp.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="StreetSmart.Wpf, Version=21.1.0.0, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
+    <Reference Include="StreetSmart.Wpf, Version=22.8.2, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libs\StreetSmart\StreetSmart.Wpf.dll</HintPath>
+      <HintPath>Assemblies\StreetSmart.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -363,7 +336,18 @@
     <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.dll">
       <Link>Install\Newtonsoft.Json.dll</Link>
     </AddInContent>
-    <Content Include="ReleaseNotes.txt" />
+    <Content Include="Assemblies\ArcGIS.Core.dll" />
+    <Content Include="Assemblies\ArcGIS.Desktop.Core.dll" />
+    <Content Include="Assemblies\ArcGIS.Desktop.Editing.dll" />
+    <Content Include="Assemblies\ArcGIS.Desktop.Extensions.dll" />
+    <Content Include="Assemblies\ArcGIS.Desktop.Framework.dll" />
+    <Content Include="Assemblies\ArcGIS.Desktop.Mapping.dll" />
+    <Content Include="Assemblies\CefSharp.BrowserSubprocess.Core.dll" />
+    <Content Include="Assemblies\CefSharp.Core.dll" />
+    <Content Include="Assemblies\CefSharp.Core.Runtime.dll" />
+    <Content Include="Assemblies\CefSharp.dll" />
+    <Content Include="Assemblies\CefSharp.Wpf.dll" />
+    <Content Include="Assemblies\StreetSmart.WPF.dll" />
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
@@ -575,13 +559,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Assemblies\ArcGIS.Desktop.Framework.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Assemblies\Esri.ProApp.SDK.Desktop.targets" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.CleanAddIn" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.ConvertToRelativePath" />
-  <Import Project="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
+  <Import Project="Assemblies\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('Assemblies\Esri.ProApp.SDK.Desktop.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -590,10 +578,22 @@
   </Target>
   -->
   <Target Name="BeforeBuild">
-    <Error Text="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets not found." Condition="!Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
+    <Error Text="Assemblies\Esri.ProApp.SDK.Desktop.targets not found." Condition="!Exists('Assemblies\Esri.ProApp.SDK.Desktop.targets')" />
   </Target>
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.123.0.6\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.123.0.6\build\chromiumembeddedframework.runtime.win-x64.props'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.123.0.6\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.123.0.6\build\chromiumembeddedframework.runtime.win-x86.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.targets'))" />
+    <Error Condition="!Exists('..\packages\Esri.ArcGISPro.Extensions.2.9.0.32739\build\net461\Esri.ArcGISPro.Extensions.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Esri.ArcGISPro.Extensions.2.9.0.32739\build\net461\Esri.ArcGISPro.Extensions.targets'))" />
+  </Target>
+  <Import Project="..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.123.0.60\build\CefSharp.Common.targets')" />
+  <Import Project="..\packages\Esri.ArcGISPro.Extensions.2.9.0.32739\build\net461\Esri.ArcGISPro.Extensions.targets" Condition="Exists('..\packages\Esri.ArcGISPro.Extensions.2.9.0.32739\build\net461\Esri.ArcGISPro.Extensions.targets')" />
 </Project>

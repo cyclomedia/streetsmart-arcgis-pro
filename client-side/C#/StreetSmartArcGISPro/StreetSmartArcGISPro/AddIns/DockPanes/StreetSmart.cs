@@ -403,7 +403,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         IAPISettings settings = CefSettingsFactory.Create(cachePath);
         settings.Locale = _languageSettings.Locale;
         settings.SetDefaultBrowserSubprocessPath();
-        StreetSmartAPIFactory.Initialize(settings, true);
+        settings.AllowInsecureContent = true;
+        StreetSmartAPIFactory.Initialize(settings);
       }
       catch(Exception e)
       {
@@ -895,10 +896,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
         IDomElement element = DomElementFactory.Create();
         _options = _configuration.UseDefaultConfigurationUrl
-          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            addressSettings, element)
-          : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            _configuration.ConfigurationUrlLocation, addressSettings, element);
+          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element)
+          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
+            _configuration.ConfigurationUrlLocation, addressSettings, element, loginOauth: false);
 
         try
         {
@@ -1199,7 +1199,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       switch (args.PropertyName)
       {
         case "Language":
-          CefSettingsFactory.SetLanguage(_languageSettings.Locale);
+          await CefSettingsFactory.SetLanguage(_languageSettings.Locale);
           await RestartStreetSmart(false);
           break;
       }

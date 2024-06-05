@@ -58,7 +58,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #endregion
 
-    #region Properties
+    #region Fields
 
     private readonly MeasurementList _measurementList;
     private string _currentToolId;

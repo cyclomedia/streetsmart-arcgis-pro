@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,54 +58,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ArcGIS.Desktop.Extensions">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Framework">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Editing">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
-    </Reference>
-    <Reference Include="ArcGIS.Core">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Core">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Mapping">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CefSharp, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.BrowserSubprocess.Core, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.BrowserSubprocess.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core.Runtime, Version=90.6.70.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Core.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Wpf, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="StreetSmart.Wpf, Version=22.8.2, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libs\StreetSmart\StreetSmart.Wpf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="PresentationCore" />
@@ -324,46 +279,6 @@
     </Content>
     <AddInContent Include="Images\ImageIdSearch32.png" />
     <AddInContent Include="Images\MeasurementDetail32.png" />
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.BrowserSubprocess.Core.dll">
-      <Link>Install\CefSharp.BrowserSubprocess.Core.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.BrowserSubprocess.exe">
-      <Link>Install\CefSharp.BrowserSubprocess.exe</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Core.dll">
-      <Link>Install\CefSharp.Core.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.dll">
-      <Link>Install\CefSharp.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Wpf.dll">
-      <Link>Install\CefSharp.Wpf.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\chrome_elf.dll">
-      <Link>Install\chrome_elf.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\d3dcompiler_47.dll">
-      <Link>Install\d3dcompiler_47.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\libcef.dll">
-      <Link>Install\libcef.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\libEGL.dll">
-      <Link>Install\libEGL.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\libGLESv2.dll">
-      <Link>Install\libGLESv2.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libEGL.dll">
-      <Link>Install\swiftshader\libEGL.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libGLESv2.dll">
-      <Link>Install\swiftshader\libGLESv2.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.dll">
-      <Link>Install\Newtonsoft.Json.dll</Link>
-    </AddInContent>
-    <Content Include="ReleaseNotes.txt" />
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
     <EmbeddedResource Include="Images\FocusMode16.png" />
@@ -376,196 +291,6 @@
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
   </ItemGroup>
   <ItemGroup>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef.pak">
-      <Link>Install\cef.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_100_percent.pak">
-      <Link>Install\cef_100_percent.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_200_percent.pak">
-      <Link>Install\cef_200_percent.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_extensions.pak">
-      <Link>Install\cef_extensions.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\devtools_resources.pak">
-      <Link>Install\devtools_resources.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\icudtl.dat">
-      <Link>Install\icudtl.dat</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\en-US.pak">
-      <Link>Install\locales\en-US.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\natives_blob.bin">
-      <Link>Install\natives_blob.bin</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\snapshot_blob.bin">
-      <Link>Install\snapshot_blob.bin</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\v8_context_snapshot.bin">
-      <Link>Install\v8_context_snapshot.bin</Link>
-    </AddInContent>
-  </ItemGroup>
-  <ItemGroup>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\am.pak">
-      <Link>Install\locales\am.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ar.pak">
-      <Link>Install\locales\ar.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\bg.pak">
-      <Link>Install\locales\bg.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\bn.pak">
-      <Link>Install\locales\bn.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ca.pak">
-      <Link>Install\locales\ca.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\cs.pak">
-      <Link>Install\locales\cs.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\da.pak">
-      <Link>Install\locales\da.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\de.pak">
-      <Link>Install\locales\de.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\el.pak">
-      <Link>Install\locales\el.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\en-GB.pak">
-      <Link>Install\locales\en-GB.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\es-419.pak">
-      <Link>Install\locales\es-419.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\es.pak">
-      <Link>Install\locales\es.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\et.pak">
-      <Link>Install\locales\et.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\fa.pak">
-      <Link>Install\locales\fa.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\fi.pak">
-      <Link>Install\locales\fi.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\fil.pak">
-      <Link>Install\locales\fil.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\fr.pak">
-      <Link>Install\locales\fr.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\gu.pak">
-      <Link>Install\locales\gu.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\he.pak">
-      <Link>Install\locales\he.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\hi.pak">
-      <Link>Install\locales\hi.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\hr.pak">
-      <Link>Install\locales\hr.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\hu.pak">
-      <Link>Install\locales\hu.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\id.pak">
-      <Link>Install\locales\id.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\it.pak">
-      <Link>Install\locales\it.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ja.pak">
-      <Link>Install\locales\ja.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\kn.pak">
-      <Link>Install\locales\kn.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ko.pak">
-      <Link>Install\locales\ko.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\lt.pak">
-      <Link>Install\locales\lt.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\lv.pak">
-      <Link>Install\locales\lv.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ml.pak">
-      <Link>Install\locales\ml.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\mr.pak">
-      <Link>Install\locales\mr.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ms.pak">
-      <Link>Install\locales\ms.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\nb.pak">
-      <Link>Install\locales\nb.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\nl.pak">
-      <Link>Install\locales\nl.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\pl.pak">
-      <Link>Install\locales\pl.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\pt-BR.pak">
-      <Link>Install\locales\pt-BR.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\pt-PT.pak">
-      <Link>Install\locales\pt-PT.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ro.pak">
-      <Link>Install\locales\ro.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ru.pak">
-      <Link>Install\locales\ru.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\sk.pak">
-      <Link>Install\locales\sk.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\sl.pak">
-      <Link>Install\locales\sl.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\sr.pak">
-      <Link>Install\locales\sr.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\sv.pak">
-      <Link>Install\locales\sv.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\sw.pak">
-      <Link>Install\locales\sw.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\ta.pak">
-      <Link>Install\locales\ta.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\te.pak">
-      <Link>Install\locales\te.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\th.pak">
-      <Link>Install\locales\th.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\tr.pak">
-      <Link>Install\locales\tr.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\uk.pak">
-      <Link>Install\locales\uk.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\vi.pak">
-      <Link>Install\locales\vi.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\zh-CN.pak">
-      <Link>Install\locales\zh-CN.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\zh-TW.pak">
-      <Link>Install\locales\zh-TW.pak</Link>
-    </AddInContent>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
       <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
     </EmbeddedResource>
@@ -575,25 +300,29 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Esri.ArcGISPro.Extensions">
+      <Version>2.9.0.32739</Version>
+    </PackageReference>
+    <PackageReference Include="StreetSmart.WPF">
+      <Version>24.1.1-rc01</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
-  <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.CleanAddIn" />
-  <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.ConvertToRelativePath" />
-  <Import Project="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
+	<Exec Command="powershell -File '.\ReplaceConfigDate.ps1' $(ProjectDir) "/>
   </Target>
-  <Target Name="AfterBuild">
+<Target Name="AfterBuild">
   </Target>
   -->
-  <Target Name="BeforeBuild">
-    <Error Text="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets not found." Condition="!Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
-  </Target>
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -File "$(ProjectDir)ReplaceConfigDate.ps1" $(ProjectDir)</PreBuildEvent>
   </PropertyGroup>
 </Project>

@@ -21,19 +21,19 @@
         defaultNamespace="StreetSmartArcGISPro"
         xmlns="http://schemas.esri.com/DADF/Registry"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+        xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file://.Assemblies\ArcGIS.Desktop.Framework.xsd">
   <AddInInfo id="{BD021436-D851-4D91-8301-AC76733FD444}"
-             version="1.6.10"
+             version="1.6.11"
              desktopVersion="2.9">
     <Name>Street Smart for ArcGIS Pro</Name>
     <Description>
       Street Smart for ArcGIS Pro
-      Copyright © CycloMedia Technology 2023
+      Copyright © CycloMedia Technology 2024
     </Description>
     <Image>Images\StreetSmartArcGISPro32.png</Image>
     <Author>CycloMedia</Author>
     <Company>CycloMedia</Company>
-    <Date>12/15/2023 11:00:00 AM, 2023</Date>
+    <Date>04/11/2024 11:00:00 AM</Date>
     <Subject>Content</Subject>
   </AddInInfo>
   <modules>
