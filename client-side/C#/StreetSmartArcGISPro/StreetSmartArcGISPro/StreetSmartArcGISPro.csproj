@@ -13,8 +13,6 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -270,9 +268,6 @@
     <Content Include="..\..\Doc\LGPL-3.0.txt">
       <Link>LGPL-3.0.txt</Link>
     </Content>
-    <Content Include="..\..\Doc\Release notes.txt">
-      <Link>Release notes.txt</Link>
-    </Content>
     <AddInContent Include="Images\OpenLocation32.png" />
     <Content Include="..\..\Doc\ToDo.txt">
       <Link>ToDo.txt</Link>
@@ -306,7 +301,7 @@
       <Version>2.9.0.32739</Version>
     </PackageReference>
     <PackageReference Include="StreetSmart.WPF">
-      <Version>24.1.1-rc01</Version>
+      <Version>24.1.1-rc06</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

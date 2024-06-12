@@ -27,7 +27,7 @@
  */
 -->
   <Grid>
-    <streetSmart:StreetSmartGUI 
-      WpfApi="{Binding Api, Mode=OneWay}" />
-  </Grid>
+        <streetSmart:StreetSmartGUI 
+  WpfApi="{Binding Api, Mode=OneWay}" />
+    </Grid>
 </UserControl>

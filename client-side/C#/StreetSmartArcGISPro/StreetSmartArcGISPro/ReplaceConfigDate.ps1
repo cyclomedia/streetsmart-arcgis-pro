@@ -1,4 +1,7 @@
 param (
     [string]$folder = "."
 )
-(Get-Content "$folder\Config.daml") -replace '<Date>.*?</Date>', "<Date>$(Get-Date -format o)</Date>" | Out-File "$folder\Config.daml"
+
+$date = Get-Date -format o
+(Get-Content "$folder\Config.daml") -replace '<Date>.*?</Date>', "<Date>$date</Date>" | Out-File "$folder\Config.daml"
+(Get-Content "$folder\Config.fr.daml") -replace '<Date>.*?</Date>', "<Date>$date</Date>" | Out-File "$folder\Config.fr.daml"
