@@ -52,6 +52,15 @@ using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
+
+  public enum SrsUnit
+  {
+    Unknown,
+    LinearUnit,
+    Degree,
+    Error
+  }
+
   class MeasurementList : Dictionary<string, Measurement>
   {
     #region Members
@@ -192,9 +201,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             try
             {
               string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(MapView.Active);
-              string srsUnit = GetSrsUnit(epsgCode);
+              SrsUnit srsUnit = GetSrsUnit(epsgCode);
 
-              bool isMeasurementNotAllowed = (srsUnit.Equals("degree", StringComparison.OrdinalIgnoreCase) || srsUnit.Equals("degrees", StringComparison.OrdinalIgnoreCase) || srsUnit.Equals("Unknown unit", StringComparison.OrdinalIgnoreCase) || srsUnit.Contains("Error", StringComparison.OrdinalIgnoreCase));
+              bool isMeasurementNotAllowed = (srsUnit == SrsUnit.Degree || srsUnit == SrsUnit.Unknown || srsUnit == SrsUnit.Error);
               if (!isMeasurementNotAllowed)
               {
                 await Api.StartMeasurementMode(panoramaViewer, options);
@@ -208,53 +217,56 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
       }
     }
-
-    public static string GetSrsUnit(string srsString)
+    public static SrsUnit GetSrsUnit(string srsString)
     {
       try
       {
         if (!srsString.StartsWith("EPSG:", StringComparison.OrdinalIgnoreCase))
         {
-          return "Invalid format. Expected format is 'EPSG:XXXX'.";
+          return SrsUnit.Error;
         }
 
         string srsCodeString = srsString.Substring(5);
 
         if (!int.TryParse(srsCodeString, out int srsCode))
         {
-          return "Invalid SRS code.";
+          return SrsUnit.Error;
         }
 
         SpatialReference spatialReference = SpatialReferenceBuilder.CreateSpatialReference(srsCode);
 
         if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCase) && (spatialReference.Name.Contains("Sphere", StringComparison.OrdinalIgnoreCase) || spatialReference.Name.Contains("Spherical", StringComparison.OrdinalIgnoreCase)))
         {
-          return "Unknown unit";
+          return SrsUnit.Unknown;
         }
 
         if (spatialReference.Datum != null && spatialReference.Datum.Name.Equals("None", StringComparison.OrdinalIgnoreCase))
         {
-          return "Unknown unit";
+          return SrsUnit.Unknown;
         }
 
         ArcGIS.Core.Geometry.Unit unit = spatialReference.Unit;
 
         if (unit is LinearUnit linearUnit)
         {
-          return linearUnit.Name;
+          return SrsUnit.LinearUnit;
         }
         else if (unit is AngularUnit angularUnit)
         {
-          return angularUnit.Name;
+          if (angularUnit.Name.Equals("Degree", StringComparison.OrdinalIgnoreCase) || angularUnit.Name.Equals("Degrees", StringComparison.OrdinalIgnoreCase))
+          {
+            return SrsUnit.Degree;
+          }
+          else
+          {
+            return SrsUnit.Unknown;
+          }
         }
-        else
-        {
-          return "Unknown unit";
-        }
+        return SrsUnit.Unknown;
       }
-      catch (Exception ex)
+      catch (Exception)
       {
-        return $"Error: {ex.Message}";
+        return SrsUnit.Error;
       }
     }
 
