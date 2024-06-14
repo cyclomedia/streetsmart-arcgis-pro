@@ -233,7 +233,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       int wkid = spatialReference?.Wkid ?? 0;
       string mapName = map?.Name; 
       string fixedMapName = fixMapNameByReplacingSpecialCharacters(mapName);
-      string fcNameWkid = string.Concat(FcName, mapName, wkid);
+      string fcNameWkid = string.Concat(FcName, fixedMapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
       Layer = await CreateLayerAsync(project, fcNameWkid, _cycloMediaGroupLayer.GroupLayer);
