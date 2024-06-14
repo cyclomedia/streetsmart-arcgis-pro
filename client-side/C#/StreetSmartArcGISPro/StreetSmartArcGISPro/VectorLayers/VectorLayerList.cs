@@ -688,8 +688,9 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       foreach (Layer layer in args.Layers)
       {
-        MapView mapView = GetMapViewFromLayer(layer);
-        await AddLayerAsync(layer, mapView ?? MapView.Active);
+        MapView mapView = GetMapViewFromLayer(layer) ?? MapView.Active;
+        if(mapView != null)
+          await AddLayerAsync(layer, mapView);
       }
     }
 
