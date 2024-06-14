@@ -231,9 +231,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       }
 
       int wkid = spatialReference?.Wkid ?? 0;
-      string mapName = map?.Name;
-      mapName = mapName?.Replace(" ", "_") ?? string.Empty;
-      mapName = mapName?.Replace(".", "_") ?? string.Empty; //GC: period in map name would crash Pro
+      string mapName = map?.Name; 
+      string fixedMapName = fixMapNameByReplacingSpecialCharacters(mapName);
       string fcNameWkid = string.Concat(FcName, mapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
@@ -942,6 +941,18 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
+    public string fixMapNameByReplacingSpecialCharacters(string mapName)
+    {
+      char[] charsToReplace = {
+   ' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+',
+   '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'
+  };
+      foreach (char c in charsToReplace)
+      {
+        mapName = mapName?.Replace(c, '_') ?? string.Empty;
+      }
+      return mapName;
+    }
     #endregion
   }
 }
