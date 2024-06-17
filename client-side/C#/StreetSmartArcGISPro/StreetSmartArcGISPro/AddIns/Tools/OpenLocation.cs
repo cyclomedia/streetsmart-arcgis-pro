@@ -19,9 +19,13 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Resources;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+
+using WinPoint = System.Windows.Point;
 
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
@@ -33,14 +37,21 @@ using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
 
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using WinPoint = System.Windows.Point;
+using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
   class OpenLocation : MapTool
   {
+    #region Members
+
+    private readonly LanguageSettings _languageSettings;
+
+    #endregion
+
     #region Constructor
 
     public OpenLocation()
@@ -49,6 +60,8 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       string cursorPath = $@"StreetSmartArcGISPro.Images.{thisType.Name}.cur";
       Assembly thisAssembly = Assembly.GetAssembly(thisType);
       Stream cursorStream = thisAssembly.GetManifestResourceStream(cursorPath);
+
+      _languageSettings = LanguageSettings.Instance;
 
       if (cursorStream != null)
       {
@@ -68,6 +81,19 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       bool nearest = false;
       string location = string.Empty;
       MapView activeView = MapView.Active;
+
+      if (activeView.Map?.MapType == ArcGIS.Core.CIM.MapType.Scene)
+      {
+        ResourceManager res = ThisResources.ResourceManager;
+        string openLocationNotSupportedInSceneTxt = res.GetString("OpenLocationNotSupportedInScene", _languageSettings.CultureInfo);
+        MessageBox.Show(
+          openLocationNotSupportedInSceneTxt,
+          openLocationNotSupportedInSceneTxt, 
+          MessageBoxButton.OK, 
+          MessageBoxImage.Error);
+
+        return false;
+      }
 
       await QueuedTask.Run(async () =>
       {
