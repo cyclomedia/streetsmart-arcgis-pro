@@ -682,6 +682,11 @@ namespace StreetSmartArcGISPro.VectorLayers
         VectorLayer vectorLayer = this[mapView][0];
         await RemoveLayer(vectorLayer, mapView);
       }
+
+      MapViewInitializedEvent.Unsubscribe(OnMapViewInitialized);
+      MapClosedEvent.Unsubscribe(OnMapClosed);
+
+      this.Remove(mapView);
     }
 
     private async void OnLayersAdded(LayerEventsArgs args)

@@ -830,19 +830,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (_vectorLayerList.ContainsKey(MapView))
       {
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
-        //GC: create new list to keep track if duplicates are being added to the map
-        List<String> vectors = new List<String>();
-        // ReSharper disable once ForCanBeConvertedToForeach
-        for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
-        {
-          VectorLayer vectorLayer = _vectorLayerList[MapView][i];
-          if (!vectors.Contains(vectorLayer.Name))
+
+        foreach(var vectorLayer in _vectorLayerList[MapView])
         { 
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer");
-            vectors.Add(vectorLayer.Name);
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
+
           await UpdateVectorLayerAsync(vectorLayer);
-        }
-          //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
         }
       }
     }
@@ -864,12 +857,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         string srsName = cyclSpatRel?.SRSName;
 
         if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
-        {//GC: create transparency value here
+        {
+          //GC: create transparency value here
           string layerName = vectorLayer.Name;
-          bool visible = _storedLayerList.GetVisibility(layerName);
+          string layerNameAndUri = vectorLayer.NameAndUri;
+          bool hasCycloramaVisibility = _storedLayerList.GetVisibility(layerNameAndUri);
+          bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
           double transparency = vectorLayer.Layer.Transparency;
 
-          if (!visible)
+          if (!hasCycloramaVisibility)
           {
             await vectorLayer.GeoJsonToOld();
           }
@@ -898,11 +894,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
           IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
           overlay = await Api.AddOverlay(overlay);
-          StoredLayer layer = _storedLayerList.GetLayer(layerName);
+          StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
 
           if (layer == null)
           {
-            _storedLayerList.Update(layerName, false);
+            _storedLayerList.Update(layerNameAndUri, visible);
           }
           vectorLayer.Overlay = overlay;
 
@@ -915,6 +911,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
             return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
           });
+
           //should reset the image if the first feature was created so it isn't invisible
           if (numIds.Count > 0 && numIds[0] == 1)
           {
@@ -1120,7 +1117,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
       ILayerInfo layerInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
-      _storedLayerList.Update(vectorLayer?.Name ?? layerInfo.LayerId, layerInfo.Visible);
+      _storedLayerList.Update(vectorLayer?.NameAndUri ?? layerInfo.LayerId, layerInfo.Visible);
 
       if (vectorLayer != null)
       {
