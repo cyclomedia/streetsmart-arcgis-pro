@@ -837,11 +837,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           VectorLayer vectorLayer = _vectorLayerList[MapView][i];
           if (!vectors.Contains(vectorLayer.Name))
-          {
+        { 
             EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer");
             vectors.Add(vectorLayer.Name);
-            await UpdateVectorLayerAsync(vectorLayer);
-          }
+          await UpdateVectorLayerAsync(vectorLayer);
+        }
           //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
         }
       }
@@ -916,7 +916,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
           });
           //should reset the image if the first feature was created so it isn't invisible
-          if (numIds[0] == 1)
+          if (numIds.Count > 0 && numIds[0] == 1)
           {
             await OpenImageAsync();
           }
@@ -1434,10 +1434,20 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) switcher: {switcher}");
 
-      if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
-      {
-        _vectorLayerInChange.Add(vectorLayer);
+      bool changeVectorLayer = false;
 
+      lock (_vectorLayerInChange)
+      {
+        if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
+        {
+          _vectorLayerInChange.Add(vectorLayer);
+
+          changeVectorLayer = true;
+        }
+      }
+
+      if(changeVectorLayer)
+      { 
         try
         {
           //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
@@ -1472,12 +1482,17 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
           }
         }
-        catch (Exception)
+        catch (Exception e)
         {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer): exception: {e}");
         }
 
-        _vectorLayerInChange.Remove(vectorLayer);
-      }else if(switcher == true && vectorLayer.Overlay != null)
+        lock (_vectorLayerInChange)
+        {
+          _vectorLayerInChange.Remove(vectorLayer);
+        }
+      }
+      else if (switcher && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
         this._panorama.ToggleOverlay(vectorLayer.Overlay);
