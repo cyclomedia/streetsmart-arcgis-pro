@@ -54,7 +54,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.7" />
     <PackageReference Include="Nancy" Version="2.0.0" />
-    <PackageReference Include="StreetSmart.WPF" Version="24.1.0" />
+    <PackageReference Include="StreetSmart.WPF" Version="24.1.2" />
     <PackageReference Include="System.Windows.Extensions" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
