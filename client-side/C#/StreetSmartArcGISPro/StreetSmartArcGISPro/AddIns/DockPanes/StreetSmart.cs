@@ -827,12 +827,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async Task UpdateVectorLayerAsync()
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
+
       if (_vectorLayerList.ContainsKey(MapView))
       {
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
 
-        foreach(var vectorLayer in _vectorLayerList[MapView])
-        { 
+        for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+        {
+          VectorLayer vectorLayer = _vectorLayerList[MapView][i];
+
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
 
           await UpdateVectorLayerAsync(vectorLayer);
