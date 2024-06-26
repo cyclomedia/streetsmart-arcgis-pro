@@ -931,13 +931,17 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
           }
-          catch (Exception ex)
+          catch (ArgumentException e)
           {
             if (!isExceptionAlreadyLogged)
             {
-              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
+              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
               isExceptionAlreadyLogged = true;
             }
+          }
+          catch (Exception ex)
+          {
+              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
           }
         }
       }
