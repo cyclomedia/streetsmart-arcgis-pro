@@ -504,7 +504,6 @@ namespace StreetSmartArcGISPro.VectorLayers
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
-
         return !(oldSld?.Equals(Sld?.SLD) ?? false);
       });
     }
@@ -882,7 +881,6 @@ namespace StreetSmartArcGISPro.VectorLayers
                 foreach (IViewer viewer in viewers)
                 {
                   string id = await viewer.GetId();
-
                   if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
@@ -916,7 +914,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public Dictionary<string, string> GetPropertiesFromRow(RowCursor rowCursor)
     {
-      bool isLogged = false;
+      bool isExceptionAlreadyLogged = false;
       Row row = rowCursor.Current;
       Feature feature = row as Feature;
       IReadOnlyList<Field> fields = feature?.GetFields();
@@ -935,10 +933,10 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           catch (Exception ex)
           {
-            if (!isLogged)
+            if (!isExceptionAlreadyLogged)
             {
               EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
-              isLogged = true;
+              isExceptionAlreadyLogged = true;
             }
           }
         }
