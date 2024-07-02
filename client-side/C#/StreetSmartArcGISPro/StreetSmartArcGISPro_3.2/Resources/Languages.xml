@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Languages xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Language>
+    <Name>English</Name>
+    <Locale>en-GB</Locale>
+  </Language>
+  <Language>
+    <Name>Français</Name>
+    <Locale>fr</Locale>
+  </Language>
+</Languages>

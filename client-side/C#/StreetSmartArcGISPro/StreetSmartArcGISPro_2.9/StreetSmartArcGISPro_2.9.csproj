@@ -1,0 +1,324 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FF025699-0123-458E-8A61-3BD27D7A0733}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StreetSmartArcGISPro</RootNamespace>
+    <AssemblyName>StreetSmartArcGISPro</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <UseWPF>true</UseWPF>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe</StartProgram>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe</StartProgram>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Config.fr.daml">
+      <SubType>Designer</SubType>
+    </AddInContent>
+    <AddInContent Include="Config.daml">
+      <SubType>Designer</SubType>
+    </AddInContent>
+    <AddInContent Include="Images\StreetSmartArcGISPro32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddIns\Buttons\Help.cs" />
+    <Compile Include="AddIns\Buttons\ImageIdSearch.cs" />
+    <Compile Include="AddIns\Buttons\RecordingLayer.cs" />
+    <Compile Include="AddIns\Pages\Agreement.cs" />
+    <Compile Include="AddIns\Pages\Configuration.cs" />
+    <Compile Include="AddIns\Pages\About.cs" />
+    <Compile Include="AddIns\Pages\Language.cs" />
+    <Compile Include="AddIns\Pages\Settings.cs" />
+    <Compile Include="AddIns\Pages\Login.cs" />
+    <Compile Include="AddIns\Buttons\CycloMediaOptions.cs" />
+    <Compile Include="AddIns\Modules\StreetSmart.cs" />
+    <Compile Include="AddIns\Tools\OpenLocation.cs" />
+    <Compile Include="AddIns\Views\Agreement.xaml.cs">
+      <DependentUpon>Agreement.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Configuration.xaml.cs">
+      <DependentUpon>Configuration.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
+    <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
+    <Compile Include="AddIns\Views\Converters\ContainsSrItems.cs" />
+    <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
+    <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
+    <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
+    <Compile Include="AddIns\Views\Converters\IsNotNull.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementObservationSelected.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementOpenClose.cs" />
+    <Compile Include="AddIns\Views\Converters\ConfigurationService.cs" />
+    <Compile Include="AddIns\Views\Converters\CombineBoolean.cs" />
+    <Compile Include="AddIns\Views\About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Converters\CanMeasuring.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementObservationWidth.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementColor.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementMatch.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementImage.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementRelEst.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementPositionStd.cs" />
+    <Compile Include="AddIns\Views\Converters\MeasurementPosition.cs" />
+    <Compile Include="AddIns\Views\Converters\LoginStatus.cs" />
+    <Compile Include="AddIns\Views\Language.xaml.cs">
+      <DependentUpon>Language.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Converters\InverseBoolean.cs" />
+    <Compile Include="AddIns\Views\StreetSmartApi.xaml.cs">
+      <DependentUpon>StreetSmartApi.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Configuration\File\Agreement.cs" />
+    <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
+    <Compile Include="Configuration\File\ConstantsViewer.cs" />
+    <Compile Include="Configuration\File\Project.cs" />
+    <Compile Include="Configuration\File\ProjectList.cs" />
+    <Compile Include="Configuration\File\LanguageSettings.cs" />
+    <Compile Include="Configuration\File\Setting.cs" />
+    <Compile Include="Configuration\File\StoredLayer.cs" />
+    <Compile Include="Configuration\File\StoredLayerList.cs" />
+    <Compile Include="Configuration\Remote\Recordings\FeatureCollection.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Images.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Height.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Point.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Location.cs" />
+    <Compile Include="Configuration\Remote\Recordings\FeatureMembers.cs" />
+    <Compile Include="Configuration\Remote\Recordings\ProductType.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Image.cs" />
+    <Compile Include="Configuration\Remote\Recordings\TileSchema.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\Bounds.cs" />
+    <Compile Include="Configuration\Remote\Recordings\Recording.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\SpatialReference.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\SpatialReferenceList.cs" />
+    <Compile Include="Configuration\Resource\Language.cs" />
+    <Compile Include="Configuration\Resource\Languages.cs" />
+    <Compile Include="Configuration\Resource\APIKey.cs" />
+    <Compile Include="Configuration\Remote\GlobeSpotter\ApplicationConfiguration.cs" />
+    <Compile Include="Configuration\Remote\GlobeSpotter\Functionality.cs" />
+    <Compile Include="Configuration\Remote\GlobeSpotter\GlobeSpotterConfiguration.cs" />
+    <Compile Include="Configuration\File\Configuration.cs" />
+    <Compile Include="Configuration\Remote\State.cs" />
+    <Compile Include="Configuration\Remote\Urls.cs" />
+    <Compile Include="Configuration\Remote\Web.cs" />
+    <Compile Include="Configuration\File\Login.cs" />
+    <Compile Include="AddIns\Views\StreetSmart.xaml.cs">
+      <DependentUpon>StreetSmart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\DockPanes\StreetSmart.cs" />
+    <Compile Include="AddIns\Views\ImageIdSearch.xaml.cs">
+      <DependentUpon>ImageIdSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\DockPanes\ImageIdSearch.cs" />
+    <Compile Include="Overlays\Measurement\MeasurementList.cs" />
+    <Compile Include="Overlays\Measurement\Measurement.cs" />
+    <Compile Include="Overlays\Measurement\MeasurementObservation.cs" />
+    <Compile Include="Overlays\Measurement\MeasurementPoint.cs" />
+    <Compile Include="Overlays\ViewerList.cs" />
+    <Compile Include="Properties\Resources.fr.Designer.cs">
+      <DependentUpon>Resources.fr.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Utilities\AvailableCoordSystems.cs" />
+    <Compile Include="Utilities\HSVToRGBColor.cs" />
+    <Compile Include="Utilities\ImageExtensions.cs" />
+    <Compile Include="Utilities\LocalizationProvider.cs" />
+    <Compile Include="VectorLayers\EditTools.cs" />
+    <Compile Include="VectorLayers\VectorLayer.cs" />
+    <Compile Include="CycloMediaLayers\CycloMediaGroupLayer.cs" />
+    <Compile Include="CycloMediaLayers\CycloMediaLayer.cs" />
+    <Compile Include="CycloMediaLayers\RecordingLayer.cs" />
+    <Compile Include="Overlays\Viewer.cs" />
+    <Compile Include="Overlays\CrossCheck.cs" />
+    <Compile Include="Overlays\ViewingCone.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\CoordSystemUtils.cs" />
+    <Compile Include="Utilities\CurrentCult.cs" />
+    <Compile Include="Utilities\FileUtils.cs" />
+    <Compile Include="VectorLayers\VectorLayerList.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AddIns\Views\Agreement.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Configuration.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\About.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Language.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Login.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddIns\Views\StreetSmartApi.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\StreetSmart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddIns\Views\ImageIdSearch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Images\CycloMediaOptions32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Agreement.txt" />
+    <EmbeddedResource Include="Resources\APIKey.xml" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Images\RecordingLayer32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Images\StreetSmart32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\Doc\LGPL-3.0.txt">
+      <Link>LGPL-3.0.txt</Link>
+    </Content>
+    <AddInContent Include="Images\OpenLocation32.png" />
+    <Content Include="..\..\Doc\ToDo.txt">
+      <Link>ToDo.txt</Link>
+    </Content>
+    <AddInContent Include="Images\ImageIdSearch32.png" />
+    <AddInContent Include="Images\MeasurementDetail32.png" />
+    <EmbeddedResource Include="Resources\Languages.xml" />
+    <EmbeddedResource Include="Images\UserTrash16.png" />
+    <EmbeddedResource Include="Images\FocusMode16.png" />
+    <EmbeddedResource Include="Images\SystemSearch16.png" />
+    <EmbeddedResource Include="Images\OpenLocation.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
+    <EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
+    <EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
+      <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Esri.ArcGISPro.Extensions">
+      <Version>2.9.0.32739</Version>
+    </PackageReference>
+    <PackageReference Include="StreetSmart.WPF">
+      <Version>24.4.0-rc02a</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+	<Exec Command="powershell -File '.\ReplaceConfigDate.ps1' $(ProjectDir) "/>
+  </Target>
+<Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -File "$(ProjectDir)ReplaceConfigDate.ps1" $(ProjectDir)</PreBuildEvent>
+  </PropertyGroup>
+</Project>

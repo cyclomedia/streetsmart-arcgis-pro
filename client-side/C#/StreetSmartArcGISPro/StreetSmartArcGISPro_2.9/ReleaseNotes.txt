@@ -1,0 +1,265 @@
+﻿Release notes:
+==============
+
+Version 22.20.0
+================
+- Updated to .net 6.0
+- Connected to the latest Street Smart 22.20 API
+- Added a OAuth property in the api.init for login by OAuth
+- Added clientId (needed to login by oauth) to the init function of the api
+- Added events: measurementStart, measurementStop, measurementSaved
+- Added a save measurement button function to the api
+
+
+Version 22.8.0
+================
+- Connected to new Street Smart 22.8 API
+- Implemented new PointCloudViewer
+- Added interface fuction for linkedViewers
+- added the functionality of compass, which can be set with function `toggleCompass'
+- added the function to set an elevationLevel in the panorama viewer
+
+
+Version 21.10.0
+================
+- implemented DCR9+ Tileschema
+
+Version 21.4.0
+================
+- replaced the poitscene pointcloud viewer with the bluebird viewer
+
+Version 21.1.0
+================
+- added Aerial point cloud support (including interface functions
+
+
+Version 21.1.0
+================
+- added Aerial point cloud support (including interface functions)
+- it is posible for add a layer which is standard turned off
+
+
+Version: 20.6.0
+================
+- parse the property year in the recording object
+
+
+Version: 20.2.0
+================
+- Updated to CefSharp version 0.79
+
+
+Version: 19.19.0
+================
+- fixed some geojson generation with polygons, triangolation wasn't working
+- in case of a WPF API, show and close developer tools are running now in the UI thread
+- pass an optional measure method to the start measurement call
+- feet / metric toggle (SetUnitPreference / GetUnitPreference)
+- enable / disable shortcuts (enableShortcut / disableShortcut)
+- added oblique viewer events: SWITCH_VIEWING_DIRECTION, FEATURE_CLICK, FEATURE_SELECTION_CHANGE, IMAGE_CHANGE, VIEW_CHANGE, VIEW_LOAD_END, TIME_TRAVEL_CHANGE
+
+
+Version: 19.18.0
+================
+- Implemented all the point cloud functions + events + viewers
+- Improved parsing of geoJson layers + exception handling
+
+
+Version: 19.17.0
+================
+- added the public function: Initialize() in the StreetSmartAPIFactory class
+- added the 'resolution' part to the geoJson measurements
+
+
+Version: 19.16.0
+================
+- reverted to Cefsharp version 73.1.130 because of some problems with the ArcGisPro integration of version 75.1.142 of Cefsharp
+- fixed issue that sometimes a wrong close viewer is given to the viewerRemovedEvent
+
+
+Version: 19.15.0
+================
+- a bug has been fixed that sometimes causes a crash if panorama viewers are closed very quickly.
+
+
+Version: 19.14.0
+================
+- Added interface functions: GetSidebarVisible, getSidebarEnabled, GetSidebarExpanded, TobbleSidebarExpanded, toggleSidebarVisible, toggleSidebarEnabled
+- Minor bug fixes of parsing of measurement information
+- Updated to CefSharp version 0.75
+- Bug fixed in the event handling of the on the viewerAdded and viewerRemovedEvents
+- Added ObliqueViewerButtons: MEASURE
+- Added PanoramaViewerButtons: ZOOM_WINDOW
+- Start measurement function: Now the function send an exception if there is an exception on the javascript side
+- Start measurement function: It is now also possible for start oblique measurements
+- Updated geoJson structure of measurements with the oblique values
+- Changed culture info parsing
+
+
+Version: 19.7.0
+===============
+- Added layer visibility changed event
+
+
+Version: 19.6.0
+===============
+- Added option: EnableHighDPISupport()
+- Updated to CefSharp version 0.73
+- Fixed issue with more panorama viewers, start measurement, stop measurement, all panorama viewers are working now
+
+
+Version: 19.5.0
+===============
+- SLD parsing: External Graphic / InlineContent as base64 string
+- Solved stability issues
+- Solved small issue with the set the point measurement as geoJson
+
+
+Version: 19.3.0
+===============
+- Added function for set the chromium browser language
+- Add WFS option on API-WFS-SLD-string styling
+- Add address layer option
+- addOverlay function with only a color
+- add function: AllowInsecureContent, this function can for example be used for show insecure wfs content
+
+
+Version: 19.2.0
+===============
+- Added function in the panorama viewer: ShowAttributePanelOnFeatureClick(), for deselect the object info
+
+
+Version: 19.1.0
+===============
+- Added event: FeatureClicked, this event is fired when click on a feature in a layer
+- Created methods for create point, lineString and polygons in a geoJson
+- Create a clone function for clone the FeatureCollection
+- Fixed several small bugs
+- Fixed: white screen after close measurement, close viewer
+
+
+Version: 18.15.1
+================
+- No debug log is made in the working directory
+- localesDirPath is configurable
+- resourcesDirPath is configurable
+- Fixed error message: CEF can only be initialized once per process
+
+
+Version: 18.15.0
+================
+- Refactor some code
+- Added Code for Constructing SLD objects
+- Added a API Settings class
+- Added in the API Settings class functionalities for location of the GPU Cache and the disabling of the GPU cache
+- Added functions in the viewer objects: (IViewer / IPanoramaViewer / IObliqueViewer): GetType(), SaveImage(), ToggleOverlay()
+- Added function to the obliqueViewer: SwitchViewingDirection()
+- Added to the oblique and the panorama viewer buttons list: SAVE_IMAGE
+- Added properties to the panoramaViewerOptions: MeasureTypeButtonVisible, MeasureTypeButtonToggle, MeasureTypeButtonStart
+- Possible for set the active measurement
+- Updated with cefsharp version 0.69
+- Added function for setActiveMeasurement
+
+
+Version: 18.13.0
+================
+- LookAtCoordinate function is now awaited
+- Exception message if you try to call a viewer which no longer exists
+- Destroy function is now awaited
+- fixed: getAPIReady state, incase of API isn't ready, now returns false in case of a crash
+- Wait time for getViewers is now 1 second, no infinite wait time
+- Added panorama viewer buttons: OPEN_POINTCLOUD, PLAYLIST, CENTER_MAP
+- Remove panorama viewer button: SAVE_IMAGE
+- Added oblique viewer buttons: OVERLAYS, CENTER_MAP
+- Remove oblique viewer button: SAVE_IMAGE
+- Added geoJson parsing, now it is possible for generate a geoJson
+- Solved crash with removing panorama viewers
+- Solved crash with getRecording() and the coordinate doesn't contains decimals after the comma
+- Added function for restart the StreetSmartAPI, only for the WPF version
+- added event: LayerVisibilityChanged in the panorama viewer and the oblique viewer
+- Fixed: some more issues about thread safe of the API
+- Fixed crash with measurements in other countrys of the Netherlands
+- Fixed some help
+
+
+Version: 18.11.0
+================
+- Fixed: Make the API thread safe
+- Fixed: parsing recordedAt in case of Smart Click measurements with use of old services
+
+
+Version: 18.10.0
+================
+- build with chefsharp version 0.67
+- From this moment, there is also a WPF version available
+- Now always expect that all files are placed / running in the same directory
+- Stability fixes
+- Changed parameters in following events: imageChanged, timeTravelChanged, viewLoadEnd, viewLoadStart
+- Added a json object
+- Rename: getViewerId() => getId()
+- Added function: setOverlayDrawDistance()
+- Added function: setSelectedFeatureByProperties()
+- Added event: elevationChanged
+
+
+Version: 18.7.0
+===============
+- Fixed bug: crashed on .GetRecording() with images from 2008
+- GetActiveMeasurement: returns now an object structure
+- The measurement changed event, returns now an object structure
+- Remove overlay function is now awaited
+- Added a function for get the viewerId: GetViewerId()
+- Added a function for close a viewer by Id: CloseViewer(viewerId)
+- Added a function for get the opened viewers: getViewers()
+- Fixed bug: when setting a viewer to not be closeable, button still appears
+- Fixed: now multiple API creation and initialization support
+
+
+Version: 18.5.0
+===============
+- Removed maxWindows, now the maxWindows is always 3
+- Removed the Copy_Link and Center_Map button in the oblique viewer and panorama viewer buttons
+- Added the toggle3D Cursor and get3DCursor visible functions in the Panorama viewer
+- Added the SetBrightness and the SetContrast functions in the panorama viewer and the oblique viewer
+- Improved parsing SLD, now you don't have to escape characters
+- Added set Active measurment function: ToDo: add it possible for create a GeoJSON object and parse this object to this function
+
+
+Version: 18.4.0
+===============
+- Added the folowing buttons to the panorama viewer button list. Now you can turn these buttons on and off.
+	+ Elevation button
+	+ report blurring button
+	+ measure button
+- Bug fixed: crashed on .GetRecording() with old images
+- Build with Cefsharp version 0.63. (Previous we CefSharp version 0.57). This new build fixed the next problem:
+    + Fixed running API on older operationg systems. (For example windows server 2008)
+- Changed the open image options, now there are oblique viewer options and panorama viewer options
+- Implemented: Remove cross from panoramic viewer
+- Fixed adding geoJson layer with an empty SLD
+
+
+Version: 17.3.0
+===============
+- IStreetsmartAPI:
+	- Added events: ViewerAdded and ViewerRemoved
+	- Added functions: DestroyApi, GetDebugLogs, removeOverlays
+	- Renamed: GetMeasurementInfo => GetActiveMeasurement, OpenByQuery => Open
+	- Updated function:
+		- AddOverlay: returns now a Id, can now used for add a SLD to the overlay
+	- Remove deprecated functions:
+		- AddPanoramaViewer, DestroyPanoramaViewer
+
+- IObliqueViewer:
+	- Expand with the same functions as in the IPanoramaViewer interace
+	- Added functions: getButtonEnabled and toggleButtonEnabled
+
+- IPanoramaViewer:
+	- Added functions: getButtonEnabled and toggleButtonEnabled
+
+- Added support for multiple cyclorama viewers
+
+
+Version: 17.2.0
+===============
+- Start release notes

@@ -1,0 +1,111 @@
+﻿CycloMedia Technology B.V. (‘CycloMedia’) is registered in the Trade Register
+of the Chamber of Commerce under number 16063843.
+
+USER TERMS AND CONDITIONS STREET SMART
+The usage of Image Material and/or the Information Products and the Software 
+as a Service Services (‘SaaS Services’) made available via Street Smart by 
+means of an agreement with the organization for which you work, be it as an
+employee or on assignment basis, is only permitted under the following terms
+and conditions.
+
+Definitions
+Image Material Cycloramas, Aquaramas, Aerials, Aerial photographs and/or 3D
+images or other static and/or moving images.
+
+Information Products
+Any data generated from Image Material and/or generated from other other 
+datasets or object information and/or change detection data in any form, 
+including but not limited to BAG Smart, 3D data and data with regard to 
+traffic signs, road markings and light poles.
+
+User
+The duly authorized user of products and/or services under the Agreement, who
+is employed by the Customer or has been authorized by the Customer within the 
+Customer’s organization on any other basis.
+
+Agreement
+The agreement between or on behalf of CycloMedia and the organisation of the 
+User (‘Customer’) which sets out their mutual rights and obligations relating 
+to the software to be provided or the Services and/or Products to be 
+delivered by CycloMedia to the Customer.
+
+Software
+The computer software to be provided by CycloMedia to the Customer, including
+scripts and data sets, including but not limited to standard data layers, as 
+well as Documentation.
+
+System
+Computer and related equipment used by or on behalf of CycloMedia for access 
+to the SaaS Services, services, products and/or use of the Software.
+
+1.	The User shall (a) keep the access code(s) provided secret, (b) immediately 
+	inform CycloMedia if the User no longer possesses the access code(s) and (c)
+	not transfer to third parties, or allow third persons to use, its access 
+	code(s), the documentation or manual or other rights arising under the 
+	Agreement, unless CycloMedia has expressly granted written permission for 
+	it. The User is at all times responsible for the use of any access code.
+
+2.	The User shall notify CycloMedia in writing as soon as possible of any 
+	changes in relevant personal details concerning the User.
+
+3.	The User is not permitted to use the Image Material and/or the Information
+	Products for other than the purposes for which it has been provided by means
+	of the Agreement.
+
+4.	Without CycloMedia’s prior permission in writing, the User is not permitted 
+	to:
+	4.1	make the Image Material and/or the Information Products available to 
+		third parties;
+	4.2	change or remove references to CycloMedia in the Image Material and/or 
+		the Information Products;
+	4.3	disclose the Image Material and/or the Information Products to the 
+		public (including all conceivable Internet applications);
+	4.4	lease out, sublicense, sell, dispose of, pledge or transfer by way of 
+		security the Image Material and/or the Information Products or to allow 
+		third parties for any reason to use it for any purpose;
+	4.5	trace metadata from the Image Material in so far as these metadata are 
+		not necessary for the intended use of the Image Material. 
+
+5.	The processing of the Image Material by the User may involve processing of 
+	personal data, e.g. recognizable faces and number plates, within the 
+	meaning	of the General Data Protection Regulation (‘GDPR’). The User shall
+	act in compliance with the GDPR and any other statutory rules, codes of 
+	conduct, privacy regulations and conditions.
+
+6.	The User shall inform CycloMedia immediately of all relevant facts and 
+	circumstances as soon as the former discovers any unauthorized use of 
+	the Image Material.
+
+7.	The right of use is granted for usage on a maximum of 3 different user
+	devices per concurrent user, unless agreed otherwise in writing. 
+
+8.	The User shall meet the technical or other prescriptions, conditions and 
+	proce¬du¬res which are provided by or on behalf of CycloMedia.
+
+9.	The User shall refrain from obstructing CycloMedia, other customers of 
+	CycloMedia and other Internet users from using the System and/or from 
+	damaging the System. The User is not permitted to start processes or 
+	programs – whether or not through the System – of which the User knows
+	or can reasonably suspect that it may obstruct CycloMedia, other customers 
+	of CycloMedia and other Internet users or cause damage.
+
+10.	The User is not permitted to use the System for any acts that are contrary
+	to applicable statutory provisions, self-regulation, general guidelines 
+	and codes of conduct on the use of the Internet (e.g. Netiquette), the 
+	Agreement or these user terms and conditions. 
+
+11.	CycloMedia is entitled to include the personal data concerning the User
+	in CycloMedia’s registration of persons, which is required for its 
+	accounting and management tasks, and shall comply with the provisions 
+	in the GDPR in processing these personal data.
+
+COOKIES GOOGLE ANALYTICS
+The Street Smart website uses Google cookies as part of the "Analytics" service.
+We use these cookies to analyze the use of Street Smart and align the 
+development of Street Smart with the Users’ needs. For this purpose, we for
+instance analyze from which country our service is consulted and which browser
+is used. More information about the Cookie Policy is available on the 
+CycloMedia website.
+
+By clicking Accept you agree to these user terms and conditions Street Smart 			
+© Copyright 2019 CycloMedia Technology B.V.
