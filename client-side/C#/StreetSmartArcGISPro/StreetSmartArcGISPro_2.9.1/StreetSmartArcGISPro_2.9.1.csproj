@@ -443,7 +443,6 @@
     <None Include="..\StreetSmartArcGISPro_3.2\Resources\Recordings\FCRecordings.shx">
       <Link>Resources\Recordings\FCRecordings.shx</Link>
     </None>
-    <None Include="AddIns\Views\Settings.xaml.bak" />
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
