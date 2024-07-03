@@ -5,131 +5,136 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file://$(localAppData)\Programs/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
 	<AddInInfo id="{34D5B2FF-2566-4346-9C41-CB901D8811E1}" version="1.8.4" desktopVersion="3.0.36030">
-    <Name>Street Smart for ArcGIS Pro</Name>
-    <Description>
-      Street Smart for ArcGIS Pro
-      Copyright © CycloMedia Technology 2024
-    </Description>
-    <Image>Images\StreetSmartArcGISPro32.png</Image>
-    <Author>CycloMedia</Author>
-    <Company>CycloMedia</Company>
+		<Name>Street Smart for ArcGIS Pro</Name>
+		<Description>
+			Street Smart for ArcGIS Pro
+			Copyright © CycloMedia Technology 2024
+		</Description>
+		<Image>Images\StreetSmartArcGISPro32.png</Image>
+		<Author>CycloMedia</Author>
+		<Company>CycloMedia</Company>
 		<Date>06/28/2024 03:30:00 PM, 2024</Date>
-    <Subject>Content</Subject>
-  </AddInInfo>
-  <modules>
-    <insertModule id="streetSmartArcGISPro_module_fr" className="AddIns.Modules.StreetSmart" autoLoad="true" caption="Street Smart module">
-      <tabs>
-        <tab id="streetSmartArcGISPro_tab" caption="Street Smart" keytip="G">
-          <group refID="streetSmartArcGISPro_layerGroup" />
-          <group refID="streetSmartArcGISPro_inquiryGroup" />
-          <group refID="streetSmartArcGISPro_navigateGroup" />
-        </tab>
-      </tabs>
-      <groups>
-        <group id="streetSmartArcGISPro_layerGroup" caption="Calque" appearsOnAddInTab="false" keytip="GL">
-          <button refID="streetSmartArcGISPro_recordingLayerButton" size="large" />
-        </group>
-        <group id="streetSmartArcGISPro_inquiryGroup" caption="Requête" appearsOnAddInTab="false" keytip="GI">
-          <button refID="streetSmartArcGISPro_ImageIdSearchButton" size="large" />
-        </group>
-        <group id="streetSmartArcGISPro_navigateGroup" caption="Naviguer" appearsOnAddInTab="false" keytip="GN">
-          <tool refID="streetSmartArcGISPro_openImageTool" size="large" />
-          <tool refID="esri_mapping_exploreTool" size="large" />
-        </group>
-      </groups>
-      <controls>
-        <tool id="streetSmartArcGISPro_openImageTool" caption="Ouvrir la vue" className="AddIns.Tools.OpenLocation" loadOnClick="false" largeImage="Images\OpenLocation32.png" condition="streetSmartArcGISPro_openImageToolReadyCondition" keytip="GO">
-          <tooltip heading="Ouvrir la vue">
-            Ouvrir le lieu dans un cyclorama
-            <disabledText /></tooltip>
-        </tool>
-        <button id="streetSmartArcGISPro_cycloMediaOptionsButton" caption="Street Smart" className="AddIns.Buttons.CycloMediaOptions" loadOnClick="false" largeImage="Images\CycloMediaOptions32.png" keytip="GS">
-          <tooltip heading="Réglages">
-            Paramètres de Street Smart pour ArcGIS Pro
-            <disabledText /></tooltip>
-        </button>
-        <button id="streetSmartArcGISPro_recordingLayerButton" caption="Calque enregistrement" className="AddIns.Buttons.RecordingLayer" loadOnClick="false" largeImage="Images\RecordingLayer32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GR">
-          <tooltip heading="Calque enregistrement">
-            Ajouter une calque enregistrement à la carte
-            <disabledText /></tooltip>
-        </button>
-        <button id="streetSmartArcGISPro_ImageIdSearchButton" caption="Recherche d'ImageId" className="AddIns.Buttons.ImageIdSearch" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GIS">
-          <tooltip heading="Recherche d'ImageId">
-            Rechercher l'imageId
-            <disabledText /></tooltip>
-        </button>
-        <button id="streetSmartArcGISPro_HelpButton" caption="Street Smart Help" className="AddIns.Buttons.Help" loadOnClick="false" largeImage="Images\Help32.png" condition="streetSmartArcGISPro_agreementAcceptedCondition" keytip="GH">
-          <tooltip heading="Afficher les informations d'aide">
-            Afficher les informations d'aide
-            <disabledText /></tooltip>
-        </button>
-      </controls>
-      <dockPanes>
-        <dockPane id="streetSmartArcGISPro_streetSmartDockPane" caption="Cyclorama Viewer" className="AddIns.DockPanes.StreetSmart" dock="bottom" smallImage="Images\StreetSmart32.png" dockWith="esri_mapping_mapPane">
-          <content className="AddIns.Views.StreetSmart" />
-        </dockPane>
-        <dockPane id="streetSmartArcGISPro_ImageIdSearch" caption="Recherche d'ImageId" className="AddIns.DockPanes.ImageIdSearch" dock="group" dockWith="esri_mapping_locateDockPane">
-          <content className="AddIns.Views.ImageIdSearch" />
-        </dockPane>
-      </dockPanes>
-    </insertModule>
-    <updateModule refID="esri_mapping">
-      <groups>
-        <updateGroup refID="esri_mapping_navigateGroup">
-          <insertButton refID="streetSmartArcGISPro_openImageTool" size="large" />
-        </updateGroup>
-        <updateGroup refID="esri_mapping_inquiryGroup">
-          <insertButton refID="streetSmartArcGISPro_ImageIdSearchButton" size="large" />
-        </updateGroup>
-      </groups>
-    </updateModule>
-  </modules>
-  <propertySheets>
-    <insertSheet id="streetSmartArcGISPro_optionsPropertySheet" caption="Street Smart for ArcGIS Pro" resizable='true'>
-      <page id="streetSmartArcGISPro_loginPage" caption="S'identifier" className="AddIns.Pages.Login" condition="streetSmartArcGISPro_agreementAcceptedCondition">
-        <content className="AddIns.Views.Login" />
-      </page>
-      <page id="streetSmartArcGISPro_languagePage" caption="Langue" className="AddIns.Pages.Language" condition="streetSmartArcGISPro_agreementAcceptedCondition">
-        <content className="AddIns.Views.Language" />
-      </page>
-      <page id="streetSmartArcGISPro_configurationPage" caption="Configuration" className="AddIns.Pages.Configuration" condition="streetSmartArcGISPro_agreementAcceptedCondition">
-        <content className="AddIns.Views.Configuration" />
-      </page>
-      <page id="streetSmartArcGISPro_aboutPage" caption="A propos" className="AddIns.Pages.About" condition="streetSmartArcGISPro_agreementAcceptedCondition">
-        <content className="AddIns.Views.About" />
-      </page>
-      <page id="streetSmartArcGISPro_agreementPage" caption="Accord" className="AddIns.Pages.Agreement">
-        <content className="AddIns.Views.Agreement" />
-      </page>
-    </insertSheet>
-    <updateSheet refID="esri_mapping_mapPropertySheet">
-      <insertPage id="streetSmartArcGISPro_SettingsPage" caption="Street Smart" className="AddIns.Pages.Settings" condition="streetSmartArcGISPro_agreementAcceptedCondition">
-        <content className="AddIns.Views.Settings" />
-      </insertPage>
-    </updateSheet>
-  </propertySheets>
-  <conditions>
-    <insertCondition id="streetSmartArcGISPro_agreementAcceptedCondition" caption="L'accord est accepté.">
-      <state id="streetSmartArcGISPro_agreementAcceptedState" />
-    </insertCondition>
-    <insertCondition id="streetSmartArcGISPro_recordingsReadyCondition" caption="Les enregistrements sont prêts..">
-      <and>
-        <state id="streetSmartArcGISPro_agreementAcceptedState" />
-        <state id="streetSmartArcGISPro_loginSuccessfullyState" />
-        <state id="esri_mapping_mapPane" />
-      </and>
-    </insertCondition>
-    <insertCondition id="streetSmartArcGISPro_openImageToolReadyCondition" caption="L'outil image est prêt.">
-      <and>
-        <state id="streetSmartArcGISPro_agreementAcceptedState" />
-        <state id="streetSmartArcGISPro_loginSuccessfullyState" />
-        <state id="streetSmartArcGISPro_recordingLayerEnabledState" />
-        <state id="esri_mapping_mapPane" />
-      </and>
-    </insertCondition>
-  </conditions>
-  <backstage>
-    <insertButton refID="streetSmartArcGISPro_cycloMediaOptionsButton" insert="after" placeWith="esri_core_showOptionsSheetButton" separator="false" />
-    <insertButton refID="streetSmartArcGISPro_HelpButton" insert="after" placeWith="esri_core_showHelpButton" separator="false" />
-  </backstage>
+		<Subject>Content</Subject>
+	</AddInInfo>
+	<modules>
+		<insertModule id="streetSmartArcGISPro_module_fr" className="AddIns.Modules.StreetSmart" autoLoad="true" caption="Street Smart module">
+			<tabs>
+				<tab id="streetSmartArcGISPro_tab" caption="Street Smart" keytip="G">
+					<group refID="streetSmartArcGISPro_layerGroup" />
+					<group refID="streetSmartArcGISPro_inquiryGroup" />
+					<group refID="streetSmartArcGISPro_navigateGroup" />
+				</tab>
+			</tabs>
+			<groups>
+				<group id="streetSmartArcGISPro_layerGroup" caption="Calque" appearsOnAddInTab="false" keytip="GL">
+					<button refID="streetSmartArcGISPro_recordingLayerButton" size="large" />
+				</group>
+				<group id="streetSmartArcGISPro_inquiryGroup" caption="Requête" appearsOnAddInTab="false" keytip="GI">
+					<button refID="streetSmartArcGISPro_ImageIdSearchButton" size="large" />
+				</group>
+				<group id="streetSmartArcGISPro_navigateGroup" caption="Naviguer" appearsOnAddInTab="false" keytip="GN">
+					<tool refID="streetSmartArcGISPro_openImageTool" size="large" />
+					<tool refID="esri_mapping_exploreTool" size="large" />
+				</group>
+			</groups>
+			<controls>
+				<tool id="streetSmartArcGISPro_openImageTool" caption="Ouvrir la vue" className="AddIns.Tools.OpenLocation" loadOnClick="false" largeImage="Images\OpenLocation32.png" condition="streetSmartArcGISPro_openImageToolReadyCondition" keytip="GO">
+					<tooltip heading="Ouvrir la vue">
+						Ouvrir le lieu dans un cyclorama
+						<disabledText />
+					</tooltip>
+				</tool>
+				<button id="streetSmartArcGISPro_cycloMediaOptionsButton" caption="Street Smart" className="AddIns.Buttons.CycloMediaOptions" loadOnClick="false" largeImage="Images\CycloMediaOptions32.png" keytip="GS">
+					<tooltip heading="Réglages">
+						Paramètres de Street Smart pour ArcGIS Pro
+						<disabledText />
+					</tooltip>
+				</button>
+				<button id="streetSmartArcGISPro_recordingLayerButton" caption="Calque enregistrement" className="AddIns.Buttons.RecordingLayer" loadOnClick="false" largeImage="Images\RecordingLayer32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GR">
+					<tooltip heading="Calque enregistrement">
+						Ajouter une calque enregistrement à la carte
+						<disabledText />
+					</tooltip>
+				</button>
+				<button id="streetSmartArcGISPro_ImageIdSearchButton" caption="Recherche d'ImageId" className="AddIns.Buttons.ImageIdSearch" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GIS">
+					<tooltip heading="Recherche d'ImageId">
+						Rechercher l'imageId
+						<disabledText />
+					</tooltip>
+				</button>
+				<button id="streetSmartArcGISPro_HelpButton" caption="Street Smart Help" className="AddIns.Buttons.Help" loadOnClick="false" largeImage="Images\Help32.png" condition="streetSmartArcGISPro_agreementAcceptedCondition" keytip="GH">
+					<tooltip heading="Afficher les informations d'aide">
+						Afficher les informations d'aide
+						<disabledText />
+					</tooltip>
+				</button>
+			</controls>
+			<dockPanes>
+				<dockPane id="streetSmartArcGISPro_streetSmartDockPane" caption="Cyclorama Viewer" className="AddIns.DockPanes.StreetSmart" dock="bottom" smallImage="Images\StreetSmart32.png" dockWith="esri_mapping_mapPane">
+					<content className="AddIns.Views.StreetSmart" />
+				</dockPane>
+				<dockPane id="streetSmartArcGISPro_ImageIdSearch" caption="Recherche d'ImageId" className="AddIns.DockPanes.ImageIdSearch" dock="group" dockWith="esri_mapping_locateDockPane">
+					<content className="AddIns.Views.ImageIdSearch" />
+				</dockPane>
+			</dockPanes>
+		</insertModule>
+		<updateModule refID="esri_mapping">
+			<groups>
+				<updateGroup refID="esri_mapping_navigateGroup">
+					<insertButton refID="streetSmartArcGISPro_openImageTool" size="large" />
+				</updateGroup>
+				<updateGroup refID="esri_mapping_inquiryGroup">
+					<insertButton refID="streetSmartArcGISPro_ImageIdSearchButton" size="large" />
+				</updateGroup>
+			</groups>
+		</updateModule>
+	</modules>
+	<propertySheets>
+		<insertSheet id="streetSmartArcGISPro_optionsPropertySheet" caption="Street Smart for ArcGIS Pro" resizable='true'>
+			<page id="streetSmartArcGISPro_loginPage" caption="S'identifier" className="AddIns.Pages.Login" condition="streetSmartArcGISPro_agreementAcceptedCondition">
+				<content className="AddIns.Views.Login" />
+			</page>
+			<page id="streetSmartArcGISPro_languagePage" caption="Langue" className="AddIns.Pages.Language" condition="streetSmartArcGISPro_agreementAcceptedCondition">
+				<content className="AddIns.Views.Language" />
+			</page>
+			<page id="streetSmartArcGISPro_configurationPage" caption="Configuration" className="AddIns.Pages.Configuration" condition="streetSmartArcGISPro_agreementAcceptedCondition">
+				<content className="AddIns.Views.Configuration" />
+			</page>
+			<page id="streetSmartArcGISPro_aboutPage" caption="A propos" className="AddIns.Pages.About" condition="streetSmartArcGISPro_agreementAcceptedCondition">
+				<content className="AddIns.Views.About" />
+			</page>
+			<page id="streetSmartArcGISPro_agreementPage" caption="Accord" className="AddIns.Pages.Agreement">
+				<content className="AddIns.Views.Agreement" />
+			</page>
+		</insertSheet>
+		<updateSheet refID="esri_mapping_mapPropertySheet">
+			<insertPage id="streetSmartArcGISPro_SettingsPage" caption="Street Smart" className="AddIns.Pages.Settings" condition="streetSmartArcGISPro_agreementAcceptedCondition">
+				<content className="AddIns.Views.Settings" />
+			</insertPage>
+		</updateSheet>
+	</propertySheets>
+	<conditions>
+		<insertCondition id="streetSmartArcGISPro_agreementAcceptedCondition" caption="L'accord est accepté.">
+			<state id="streetSmartArcGISPro_agreementAcceptedState" />
+		</insertCondition>
+		<insertCondition id="streetSmartArcGISPro_recordingsReadyCondition" caption="Les enregistrements sont prêts..">
+			<and>
+				<state id="streetSmartArcGISPro_agreementAcceptedState" />
+				<state id="streetSmartArcGISPro_loginSuccessfullyState" />
+				<state id="esri_mapping_mapPane" />
+			</and>
+		</insertCondition>
+		<insertCondition id="streetSmartArcGISPro_openImageToolReadyCondition" caption="L'outil image est prêt.">
+			<and>
+				<state id="streetSmartArcGISPro_agreementAcceptedState" />
+				<state id="streetSmartArcGISPro_loginSuccessfullyState" />
+				<state id="streetSmartArcGISPro_recordingLayerEnabledState" />
+				<state id="esri_mapping_mapPane" />
+			</and>
+		</insertCondition>
+	</conditions>
+	<backstage>
+		<insertButton refID="streetSmartArcGISPro_cycloMediaOptionsButton" insert="after" placeWith="esri_core_showOptionsSheetButton" separator="false" />
+		<insertButton refID="streetSmartArcGISPro_HelpButton" insert="after" placeWith="esri_core_showHelpButton" separator="false" />
+	</backstage>
 </ArcGIS>
