@@ -12,6 +12,7 @@
 		<OutputType>Library</OutputType>
 		<RootNamespace>StreetSmartArcGISPro</RootNamespace>
 		<Platforms>AnyCPU;x64</Platforms>
+		<AssemblyName>StreetSmartArcGISPro</AssemblyName>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<Optimize>False</Optimize>
