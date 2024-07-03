@@ -2,4 +2,4 @@
 
 ## More information
 
-- [Service and support for developers](https://www.cyclomedia.com/us/service-and-support-for-developers)
+- [Service and support for developers](https://www.cyclomedia.com/us/apidocumentation)
