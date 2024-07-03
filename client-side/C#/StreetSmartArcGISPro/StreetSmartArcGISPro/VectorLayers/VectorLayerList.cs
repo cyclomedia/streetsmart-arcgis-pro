@@ -37,6 +37,7 @@ using StreetSmartArcGISPro.Utilities;
 
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -482,9 +483,13 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         //force the tool to change manually then go back and turn on the sketch tool
         await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
-        await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+
+        if (args.IncomingTemplate != null)
+          await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+        else
+          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
       }
-      
+
       if (args.IncomingTemplate != null && args.IncomingTemplate.IsActive != false)
       {
         switch (args.IncomingTemplate.DefaultToolID)
@@ -682,14 +687,20 @@ namespace StreetSmartArcGISPro.VectorLayers
         VectorLayer vectorLayer = this[mapView][0];
         await RemoveLayer(vectorLayer, mapView);
       }
+
+      MapViewInitializedEvent.Unsubscribe(OnMapViewInitialized);
+      MapClosedEvent.Unsubscribe(OnMapClosed);
+
+      this.Remove(mapView);
     }
 
     private async void OnLayersAdded(LayerEventsArgs args)
     {
       foreach (Layer layer in args.Layers)
       {
-        MapView mapView = GetMapViewFromLayer(layer);
-        await AddLayerAsync(layer, mapView ?? MapView.Active);
+        MapView mapView = GetMapViewFromLayer(layer) ?? MapView.Active;
+        if(mapView != null)
+          await AddLayerAsync(layer, mapView);
       }
     }
 

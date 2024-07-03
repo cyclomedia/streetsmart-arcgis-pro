@@ -122,6 +122,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string Name => Layer?.Name ?? string.Empty;
 
+    public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
+
     public bool IsVisible => Layer != null && Layer.IsVisible;
     //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;
@@ -502,7 +504,6 @@ namespace StreetSmartArcGISPro.VectorLayers
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
-        
         return !(oldSld?.Equals(Sld?.SLD) ?? false);
       });
     }
@@ -880,7 +881,6 @@ namespace StreetSmartArcGISPro.VectorLayers
                 foreach (IViewer viewer in viewers)
                 {
                   string id = await viewer.GetId();
-                  
                   if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
@@ -914,6 +914,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public Dictionary<string, string> GetPropertiesFromRow(RowCursor rowCursor)
     {
+      bool isExceptionAlreadyLogged = false;
       Row row = rowCursor.Current;
       Feature feature = row as Feature;
       IReadOnlyList<Field> fields = feature?.GetFields();
@@ -930,8 +931,17 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
           }
-          catch (NullReferenceException)
+          catch (ArgumentException e)
           {
+            if (!isExceptionAlreadyLogged)
+            {
+              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
+              isExceptionAlreadyLogged = true;
+            }
+          }
+          catch (Exception ex)
+          {
+              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
           }
         }
       }

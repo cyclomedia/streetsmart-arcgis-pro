@@ -16,14 +16,17 @@
  * License along with this library.
  */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Resources;
 using System.Threading.Tasks;
-
+using System.Windows;
+using System.Windows.Threading;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 
@@ -157,6 +160,17 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     protected override bool CanUnload()
     {
       return true;
+    }
+
+    protected override bool Initialize()
+    {
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+      Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+      TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
+
+
+      return base.Initialize();
     }
 
     protected override async void Uninitialize()
@@ -444,6 +458,29 @@ namespace StreetSmartArcGISPro.AddIns.Modules
           FrameworkApplication.State.Deactivate("streetSmartArcGISPro_recordingLayerEnabledState");
         }
       }
+    }
+
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+      Exception ex = e.ExceptionObject as Exception;
+      HandleException("CurrentDomain_UnhandledException", ex);
+    }
+
+    private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+      HandleException("Current_DispatcherUnhandledException",e.Exception);
+      //e.Handled = true;   // This can prevent application from crashing, but do we want to keep application running in unhandled state?
+    }
+
+    private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+    {
+      HandleException("TaskScheduler_UnobservedTaskException", e.Exception);
+      //e.SetObserved();  // This can prevent application from crashing, but do we want to keep application running in unhandled state?
+    }
+
+    private void HandleException(string exceptionSource, Exception ex)
+    {
+      EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Module) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
     }
 
     #endregion

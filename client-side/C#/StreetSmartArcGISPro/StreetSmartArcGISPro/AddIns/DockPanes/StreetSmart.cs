@@ -827,22 +827,18 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async Task UpdateVectorLayerAsync()
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
+
       if (_vectorLayerList.ContainsKey(MapView))
       {
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
-        //GC: create new list to keep track if duplicates are being added to the map
-        List<String> vectors = new List<String>();
-        // ReSharper disable once ForCanBeConvertedToForeach
+
         for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
         {
           VectorLayer vectorLayer = _vectorLayerList[MapView][i];
-          if (!vectors.Contains(vectorLayer.Name))
-          {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer");
-            vectors.Add(vectorLayer.Name);
-            await UpdateVectorLayerAsync(vectorLayer);
-          }
-          //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
+
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
+
+          await UpdateVectorLayerAsync(vectorLayer);
         }
       }
     }
@@ -864,12 +860,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         string srsName = cyclSpatRel?.SRSName;
 
         if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
-        {//GC: create transparency value here
+        {
+          //GC: create transparency value here
           string layerName = vectorLayer.Name;
-          bool visible = _storedLayerList.GetVisibility(layerName);
+          string layerNameAndUri = vectorLayer.NameAndUri;
+          bool hasCycloramaVisibility = _storedLayerList.GetVisibility(layerNameAndUri);
+          bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
           double transparency = vectorLayer.Layer.Transparency;
 
-          if (!visible)
+          if (!hasCycloramaVisibility)
           {
             await vectorLayer.GeoJsonToOld();
           }
@@ -898,11 +897,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
           IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
           overlay = await Api.AddOverlay(overlay);
-          StoredLayer layer = _storedLayerList.GetLayer(layerName);
+          StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
 
           if (layer == null)
           {
-            _storedLayerList.Update(layerName, false);
+            _storedLayerList.Update(layerNameAndUri, visible);
           }
           vectorLayer.Overlay = overlay;
 
@@ -915,8 +914,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
             return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
           });
+
           //should reset the image if the first feature was created so it isn't invisible
-          if (numIds[0] == 1)
+          if (numIds.Count > 0 && numIds[0] == 1)
           {
             await OpenImageAsync();
           }
@@ -1120,7 +1120,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
       ILayerInfo layerInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
-      _storedLayerList.Update(vectorLayer?.Name ?? layerInfo.LayerId, layerInfo.Visible);
+      _storedLayerList.Update(vectorLayer?.NameAndUri ?? layerInfo.LayerId, layerInfo.Visible);
 
       if (vectorLayer != null)
       {
@@ -1316,41 +1316,48 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnImageChanged)");
 
-      if (sender is IPanoramaViewer panoramaViewer && Api != null)
+      try
       {
-        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
-        if (viewer != null)
+        if (sender is IPanoramaViewer panoramaViewer && Api != null)
         {
-          IRecording recording = await panoramaViewer.GetRecording();
-          IOrientation orientation = await panoramaViewer.GetOrientation();
-          Color color = await panoramaViewer.GetViewerColor();
+          Viewer viewer = _viewerList.GetViewer(panoramaViewer);
 
-          ICoordinate coordinate = recording.XYZ;
-          string imageId = recording.Id;
-
-          viewer.ImageId = imageId;
-          await viewer.SetAsync(coordinate, orientation, color, _mapView);
-
-          await MoveToLocationAsync(panoramaViewer);
-
-          if (viewer.HasMarker)
+          if (viewer != null)
           {
-            viewer.HasMarker = false;
-            List<Viewer> markerViewers = _viewerList.MarkerViewers;
+            IRecording recording = await panoramaViewer.GetRecording();
+            IOrientation orientation = await panoramaViewer.GetOrientation();
+            Color color = await panoramaViewer.GetViewerColor();
 
-            if (markerViewers.Count == 0 && _crossCheck != null)
+            ICoordinate coordinate = recording.XYZ;
+            string imageId = recording.Id;
+
+            viewer.ImageId = imageId;
+            await viewer.SetAsync(coordinate, orientation, color, _mapView);
+
+            await MoveToLocationAsync(panoramaViewer);
+
+            if (viewer.HasMarker)
             {
-              _crossCheck.Dispose();
-              _crossCheck = null;
+              viewer.HasMarker = false;
+              List<Viewer> markerViewers = _viewerList.MarkerViewers;
+
+              if (markerViewers.Count == 0 && _crossCheck != null)
+              {
+                _crossCheck.Dispose();
+                _crossCheck = null;
+              }
+            }
+
+            if (GlobeSpotterConfiguration.AddLayerWfs)
+            {
+              await UpdateVectorLayerAsync();
             }
           }
-
-          if (GlobeSpotterConfiguration.AddLayerWfs)
-          {
-            await UpdateVectorLayerAsync();
-          }
         }
+      }
+      catch (Exception e)
+      {
+        EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChange): exception: {e}");
       }
     }
 
@@ -1434,10 +1441,20 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) switcher: {switcher}");
 
-      if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
-      {
-        _vectorLayerInChange.Add(vectorLayer);
+      bool changeVectorLayer = false;
 
+      lock (_vectorLayerInChange)
+      {
+        if ((vectorLayer.Overlay == null || vectorLayer.GeoJsonChanged) && !_vectorLayerInChange.Contains(vectorLayer))
+        {
+          _vectorLayerInChange.Add(vectorLayer);
+
+          changeVectorLayer = true;
+        }
+      }
+
+      if(changeVectorLayer)
+      { 
         try
         {
           //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
@@ -1472,12 +1489,17 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
           }
         }
-        catch (Exception)
+        catch (Exception e)
         {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer): exception: {e}");
         }
 
-        _vectorLayerInChange.Remove(vectorLayer);
-      }else if(switcher == true && vectorLayer.Overlay != null)
+        lock (_vectorLayerInChange)
+        {
+          _vectorLayerInChange.Remove(vectorLayer);
+        }
+      }
+      else if (switcher && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
         this._panorama.ToggleOverlay(vectorLayer.Overlay);

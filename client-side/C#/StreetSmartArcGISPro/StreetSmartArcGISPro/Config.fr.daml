@@ -3,8 +3,8 @@
 		defaultNamespace="StreetSmartArcGISPro"
 		xmlns="http://schemas.esri.com/DADF/Registry"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file://$(localAppData)/Programs/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-	<AddInInfo id="{34D5B2FF-2566-4346-9C41-CB901D8811E1}" version="1.8.1" desktopVersion="3.0.36030">
+		xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file://$(localAppData)\Programs/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+	<AddInInfo id="{34D5B2FF-2566-4346-9C41-CB901D8811E1}" version="1.8.4" desktopVersion="3.0.36030">
     <Name>Street Smart for ArcGIS Pro</Name>
     <Description>
       Street Smart for ArcGIS Pro
@@ -13,7 +13,7 @@
     <Image>Images\StreetSmartArcGISPro32.png</Image>
     <Author>CycloMedia</Author>
     <Company>CycloMedia</Company>
-    <Date>2024-06-12T12:13:24.5052430+02:00</Date>
+		<Date>06/28/2024 03:30:00 PM, 2024</Date>
     <Subject>Content</Subject>
   </AddInInfo>
   <modules>
