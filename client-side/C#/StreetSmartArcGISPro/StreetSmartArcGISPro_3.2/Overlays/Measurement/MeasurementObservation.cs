@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 
 using ArcGIS.Core.CIM;
+using ArcGIS.Core.Data;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
@@ -189,7 +190,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           IList<MapPoint> linePointList = new List<MapPoint>();
           linePointList.Add(mapPointObsLine);
           linePointList.Add(Point);
+#if ARCGISPRO291
+          Polyline polyline = PolylineBuilderEx.CreatePolyline(linePointList, AttributeFlags.NoAttributes);
+#elif ARCGISPRO32
           Polyline polyline = PolylineBuilderEx.CreatePolyline(linePointList);
+#endif
           Color outerColorLine = Color.DarkGray;
           IObservationLines observationLines = _measurementPoint.Measurement.ObservationLines;
 

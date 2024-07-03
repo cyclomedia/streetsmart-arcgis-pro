@@ -41,6 +41,7 @@ using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using System.Linq;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
@@ -156,8 +157,11 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
             else
             {
-              //3.0 code change
+#if ARCGISPRO291
+              foreach (var feature in features)
+#elif ARCGISPRO32
               foreach (var feature in features.ToDictionary())
+#endif
               {
                 Layer layer = (Layer)feature.Key;
                 CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
@@ -199,6 +203,6 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       return true;
     }
 
-    #endregion
+#endregion
   }
 }

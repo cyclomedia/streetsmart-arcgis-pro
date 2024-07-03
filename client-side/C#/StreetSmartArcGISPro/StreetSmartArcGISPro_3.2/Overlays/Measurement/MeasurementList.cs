@@ -26,7 +26,6 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Editing.Events;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -39,13 +38,6 @@ using StreetSmartArcGISPro.VectorLayers;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using dockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using System.Diagnostics.Metrics;
-using System.Collections;
-using ArcGIS.Desktop.Internal.Mapping;
-using ArcGIS.Core.Data.UtilityNetwork.Trace;
-using System.Windows.Threading;
-using IViewer = StreetSmart.Common.Interfaces.API.IViewer;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using StreetSmartArcGISPro.Utilities;
 using ArcGIS.Desktop.Framework.Utilities;
@@ -235,7 +227,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         SpatialReference spatialReference = SpatialReferenceBuilder.CreateSpatialReference(srsCode);
 
+#if ARCGISPRO291
+        if (spatialReference.Name.Contains("Mercator") && (spatialReference.Name.Contains("Sphere") || spatialReference.Name.Contains("Spherical")))
+#elif ARCGISPRO32
         if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCase) && (spatialReference.Name.Contains("Sphere", StringComparison.OrdinalIgnoreCase) || spatialReference.Name.Contains("Spherical", StringComparison.OrdinalIgnoreCase)))
+#endif
         {
           return SrsUnit.Unknown;
         }
@@ -400,7 +396,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 await QueuedTask.Run(async () =>
                 {
                   List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO291
+                  Polygon surface = PolygonBuilderEx.CreatePolygon(points, AttributeFlags.NoAttributes, geometrySketch.SpatialReference);
+#elif ARCGISPRO32
                   Polygon surface = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+#endif
                   await mapView.SetCurrentSketchAsync(surface);
                 });
               }
@@ -418,7 +418,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 await QueuedTask.Run(async () =>
                 {
                   List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO291
+                  Polyline line = PolylineBuilderEx.CreatePolyline(points, AttributeFlags.NoAttributes, geometrySketch.SpatialReference);
+#elif ARCGISPRO32
                   Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+#endif
                   await mapView.SetCurrentSketchAsync(line);
                 });
               }
@@ -631,7 +635,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       await QueuedTask.Run(async () =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO291
+                        Polyline line = PolylineBuilderEx.CreatePolyline(points, AttributeFlags.NoAttributes, geometrySketch.SpatialReference);
+#elif ARCGISPRO32
                         Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+#endif
                         await mapView.SetCurrentSketchAsync(line);
                       });
                     }
@@ -706,7 +714,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       await QueuedTask.Run(async () =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO291
+                        Polygon polygon = PolygonBuilderEx.CreatePolygon(points, AttributeFlags.NoAttributes, geometrySketch.SpatialReference);
+#elif ARCGISPRO32
                         Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+#endif
                         await mapView.SetCurrentSketchAsync(polygon);
                       });
                     }
@@ -850,6 +862,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    #endregion
+#endregion
   }
 }

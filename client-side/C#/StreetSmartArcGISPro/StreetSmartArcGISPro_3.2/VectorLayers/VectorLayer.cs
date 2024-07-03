@@ -20,13 +20,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Events;
 using ArcGIS.Core.Geometry;
+#if ARCGISPRO32
 using ArcGIS.Core.Internal.Geometry;
+#endif
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
@@ -766,8 +769,8 @@ namespace StreetSmartArcGISPro.VectorLayers
             }
           }
 
-          if (!(editingFeatureTemplate?.GetDefinition() is CIMRowTemplate definition) ||
-              definition.DefaultValues == null)
+#if ARCGISPRO32
+          if (!(editingFeatureTemplate?.GetDefinition() is CIMRowTemplate definition) || definition.DefaultValues == null)
           {
             editOperation.Create(Layer, geometry);
             await editOperation.ExecuteAsync();
@@ -805,6 +808,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             editOperation.Create(Layer, toAddFields);
             await editOperation.ExecuteAsync();
           }
+#endif
         }
       });
     }
@@ -822,10 +826,18 @@ namespace StreetSmartArcGISPro.VectorLayers
           switch (geometryType)
           {
             case GeometryType.Polygon:
+#if ARCGISPRO291
+              geometry = PolygonBuilderEx.CreatePolygon(points, AttributeFlags.NoAttributes, spatialReference);
+#elif ARCGISPRO32
               geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+#endif
               break;
             case GeometryType.Polyline:
+#if ARCGISPRO291
+              geometry = PolylineBuilderEx.CreatePolyline(points, AttributeFlags.NoAttributes, spatialReference);
+#elif ARCGISPRO32
               geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+#endif
               break;
             case GeometryType.Point:
               if (points.Count >= 1)
@@ -949,7 +961,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    #endregion
+#endregion
 
     #region Edit events
 
@@ -959,7 +971,12 @@ namespace StreetSmartArcGISPro.VectorLayers
       MapView mapView = _vectorLayerList.GetMapViewFromMap(args.Map);
       _measurementList.ObjectId = null;
 
+#if ARCGISPRO291
+      foreach (var selection in args.Selection)
+#elif ARCGISPRO32
       foreach (var selection in args.Selection.ToDictionary())
+#endif
+
       {
         MapMember mapMember = selection.Key;
         FeatureLayer layer = mapMember as FeatureLayer;

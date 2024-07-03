@@ -28,8 +28,9 @@ using ArcGIS.Desktop.Framework.Utilities;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Resource;
 
-using mySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using static StreetSmartArcGISPro.Utilities.WebUtils;
+
+using mySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 
 namespace StreetSmartArcGISPro.Configuration.Remote
 {

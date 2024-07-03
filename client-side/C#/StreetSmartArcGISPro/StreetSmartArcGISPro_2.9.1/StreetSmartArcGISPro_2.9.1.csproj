@@ -1,0 +1,540 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{58B0D431-9CA8-4437-9B45-C628F2A123C6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StreetSmartArcGISPro</RootNamespace>
+    <AssemblyName>StreetSmartArcGISPro</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <UseWPF>true</UseWPF>
+    <TargetFrameworkProfile />
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;ARCGISPRO291</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe</StartProgram>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;ARCGISPRO291</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe</StartProgram>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;ARCGISPRO291</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;ARCGISPRO291</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AddInContent Include="Config.fr.daml">
+      <SubType>Designer</SubType>
+    </AddInContent>
+    <AddInContent Include="Config.daml">
+      <SubType>Designer</SubType>
+    </AddInContent>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\Agreement.cs">
+      <Link>Configuration\File\Agreement.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\Configuration.cs">
+      <Link>Configuration\File\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\ConstantsRecordingLayer.cs">
+      <Link>Configuration\File\ConstantsRecordingLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\ConstantsViewer.cs">
+      <Link>Configuration\File\ConstantsViewer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\LanguageSettings.cs">
+      <Link>Configuration\File\LanguageSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\Login.cs">
+      <Link>Configuration\File\Login.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\Project.cs">
+      <Link>Configuration\File\Project.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\ProjectList.cs">
+      <Link>Configuration\File\ProjectList.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\Setting.cs">
+      <Link>Configuration\File\Setting.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\StoredLayer.cs">
+      <Link>Configuration\File\StoredLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\File\StoredLayerList.cs">
+      <Link>Configuration\File\StoredLayerList.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Buttons\Help.cs">
+      <Link>AddIns\Buttons\Help.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Buttons\ImageIdSearch.cs">
+      <Link>AddIns\Buttons\ImageIdSearch.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Buttons\RecordingLayer.cs">
+      <Link>AddIns\Buttons\RecordingLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Pages\Agreement.cs">
+      <Link>AddIns\Pages\Agreement.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Pages\Configuration.cs">
+      <Link>AddIns\Pages\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Pages\About.cs">
+      <Link>AddIns\Pages\About.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Pages\Language.cs">
+      <Link>AddIns\Pages\Language.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Pages\Settings.cs">
+      <Link>AddIns\Pages\Settings.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Pages\Login.cs">
+      <Link>AddIns\Pages\Login.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Buttons\CycloMediaOptions.cs">
+      <Link>AddIns\Buttons\CycloMediaOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Modules\StreetSmart.cs">
+      <Link>AddIns\Modules\StreetSmart.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Tools\OpenLocation.cs">
+      <Link>AddIns\Tools\OpenLocation.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\AgreementAccepted.cs">
+      <Link>AddIns\Views\Converters\AgreementAccepted.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\boolToVisibility.cs">
+      <Link>AddIns\Views\Converters\boolToVisibility.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\ContainsSrItems.cs">
+      <Link>AddIns\Views\Converters\ContainsSrItems.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\DateTimeToTime.cs">
+      <Link>AddIns\Views\Converters\DateTimeToTime.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\DateTimeToDate.cs">
+      <Link>AddIns\Views\Converters\DateTimeToDate.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\ImageIdInput.cs">
+      <Link>AddIns\Views\Converters\ImageIdInput.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\IsNotNull.cs">
+      <Link>AddIns\Views\Converters\IsNotNull.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementObservationSelected.cs">
+      <Link>AddIns\Views\Converters\MeasurementObservationSelected.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementOpenClose.cs">
+      <Link>AddIns\Views\Converters\MeasurementOpenClose.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\ConfigurationService.cs">
+      <Link>AddIns\Views\Converters\ConfigurationService.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\CombineBoolean.cs">
+      <Link>AddIns\Views\Converters\CombineBoolean.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\CanMeasuring.cs">
+      <Link>AddIns\Views\Converters\CanMeasuring.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementObservationWidth.cs">
+      <Link>AddIns\Views\Converters\MeasurementObservationWidth.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementColor.cs">
+      <Link>AddIns\Views\Converters\MeasurementColor.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementMatch.cs">
+      <Link>AddIns\Views\Converters\MeasurementMatch.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementImage.cs">
+      <Link>AddIns\Views\Converters\MeasurementImage.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementRelEst.cs">
+      <Link>AddIns\Views\Converters\MeasurementRelEst.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementPositionStd.cs">
+      <Link>AddIns\Views\Converters\MeasurementPositionStd.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\MeasurementPosition.cs">
+      <Link>AddIns\Views\Converters\MeasurementPosition.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\LoginStatus.cs">
+      <Link>AddIns\Views\Converters\LoginStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\Views\Converters\InverseBoolean.cs">
+      <Link>AddIns\Views\Converters\InverseBoolean.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\FeatureCollection.cs">
+      <Link>Configuration\Remote\Recordings\FeatureCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Images.cs">
+      <Link>Configuration\Remote\Recordings\Images.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Height.cs">
+      <Link>Configuration\Remote\Recordings\Height.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Point.cs">
+      <Link>Configuration\Remote\Recordings\Point.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Location.cs">
+      <Link>Configuration\Remote\Recordings\Location.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\FeatureMembers.cs">
+      <Link>Configuration\Remote\Recordings\FeatureMembers.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\ProductType.cs">
+      <Link>Configuration\Remote\Recordings\ProductType.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Image.cs">
+      <Link>Configuration\Remote\Recordings\Image.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\TileSchema.cs">
+      <Link>Configuration\Remote\Recordings\TileSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\SpatialReference\Bounds.cs">
+      <Link>Configuration\Remote\SpatialReference\Bounds.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Recording.cs">
+      <Link>Configuration\Remote\Recordings\Recording.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\SpatialReference\SpatialReference.cs">
+      <Link>Configuration\Remote\SpatialReference\SpatialReference.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\SpatialReference\SpatialReferenceList.cs">
+      <Link>Configuration\Remote\SpatialReference\SpatialReferenceList.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Resource\Language.cs">
+      <Link>Configuration\Resource\Language.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Resource\Languages.cs">
+      <Link>Configuration\Resource\Languages.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Resource\APIKey.cs">
+      <Link>Configuration\Resource\APIKey.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\GlobeSpotter\ApplicationConfiguration.cs">
+      <Link>Configuration\Remote\GlobeSpotter\ApplicationConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\GlobeSpotter\Functionality.cs">
+      <Link>Configuration\Remote\GlobeSpotter\Functionality.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\GlobeSpotter\GlobeSpotterConfiguration.cs">
+      <Link>Configuration\Remote\GlobeSpotter\GlobeSpotterConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\State.cs">
+      <Link>Configuration\Remote\State.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Urls.cs">
+      <Link>Configuration\Remote\Urls.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Web.cs">
+      <Link>Configuration\Remote\Web.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\DockPanes\StreetSmart.cs">
+      <Link>AddIns\DockPanes\StreetSmart.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\AddIns\DockPanes\ImageIdSearch.cs">
+      <Link>AddIns\DockPanes\ImageIdSearch.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\Measurement\MeasurementList.cs">
+      <Link>Overlays\Measurement\MeasurementList.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\Measurement\Measurement.cs">
+      <Link>Overlays\Measurement\Measurement.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\Measurement\MeasurementObservation.cs">
+      <Link>Overlays\Measurement\MeasurementObservation.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\Measurement\MeasurementPoint.cs">
+      <Link>Overlays\Measurement\MeasurementPoint.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\ViewerList.cs">
+      <Link>Overlays\ViewerList.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Properties\Resources.fr1.Designer.cs">
+      <Link>Properties\Resources.fr1.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.fr.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Properties\Resources1.Designer.cs">
+      <Link>Properties\Resources1.Designer.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\AvailableCoordSystems.cs">
+      <Link>Utilities\AvailableCoordSystems.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\HSVToRGBColor.cs">
+      <Link>Utilities\HSVToRGBColor.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\ImageExtensions.cs">
+      <Link>Utilities\ImageExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\LocalizationProvider.cs">
+      <Link>Utilities\LocalizationProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\WebUtils.cs">
+      <Link>Utilities\WebUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\VectorLayers\EditTools.cs">
+      <Link>VectorLayers\EditTools.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\VectorLayers\VectorLayer.cs">
+      <Link>VectorLayers\VectorLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\CycloMediaLayers\CycloMediaGroupLayer.cs">
+      <Link>CycloMediaLayers\CycloMediaGroupLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\CycloMediaLayers\CycloMediaLayer.cs">
+      <Link>CycloMediaLayers\CycloMediaLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\CycloMediaLayers\RecordingLayer.cs">
+      <Link>CycloMediaLayers\RecordingLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\Viewer.cs">
+      <Link>Overlays\Viewer.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\CrossCheck.cs">
+      <Link>Overlays\CrossCheck.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\ViewingCone.cs">
+      <Link>Overlays\ViewingCone.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\CoordSystemUtils.cs">
+      <Link>Utilities\CoordSystemUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\CurrentCult.cs">
+      <Link>Utilities\CurrentCult.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\FileUtils.cs">
+      <Link>Utilities\FileUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\VectorLayers\VectorLayerList.cs">
+      <Link>VectorLayers\VectorLayerList.cs</Link>
+    </Compile>
+    <Compile Include="AddIns\Views\About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Agreement.xaml.cs">
+      <DependentUpon>Agreement.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Configuration.xaml.cs">
+      <DependentUpon>Configuration.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\ImageIdSearch.xaml.cs">
+      <DependentUpon>ImageIdSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Language.xaml.cs">
+      <DependentUpon>Language.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\StreetSmart.xaml.cs">
+      <DependentUpon>StreetSmart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddIns\Views\StreetSmartApi.xaml.cs">
+      <DependentUpon>StreetSmartApi.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\Doc\LGPL-3.0.txt">
+      <Link>LGPL-3.0.txt</Link>
+    </Content>
+    <Content Include="..\..\Doc\ToDo.txt">
+      <Link>ToDo.txt</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\CycloMediaOptions32.png">
+      <Link>Images\CycloMediaOptions32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\FocusMode16.png">
+      <Link>Images\FocusMode16.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\ImageIdSearch32.png">
+      <Link>Images\ImageIdSearch32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\MeasurementDetail32.png">
+      <Link>Images\MeasurementDetail32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\OpenLocation.cur">
+      <Link>Images\OpenLocation.cur</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\OpenLocation32.png">
+      <Link>Images\OpenLocation32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\RecordingLayer32.png">
+      <Link>Images\RecordingLayer32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\StreetSmart32.png">
+      <Link>Images\StreetSmart32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\StreetSmartArcGISPro32.png">
+      <Link>Images\StreetSmartArcGISPro32.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\SystemSearch16.png">
+      <Link>Images\SystemSearch16.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Images\UserTrash16.png">
+      <Link>Images\UserTrash16.png</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Resources\Agreement.txt">
+      <Link>Resources\Agreement.txt</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Resources\APIKey.xml">
+      <Link>Resources\APIKey.xml</Link>
+    </Content>
+    <Content Include="..\StreetSmartArcGISPro_3.2\Resources\Languages.xml">
+      <Link>Resources\Languages.xml</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
+      <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Properties\Resources.fr.resx">
+      <Link>Properties\Resources.fr.resx</Link>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.fr1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Properties\Resources.resx">
+      <Link>Properties\Resources.resx</Link>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\StreetSmartArcGISPro_3.2\Resources\Recordings\FCRecordings.dbf">
+      <Link>Resources\Recordings\FCRecordings.dbf</Link>
+    </None>
+    <None Include="..\StreetSmartArcGISPro_3.2\Resources\Recordings\FCRecordings.shp">
+      <Link>Resources\Recordings\FCRecordings.shp</Link>
+    </None>
+    <None Include="..\StreetSmartArcGISPro_3.2\Resources\Recordings\FCRecordings.shx">
+      <Link>Resources\Recordings\FCRecordings.shx</Link>
+    </None>
+    <None Include="AddIns\Views\Settings.xaml.bak" />
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Esri.ArcGISPro.Extensions">
+      <Version>2.9.0.32739</Version>
+    </PackageReference>
+    <PackageReference Include="Nancy">
+      <Version>2.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="StreetSmart.WPF">
+      <Version>24.4.0-rc02a</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AddIns\Views\About.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Agreement.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Configuration.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\ImageIdSearch.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Language.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Login.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\StreetSmart.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddIns\Views\StreetSmartApi.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+	<Exec Command="powershell -File '.\ReplaceConfigDate.ps1' $(ProjectDir) "/>
+  </Target>
+<Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -File "$(ProjectDir)ReplaceConfigDate.ps1" $(ProjectDir)</PreBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -263,7 +263,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
+#if ARCGISPRO291
+                  polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, AttributeFlags.NoAttributes, polyline.SpatialReference);
+#elif ARCGISPRO32
                   polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#endif
                 });
 
                 await mapView.SetCurrentSketchAsync(polyline);
@@ -309,7 +313,12 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
+#if ARCGISPRO291
+                  polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, AttributeFlags.NoAttributes, polygon.SpatialReference);
+#elif ARCGISPRO32
                   polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+#endif
+
                 });
 
                 await mapView.SetCurrentSketchAsync(polygon);

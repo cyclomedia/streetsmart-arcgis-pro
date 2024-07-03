@@ -1,0 +1,69 @@
+﻿<UserControl x:Class="StreetSmartArcGISPro.AddIns.Views.Settings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:StreetSmartArcGISPro.AddIns.Views.Converters"
+             xmlns:util="clr-namespace:StreetSmartArcGISPro.Utilities"
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="300">
+<!--
+ /*
+ * Street Smart integration in ArcGIS Pro
+ * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ */
+-->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <converters:CanMeasuring x:Key="CanMeasuringConverter" />
+      <converters:ContainsSrItems x:Key="ContainsSrItems" />
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Grid.Row="0" Margin="5,10,5,0">
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="SettingsCoordinateSystems" />
+      <DockPanel Margin="5,5,5,0">
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsRecordingLayer" Width="120" Margin="0,5,5,0"/>
+        <ComboBox IsEnabled="{Binding ExistsInAreaSpatialReferences, Converter={StaticResource ContainsSrItems}, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Path=ExistsInAreaSpatialReferences, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=RecordingLayerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+        </ComboBox>
+      </DockPanel>
+      <DockPanel Margin="5,5,5,0">
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsCycloramaViewer" Width="120" Margin="0,5,5,0"/>
+        <ComboBox IsEnabled="{Binding ExistsInAreaSpatialReferences, Converter={StaticResource ContainsSrItems}, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Path=ExistsInAreaSpatialReferences, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=CycloramaViewerCoordinateSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+        </ComboBox>
+      </DockPanel>
+      <StackPanel Margin="130,5,5,0">
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="{Binding CanMeasuring, Converter={StaticResource CanMeasuringConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0"/>
+      </StackPanel>
+    </StackPanel>
+    <StackPanel Grid.Row="1" Margin="5,10,5,0">
+      <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="SettingsGeneral" />
+      <DockPanel Margin="5,5,5,0">
+        <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="SettingsOverlayDrawDistance" util:LocalizationProvider.TooltipId="SettingsSetsOverlayDrawDistance" Width="170" Margin="0,5,5,0"/>
+        <ComboBox ItemsSource="{Binding Path=ListOfOverlayDrawDistance}" SelectedItem="{Binding Path=OverlayDrawDistance}" HorizontalAlignment="Left" Margin="0,5,0,0" Width="40">
+        </ComboBox>
+      </DockPanel>
+    </StackPanel>
+  </Grid>
+</UserControl>

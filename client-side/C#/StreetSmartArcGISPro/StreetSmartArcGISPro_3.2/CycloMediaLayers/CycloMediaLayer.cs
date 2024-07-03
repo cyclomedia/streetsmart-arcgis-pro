@@ -46,7 +46,9 @@ using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialRefe
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
+#if ARCGISPRO32
 using ArcGIS.Core.Data.Exceptions;
+#endif
 using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers

@@ -154,11 +154,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       IsDisposed = true;
 
-//      foreach (var element in this)
-//      {
-//        MeasurementPoint measurementPoint = element.Value;
-//        measurementPoint.Dispose();
-//      }
+      //      foreach (var element in this)
+      //      {
+      //        MeasurementPoint measurementPoint = element.Value;
+      //        measurementPoint.Dispose();
+      //      }
 
       while (Count >= 1)
       {
@@ -336,7 +336,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         ArcGISGeometryType geometryType = geometry.GeometryType;
 
         await QueuedTask.Run(() =>
-        { 
+        {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
           /*if (srs?.ZUnit != spatialReference?.ZUnit)
@@ -346,7 +346,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
-          if (spatialReference?.ZUnit == null && (((this.Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline) 
+          if (spatialReference?.ZUnit == null && (((this.Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline)
           || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
           {
             zScale = 1 / modifierFactor;
@@ -355,7 +355,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         });
 
         result = new List<MapPoint>();
-        
+
         //if z-unit is null or feet, then the z-offset should only be 3.28
         switch (geometryType)
         {
@@ -423,20 +423,20 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         if (feature != null)
         {
           List<ICoordinate> coordinates = new List<ICoordinate>();
-          IMeasurementProperties properties = (IMeasurementProperties) feature.Properties;
+          IMeasurementProperties properties = (IMeasurementProperties)feature.Properties;
           IList<IMeasureDetails> measureDetails = properties.MeasureDetails;
           bool changes = false;
 
           switch (feature.Geometry.Type)
           {
             case StreetSmartGeometryType.Point:
-              coordinates.Add((IPoint) feature.Geometry);
+              coordinates.Add((IPoint)feature.Geometry);
               break;
             case StreetSmartGeometryType.LineString:
-              coordinates.AddRange((ILineString) feature.Geometry);
+              coordinates.AddRange((ILineString)feature.Geometry);
               break;
             case StreetSmartGeometryType.Polygon:
-              coordinates.AddRange(((IPolygon) feature.Geometry)[0]);
+              coordinates.AddRange(((IPolygon)feature.Geometry)[0]);
               break;
           }
 
@@ -615,72 +615,88 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         await QueuedTask.Run(async () =>
         {
-          ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
-          ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
-          ArcGISSpatialReference srs = geometry?.SpatialReference; //new spatial reference with the correct units
+        ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
+        ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
+        ArcGISSpatialReference srs = geometry?.SpatialReference; //new spatial reference with the correct units
 
-          //GC: Added an alert message when SRS do not match up and creating features
-          if (spatialReference.Wkid != mapSpatialReference.Wkid)
+        //GC: Added an alert message when SRS do not match up and creating features
+        if (spatialReference.Wkid != mapSpatialReference.Wkid)
+        {
+          string message = "The map SRS does not match with the cyclorama SRS so the point will not be created. Please match up the SRS and try again.";
+          string title = "Alert";
+          MessageBox.Show(message, title);
+          return;
+        }
+
+        for (int i = 0; i < Count; i++)
+        {
+          MapPoint mapPoint = pointsGeometry?.Count > i ? pointsGeometry[i] : null;
+          MeasurementPoint mp = this.ElementAt(i).Value;
+          toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
+
+          if (mp.Point != null)
           {
-            string message = "The map SRS does not match with the cyclorama SRS so the point will not be created. Please match up the SRS and try again.";
-            string title = "Alert";
-            MessageBox.Show(message, title);
-            return;
-          }
-
-          for (int i = 0; i < Count; i++)
-          {
-            MapPoint mapPoint = pointsGeometry?.Count > i ? pointsGeometry[i] : null;
-            MeasurementPoint mp = this.ElementAt(i).Value;
-            toUpdate = toUpdate || mp.Updated && !mp.IsSame(mapPoint);
-
-            if (mp.Point != null)
+            MapPoint point = mp.Point;
+            double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
+            double z = conversionFactor * (point?.Z ?? 0);
+            //trying to change the Z value before it gets changed but it doesn't work
+            if (i == 0 && (point?.Z > mp.NextPoint?.Point.Z + 10 || point?.Z < mp.NextPoint?.Point.Z - 10 || mp.Point.Z == 0))
             {
-              MapPoint point = mp.Point;
-              double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
-              double z = conversionFactor * (point?.Z ?? 0);
-              //trying to change the Z value before it gets changed but it doesn't work
-              if (i == 0 && (point?.Z > mp.NextPoint?.Point.Z + 10 || point?.Z < mp.NextPoint?.Point.Z - 10 || mp.Point.Z == 0))
-              {
-                z = z * conversionFactor;
-              }
-              else if (i > 0 && (point?.Z > mp.PreviousPoint?.Point.Z + 10 || (point?.Z < 0 && point?.Z < mp.PreviousPoint?.Point.Z - 10) || mp.Point.Z == 0))
-              {
-                z = z * conversionFactor;
-              }
-              /*if (mp.Point.Z > mapPoint.Z + 10 || mp.Point.Z < mapPoint.Z - 10 || mp.Point.Z == 0)
-              {
-                z = z * conversionFactor;
-              }*/
-              /*string message = z.ToString() + " feet, z-unit: " + spatialReference?.ZUnit + ", point-z: " + point.Z.ToString(); ;
-              string title = "Conversion";
-              MessageBox.Show(message, title);*/
-              points.Add(MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z));
+              z = z * conversionFactor;
             }
+            else if (i > 0 && (point?.Z > mp.PreviousPoint?.Point.Z + 10 || (point?.Z < 0 && point?.Z < mp.PreviousPoint?.Point.Z - 10) || mp.Point.Z == 0))
+            {
+              z = z * conversionFactor;
+            }
+            /*if (mp.Point.Z > mapPoint.Z + 10 || mp.Point.Z < mapPoint.Z - 10 || mp.Point.Z == 0)
+            {
+              z = z * conversionFactor;
+            }*/
+            /*string message = z.ToString() + " feet, z-unit: " + spatialReference?.ZUnit + ", point-z: " + point.Z.ToString(); ;
+            string title = "Conversion";
+            MessageBox.Show(message, title);*/
+            points.Add(MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z));
           }
+        }
 
-          if (toUpdate)
-          {
+        if (toUpdate)
+        {
             if (IsGeometryType(ArcGISGeometryType.Polygon))
             { //GC: added if statements to let it work without a z reference
               if (spatialReference.ZUnit == null || srs == null)
               {
-                geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+#if ARCGISPRO291
+                  geometry = PolygonBuilderEx.CreatePolygon(points, AttributeFlags.NoAttributes, srs);
+#elif ARCGISPRO32
+                  geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+#endif
               }
               else
               {
-                geometry = PolygonBuilderEx.CreatePolygon(points, srs);
+#if ARCGISPRO291
+                  geometry = PolygonBuilderEx.CreatePolygon(points, AttributeFlags.NoAttributes, srs);
+#elif ARCGISPRO32
+                  geometry = PolygonBuilderEx.CreatePolygon(points, srs);
+#endif
               }
             }
             else if (IsGeometryType(ArcGISGeometryType.Polyline))
             {
               if (spatialReference.ZUnit == null || srs == null)
               {
+#if ARCGISPRO291
+                geometry = PolylineBuilderEx.CreatePolyline(points, AttributeFlags.NoAttributes, spatialReference);
+#elif ARCGISPRO32
                 geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+#endif
               }
               else
               {
+#if ARCGISPRO291
+                geometry = PolylineBuilderEx.CreatePolyline(points, AttributeFlags.NoAttributes, srs);
+#elif ARCGISPRO32
                 geometry = PolylineBuilderEx.CreatePolyline(points, srs);
+#endif
               }
             }
             else if (geometry is MapPoint mapPoint)
