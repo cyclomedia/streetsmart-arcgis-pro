@@ -297,18 +297,6 @@
     <Compile Include="..\StreetSmartArcGISPro_3.2\Overlays\ViewerList.cs">
       <Link>Overlays\ViewerList.cs</Link>
     </Compile>
-    <Compile Include="..\StreetSmartArcGISPro_3.2\Properties\Resources.fr1.Designer.cs">
-      <Link>Properties\Resources.fr1.Designer.cs</Link>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.fr.resx</DependentUpon>
-    </Compile>
-    <Compile Include="..\StreetSmartArcGISPro_3.2\Properties\Resources1.Designer.cs">
-      <Link>Properties\Resources1.Designer.cs</Link>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="..\StreetSmartArcGISPro_3.2\Utilities\AvailableCoordSystems.cs">
       <Link>Utilities\AvailableCoordSystems.cs</Link>
     </Compile>
@@ -390,6 +378,16 @@
     <Compile Include="AddIns\Views\StreetSmartApi.xaml.cs">
       <DependentUpon>StreetSmartApi.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.fr.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.fr.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\Doc\LGPL-3.0.txt">
@@ -397,39 +395,6 @@
     </Content>
     <Content Include="..\..\Doc\ToDo.txt">
       <Link>ToDo.txt</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\CycloMediaOptions32.png">
-      <Link>Images\CycloMediaOptions32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\FocusMode16.png">
-      <Link>Images\FocusMode16.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\ImageIdSearch32.png">
-      <Link>Images\ImageIdSearch32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\MeasurementDetail32.png">
-      <Link>Images\MeasurementDetail32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\OpenLocation.cur">
-      <Link>Images\OpenLocation.cur</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\OpenLocation32.png">
-      <Link>Images\OpenLocation32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\RecordingLayer32.png">
-      <Link>Images\RecordingLayer32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\StreetSmart32.png">
-      <Link>Images\StreetSmart32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\StreetSmartArcGISPro32.png">
-      <Link>Images\StreetSmartArcGISPro32.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\SystemSearch16.png">
-      <Link>Images\SystemSearch16.png</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Images\UserTrash16.png">
-      <Link>Images\UserTrash16.png</Link>
     </Content>
     <Content Include="..\StreetSmartArcGISPro_3.2\Resources\Agreement.txt">
       <Link>Resources\Agreement.txt</Link>
@@ -440,20 +405,29 @@
     <Content Include="..\StreetSmartArcGISPro_3.2\Resources\Languages.xml">
       <Link>Resources\Languages.xml</Link>
     </Content>
+    <Content Include="Images\CycloMediaOptions32.png" />
+    <Content Include="Images\FocusMode16.png" />
+    <Content Include="Images\ImageIdSearch32.png" />
+    <Content Include="Images\MeasurementDetail32.png" />
+    <Content Include="Images\OpenLocation.cur" />
+    <Content Include="Images\OpenLocation32.png" />
+    <Content Include="Images\RecordingLayer32.png" />
+    <Content Include="Images\StreetSmart32.png" />
+    <Content Include="Images\StreetSmartArcGISPro32.png" />
+    <Content Include="Images\SystemSearch16.png" />
+    <Content Include="Images\UserTrash16.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">
       <Link>Resources\Street Smart for ArcGIS Pro User Manual.pdf</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Properties\Resources.fr.resx">
-      <Link>Properties\Resources.fr.resx</Link>
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.fr1.Designer.cs</LastGenOutput>
+      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Properties\Resources.resx">
-      <Link>Properties\Resources.resx</Link>
+    <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources1.Designer.cs</LastGenOutput>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

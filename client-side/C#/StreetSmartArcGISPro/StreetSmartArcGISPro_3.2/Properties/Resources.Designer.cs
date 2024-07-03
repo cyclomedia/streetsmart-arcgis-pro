@@ -19,10 +19,10 @@ namespace StreetSmartArcGISPro.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace StreetSmartArcGISPro.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("StreetSmartArcGISPro.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace StreetSmartArcGISPro.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to version.
         /// </summary>
-        internal static string AboutVersion {
+        public static string AboutVersion {
             get {
                 return ResourceManager.GetString("AboutVersion", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to I have read and agree to the terms of use..
         /// </summary>
-        internal static string AgreementAcceptance {
+        public static string AgreementAcceptance {
             get {
                 return ResourceManager.GetString("AgreementAcceptance", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Address.
         /// </summary>
-        internal static string ConfigurationAddress {
+        public static string ConfigurationAddress {
             get {
                 return ResourceManager.GetString("ConfigurationAddress", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Bypass proxy server for local addresses.
         /// </summary>
-        internal static string ConfigurationBypassProxy {
+        public static string ConfigurationBypassProxy {
             get {
                 return ResourceManager.GetString("ConfigurationBypassProxy", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Configuration url.
         /// </summary>
-        internal static string ConfigurationConfigurationUrl {
+        public static string ConfigurationConfigurationUrl {
             get {
                 return ResourceManager.GetString("ConfigurationConfigurationUrl", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Domain.
         /// </summary>
-        internal static string ConfigurationDomain {
+        public static string ConfigurationDomain {
             get {
                 return ResourceManager.GetString("ConfigurationDomain", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Location.
         /// </summary>
-        internal static string ConfigurationLocation {
+        public static string ConfigurationLocation {
             get {
                 return ResourceManager.GetString("ConfigurationLocation", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Password.
         /// </summary>
-        internal static string ConfigurationPassword {
+        public static string ConfigurationPassword {
             get {
                 return ResourceManager.GetString("ConfigurationPassword", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Port.
         /// </summary>
-        internal static string ConfigurationPort {
+        public static string ConfigurationPort {
             get {
                 return ResourceManager.GetString("ConfigurationPort", resourceCulture);
             }
@@ -144,7 +144,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Proxy server.
         /// </summary>
-        internal static string ConfigurationProxyServer {
+        public static string ConfigurationProxyServer {
             get {
                 return ResourceManager.GetString("ConfigurationProxyServer", resourceCulture);
             }
@@ -153,7 +153,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Street Smart location.
         /// </summary>
-        internal static string ConfigurationStreetSmartLocation {
+        public static string ConfigurationStreetSmartLocation {
             get {
                 return ResourceManager.GetString("ConfigurationStreetSmartLocation", resourceCulture);
             }
@@ -162,7 +162,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Use default.
         /// </summary>
-        internal static string ConfigurationUseDefault {
+        public static string ConfigurationUseDefault {
             get {
                 return ResourceManager.GetString("ConfigurationUseDefault", resourceCulture);
             }
@@ -171,7 +171,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Use default credentials.
         /// </summary>
-        internal static string ConfigurationUseDefaultCredentials {
+        public static string ConfigurationUseDefaultCredentials {
             get {
                 return ResourceManager.GetString("ConfigurationUseDefaultCredentials", resourceCulture);
             }
@@ -180,7 +180,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Use a proxy server.
         /// </summary>
-        internal static string ConfigurationUseProxyServer {
+        public static string ConfigurationUseProxyServer {
             get {
                 return ResourceManager.GetString("ConfigurationUseProxyServer", resourceCulture);
             }
@@ -189,7 +189,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Username.
         /// </summary>
-        internal static string ConfigurationUsername {
+        public static string ConfigurationUsername {
             get {
                 return ResourceManager.GetString("ConfigurationUsername", resourceCulture);
             }
@@ -198,7 +198,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FocusMode16 {
+        public static System.Drawing.Bitmap FocusMode16 {
             get {
                 object obj = ResourceManager.GetObject("FocusMode16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -208,7 +208,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to An error while opening the help document.
         /// </summary>
-        internal static string HelpErrorOpenHelpDocument {
+        public static string HelpErrorOpenHelpDocument {
             get {
                 return ResourceManager.GetString("HelpErrorOpenHelpDocument", resourceCulture);
             }
@@ -217,7 +217,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to There is no pdf viewer installed on your system.
         /// </summary>
-        internal static string HelpNoPdfViewerInstalledOnYourSystem {
+        public static string HelpNoPdfViewerInstalledOnYourSystem {
             get {
                 return ResourceManager.GetString("HelpNoPdfViewerInstalledOnYourSystem", resourceCulture);
             }
@@ -226,7 +226,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Date:.
         /// </summary>
-        internal static string ImageIdSearchDate {
+        public static string ImageIdSearchDate {
             get {
                 return ResourceManager.GetString("ImageIdSearchDate", resourceCulture);
             }
@@ -235,7 +235,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to ImageId:.
         /// </summary>
-        internal static string ImageIdSearchImageId {
+        public static string ImageIdSearchImageId {
             get {
                 return ResourceManager.GetString("ImageIdSearchImageId", resourceCulture);
             }
@@ -244,7 +244,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Location:.
         /// </summary>
-        internal static string ImageIdSearchLocation {
+        public static string ImageIdSearchLocation {
             get {
                 return ResourceManager.GetString("ImageIdSearchLocation", resourceCulture);
             }
@@ -253,7 +253,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Product type:.
         /// </summary>
-        internal static string ImageIdSearchProductType {
+        public static string ImageIdSearchProductType {
             get {
                 return ResourceManager.GetString("ImageIdSearchProductType", resourceCulture);
             }
@@ -262,7 +262,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Time:.
         /// </summary>
-        internal static string ImageIdSearchTime {
+        public static string ImageIdSearchTime {
             get {
                 return ResourceManager.GetString("ImageIdSearchTime", resourceCulture);
             }
@@ -271,7 +271,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to General.
         /// </summary>
-        internal static string LanguageGeneral {
+        public static string LanguageGeneral {
             get {
                 return ResourceManager.GetString("LanguageGeneral", resourceCulture);
             }
@@ -280,7 +280,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Language.
         /// </summary>
-        internal static string LanguageLanguage {
+        public static string LanguageLanguage {
             get {
                 return ResourceManager.GetString("LanguageLanguage", resourceCulture);
             }
@@ -289,7 +289,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Check.
         /// </summary>
-        internal static string LoginCheck {
+        public static string LoginCheck {
             get {
                 return ResourceManager.GetString("LoginCheck", resourceCulture);
             }
@@ -298,7 +298,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Check the username and password combination.
         /// </summary>
-        internal static string LoginCheckText {
+        public static string LoginCheckText {
             get {
                 return ResourceManager.GetString("LoginCheckText", resourceCulture);
             }
@@ -307,7 +307,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Login Failed.
         /// </summary>
-        internal static string LoginFailed {
+        public static string LoginFailed {
             get {
                 return ResourceManager.GetString("LoginFailed", resourceCulture);
             }
@@ -316,7 +316,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
-        internal static string LoginLogin {
+        public static string LoginLogin {
             get {
                 return ResourceManager.GetString("LoginLogin", resourceCulture);
             }
@@ -325,7 +325,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Password.
         /// </summary>
-        internal static string LoginPassword {
+        public static string LoginPassword {
             get {
                 return ResourceManager.GetString("LoginPassword", resourceCulture);
             }
@@ -334,7 +334,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Status.
         /// </summary>
-        internal static string LoginStatus {
+        public static string LoginStatus {
             get {
                 return ResourceManager.GetString("LoginStatus", resourceCulture);
             }
@@ -343,7 +343,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Login Successful.
         /// </summary>
-        internal static string LoginSuccessfully {
+        public static string LoginSuccessfully {
             get {
                 return ResourceManager.GetString("LoginSuccessfully", resourceCulture);
             }
@@ -352,27 +352,25 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Username.
         /// </summary>
-        internal static string LoginUsername {
+        public static string LoginUsername {
             get {
                 return ResourceManager.GetString("LoginUsername", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Open Location is not supported in Scene.
         /// </summary>
-        internal static string OpenLocationNotSupportedInScene
-        {
-            get
-            {
+        public static string OpenLocationNotSupportedInScene {
+            get {
                 return ResourceManager.GetString("OpenLocationNotSupportedInScene", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Depth map.
         /// </summary>
-        internal static string RecordingLayerDepthMap {
+        public static string RecordingLayerDepthMap {
             get {
                 return ResourceManager.GetString("RecordingLayerDepthMap", resourceCulture);
             }
@@ -381,7 +379,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Detail images.
         /// </summary>
-        internal static string RecordingLayerDetailImages {
+        public static string RecordingLayerDetailImages {
             get {
                 return ResourceManager.GetString("RecordingLayerDetailImages", resourceCulture);
             }
@@ -390,7 +388,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Street Smart.
         /// </summary>
-        internal static string RecordingLayerGroupName {
+        public static string RecordingLayerGroupName {
             get {
                 return ResourceManager.GetString("RecordingLayerGroupName", resourceCulture);
             }
@@ -399,7 +397,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to GeoCyclorama Recording Points.
         /// </summary>
-        internal static string RecordingLayerName {
+        public static string RecordingLayerName {
             get {
                 return ResourceManager.GetString("RecordingLayerName", resourceCulture);
             }
@@ -408,7 +406,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to No Authorization.
         /// </summary>
-        internal static string RecordingLayerNoAuthorization {
+        public static string RecordingLayerNoAuthorization {
             get {
                 return ResourceManager.GetString("RecordingLayerNoAuthorization", resourceCulture);
             }
@@ -417,7 +415,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Coordinate systems.
         /// </summary>
-        internal static string SettingsCoordinateSystems {
+        public static string SettingsCoordinateSystems {
             get {
                 return ResourceManager.GetString("SettingsCoordinateSystems", resourceCulture);
             }
@@ -426,7 +424,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Cyclorama viewer.
         /// </summary>
-        internal static string SettingsCycloramaViewer {
+        public static string SettingsCycloramaViewer {
             get {
                 return ResourceManager.GetString("SettingsCycloramaViewer", resourceCulture);
             }
@@ -435,7 +433,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to General.
         /// </summary>
-        internal static string SettingsGeneral {
+        public static string SettingsGeneral {
             get {
                 return ResourceManager.GetString("SettingsGeneral", resourceCulture);
             }
@@ -444,7 +442,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Measuring not supported.
         /// </summary>
-        internal static string SettingsMeasurementNotSupported {
+        public static string SettingsMeasurementNotSupported {
             get {
                 return ResourceManager.GetString("SettingsMeasurementNotSupported", resourceCulture);
             }
@@ -453,7 +451,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Measuring supported.
         /// </summary>
-        internal static string SettingsMeasurementSupported {
+        public static string SettingsMeasurementSupported {
             get {
                 return ResourceManager.GetString("SettingsMeasurementSupported", resourceCulture);
             }
@@ -462,7 +460,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Overlay draw distance (meters).
         /// </summary>
-        internal static string SettingsOverlayDrawDistance {
+        public static string SettingsOverlayDrawDistance {
             get {
                 return ResourceManager.GetString("SettingsOverlayDrawDistance", resourceCulture);
             }
@@ -471,7 +469,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Recording layer.
         /// </summary>
-        internal static string SettingsRecordingLayer {
+        public static string SettingsRecordingLayer {
             get {
                 return ResourceManager.GetString("SettingsRecordingLayer", resourceCulture);
             }
@@ -480,7 +478,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Sets the overlay draw distance in the cyclorama..
         /// </summary>
-        internal static string SettingsSetsOverlayDrawDistance {
+        public static string SettingsSetsOverlayDrawDistance {
             get {
                 return ResourceManager.GetString("SettingsSetsOverlayDrawDistance", resourceCulture);
             }
@@ -489,7 +487,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Can not open the image.
         /// </summary>
-        internal static string StreetSmartCanNotOpenImage {
+        public static string StreetSmartCanNotOpenImage {
             get {
                 return ResourceManager.GetString("StreetSmartCanNotOpenImage", resourceCulture);
             }
@@ -498,7 +496,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Can not login to Street Smart.
         /// </summary>
-        internal static string StreetSmartOnLoginFailed {
+        public static string StreetSmartOnLoginFailed {
             get {
                 return ResourceManager.GetString("StreetSmartOnLoginFailed", resourceCulture);
             }
@@ -507,7 +505,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SystemSearch16 {
+        public static System.Drawing.Bitmap SystemSearch16 {
             get {
                 object obj = ResourceManager.GetObject("SystemSearch16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -517,7 +515,7 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap UserTrash16 {
+        public static System.Drawing.Bitmap UserTrash16 {
             get {
                 object obj = ResourceManager.GetObject("UserTrash16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
