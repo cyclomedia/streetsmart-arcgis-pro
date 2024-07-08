@@ -61,6 +61,8 @@ using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using StreetSmart.WPF;
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
@@ -186,6 +188,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       InitializeApi();
 
+      WpfApi = new WpfApi();
+      WpfApi.PropertyChanged += OnApiAdded;
+
       MapClosedEvent.Subscribe(OnMapClosedEvent);
     }
 
@@ -194,6 +199,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     #region Properties
 
     public IStreetSmartAPI Api { get; private set; }
+
+    public WpfApi WpfApi { get; set; }
 
     public string Location
     {
@@ -363,6 +370,27 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Functions
 
+    private void OnApiAdded(object sender, PropertyChangedEventArgs args)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnApiAdded):{_configuration.StreetSmartLocation}");
+
+      if (args != null)
+      {
+        if (args.PropertyName == "Api")
+        {
+          Api = WpfApi.Api;
+          Api.APIReady += ApiReady;
+          Api.ViewerAdded += ViewerAdded;
+          Api.ViewerRemoved += ViewerRemoved;
+
+          if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
+          {
+            Api.RestartStreetSmart(_configuration.StreetSmartLocation);
+          }
+        }
+      }
+    }
+
     private async Task CloseViewersAsync()
     {
       if (!_inClose)
@@ -397,42 +425,40 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private void InitializeApi()
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi)");
       string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+
       try
       {
         IAPISettings settings = CefSettingsFactory.Create(cachePath);
         settings.Locale = _languageSettings.Locale;
         settings.SetDefaultBrowserSubprocessPath();
-        StreetSmartAPIFactory.Initialize(settings, true);
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi): Cache: {cachePath}, locale: {_languageSettings.Locale}");
+        StreetSmartAPIFactory.Initialize(settings);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitializeApi): exception: {e}");
         return;
       }
     }
 
     private void Initialize()
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Initialize): {_configuration.StreetSmartLocation}");
+
       if (_login.Credentials)
       {
         try
         {
-          Api = _configuration.UseDefaultStreetSmartUrl
-            ? StreetSmartAPIFactory.Create()
-            : !string.IsNullOrEmpty(_configuration.StreetSmartLocation)
-              ? StreetSmartAPIFactory.Create(_configuration.StreetSmartLocation)
-              : null;
-
-
-          if (Api != null)
+          if (Api != null && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
           {
-            Api.APIReady += ApiReady;
-            Api.ViewerAdded += ViewerAdded;
-            Api.ViewerRemoved += ViewerRemoved;
+            Api.RestartStreetSmart(_configuration.StreetSmartLocation);
           }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Initialize): Error: {e}");
           return;
         }
       }
@@ -877,6 +903,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void ApiReady(object sender, EventArgs args)
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
       await InitApi();
     }
 
@@ -897,7 +924,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         _options = _configuration.UseDefaultConfigurationUrl
           ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
             addressSettings, element)
-          : OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
+          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
             _configuration.ConfigurationUrlLocation, addressSettings, element);
 
         try

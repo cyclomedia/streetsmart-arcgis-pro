@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:streetSmart="clr-namespace:StreetSmart.Wpf;assembly=StreetSmart.Wpf"
+             xmlns:streetSmart="clr-namespace:StreetSmart.WPF;assembly=StreetSmart.WPF"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -26,8 +26,7 @@
  * License along with this library.
  */
 -->
-  <Grid>
-    <streetSmart:StreetSmartGUI
-      Api="{Binding Api, Mode=OneWay}" />
-  </Grid>
+    <Grid>
+        <streetSmart:StreetSmartGUI WpfApi="{Binding WpfApi, Mode=OneWay}" />
+    </Grid>
 </UserControl>

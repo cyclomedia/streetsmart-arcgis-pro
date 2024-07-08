@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,54 +58,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ArcGIS.Desktop.Extensions">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\DesktopExtensions\ArcGIS.Desktop.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Framework">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Editing">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
-    </Reference>
-    <Reference Include="ArcGIS.Core">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Core">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Core\ArcGIS.Desktop.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ArcGIS.Desktop.Mapping">
-      <HintPath>C:\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CefSharp, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.BrowserSubprocess.Core, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.BrowserSubprocess.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core.Runtime, Version=90.6.70.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Core.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Wpf, Version=73.1.130.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\cef\CefSharp.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="StreetSmart.Wpf, Version=22.8.2, Culture=neutral, PublicKeyToken=d1424f787eed2373, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libs\StreetSmart\StreetSmart.Wpf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="PresentationCore" />
@@ -324,45 +279,6 @@
     </Content>
     <AddInContent Include="Images\ImageIdSearch32.png" />
     <AddInContent Include="Images\MeasurementDetail32.png" />
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.BrowserSubprocess.Core.dll">
-      <Link>Install\CefSharp.BrowserSubprocess.Core.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.BrowserSubprocess.exe">
-      <Link>Install\CefSharp.BrowserSubprocess.exe</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Core.dll">
-      <Link>Install\CefSharp.Core.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.dll">
-      <Link>Install\CefSharp.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\CefSharp.Wpf.dll">
-      <Link>Install\CefSharp.Wpf.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\chrome_elf.dll">
-      <Link>Install\chrome_elf.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\d3dcompiler_47.dll">
-      <Link>Install\d3dcompiler_47.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\libcef.dll">
-      <Link>Install\libcef.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\libEGL.dll">
-      <Link>Install\libEGL.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\libGLESv2.dll">
-      <Link>Install\libGLESv2.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libEGL.dll">
-      <Link>Install\swiftshader\libEGL.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\swiftshader\libGLESv2.dll">
-      <Link>Install\swiftshader\libGLESv2.dll</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\Newtonsoft.Json.dll">
-      <Link>Install\Newtonsoft.Json.dll</Link>
-    </AddInContent>
     <Content Include="ReleaseNotes.txt" />
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
@@ -374,38 +290,6 @@
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
     <EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
-  </ItemGroup>
-  <ItemGroup>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef.pak">
-      <Link>Install\cef.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_100_percent.pak">
-      <Link>Install\cef_100_percent.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_200_percent.pak">
-      <Link>Install\cef_200_percent.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\cef_extensions.pak">
-      <Link>Install\cef_extensions.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\devtools_resources.pak">
-      <Link>Install\devtools_resources.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\icudtl.dat">
-      <Link>Install\icudtl.dat</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\locales\en-US.pak">
-      <Link>Install\locales\en-US.pak</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\natives_blob.bin">
-      <Link>Install\natives_blob.bin</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\snapshot_blob.bin">
-      <Link>Install\snapshot_blob.bin</Link>
-    </AddInContent>
-    <AddInContent Include="..\..\Libs\StreetSmart\v8_context_snapshot.bin">
-      <Link>Install\v8_context_snapshot.bin</Link>
-    </AddInContent>
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="..\..\Libs\StreetSmart\locales\am.pak">
@@ -575,7 +459,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Esri.ArcGISPro.Extensions">
+      <Version>2.9.0.32739</Version>
+    </PackageReference>
+    <PackageReference Include="StreetSmart.WPF">
+      <Version>24.4.0-rc01</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
