@@ -302,7 +302,7 @@
       <Version>2.9.0.32739</Version>
     </PackageReference>
     <PackageReference Include="StreetSmart.WPF">
-      <Version>24.4.0-rc02a</Version>
+      <Version>24.4.0-rc02b</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

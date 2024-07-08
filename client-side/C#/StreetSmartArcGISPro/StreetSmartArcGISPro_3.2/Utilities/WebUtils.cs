@@ -1,17 +1,13 @@
 ﻿using StreetSmartArcGISPro.Configuration.Remote;
-using StreetSmartArcGISPro.Configuration.Resource;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace StreetSmartArcGISPro.Utilities
 {
-    internal class WebUtils
+  internal class WebUtils
     {
         #region Constants
         private const int BufferImageLengthService = 2048;

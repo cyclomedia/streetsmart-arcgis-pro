@@ -15,6 +15,7 @@
     <UseWPF>true</UseWPF>
     <TargetFrameworkProfile />
     <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -240,6 +241,12 @@
     <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\SpatialReference\Bounds.cs">
       <Link>Configuration\Remote\SpatialReference\Bounds.cs</Link>
     </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Models\GlobeSpotterConfiguration.cs">
+      <Link>Configuration\Remote\Models\GlobeSpotterConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Models\UserInfo.cs">
+      <Link>Configuration\Remote\Models\UserInfo.cs</Link>
+    </Compile>
     <Compile Include="..\StreetSmartArcGISPro_3.2\Configuration\Remote\Recordings\Recording.cs">
       <Link>Configuration\Remote\Recordings\Recording.cs</Link>
     </Compile>
@@ -396,26 +403,27 @@
     <Content Include="..\..\Doc\ToDo.txt">
       <Link>ToDo.txt</Link>
     </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Resources\Agreement.txt">
+    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Resources\Agreement.txt">
       <Link>Resources\Agreement.txt</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Resources\APIKey.xml">
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Resources\APIKey.xml">
       <Link>Resources\APIKey.xml</Link>
-    </Content>
-    <Content Include="..\StreetSmartArcGISPro_3.2\Resources\Languages.xml">
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\StreetSmartArcGISPro_3.2\Resources\Languages.xml">
       <Link>Resources\Languages.xml</Link>
-    </Content>
-    <Content Include="Images\CycloMediaOptions32.png" />
-    <Content Include="Images\FocusMode16.png" />
-    <Content Include="Images\ImageIdSearch32.png" />
-    <Content Include="Images\MeasurementDetail32.png" />
-    <Content Include="Images\OpenLocation.cur" />
-    <Content Include="Images\OpenLocation32.png" />
-    <Content Include="Images\RecordingLayer32.png" />
-    <Content Include="Images\StreetSmart32.png" />
-    <Content Include="Images\StreetSmartArcGISPro32.png" />
-    <Content Include="Images\SystemSearch16.png" />
-    <Content Include="Images\UserTrash16.png" />
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <AddInContent Include="Images\CycloMediaOptions32.png" />
+    <AddInContent Include="Images\FocusMode16.png" />
+    <AddInContent Include="Images\ImageIdSearch32.png" />
+    <AddInContent Include="Images\MeasurementDetail32.png" />
+    <AddInContent Include="Images\OpenLocation.cur" />
+    <AddInContent Include="Images\OpenLocation32.png" />
+    <AddInContent Include="Images\RecordingLayer32.png" />
+    <AddInContent Include="Images\StreetSmart32.png" />
+    <AddInContent Include="Images\StreetSmartArcGISPro32.png" />
+    <AddInContent Include="Images\SystemSearch16.png" />
+    <AddInContent Include="Images\UserTrash16.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\Doc\Street Smart for ArcGIS Pro User Manual.pdf">

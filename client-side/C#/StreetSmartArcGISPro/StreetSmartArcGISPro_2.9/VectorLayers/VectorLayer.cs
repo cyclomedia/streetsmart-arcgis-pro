@@ -118,6 +118,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string Name => Layer?.Name ?? string.Empty;
 
+    public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
+
     public bool IsVisible => Layer != null && Layer.IsVisible;
     //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;

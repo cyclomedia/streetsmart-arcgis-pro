@@ -16,12 +16,14 @@
  * License along with this library.
  */
 
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-
+using ArcGIS.Desktop.Framework.Utilities;
+using Newtonsoft.Json;
 using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.Utilities;
 
@@ -105,20 +107,34 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      OnPropertyChanged();
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlLanguageSettings.Serialize(streamFile, this);
-      streamFile.Close();
+      //OnPropertyChanged();
+      //FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
+      //XmlLanguageSettings.Serialize(streamFile, this);
+      //streamFile.Close();
+      var obj = JsonConvert.SerializeObject(_language);
+      SystemIOFile.WriteAllText(FileName, obj);
     }
 
     private static void Load()
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _languageSettings = (LanguageSettings) XmlLanguageSettings.Deserialize(streamFile);
-        streamFile.Close();
+        //var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
+        //_languageSettings = (LanguageSettings) XmlLanguageSettings.Deserialize(streamFile);
+        //streamFile.Close();
+        try
+        {
+          var text = SystemIOFile.ReadAllText(FileName);
+          _languageSettings = JsonConvert.DeserializeObject<LanguageSettings>(text);
+          return;
+        }
+        catch(Exception ex)
+        {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: {ex}");
+        }
       }
+
+      _languageSettings = null;
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

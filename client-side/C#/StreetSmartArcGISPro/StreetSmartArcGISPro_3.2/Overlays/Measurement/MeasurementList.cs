@@ -673,9 +673,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.Geometry = geometry;
                     //await measurement.UpdateMap();
                     //GC: added task delay to allow the line feature to be completed 
-                    await Task.Delay(250).ContinueWith(_ =>
+                    await Task.Delay(250).ContinueWith(async _ =>
                     {
-                      measurement.UpdateMap();
+                      await measurement.UpdateMap();
                     });
                   }
                   else
@@ -762,9 +762,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.Geometry = geometry;
                     //await measurement.UpdateMap();
                     //GC: added task delay to allow the polygon feature to be completed 
-                    await Task.Delay(250).ContinueWith(_ =>
+                    await Task.Delay(250).ContinueWith(async _ =>
                     {
-                      measurement.UpdateMap();
+                      await measurement.UpdateMap();
                     });
                   }
                   else

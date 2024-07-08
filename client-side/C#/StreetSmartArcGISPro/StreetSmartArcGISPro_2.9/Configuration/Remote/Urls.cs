@@ -67,6 +67,11 @@ namespace StreetSmartArcGISPro.Configuration.Remote
     protected string ConfigurationUrl => $"{BaseUrl}{configurationRequest}";
 
     /// <summary>
+    /// Configuration URL
+    /// </summary>
+    public string ConfigServiceUrl { get; private set; }
+
+    /// <summary>
     /// Spatialreferences URL
     /// </summary>
     protected string SpatialReferenceUrl => $"{BaseUrl.Replace(@"/api", string.Empty)}{spatialReferencesXml}";

@@ -19,13 +19,9 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-
-#if ARCGISPRO32
+using static StreetSmartArcGISPro.Utilities.WebUtils;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Models;
-using static StreetSmartArcGISPro.Utilities.WebUtils;
-#endif
-
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 
 namespace StreetSmartArcGISPro.Configuration.Remote
@@ -63,21 +59,16 @@ namespace StreetSmartArcGISPro.Configuration.Remote
     {
       Configuration = FileConfiguration.Instance;
 
-#if ARCGISPRO291
-      _configId = string.Empty;
-#elif ARCGISPRO32
+
       _configId = FetchConfigIdFromUserInfoConfiguration();
-#endif
+
 
       ConfigServiceUrl = $"{BaseUrl}{_appConfigurationRequestPrefix}";
       ConfigurationUrl = $"{ConfigServiceUrl}{_appConfigurationRequestPrefix}/{_configId}";
 
-#if ARCGISPRO291
-      RecordingServiceUrl = string.Empty;
-#elif ARCGISPRO32
+
       var globeSpotterConfig = FetchConfigurationByConfigId();
       RecordingServiceUrl = globeSpotterConfig?.ServicesConfiguration?.RecordingLocationService?.OnlineResource?.ResourceLink?.Replace("?", "") ?? string.Empty;
-#endif
     }
 
     #endregion
@@ -125,7 +116,6 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       return string.Format(recordingRequest, RecordingServiceUrl, epsgCode, imageId);
     }
 
-#if ARCGISPRO32
     private string FetchConfigIdFromUserInfoConfiguration()
     {
       string configId = string.Empty;
@@ -161,7 +151,6 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       return configId;
     }
 
-#endif
     /*
             public async Task<Stream> TestRequest(string url, Login login, ApiKey apiKey)
             {
@@ -184,7 +173,6 @@ namespace StreetSmartArcGISPro.Configuration.Remote
             }
     */
 
-#if ARCGISPRO32
     private GlobeSpotterConfiguration FetchConfigurationByConfigId()
     {
       var globeSpotterConfig = new GlobeSpotterConfiguration();
@@ -217,7 +205,6 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       }
       return globeSpotterConfig;
     }
-#endif
 #endregion
   }
 }
