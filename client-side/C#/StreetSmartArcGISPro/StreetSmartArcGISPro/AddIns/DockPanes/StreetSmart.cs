@@ -922,10 +922,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
         IDomElement element = DomElementFactory.Create();
         _options = _configuration.UseDefaultConfigurationUrl
-          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            addressSettings, element)
-          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            _configuration.ConfigurationUrlLocation, addressSettings, element);
+          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element)
+          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale, _configuration.ConfigurationUrlLocation, addressSettings, element);
 
         try
         {
