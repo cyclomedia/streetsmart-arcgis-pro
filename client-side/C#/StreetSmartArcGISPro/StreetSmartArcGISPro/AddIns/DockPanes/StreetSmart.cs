@@ -1226,7 +1226,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       switch (args.PropertyName)
       {
         case "Language":
-          CefSettingsFactory.SetLanguage(_languageSettings.Locale);
+          await CefSettingsFactory.SetLanguage(_languageSettings.Locale);
           await RestartStreetSmart(false);
           break;
       }
