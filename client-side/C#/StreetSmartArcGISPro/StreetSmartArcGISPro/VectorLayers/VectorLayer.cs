@@ -419,8 +419,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
         });
 
-        string newJson = featureCollection?.ToString();
-        GeoJsonChanged = !(newJson?.Equals(GeoJson?.ToString()) ?? false) || GeoJsonChanged;
+        GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
         GeoJson = featureCollection;
       }
 
