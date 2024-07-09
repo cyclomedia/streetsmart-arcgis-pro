@@ -27,14 +27,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
     public StreetSmartApi()
     {
-      try
-      {
-        InitializeComponent();
-      }
-      catch(System.Exception e)
-      { 
-        return;
-      }
+      InitializeComponent();
     }
 
     #endregion
