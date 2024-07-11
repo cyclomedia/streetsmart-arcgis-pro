@@ -1403,7 +1403,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnRemoveVectorLayer)");
 
-      if (GlobeSpotterConfiguration.AddLayerWfs && vectorLayer.Layer.Map == MapView.Map)
+      if (GlobeSpotterConfiguration.AddLayerWfs)
       {
         vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
         await RemoveVectorLayerAsync(vectorLayer);
