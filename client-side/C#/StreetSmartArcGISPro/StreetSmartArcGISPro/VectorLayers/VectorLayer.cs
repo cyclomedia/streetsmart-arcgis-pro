@@ -118,6 +118,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string Name => Layer?.Name ?? string.Empty;
 
+    public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
+
     public bool IsVisible => Layer != null && Layer.IsVisible;
     //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;
@@ -474,7 +476,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                   {
                     string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
                     //GC: made to fix apostrophe error for symbology
-                    if(value.Contains("'"))
+                    if (value.Contains("'"))
                     {
                       value = value.Replace("'", "");
                     }
@@ -500,7 +502,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
-        
+
         return !(oldSld?.Equals(Sld?.SLD) ?? false);
       });
     }
@@ -586,7 +588,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         double h = colorValues != null && colorValues.Length >= 1 ? colorValues[0] : 0.0;
         double s = colorValues != null && colorValues.Length >= 2 ? colorValues[1] : 0.0;
         double v = colorValues != null && colorValues.Length >= 3 ? colorValues[2] : 0.0;
-        alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
+        alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
 
         //GC: added catch statements that turns the s and v values to percentages because it was causing incorrect overlay colors
         if (s > 1)
@@ -603,10 +605,10 @@ namespace StreetSmartArcGISPro.VectorLayers
       else
       {
         double[] colorValues = cimColor?.Values;
-        red = colorValues != null && colorValues.Length >= 1 ? (int) colorValues[0] : 255;
-        green = colorValues != null && colorValues.Length >= 2 ? (int) colorValues[1] : 255;
-        blue = colorValues != null && colorValues.Length >= 3 ? (int) colorValues[2] : 255;
-        alpha = colorValues != null && colorValues.Length >= 4 ? (int) colorValues[3] : 255;
+        red = colorValues != null && colorValues.Length >= 1 ? (int)colorValues[0] : 255;
+        green = colorValues != null && colorValues.Length >= 2 ? (int)colorValues[1] : 255;
+        blue = colorValues != null && colorValues.Length >= 3 ? (int)colorValues[2] : 255;
+        alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
       }
 
       return Color.FromArgb(alpha, red, green, blue);
@@ -709,7 +711,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
       else
       {
-        await UpdateFeatureAsync((long) objectId, sketch, measurement);
+        await UpdateFeatureAsync((long)objectId, sketch, measurement);
       }
     }
 
@@ -779,7 +781,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           foreach (var value in Layer.GetFieldDescriptions())
           {
-            switch(value.Name)
+            switch (value.Name)
             {
               case "x":
                 toAddFields["x"] = measurementX;
@@ -794,7 +796,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 toAddFields["ZGeom"] = measurementZ;
                 break;
             }
-          }          
+          }
 
           editOperation.Create(Layer, toAddFields);
           await editOperation.ExecuteAsync();
@@ -862,7 +864,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 foreach (IViewer viewer in viewers)
                 {
                   string id = await viewer.GetId();
-                  
+
                   if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
                   {
                     Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
@@ -940,7 +942,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         MapMember mapMember = selection.Key;
         FeatureLayer layer = mapMember as FeatureLayer;
-        _measurementList.ObjectId = selection.Value.Count >= 1 ? selection.Value[0] : (long?) null;
+        _measurementList.ObjectId = selection.Value.Count >= 1 ? selection.Value[0] : (long?)null;
 
         if (layer == Layer)
         {
@@ -961,7 +963,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               _updateMeasurements = true;
             }
           }
-          catch(Exception) { }
+          catch (Exception) { }
         }
       }
 

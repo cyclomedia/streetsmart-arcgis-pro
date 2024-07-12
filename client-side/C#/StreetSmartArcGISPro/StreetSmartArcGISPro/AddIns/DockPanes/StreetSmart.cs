@@ -801,27 +801,23 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       return streetSmart;
     }
 
-    private async Task UpdateVectorLayerAsync()
-    {
-      if (_vectorLayerList.ContainsKey(MapView))
-      {
-        //GC: create new list to keep track if duplicates are being added to the map
-        List<String> vectors = new List<String>();
-        // ReSharper disable once ForCanBeConvertedToForeach
-        for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+        private async Task UpdateVectorLayerAsync()
         {
-          VectorLayer vectorLayer = _vectorLayerList[MapView][i];
-          if (!vectors.Contains(vectorLayer.Name))
-          {
-            vectors.Add(vectorLayer.Name);
-            await UpdateVectorLayerAsync(vectorLayer);
-          }
-          //await UpdateVectorLayerAsync(_vectorLayerList[MapView][i]);
-        }
-      }
-    }
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
+            if (_vectorLayerList.ContainsKey(MapView))
+            {
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
 
-    private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
+                foreach (var vectorLayer in _vectorLayerList[MapView])
+                {
+                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
+
+                    await UpdateVectorLayerAsync(vectorLayer);
+                }
+            }
+        }
+
+        private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
     {
       await vectorLayer.GenerateJsonAsync(_mapView);
     }
