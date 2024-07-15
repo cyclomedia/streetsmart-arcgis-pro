@@ -1004,7 +1004,6 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       if (_vectorLayerList.EditTool == EditTools.Verticles)
       {
-        _measurementList.ObjectId = null;
         _measurementList.Api.StopMeasurementMode();
       }
     }
