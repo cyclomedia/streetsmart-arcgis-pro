@@ -311,11 +311,11 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-	<PropertyGroup>
-		<PostBuildEvent>
-		</PostBuildEvent>
-	</PropertyGroup>
-	<PropertyGroup>
-		<PreBuildEvent>powershell -File "$(ProjectDir)ReplaceConfigDate.ps1" $(ProjectDir)</PreBuildEvent>
-	</PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -File "$(ProjectDir)ReplaceConfigDate.ps1" $(ProjectDir)</PreBuildEvent>
+  </PropertyGroup>
 </Project>
