@@ -614,7 +614,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       _epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
       IList<ViewerType> viewerTypes = new List<ViewerType> { ViewerType.Panorama };
-      IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, _toRestartImages.Count == 0 && Replace, true);
+      IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, _toRestartImages.Count == 0 && Replace, true, 0);
       panoramaOptions.MeasureTypeButtonToggle = false;
       IViewerOptions viewerOptions = ViewerOptionsFactory.Create(viewerTypes, _epsgCode, panoramaOptions);
       string toOpen;
