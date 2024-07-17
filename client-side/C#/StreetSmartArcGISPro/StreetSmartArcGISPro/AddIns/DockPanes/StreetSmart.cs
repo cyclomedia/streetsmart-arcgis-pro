@@ -16,6 +16,31 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Core.Events;
+using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmart.Common.Exceptions;
+using StreetSmart.Common.Factories;
+using StreetSmart.Common.Interfaces.API;
+using StreetSmart.Common.Interfaces.Data;
+using StreetSmart.Common.Interfaces.DomElement;
+using StreetSmart.Common.Interfaces.Events;
+using StreetSmart.Common.Interfaces.GeoJson;
+using StreetSmart.Common.Interfaces.SLD;
+using StreetSmart.WPF;
+using StreetSmartArcGISPro.AddIns.Views;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
+using StreetSmartArcGISPro.Configuration.Resource;
+using StreetSmartArcGISPro.Overlays;
+using StreetSmartArcGISPro.Overlays.Measurement;
+using StreetSmartArcGISPro.Utilities;
+using StreetSmartArcGISPro.VectorLayers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,41 +53,12 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Core.Events;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Contracts;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-
-using StreetSmart.Common.Exceptions;
-using StreetSmart.Common.Factories;
-using StreetSmart.Common.Interfaces.Data;
-using StreetSmart.Common.Interfaces.DomElement;
-using StreetSmart.Common.Interfaces.API;
-using StreetSmart.Common.Interfaces.Events;
-using StreetSmart.Common.Interfaces.GeoJson;
-using StreetSmart.Common.Interfaces.SLD;
-
-using StreetSmartArcGISPro.AddIns.Views;
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
-using StreetSmartArcGISPro.Configuration.Resource;
-using StreetSmartArcGISPro.Overlays;
-using StreetSmartArcGISPro.Overlays.Measurement;
-using StreetSmartArcGISPro.Utilities;
-using StreetSmartArcGISPro.VectorLayers;
-
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Login = StreetSmartArcGISPro.Configuration.File.Login;
 using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
-using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
-using StreetSmart.WPF;
-using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
@@ -790,6 +786,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     internal static StreetSmart Show()
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Show)");
+
       _fromShow = true;
       StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
 
@@ -801,29 +799,36 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       return streetSmart;
     }
 
-        private async Task UpdateVectorLayerAsync()
-        {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
-            if (_vectorLayerList.ContainsKey(MapView))
-            {
-                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
-
-                foreach (var vectorLayer in _vectorLayerList[MapView])
-                {
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
-
-                    await UpdateVectorLayerAsync(vectorLayer);
-                }
-            }
-        }
-
-        private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
+    private async Task UpdateVectorLayerAsync()
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync)");
+
+      if (_vectorLayerList.ContainsKey(MapView))
+      {
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
+
+        for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+        {
+          VectorLayer vectorLayer = _vectorLayerList[MapView][i];
+
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
+
+          await UpdateVectorLayerAsync(vectorLayer);
+        }
+      }
+    }
+
+    private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
+    {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
+
       await vectorLayer.GenerateJsonAsync(_mapView);
     }
 
     private async Task AddVectorLayerAsync(VectorLayer vectorLayer)
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync)");
+
       if (vectorLayer.Layer.Map == _mapView.Map)
       {
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
@@ -851,12 +856,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               try
               {
-                if(feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
+                if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
                 {
                   feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
                 }
               }
-              catch(Exception e)
+              catch (Exception e)
               {
                 return;
               }
@@ -1001,7 +1006,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           await MoveToLocationAsync(panoramaViewer);
         }
-        catch(Exception e) { }
+        catch (Exception e) { }
 
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;
@@ -1014,7 +1019,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           {
             case "addressLayer":
               //GC: Remove Address Layer if cyclorama not in the Netherlands
-              if(this._epsgCode == "EPSG:28992")
+              if (this._epsgCode == "EPSG:28992")
                 panoramaViewer.ToggleAddressesVisible(layer.Visible);
               else
                 await Api.RemoveOverlay("addressLayer");
@@ -1054,7 +1059,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
     {
-      string id = await(sender as IPanoramaViewer).GetId();
+      string id = await (sender as IPanoramaViewer).GetId();
       IFeatureInfo featureInfo = args.Value;
       VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId, MapView);
       layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
@@ -1365,7 +1370,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               await RemoveVectorLayerAsync(vectorLayer);
               await AddVectorLayerAsync(vectorLayer);
-            }else if(vectorLayer.Overlay.Visible)
+            }
+            else if (vectorLayer.Overlay.Visible)
             {
               await RemoveVectorLayerAsync(vectorLayer);
               await AddVectorLayerAsync(vectorLayer);
@@ -1382,7 +1388,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
 
         _vectorLayerInChange.Remove(vectorLayer);
-      }else if(switcher == true && vectorLayer.Overlay != null)
+      }
+      else if (switcher == true && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
         this._panorama.ToggleOverlay(vectorLayer.Overlay);
