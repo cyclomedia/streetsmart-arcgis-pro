@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
 		<RuntimeIdentifier>win10-x64</RuntimeIdentifier>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -64,10 +64,10 @@
 		<None Include="StreetSmartArcGISPro.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.2.0.49743" />
+		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.3.0.52636" />
 		<PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.6" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
-		<PackageReference Include="StreetSmart.WPF" Version="24.1.2" />
+		<PackageReference Include="StreetSmart.WPF" Version="24.4.0-rc07b" />
 		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
 	</ItemGroup>
 	<ItemGroup>
