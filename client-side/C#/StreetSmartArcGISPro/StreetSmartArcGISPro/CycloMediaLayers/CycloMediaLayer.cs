@@ -16,6 +16,18 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.CIM;
+using ArcGIS.Core.Data;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Core.Geoprocessing;
+using ArcGIS.Desktop.Editing;
+using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.Recordings;
+using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,30 +38,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
-using ArcGIS.Core.CIM;
-using ArcGIS.Core.Data;
-using ArcGIS.Core.Geometry;
-
-using ArcGIS.Desktop.Core.Geoprocessing;
-using ArcGIS.Desktop.Editing;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.Recordings;
-using StreetSmartArcGISPro.Utilities;
-
+using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
-using ArcGISProject = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
-  public abstract class CycloMediaLayer: INotifyPropertyChanged
+  public abstract class CycloMediaLayer : INotifyPropertyChanged
   {
     #region Events
 
@@ -189,7 +185,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
         else
         {
-          result = (Envelope) envelope.Clone();
+          result = (Envelope)envelope.Clone();
         }
 
         return result;
@@ -230,9 +226,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       int wkid = spatialReference?.Wkid ?? 0;
       string mapName = map?.Name;
-      mapName = mapName?.Replace(" ", "_") ?? string.Empty;
-      mapName = mapName?.Replace(".", "_") ?? string.Empty; //GC: fixed crash when map name used a period
-      string fcNameWkid = string.Concat(FcName, mapName, wkid);
+      string fixedMapName = FixMapNameByReplacingSpecialCharacters(mapName);
+      string fcNameWkid = string.Concat(FcName, fixedMapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
       Layer = await CreateLayerAsync(project, fcNameWkid, _cycloMediaGroupLayer.GroupLayer);
@@ -516,7 +511,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                     // ReSharper disable once AccessToModifiedClosure
                     result = result ?? 0.0;
-                    result = result + height - ((double) groundLevel);
+                    result = result + height - ((double)groundLevel);
                     count++;
                   }
                 }
@@ -526,7 +521,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
       });
 
-      result = result != null ? result/Math.Max(count, 1) : null;
+      result = result != null ? result / Math.Max(count, 1) : null;
       return result;
     }
 
@@ -544,9 +539,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        string[] fieldNames = {Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap};
+        string[] fieldNames = { Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap };
         var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
-        var uniqueValueRenderer = (CIMUniqueValueRenderer) Layer.CreateRenderer(uniqueValueRendererDefinition);
+        var uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
         uniqueValueRenderer.Fields = fieldNames;
         uniqueValueRenderer.DefaultLabel = string.Empty;
         uniqueValueRenderer.DefaultSymbol = null;
@@ -731,7 +726,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     {
                       if (Filter(recording))
                       {
-                        exists.Remove((string) recording.FieldToItem(idField));
+                        exists.Remove((string)recording.FieldToItem(idField));
                       }
                     }
                   }
@@ -763,7 +758,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected CIMMarker GetPipSymbol(Color color)
     {
-      var size025 = (int) _constants.SizeLayer;
+      var size025 = (int)_constants.SizeLayer;
       var size05 = size025 * 2;
       var size075 = size025 * 3;
       var size = size025 * 4;
@@ -803,7 +798,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected CIMMarker GetForbiddenSymbol(Color color)
     {
-      var size025 = (int) _constants.SizeLayer;
+      var size025 = (int)_constants.SizeLayer;
       var size075 = size025 * 3;
       var size = size025 * 4;
       var size15 = size025 * 6;
@@ -831,6 +826,19 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       CIMMarker marker = SymbolFactory.Instance.ConstructMarkerFromFile(writePath);
       marker.Size = size075;
       return marker;
+    }
+
+    public static string FixMapNameByReplacingSpecialCharacters(string mapName)
+    {
+      char[] charsToReplace = {
+   ' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+',
+   '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'
+  };
+      foreach (char c in charsToReplace)
+      {
+        mapName = mapName?.Replace(c, '_') ?? string.Empty;
+      }
+      return mapName;
     }
 
     #endregion
