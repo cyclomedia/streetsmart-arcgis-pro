@@ -26,20 +26,28 @@ using System.Windows.Input;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-
+using System.Resources;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
-
+using System.Windows;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using WinPoint = System.Windows.Point;
+using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
-  class OpenLocation : MapTool
+  public sealed class OpenLocation : MapTool
   {
+    #region Members
+
+    private readonly LanguageSettings _languageSettings;
+
+    #endregion
+
     #region Constructor
 
     public OpenLocation()
@@ -48,6 +56,8 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       string cursorPath = $@"StreetSmartArcGISPro.Images.{thisType.Name}.cur";
       Assembly thisAssembly = Assembly.GetAssembly(thisType);
       Stream cursorStream = thisAssembly.GetManifestResourceStream(cursorPath);
+
+      _languageSettings = LanguageSettings.Instance;
 
       if (cursorStream != null)
       {
@@ -67,6 +77,19 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       bool nearest = false;
       string location = string.Empty;
       MapView activeView = MapView.Active;
+
+      if (activeView.Map?.MapType == ArcGIS.Core.CIM.MapType.Scene)
+      {
+        ResourceManager res = ThisResources.ResourceManager;
+        string openLocationNotSupportedInSceneTxt = res.GetString("OpenLocationNotSupportedInScene", _languageSettings.CultureInfo);
+        MessageBox.Show(
+          openLocationNotSupportedInSceneTxt,
+          openLocationNotSupportedInSceneTxt,
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+
+        return false;
+      }
 
       await QueuedTask.Run(async () =>
       {
