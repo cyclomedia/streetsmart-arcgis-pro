@@ -1020,7 +1020,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location");
           await MoveToLocationAsync(panoramaViewer);
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
           EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location exception: {e}");
         }
@@ -1278,41 +1278,48 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnImageChanged)");
 
-      if (sender is IPanoramaViewer panoramaViewer && Api != null)
+      try
       {
-        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
-        if (viewer != null)
+        if (sender is IPanoramaViewer panoramaViewer && Api != null)
         {
-          IRecording recording = await panoramaViewer.GetRecording();
-          IOrientation orientation = await panoramaViewer.GetOrientation();
-          Color color = await panoramaViewer.GetViewerColor();
+          Viewer viewer = _viewerList.GetViewer(panoramaViewer);
 
-          ICoordinate coordinate = recording.XYZ;
-          string imageId = recording.Id;
-
-          viewer.ImageId = imageId;
-          await viewer.SetAsync(coordinate, orientation, color, _mapView);
-
-          await MoveToLocationAsync(panoramaViewer);
-
-          if (viewer.HasMarker)
+          if (viewer != null)
           {
-            viewer.HasMarker = false;
-            List<Viewer> markerViewers = _viewerList.MarkerViewers;
+            IRecording recording = await panoramaViewer.GetRecording();
+            IOrientation orientation = await panoramaViewer.GetOrientation();
+            Color color = await panoramaViewer.GetViewerColor();
 
-            if (markerViewers.Count == 0 && _crossCheck != null)
+            ICoordinate coordinate = recording.XYZ;
+            string imageId = recording.Id;
+
+            viewer.ImageId = imageId;
+            await viewer.SetAsync(coordinate, orientation, color, _mapView);
+
+            await MoveToLocationAsync(panoramaViewer);
+
+            if (viewer.HasMarker)
             {
-              _crossCheck.Dispose();
-              _crossCheck = null;
+              viewer.HasMarker = false;
+              List<Viewer> markerViewers = _viewerList.MarkerViewers;
+
+              if (markerViewers.Count == 0 && _crossCheck != null)
+              {
+                _crossCheck.Dispose();
+                _crossCheck = null;
+              }
+            }
+
+            if (GlobeSpotterConfiguration.AddLayerWfs)
+            {
+              await UpdateVectorLayerAsync();
             }
           }
-
-          if (GlobeSpotterConfiguration.AddLayerWfs)
-          {
-            await UpdateVectorLayerAsync();
-          }
         }
+      }
+      catch (Exception e)
+      {
+        EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChange): exception: {e}");
       }
     }
 
