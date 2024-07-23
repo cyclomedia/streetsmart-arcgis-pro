@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Web;
@@ -191,6 +192,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
       GeoJsonChanged = false;
+      double distanceFactor = (cyclSpatRef?.IsGeographic ?? true) ? factor : 1 / factor;
 
       if (Layer.Map == map)
       {
@@ -200,21 +202,14 @@ namespace StreetSmartArcGISPro.VectorLayers
           IList<IList<Segment>> geometries = new List<IList<Segment>>();
           ICollection<Viewer> viewers = _viewerList.Viewers;
 
-          foreach (var viewer in viewers)
+          var viewerTasks = viewers.Select(viewer => Task.Run(() =>
           {
             double distance = settings?.OverlayDrawDistance ?? 0.0;
             ICoordinate coordinate = viewer.Coordinate;
 
             if (coordinate != null)
             {
-              if (cyclSpatRef?.IsGeographic ?? true)
-              {
-                distance = distance * factor;
-              }
-              else
-              {
-                distance = distance / factor;
-              }
+              distance = distance * distanceFactor;
 
               double x = coordinate.X ?? 0.0;
               double y = coordinate.Y ?? 0.0;
@@ -236,9 +231,9 @@ namespace StreetSmartArcGISPro.VectorLayers
                     copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
                   }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                  // ignored
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) {ex}");
                 }
               }
 
@@ -265,12 +260,13 @@ namespace StreetSmartArcGISPro.VectorLayers
                 geometries.Add(segments);
               }
             }
-          }
+          })).ToArray();
+          await Task.WhenAll(viewerTasks);
 
           featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
           List<long> objectIds = new List<long>();
 
-          foreach (var geom in geometries)
+          var featureTasks = geometries.Select(async geom =>
           {
             Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
             //this is where the new pop-up attributes are made
@@ -310,12 +306,6 @@ namespace StreetSmartArcGISPro.VectorLayers
                     {
                       switch (geometryType)
                       {
-                        case GeometryType.Envelope:
-                          break;
-                        case GeometryType.Multipatch:
-                          break;
-                        case GeometryType.Multipoint:
-                          break;
                         case GeometryType.Point:
                           if (copyGeometry is MapPoint point)
                           {
@@ -406,6 +396,9 @@ namespace StreetSmartArcGISPro.VectorLayers
                           }
 
                           break;
+                        case GeometryType.Envelope:
+                        case GeometryType.Multipatch:
+                        case GeometryType.Multipoint:
                         case GeometryType.Unknown:
                           break;
                       }
@@ -416,7 +409,8 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
               }
             }
-          }
+          }).ToArray();
+          await Task.WhenAll(featureTasks);
         });
 
         GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
@@ -616,6 +610,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<double> GetOffsetZAsync()
     {
+      if (Layer == null) return 0.0;
+
       return await QueuedTask.Run(() =>
       {
         CIMBaseLayer cimBaseLayer = Layer?.GetDefinition();
@@ -627,9 +623,10 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task<ICoordinate> GeoJsonCoordAsync(MapPoint point)
     {
-      bool hasZ = point.HasZ;
-      double z = hasZ ? point.Z + await GetOffsetZAsync() : 0.0;
-      return hasZ ? CoordinateFactory.Create(point.X, point.Y, z) : CoordinateFactory.Create(point.X, point.Y);
+      double z = point.HasZ ? point.Z + await GetOffsetZAsync() : 0.0;
+      return point.HasZ
+          ? CoordinateFactory.Create(point.X, point.Y, z)
+          : CoordinateFactory.Create(point.X, point.Y);
     }
 
     public async void SelectFeature(IJson properties, MapView mapView, string id)
@@ -940,7 +937,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           catch (Exception ex)
           {
-              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
           }
         }
       }
