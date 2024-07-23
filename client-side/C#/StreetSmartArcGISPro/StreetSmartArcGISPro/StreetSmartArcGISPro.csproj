@@ -12,9 +12,8 @@
     <AssemblyName>StreetSmartArcGISPro</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <UseWPF>true</UseWPF>
     <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -269,9 +268,6 @@
   <ItemGroup>
     <Content Include="..\..\Doc\LGPL-3.0.txt">
       <Link>LGPL-3.0.txt</Link>
-    </Content>
-    <Content Include="..\..\Doc\Release notes.txt">
-      <Link>Release notes.txt</Link>
     </Content>
     <AddInContent Include="Images\OpenLocation32.png" />
     <Content Include="..\..\Doc\ToDo.txt">

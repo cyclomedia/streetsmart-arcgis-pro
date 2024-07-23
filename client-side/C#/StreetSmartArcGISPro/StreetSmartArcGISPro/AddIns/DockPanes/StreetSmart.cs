@@ -430,6 +430,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         settings.Locale = _languageSettings.Locale;
         settings.SetDefaultBrowserSubprocessPath();
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi): Cache: {cachePath}, locale: {_languageSettings.Locale}");
+        settings.AllowInsecureContent = true;
         StreetSmartAPIFactory.Initialize(settings);
       }
       catch (Exception e)
