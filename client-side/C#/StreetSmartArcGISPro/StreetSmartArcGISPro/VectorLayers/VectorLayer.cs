@@ -511,7 +511,6 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       double strokeWidth = 1.0;
       double strokeOpacity = 1.0;
-      ISymbolizer symbolizer = null;
 
       CIMSymbol symbol = symbolRef?.Symbol;
       CIMColor cimColor = symbol?.GetColor();
@@ -548,7 +547,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             Color color = CimColorToWinColor(cimColor);
             Color? strokeColor = cimStroke == null ? null : (Color?)CimColorToWinColor(cimStroke);
 
-            symbolizer = strokeColor != null
+            return strokeColor != null
               ? SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color, fillOpacity, strokeColor, strokeWidth, strokeOpacity)
               : SLDFactory.CreateStylePoint(SymbolizerType.Circle, 10.0, color);
           }
@@ -560,22 +559,22 @@ namespace StreetSmartArcGISPro.VectorLayers
             string[] parts = url.Split(';');
             string base64 = parts.Length >= 2 ? parts[1] : string.Empty;
             base64 = base64.Replace("base64,", string.Empty);
-            symbolizer = SLDFactory.CreateImageSymbol(size, base64);
+            return SLDFactory.CreateImageSymbol(size, base64);
           }
         }
       }
       else if (symbol is CIMLineSymbol)
       {
         Color color = CimColorToWinColor(cimColor);
-        symbolizer = SLDFactory.CreateStyleLine(color, null, fillOpacity);
+        return SLDFactory.CreateStyleLine(color, null, fillOpacity);
       }
       else if (symbol is CIMPolygonSymbol)
       {
         Color color = CimColorToWinColor(cimColor);
-        symbolizer = SLDFactory.CreateStylePolygon(color, fillOpacity);
+        return SLDFactory.CreateStylePolygon(color, fillOpacity);
       }
 
-      return symbolizer;
+      return null;
     }
 
     private Color CimColorToWinColor(CIMColor cimColor)
