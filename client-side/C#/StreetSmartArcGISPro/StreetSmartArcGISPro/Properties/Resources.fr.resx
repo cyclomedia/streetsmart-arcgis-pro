@@ -270,4 +270,7 @@ Type de produit:</value>
   <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
     <value>Il n'y a pas de lecteur de pdf installé sur votre système</value>
   </data>
+  <data name="OpenLocationNotSupportedInScene" xml:space="preserve">
+    <value>Open Location is not supported in Scene</value>
+  </data>
 </root>
