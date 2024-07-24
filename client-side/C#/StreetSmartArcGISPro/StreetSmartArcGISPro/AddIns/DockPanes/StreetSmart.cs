@@ -895,7 +895,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
           }
 
-          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
+          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
           overlay = await Api.AddOverlay(overlay);
           StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
 
