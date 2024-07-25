@@ -67,7 +67,7 @@
 		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.0.0.36056" />
 		<PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.6" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
-		<PackageReference Include="StreetSmart.WPF" Version="24.4.0-rc07" />
+		<PackageReference Include="StreetSmart.WPF" Version="24.4.0-rc09" />
 		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
 	</ItemGroup>
 	<ItemGroup>
