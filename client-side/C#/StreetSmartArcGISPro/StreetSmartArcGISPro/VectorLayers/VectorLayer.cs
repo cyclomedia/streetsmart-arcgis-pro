@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -568,10 +569,12 @@ namespace StreetSmartArcGISPro.VectorLayers
         Color color = CimColorToWinColor(cimColor);
         return SLDFactory.CreateStyleLine(color, null, fillOpacity);
       }
-      else if (symbol is CIMPolygonSymbol)
+      else if (symbol is CIMPolygonSymbol polygonSymbol)
       {
         Color color = CimColorToWinColor(cimColor);
-        return SLDFactory.CreateStylePolygon(color, fillOpacity);
+        var stroke = polygonSymbol.SymbolLayers.OfType<CIMSolidStroke>().FirstOrDefault();
+        var strokeColor = stroke == null ? (Color?)null : CimColorToWinColor(stroke.Color);
+        return SLDFactory.CreateStylePolygon(color, fillOpacity, strokeColor, stroke?.Width);
       }
 
       return null;
