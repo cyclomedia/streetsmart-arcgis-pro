@@ -444,7 +444,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       return await QueuedTask.Run(() =>
       {
-        string oldSld = Sld?.SLD;
+        string oldSld = Sld?.GetSerializedSld();
 
         if (featureCollection.Features.Count >= 1)
         {
@@ -497,7 +497,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             SLDFactory.AddRuleToStyle(Sld, rule);
           }
         }
-        return !(oldSld?.Equals(Sld?.SLD) ?? false);
+        return !(oldSld?.Equals(Sld?.GetSerializedSld()) ?? false);
       });
     }
 
