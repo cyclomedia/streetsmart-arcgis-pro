@@ -23,6 +23,7 @@ using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.Configuration.File;
@@ -568,8 +569,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             {
             }
           }
-          catch (GeodatabaseException)
+          catch (GeodatabaseException e)
           {
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (CycloMediaLayer.cs) (CreateFeatureClassAsync) error: {e}");
             createNewFeatureClass = true;
           }
         }

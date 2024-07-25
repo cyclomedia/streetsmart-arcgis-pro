@@ -103,7 +103,7 @@ namespace StreetSmartArcGISPro.Overlays
 
     #region Functions
 
-    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, Color color, MapView mapView)
+    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, SystCol color, MapView mapView)
     {
       Coordinate = coordinate;
       _orientation = orientation;
@@ -212,7 +212,7 @@ namespace StreetSmartArcGISPro.Overlays
             polygonPointList.Add(_mapPoint);
             Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
 
-            Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
+            SystCol colorPolygon = SystCol.FromArgb(Alpha, thisColor);
             CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
             CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
             polygonSymbol.SetColor(cimColorPolygon);

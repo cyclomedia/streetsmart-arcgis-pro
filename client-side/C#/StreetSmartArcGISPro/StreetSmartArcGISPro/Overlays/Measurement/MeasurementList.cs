@@ -324,7 +324,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
       var errors = FeatureCollection.Features[0].Properties.ElementAt(9);
-      var errorCount = ((System.Collections.Generic.List<int>)errors.Value).Count;
+      var errorCount = ((List<int>)errors.Value).Count;
       //GC: add new if statement that catches when error points are trying to be made
       /*if (errorCount == 0)
       {*/
@@ -456,10 +456,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.Geometry = geometry;
                     //await measurement.UpdateMap();
                     //GC: added task delay to allow the line feature to be completed 
-                    await Task.Delay(250).ContinueWith(_ =>
-                    {
-                      measurement.UpdateMap();
-                    });
+                    await Task.Delay(250);
+                    await measurement.UpdateMap();
                   }
                   else
                   {
@@ -509,7 +507,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     int polySrcCount = polySrc[0].Count;
                     int pylyDstCount = polyDst[0].Count;
-                    int j = 0;
 
                     for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
                     {

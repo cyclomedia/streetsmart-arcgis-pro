@@ -16,25 +16,22 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Mapping;
+using StreetSmartArcGISPro.Utilities;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-
-using ArcGIS.Desktop.Mapping;
-
-using StreetSmartArcGISPro.Utilities;
-
-using SystemIOFile = System.IO.File;
-using FileProject = StreetSmartArcGISPro.Configuration.File.Project;
 using ArcGisProject = ArcGIS.Desktop.Core.Project;
+using FileProject = StreetSmartArcGISPro.Configuration.File.Project;
+using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
   [XmlRoot("Projects")]
-  public class ProjectList: ObservableCollection<Project>
+  public class ProjectList : ObservableCollection<FileProject>
   {
     #region Events
 
@@ -96,7 +93,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       if (SystemIOFile.Exists(FileName))
       {
         var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _projectList = (ProjectList) XmlProjects.Deserialize(streamFile);
+        _projectList = (ProjectList)XmlProjects.Deserialize(streamFile);
         streamFile.Close();
       }
     }

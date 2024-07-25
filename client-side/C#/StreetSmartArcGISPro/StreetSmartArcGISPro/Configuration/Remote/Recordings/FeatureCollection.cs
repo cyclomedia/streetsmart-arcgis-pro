@@ -16,11 +16,11 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Utilities;
 using System;
 using System.IO;
 using System.Xml.Serialization;
-
-using ArcGIS.Core.Geometry;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
 {
@@ -39,7 +39,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
 
     static FeatureCollection()
     {
-      XmlFeatureCollection = new XmlSerializer(typeof (FeatureCollection));
+      XmlFeatureCollection = new XmlSerializer(typeof(FeatureCollection));
       Web = Web.Instance;
     }
 
@@ -76,13 +76,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           if (featuresStream != null)
           {
             featuresStream.Position = 0;
-            features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
+            features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
             featuresStream.Close();
           }
         }
-        catch
+        catch (Exception e)
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load) error: {e}");
         }
       }
 
@@ -102,13 +102,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           if (featuresStream != null)
           {
             featuresStream.Position = 0;
-            features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
+            features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
             featuresStream.Close();
           }
         }
-        catch
+        catch (Exception e)
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load) error: {e}");
         }
       }
 
