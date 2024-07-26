@@ -16,6 +16,8 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,7 +42,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
     static SpatialReferenceList()
     {
-      XmlSpatialReferenceList = new XmlSerializer(typeof (SpatialReferenceList));
+      XmlSpatialReferenceList = new XmlSerializer(typeof(SpatialReferenceList));
       Web = Web.Instance;
     }
 
@@ -71,8 +73,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
             Load();
           }
           // ReSharper disable once EmptyGeneralCatchClause
-          catch
+          catch (Exception e)
           {
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Instance) error: {e}");
           }
         }
 
@@ -111,13 +114,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
         if (spatialRef != null)
         {
           spatialRef.Position = 0;
-          _spatialReferenceList = (SpatialReferenceList) XmlSpatialReferenceList.Deserialize(spatialRef);
+          _spatialReferenceList = (SpatialReferenceList)XmlSpatialReferenceList.Deserialize(spatialRef);
           spatialRef.Close();
         }
       }
-      catch
+      catch (Exception e)
       {
-        // ignored
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Load) error: {e}");
       }
 
       return _spatialReferenceList;

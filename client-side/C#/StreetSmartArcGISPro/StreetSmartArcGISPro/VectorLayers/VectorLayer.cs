@@ -16,15 +16,6 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Events;
@@ -33,19 +24,26 @@ using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmart.Common.Interfaces.SLD;
-
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using ColorConverter = StreetSmartArcGISPro.Utilities.ColorConverter;
 using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
@@ -160,9 +158,9 @@ namespace StreetSmartArcGISPro.VectorLayers
               _rowCreated = RowCreatedEvent.Subscribe(OnRowCreated, table);
             }
           }
-          catch
+          catch (Exception e)
           {
-            // ignored
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (InitializeEventsAsync) error: {e}");
           }
         });
       }
@@ -232,9 +230,9 @@ namespace StreetSmartArcGISPro.VectorLayers
                     copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
                   }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                  // ignored
+                  EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) error: {e}");
                 }
               }
 
@@ -434,7 +432,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       return await QueuedTask.Run(() =>
       {
-        string oldSld = Sld?.SLD;
+        string oldSld = Sld?.GetSerializedSld();
 
         if (featureCollection.Features.Count >= 1)
         {
@@ -504,7 +502,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
         }
 
-        return !(oldSld?.Equals(Sld?.SLD) ?? false);
+        return !(oldSld?.Equals(Sld?.GetSerializedSld()) ?? false);
       });
     }
 
@@ -760,8 +758,10 @@ namespace StreetSmartArcGISPro.VectorLayers
               measurementY = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Y"];
               measurementZ = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["Z"];
             }
-            catch (Exception)
-            { }
+            catch (Exception e)
+            {
+              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+            }
           }
         }
 
@@ -882,8 +882,9 @@ namespace StreetSmartArcGISPro.VectorLayers
               }
             }
           }
-          catch (NullReferenceException)
+          catch (NullReferenceException e)
           {
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
           }
         });
       }
@@ -916,8 +917,9 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
           }
-          catch (NullReferenceException)
+          catch (NullReferenceException e)
           {
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) error: {e}");
           }
         }
       }
@@ -965,7 +967,10 @@ namespace StreetSmartArcGISPro.VectorLayers
               _updateMeasurements = true;
             }
           }
-          catch (Exception) { }
+          catch (Exception e)
+          {
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (OnMapSelectionChanged) error: {e}");
+          }
         }
       }
 

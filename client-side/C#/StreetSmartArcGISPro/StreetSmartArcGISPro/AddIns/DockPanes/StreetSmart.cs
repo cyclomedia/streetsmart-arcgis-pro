@@ -403,8 +403,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               await Api.CloseViewer(await viewers[0].GetId());
             }
-            catch (StreetSmartCloseViewerException)
+            catch (StreetSmartCloseViewerException e)
             {
+              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
             }
           }
         }
@@ -493,8 +494,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         _currentDispatcher.Invoke(Hide, DispatcherPriority.ContextIdle);
       }
-      catch (TaskCanceledException)
+      catch (TaskCanceledException e)
       {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (DoHide): exception: {e}");
       }
     }
 
@@ -661,8 +663,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                                     await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
           }
         }
-        catch (StreetSmartImageNotFoundException)
+        catch (StreetSmartImageNotFoundException e)
         {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}");
           ResourceManager res = ThisResources.ResourceManager;
           string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
           MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
@@ -866,12 +869,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               }
               catch (Exception e)
               {
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
+
                 return;
               }
             }
           }
 
-          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.SLD, visible);
+          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
           overlay = await Api.AddOverlay(overlay);
           StoredLayer layer = _storedLayerList.GetLayer(layerName);
 
