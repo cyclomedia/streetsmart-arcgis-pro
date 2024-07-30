@@ -306,9 +306,12 @@
     <PackageReference Include="Esri.ArcGISPro.Extensions">
       <Version>2.9.0.32739</Version>
     </PackageReference>
-    <PackageReference Include="StreetSmart.WPF">
-      <Version>24.5.0</Version>
-    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\streetsmart-dotnet\StreetSmartAPI\StreetSmart.API\WPF\StreetSmart.WPF.csproj">
+      <Project>{3fc827be-7bb8-4e5b-9b42-8922b1365f39}</Project>
+      <Name>StreetSmart.WPF</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
