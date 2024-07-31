@@ -16,35 +16,31 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
-
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
-using StreetSmartArcGISPro.VectorLayers;
-
-using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
-using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using StreetSmartArcGISPro.Utilities;
-using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.VectorLayers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
-
   public enum SrsUnit
   {
     Unknown,
@@ -53,7 +49,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     Error
   }
 
-  class MeasurementList : Dictionary<string, Measurement>
+  public class MeasurementList : Dictionary<string, Measurement>
   {
     #region Members
 
@@ -327,7 +323,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
       return measurement;
     }
 
-#endregion
+    #endregion
 
     #region streetSmart events
 
@@ -395,7 +391,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
               {
                 await QueuedTask.Run(async () =>
                 {
-                  List<MapPoint> points = new List<MapPoint>();
+                  List<MapPoint> points = [];
 #if ARCGISPRO29
                   Polygon surface = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
 #elif ARCGISPRO3X
@@ -417,7 +413,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
               {
                 await QueuedTask.Run(async () =>
                 {
-                  List<MapPoint> points = new List<MapPoint>();
+                  List<MapPoint> points = [];
 #if ARCGISPRO29
                   Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
 #elif ARCGISPRO3X
@@ -634,7 +630,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
                     {
                       await QueuedTask.Run(async () =>
                       {
-                        List<MapPoint> points = new List<MapPoint>();
+                        List<MapPoint> points = [];
 #if ARCGISPRO29
                         Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
 #elif ARCGISPRO3X
@@ -710,7 +706,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
                     {
                       await QueuedTask.Run(async () =>
                       {
-                        List<MapPoint> points = new List<MapPoint>();
+                        List<MapPoint> points = [];
 #if ARCGISPRO29
                         Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
 #elif ARCGISPRO3X
@@ -856,6 +852,6 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
       }
     }
 
-#endregion
+    #endregion
   }
 }

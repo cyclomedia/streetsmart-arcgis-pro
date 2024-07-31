@@ -142,7 +142,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _inRestart = false;
       _inClose = false;
       _inRestartDock = false;
-      _vectorLayerInChange = new List<VectorLayer>();
+      _vectorLayerInChange = [];
 
       _languageSettings = LanguageSettings.Instance;
       _languageSettings.PropertyChanged += OnLanguageSettingsChanged;
@@ -156,10 +156,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _configuration = FileConfiguration.Instance;
       _configuration.PropertyChanged += OnConfigurationPropertyChanged;
 
-      _openNearest = new List<string>();
+      _openNearest = [];
       _crossCheck = null;
       _lastSpatialReference = null;
-      _configurationPropertyChanged = new List<string>();
+      _configurationPropertyChanged = [];
 
       GetVectorLayerListAsync();
 
@@ -171,7 +171,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _mapView = MapView.Active;
       _oldMapView = MapView.Active;
 
-      _toRestartImages = new List<string>();
+      _toRestartImages = [];
 
       if (_mapView != null)
       {
@@ -611,7 +611,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
 
       _epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
-      IList<ViewerType> viewerTypes = new List<ViewerType> { ViewerType.Panorama };
+      IList<ViewerType> viewerTypes = [ViewerType.Panorama];
       IPanoramaViewerOptions panoramaOptions = PanoramaViewerOptionsFactory.Create(true, false, true, true, _toRestartImages.Count == 0 && Replace, true, 0);
       panoramaOptions.MeasureTypeButtonToggle = false;
       IViewerOptions viewerOptions = ViewerOptionsFactory.Create(viewerTypes, _epsgCode, panoramaOptions);
@@ -681,7 +681,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
         catch (StreetSmartImageNotFoundException e)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}"); ResourceManager res = ThisResources.ResourceManager;
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}");
+          ResourceManager res = ThisResources.ResourceManager;
           string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
           MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
             canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -911,7 +912,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           var numIds = await QueuedTask.Run<List<long>>(() =>
           {
             var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
-            return (List<long>)listOfMapMemberDictionaries[searchThisLayer as MapMember];
+            return listOfMapMemberDictionaries[searchThisLayer];
           });
 
           //should reset the image if the first feature was created so it isn't invisible
@@ -1123,7 +1124,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
-      
+
       ILayerInfo layerInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
       _storedLayerList.Update(vectorLayer?.NameAndUri ?? layerInfo.LayerId, layerInfo.Visible);
@@ -1137,7 +1138,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnFeatureClick)");
-      
+
       string id = await (sender as IPanoramaViewer).GetId();
       IFeatureInfo featureInfo = args.Value;
       VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId, MapView);
@@ -1147,7 +1148,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewerRemoved)");
-      
+
       IViewer cyclViewer = args.Value;
 
       if (cyclViewer is IPanoramaViewer panoramaViewer)
@@ -1157,7 +1158,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       else
       {
         IList<IViewer> viewers = await Api.GetViewers();
-        IList<IViewer> removeList = new List<IViewer>();
+        IList<IViewer> removeList = [];
 
         foreach (var keyValueViewer in _viewerList)
         {
@@ -1200,7 +1201,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RemovePanoramaViewer)");
-      
+
       Viewer viewer = _viewerList.GetViewer(panoramaViewer);
       panoramaViewer.ImageChange -= OnImageChange;
 

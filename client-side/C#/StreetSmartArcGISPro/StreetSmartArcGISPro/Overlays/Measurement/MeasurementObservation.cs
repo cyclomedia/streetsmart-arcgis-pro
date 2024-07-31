@@ -16,6 +16,12 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.CIM;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmart.Common.Interfaces.GeoJson;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,20 +29,11 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Data;
-
-using ArcGIS.Core.CIM;
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-
-using StreetSmart.Common.Interfaces.GeoJson;
-
 using Point = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
-  public class MeasurementObservation: IDisposable, INotifyPropertyChanged
+  public class MeasurementObservation : IDisposable, INotifyPropertyChanged
   {
     #region Constants
 
@@ -186,9 +183,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             mapPointObsLine = MapPointBuilderEx.CreateMapPoint(Point.X + XDir * DistLine, Point.Y + YDir * DistLine);
           }
 
-          IList<MapPoint> linePointList = new List<MapPoint>();
-          linePointList.Add(mapPointObsLine);
-          linePointList.Add(Point);
+          IList<MapPoint> linePointList = [mapPointObsLine, Point];
 #if ARCGISPRO29
           Polyline polyline = PolylineBuilder.CreatePolyline(linePointList);
 #else

@@ -16,31 +16,27 @@
  * License along with this library.
  */
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-
-using WinPoint = System.Windows.Point;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
-
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
-
+using System;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Resources;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
-using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using WinPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
@@ -88,8 +84,8 @@ namespace StreetSmartArcGISPro.AddIns.Tools
         string openLocationNotSupportedInSceneTxt = res.GetString("OpenLocationNotSupportedInScene", _languageSettings.CultureInfo);
         MessageBox.Show(
           openLocationNotSupportedInSceneTxt,
-          openLocationNotSupportedInSceneTxt, 
-          MessageBoxButton.OK, 
+          openLocationNotSupportedInSceneTxt,
+          MessageBoxButton.OK,
           MessageBoxImage.Error);
 
         return false;
@@ -129,13 +125,11 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
               if (cycloCoordSystem != null)
               {
-                SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ??
-                                                         await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
+                SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ?? await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
 
                 if (pointSpatialReference.Wkid != cycloSpatialReference.Wkid)
                 {
-                  ProjectionTransformation projection = ProjectionTransformation.Create(pointSpatialReference,
-                    cycloSpatialReference);
+                  ProjectionTransformation projection = ProjectionTransformation.Create(pointSpatialReference, cycloSpatialReference);
                   point = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
                 }
 
@@ -156,7 +150,6 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
             else
             {
-              //3.0 code change
 #if ARCGISPRO29
               foreach (var feature in features)
 #elif ARCGISPRO3X
@@ -164,7 +157,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 #endif
 
               {
-                Layer layer = (Layer)feature.Key;
+                Layer layer = feature.Key;
                 CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
 
                 if (cycloMediaLayer != null)
@@ -173,7 +166,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
                   {
                     Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
 
-                    if (recording.IsAuthorized == null || (bool) recording.IsAuthorized)
+                    if (recording.IsAuthorized == null || (bool)recording.IsAuthorized)
                     {
                       location = recording.ImageId;
                     }
@@ -204,6 +197,6 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       return true;
     }
 
-#endregion
+    #endregion
   }
 }

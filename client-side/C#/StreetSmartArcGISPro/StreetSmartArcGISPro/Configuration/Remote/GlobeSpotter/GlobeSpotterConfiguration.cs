@@ -16,6 +16,7 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Utilities;
 using System;
 using System.IO;
 using System.Net;
@@ -40,7 +41,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
 
     static GlobeSpotterConfiguration()
     {
-      XmlstreetSmartconfiguration = new XmlSerializer(typeof (GlobeSpotterConfiguration));
+      XmlstreetSmartconfiguration = new XmlSerializer(typeof(GlobeSpotterConfiguration));
       Web = Web.Instance;
     }
 
@@ -148,14 +149,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
         if (streetSmartConf != null)
         {
           streetSmartConf.Position = 0;
-          _globeSpotterConfiguration =
-            (GlobeSpotterConfiguration) XmlstreetSmartconfiguration.Deserialize(streetSmartConf);
+          _globeSpotterConfiguration = (GlobeSpotterConfiguration)XmlstreetSmartconfiguration.Deserialize(streetSmartConf);
           streetSmartConf.Close();
         }
       }
-      catch
+      catch (Exception e)
       {
-        // ignored
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (GlobeSpotter.cs) (Instance) error: {e}");
       }
 
       return _globeSpotterConfiguration;

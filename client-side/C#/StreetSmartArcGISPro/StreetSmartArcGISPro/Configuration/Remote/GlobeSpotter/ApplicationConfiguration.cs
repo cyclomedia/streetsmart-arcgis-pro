@@ -33,7 +33,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
 
     public ApplicationConfiguration()
     {
-      _functionalities = new List<Functionality>();
+      _functionalities = [];
     }
 
     #endregion

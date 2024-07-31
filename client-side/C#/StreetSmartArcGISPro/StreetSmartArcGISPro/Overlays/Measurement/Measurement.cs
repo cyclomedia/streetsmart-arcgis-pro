@@ -16,33 +16,26 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Dialogs;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
-
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.VectorLayers;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
-
 using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
-using StreetSmartSpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using ArcGIS.Desktop.Core.Geoprocessing;
-using ArcGIS.Desktop.Framework.Dialogs;
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+using StreetSmartSpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -55,7 +48,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     private ArcGISGeometryType _geometryType;
     private IGeometry _geometry;
-    private int pointCount = 0;
 
     #endregion
 
@@ -154,11 +146,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       IsDisposed = true;
 
-//      foreach (var element in this)
-//      {
-//        MeasurementPoint measurementPoint = element.Value;
-//        measurementPoint.Dispose();
-//      }
+      //      foreach (var element in this)
+      //      {
+      //        MeasurementPoint measurementPoint = element.Value;
+      //        measurementPoint.Dispose();
+      //      }
 
       while (Count >= 1)
       {
@@ -240,7 +232,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (ContainsKey(pointId))
       {
         MeasurementPoint measurementPoint = this[pointId];
-        List<string> imageIds = new List<string>();
+        List<string> imageIds = [];
         IMeasurementProperties properties = apiMeasurementPoint.Properties as IMeasurementProperties;
         IMeasureDetails details = properties?.MeasureDetails?.Count > pointId ? properties.MeasureDetails[pointId] : null;
 
@@ -252,7 +244,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
         }
 
-        List<string> toRemove = new List<string>();
+        List<string> toRemove = [];
 
         foreach (string observation in measurementPoint.Keys)
         {
@@ -336,7 +328,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         ArcGISGeometryType geometryType = geometry.GeometryType;
 
         await QueuedTask.Run(() =>
-        { 
+        {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
           /*if (srs?.ZUnit != spatialReference?.ZUnit)
@@ -346,7 +338,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
-          if (spatialReference?.ZUnit == null && (((Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline) 
+          if (spatialReference?.ZUnit == null && (((Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline)
           || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
           {
             zScale = 1 / modifierFactor;
@@ -354,8 +346,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           //modScale = 1 / modifierFactor;
         });
 
-        result = new List<MapPoint>();
-        
+        result = [];
+
         //if z-unit is null or feet, then the z-offset should only be 3.28
         switch (geometryType)
         {
@@ -422,21 +414,21 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         if (feature != null)
         {
-          List<ICoordinate> coordinates = new List<ICoordinate>();
-          IMeasurementProperties properties = (IMeasurementProperties) feature.Properties;
+          List<ICoordinate> coordinates = [];
+          IMeasurementProperties properties = (IMeasurementProperties)feature.Properties;
           IList<IMeasureDetails> measureDetails = properties.MeasureDetails;
           bool changes = false;
 
           switch (feature.Geometry.Type)
           {
             case StreetSmartGeometryType.Point:
-              coordinates.Add((IPoint) feature.Geometry);
+              coordinates.Add((IPoint)feature.Geometry);
               break;
             case StreetSmartGeometryType.LineString:
-              coordinates.AddRange((ILineString) feature.Geometry);
+              coordinates.AddRange((ILineString)feature.Geometry);
               break;
             case StreetSmartGeometryType.Polygon:
-              coordinates.AddRange(((IPolygon) feature.Geometry)[0]);
+              coordinates.AddRange(((IPolygon)feature.Geometry)[0]);
               break;
           }
 
@@ -554,8 +546,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   feature.Geometry = GeoJsonFactory.CreateLineGeometry(coordinates);
                   break;
                 case StreetSmartGeometryType.Polygon:
-                  IList<IList<ICoordinate>> coordinatesPolygon = new List<IList<ICoordinate>>();
-                  coordinatesPolygon.Add(coordinates);
+                  IList<IList<ICoordinate>> coordinatesPolygon = [coordinates];
                   feature.Geometry = GeoJsonFactory.CreatePolygonGeometry(coordinatesPolygon);
                   break;
               }
@@ -607,7 +598,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       MapView thisView = MapView.Active;
       Geometry geometry = await thisView.GetCurrentSketchAsync();
-      List<MapPoint> points = new List<MapPoint>();
+      List<MapPoint> points = [];
       bool toUpdate = (geometry?.PointCount ?? 0) != Count;
       IList<MapPoint> pointsGeometry = await ToPointCollectionAsync(geometry);
 
@@ -662,7 +653,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           if (toUpdate)
           {
             if (IsGeometryType(ArcGISGeometryType.Polygon))
-            { 
+            {
               //GC: added if statements to let it work without a z reference
               if (spatialReference.ZUnit == null || srs == null)
               {
@@ -728,6 +719,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       return VectorLayer != null ? vectorLayerList.GetMapViewFromLayer(VectorLayer.Layer) : null;
     }
 
-#endregion
+    #endregion
   }
 }

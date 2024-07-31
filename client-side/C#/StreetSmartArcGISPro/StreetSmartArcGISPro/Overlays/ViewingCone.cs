@@ -16,32 +16,27 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.CIM;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmart.Common.Interfaces.Data;
+using StreetSmartArcGISPro.Configuration.File;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
-using ArcGIS.Core.CIM;
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-
-using StreetSmart.Common.Interfaces.Data;
-
-using StreetSmartArcGISPro.Configuration.File;
-
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-
-using WinPoint = System.Windows.Point;
 using SystCol = System.Drawing.Color;
+using WinPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays
 {
-  public class ViewingCone: INotifyPropertyChanged
+  public class ViewingCone : INotifyPropertyChanged
   {
     #region Constants
 
@@ -133,7 +128,7 @@ namespace StreetSmartArcGISPro.Overlays
           }
           else
           {
-            _mapPoint = (MapPoint) point.Clone();
+            _mapPoint = (MapPoint)point.Clone();
           }
         });
       }
@@ -181,7 +176,7 @@ namespace StreetSmartArcGISPro.Overlays
 
         if (streetSmart.InsideScale(_mapView) && !_mapPoint.IsEmpty && Color != null)
         {
-          var thisColor = (SystCol) Color;
+          var thisColor = (SystCol)Color;
           Map map = _mapView.Map;
           SpatialReference mapSpat = map?.SpatialReference;
           SpatialReference mapPointSpat = _mapPoint?.SpatialReference;
@@ -205,11 +200,7 @@ namespace StreetSmartArcGISPro.Overlays
             MapPoint point1 = _mapView.ScreenToMap(screenPoint1);
             MapPoint point2 = _mapView.ScreenToMap(screenPoint2);
 
-            IList<MapPoint> polygonPointList = new List<MapPoint>();
-            polygonPointList.Add(_mapPoint);
-            polygonPointList.Add(point1);
-            polygonPointList.Add(point2);
-            polygonPointList.Add(_mapPoint);
+            IList<MapPoint> polygonPointList = [_mapPoint, point1, point2, _mapPoint];
 #if ARCGISPRO29
             Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
 #elif ARCGISPRO3X
@@ -234,7 +225,7 @@ namespace StreetSmartArcGISPro.Overlays
       });
     }
 
-#endregion
+    #endregion
 
     #region Event handlers
 

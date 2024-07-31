@@ -16,19 +16,14 @@
  * License along with this library.
  */
 
-using System;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
-
-using StreetSmartArcGISPro.Configuration.File;
-
+using System;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
-using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 {

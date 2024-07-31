@@ -39,7 +39,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
         {
           if (_images == null)
           {
-            _images = new List<Image>();
+            _images = [];
           }
 
           _images.AddRange(value);

@@ -37,7 +37,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
     public string StringValue
     {
       get => Value == null ? null : XmlConvert.ToString(Value.Value);
-      set => Value = value == null ? null : (double?) XmlConvert.ToDouble(value);
+      set => Value = value == null ? null : XmlConvert.ToDouble(value);
     }
 
     #endregion

@@ -51,7 +51,7 @@ namespace StreetSmartArcGISPro.Utilities
           {
             if (_existsInAreaSpatialReferences == null)
             {
-              _existsInAreaSpatialReferences = new Dictionary<MapView, List<SpatialReference>>();
+              _existsInAreaSpatialReferences = [];
             }
 
             _existsInAreaSpatialReferences.Add(MapView.Active, value);
@@ -68,7 +68,7 @@ namespace StreetSmartArcGISPro.Utilities
 
     public async Task CheckAvailableCoordinateSystems()
     {
-      ExistInAreaSpatialReferences = new List<SpatialReference>();
+      ExistInAreaSpatialReferences = [];
       var existsInAreaSpatialReferences = new List<SpatialReference>();
       SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
 
