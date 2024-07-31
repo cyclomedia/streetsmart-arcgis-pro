@@ -103,7 +103,7 @@ namespace StreetSmartArcGISPro.Overlays
 
     #region Functions
 
-    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, SystCol color, MapView mapView)
+    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, Color color, MapView mapView)
     {
       Coordinate = coordinate;
       _orientation = orientation;
@@ -123,7 +123,7 @@ namespace StreetSmartArcGISPro.Overlays
         {
           SpatialReference mapSpatialReference = mapView?.Map?.SpatialReference;
           SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
-          MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
+          MapPoint point = MapPointBuilderEx.CreateMapPoint(x, y, spatialReference);
 
           if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)
           {
@@ -210,9 +210,12 @@ namespace StreetSmartArcGISPro.Overlays
             polygonPointList.Add(point1);
             polygonPointList.Add(point2);
             polygonPointList.Add(_mapPoint);
+#if ARCGISPRO29
             Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
-
-            SystCol colorPolygon = SystCol.FromArgb(Alpha, thisColor);
+#elif ARCGISPRO3X
+            Polygon polygon = PolygonBuilderEx.CreatePolygon(polygonPointList);
+#endif
+            Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
             CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
             CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
             polygonSymbol.SetColor(cimColorPolygon);
@@ -231,7 +234,7 @@ namespace StreetSmartArcGISPro.Overlays
       });
     }
 
-    #endregion
+#endregion
 
     #region Event handlers
 

@@ -30,6 +30,7 @@ using StreetSmartArcGISPro.Utilities;
 
 using Microsoft.Win32;
 using StreetSmartArcGISPro.Configuration.File;
+using EventLog = ArcGIS.Desktop.Framework.Utilities.EventLog;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
@@ -99,6 +100,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
                 FileName = fileName,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
+                UseShellExecute = true //new code added for .net 6 that allows pdf to open
               };
 
               _process = Process.Start(processInfo);
@@ -118,12 +120,14 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
         else
         {
           string errorPdfTxt = res.GetString("HelpNoPdfViewerInstalledOnYourSystem", language.CultureInfo);
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Help.cs) (OnClick) {errorPdfTxt}");
           MessageBox.Show(errorPdfTxt);
         }
       }
       catch (Exception ex)
       {
         string errorTxt = res.GetString("HelpErrorOpenHelpDocument", language.CultureInfo);
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Help.cs) (OnClick) {errorTxt}");
         MessageBox.Show(ex.Message, errorTxt);
       }
     }

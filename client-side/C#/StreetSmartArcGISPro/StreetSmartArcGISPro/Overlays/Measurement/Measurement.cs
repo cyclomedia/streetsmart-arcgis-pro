@@ -41,6 +41,8 @@ using ArcGISSpatialReference = ArcGIS.Core.Geometry.SpatialReference;
 using StreetSmartSpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using ArcGIS.Desktop.Core.Geoprocessing;
+using ArcGIS.Desktop.Framework.Dialogs;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
@@ -53,6 +55,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     private ArcGISGeometryType _geometryType;
     private IGeometry _geometry;
+    private int pointCount = 0;
 
     #endregion
 
@@ -328,19 +331,32 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       {
         double zScale = 1.0;
         double modScale = 1.0;
+        var srs = geometry.SpatialReference;
+        var geoPointCount = geometry.PointCount;
+        ArcGISGeometryType geometryType = geometry.GeometryType;
 
         await QueuedTask.Run(() =>
-        {
+        { 
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
+          /*if (srs?.ZUnit != spatialReference?.ZUnit)
+          {
+            conversionFactor = srs.ZUnit.ConversionFactor;
+          }*/
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
-          modScale = 1 / modifierFactor;
+          //GC: adding if statement for features missing z reference since it gets put underground
+          if (spatialReference?.ZUnit == null && (((this.Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline) 
+          || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
+          {
+            zScale = 1 / modifierFactor;
+          }
+          //modScale = 1 / modifierFactor;
         });
 
         result = new List<MapPoint>();
-        ArcGISGeometryType geometryType = geometry.GeometryType;
-
+        
+        //if z-unit is null or feet, then the z-offset should only be 3.28
         switch (geometryType)
         {
           case ArcGISGeometryType.Point:
@@ -348,7 +364,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             {
               if (geometry is MapPoint mapPoint)
               {
-                result.Add(await AddZOffsetAsync(mapPoint, zScale * modScale));
+                result.Add(await AddZOffsetAsync(mapPoint, zScale));
               }
             }
 
@@ -365,18 +381,18 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 while (enumPoints.MoveNext())
                 {
                   MapPoint mapPointPart = enumPoints.Current;
-                  if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
+                  /*if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
                   {
                     result.Add(await AddZOffsetAsync(mapPointPart, zScale));
                   }
                   else
                   {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale * modScale));
-                  }
+                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
+                  }*/
+                  result.Add(await AddZOffsetAsync(mapPointPart, zScale));
                 }
               }
             }
-
             break;
         }
       }
@@ -387,10 +403,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private async Task<MapPoint> AddZOffsetAsync(MapPoint mapPoint, double zScale)
     {
       return await QueuedTask.Run(async () => mapPoint.HasZ
-        ? MapPointBuilder.CreateMapPoint(mapPoint.X, mapPoint.Y,
+        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y,
           (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0),
           mapPoint.SpatialReference)
-        : MapPointBuilder.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
+        : MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
     }
 
     public async Task UpdateMeasurementPointsAsync(MapView mapView, Geometry inGeometry)
@@ -600,6 +616,17 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         await QueuedTask.Run(async () =>
         {
           ArcGISSpatialReference spatialReference = VectorLayer.Layer.GetSpatialReference();
+          ArcGISSpatialReference mapSpatialReference = thisView.Map.SpatialReference;
+          ArcGISSpatialReference srs = geometry?.SpatialReference; //new spatial reference with the correct units
+
+          //GC: Added an alert message when SRS do not match up and creating features
+          if (spatialReference.Wkid != mapSpatialReference.Wkid)
+          {
+            string message = "The map SRS does not match with the cyclorama SRS so the point will not be created. Please match up the SRS and try again.";
+            string title = "Alert";
+            MessageBox.Show(message, title);
+            return;
+          }
 
           for (int i = 0; i < Count; i++)
           {
@@ -612,26 +639,80 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               MapPoint point = mp.Point;
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
-              points.Add(MapPointBuilder.CreateMapPoint(point.X, point.Y, z));
+              //trying to change the Z value before it gets changed but it doesn't work
+              if (i == 0 && (point?.Z > mp.NextPoint?.Point.Z + 10 || point?.Z < mp.NextPoint?.Point.Z - 10 || mp.Point.Z == 0))
+              {
+                z = z * conversionFactor;
+              }
+              else if (i > 0 && (point?.Z > mp.PreviousPoint?.Point.Z + 10 || (point?.Z < 0 && point?.Z < mp.PreviousPoint?.Point.Z - 10) || mp.Point.Z == 0))
+              {
+                z = z * conversionFactor;
+              }
+              /*if (mp.Point.Z > mapPoint.Z + 10 || mp.Point.Z < mapPoint.Z - 10 || mp.Point.Z == 0)
+              {
+                z = z * conversionFactor;
+              }*/
+              /*string message = z.ToString() + " feet, z-unit: " + spatialReference?.ZUnit + ", point-z: " + point.Z.ToString(); ;
+              string title = "Conversion";
+              MessageBox.Show(message, title);*/
+              points.Add(MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z));
             }
           }
 
           if (toUpdate)
           {
             if (IsGeometryType(ArcGISGeometryType.Polygon))
-            {
-              geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+            { 
+              //GC: added if statements to let it work without a z reference
+              if (spatialReference.ZUnit == null || srs == null)
+              {
+#if ARCGISPRO29
+                geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+#elif ARCGISPRO3X
+                geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+#endif
+              }
+              else
+              {
+#if ARCGISPRO29
+                geometry = PolygonBuilder.CreatePolygon(points, srs);
+#elif ARCGISPRO3X
+                geometry = PolygonBuilderEx.CreatePolygon(points, srs);
+#endif
+              }
             }
             else if (IsGeometryType(ArcGISGeometryType.Polyline))
             {
-              geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+              if (spatialReference.ZUnit == null || srs == null)
+              {
+#if ARCGISPRO29
+                geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+#elif ARCGISPRO3X
+                geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+#endif
+              }
+              else
+              {
+#if ARCGISPRO29
+                geometry = PolylineBuilder.CreatePolyline(points, srs);
+#elif ARCGISPRO3X
+                geometry = PolylineBuilderEx.CreatePolyline(points, srs);
+#endif
+              }
             }
             else if (geometry is MapPoint mapPoint)
             {
               MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
-              geometry = point == null ? null : MapPointBuilder.CreateMapPoint(point.X, point.Y, z, spatialReference);
+              if (spatialReference.ZUnit == null || srs == null)
+              {
+                geometry = point == null ? null : MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z, spatialReference);
+              }
+              else
+              {
+                geometry = point == null ? null : MapPointBuilderEx.CreateMapPoint(point.X, point.Y, z, srs);
+              }
             }
 
             await thisView.SetCurrentSketchAsync(geometry); //this is where the point on the map dissappears
@@ -647,6 +728,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       return VectorLayer != null ? vectorLayerList.GetMapViewFromLayer(VectorLayer.Layer) : null;
     }
 
-    #endregion
+#endregion
   }
 }

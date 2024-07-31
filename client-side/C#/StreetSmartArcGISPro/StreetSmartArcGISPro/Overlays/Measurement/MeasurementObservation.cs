@@ -183,13 +183,17 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
           else
           {
-            mapPointObsLine = MapPointBuilder.CreateMapPoint(Point.X + XDir * DistLine, Point.Y + YDir * DistLine);
+            mapPointObsLine = MapPointBuilderEx.CreateMapPoint(Point.X + XDir * DistLine, Point.Y + YDir * DistLine);
           }
 
           IList<MapPoint> linePointList = new List<MapPoint>();
           linePointList.Add(mapPointObsLine);
           linePointList.Add(Point);
+#if ARCGISPRO29
           Polyline polyline = PolylineBuilder.CreatePolyline(linePointList);
+#else
+          Polyline polyline = PolylineBuilderEx.CreatePolyline(linePointList);
+#endif
           Color outerColorLine = Color.DarkGray;
           IObservationLines observationLines = _measurementPoint.Measurement.ObservationLines;
 

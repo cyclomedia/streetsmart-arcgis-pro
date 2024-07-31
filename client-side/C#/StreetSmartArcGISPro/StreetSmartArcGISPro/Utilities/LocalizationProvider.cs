@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Resources;
 using System.Windows;
 using System.Windows.Controls;
-using ArcGIS.Desktop.Framework.Utilities;
+
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Properties;
 
@@ -94,9 +94,9 @@ namespace StreetSmartArcGISPro.Utilities
         {
           resourceValue = res.GetString(name, _languageSettings.CultureInfo);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
+          // ignored
         }
 
         if (resourceValue != null)
@@ -117,9 +117,9 @@ namespace StreetSmartArcGISPro.Utilities
         {
           resourceValue = res.GetString(text, _languageSettings.CultureInfo);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
+          // ignored
         }
 
         if (resourceValue != null)
@@ -146,9 +146,9 @@ namespace StreetSmartArcGISPro.Utilities
         {
           resourceValue = res.GetString(name, _languageSettings.CultureInfo);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnTooltipChanged) error: {ex}");
+          // ignored
         }
 
         if (resourceValue != null)

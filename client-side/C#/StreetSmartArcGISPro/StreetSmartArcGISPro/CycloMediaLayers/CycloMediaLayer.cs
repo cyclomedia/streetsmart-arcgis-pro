@@ -16,19 +16,6 @@
  * License along with this library.
  */
 
-using ArcGIS.Core.CIM;
-using ArcGIS.Core.Data;
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Core.Geoprocessing;
-using ArcGIS.Desktop.Editing;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.Recordings;
-using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -39,14 +26,37 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using ArcGISProject = ArcGIS.Desktop.Core.Project;
+
+using ArcGIS.Core.CIM;
+using ArcGIS.Core.Data;
+using ArcGIS.Core.Geometry;
+
+using ArcGIS.Desktop.Core.Geoprocessing;
+using ArcGIS.Desktop.Editing;
+using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.Recordings;
+using StreetSmartArcGISPro.Utilities;
+
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
+using ArcGISProject = ArcGIS.Desktop.Core.Project;
+
+#if ARCGISPRO3X
+using ArcGIS.Core.Data.Exceptions;
+#endif
+
+
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
-  public abstract class CycloMediaLayer : INotifyPropertyChanged
+  public abstract class CycloMediaLayer: INotifyPropertyChanged
   {
     #region Events
 
@@ -186,7 +196,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
         else
         {
-          result = (Envelope)envelope.Clone();
+          result = (Envelope) envelope.Clone();
         }
 
         return result;
@@ -226,8 +236,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       }
 
       int wkid = spatialReference?.Wkid ?? 0;
-      string mapName = map?.Name;
-      string fixedMapName = FixMapNameByReplacingSpecialCharacters(mapName);
+      string mapName = map?.Name; 
+      string fixedMapName = fixMapNameByReplacingSpecialCharacters(mapName);
       string fcNameWkid = string.Concat(FcName, fixedMapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
@@ -266,7 +276,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       var project = ArcGISProject.Current;
 
-      //making sure project editing is turned on so recordings appear on map
       if (!project.IsEditingEnabled)
       {
         await project.SetIsEditingEnabledAsync(true);
@@ -312,7 +321,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         string featureClassUrl = $@"{project.DefaultGeodatabasePath}\{fcName}";
         Uri uri = new Uri(featureClassUrl);
-        FeatureLayer result = LayerFactory.Instance.CreateFeatureLayer(uri, layerContainer);
+        //new 3.0 code
+        var layerParams = new FeatureLayerCreationParams(uri);
+        FeatureLayer result = LayerFactory.Instance.CreateLayer<FeatureLayer>(layerParams, layerContainer);
         result.SetName(Name);
         result.SetMinScale(MinimumScale);
         result.SetVisibility(true);
@@ -481,7 +492,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             double xMax = x + searchBox;
             double yMin = y - searchBox;
             double yMax = y + searchBox;
-            Envelope envelope = EnvelopeBuilder.CreateEnvelope(xMin, xMax, yMin, yMax);
+            Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, xMax, yMin, yMax);
 
             SpatialQueryFilter spatialFilter = new SpatialQueryFilter
             {
@@ -512,7 +523,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                     // ReSharper disable once AccessToModifiedClosure
                     result = result ?? 0.0;
-                    result = result + height - ((double)groundLevel);
+                    result = result + height - ((double) groundLevel);
                     count++;
                   }
                 }
@@ -522,7 +533,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
       });
 
-      result = result != null ? result / Math.Max(count, 1) : null;
+      result = result != null ? result/Math.Max(count, 1) : null;
       return result;
     }
 
@@ -540,9 +551,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        string[] fieldNames = { Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap };
+        string[] fieldNames = {Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap};
         var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
-        var uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
+        var uniqueValueRenderer = (CIMUniqueValueRenderer) Layer.CreateRenderer(uniqueValueRendererDefinition);
         uniqueValueRenderer.Fields = fieldNames;
         uniqueValueRenderer.DefaultLabel = string.Empty;
         uniqueValueRenderer.DefaultSymbol = null;
@@ -569,9 +580,8 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             {
             }
           }
-          catch (GeodatabaseException e)
+          catch (GeodatabaseException)
           {
-            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (CycloMediaLayer.cs) (CreateFeatureClassAsync) error: {e}");
             createNewFeatureClass = true;
           }
         }
@@ -651,7 +661,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    public async Task<bool> SaveFeatureMembersAsync(FeatureCollection featureCollection, Envelope envelope)
+    public async Task<EditOperation> SaveFeatureMembersAsync(FeatureCollection featureCollection, Envelope envelope)
     {
       return await QueuedTask.Run(() =>
       {
@@ -666,6 +676,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           FeatureMembers featureMembers = featureCollection.FeatureMembers;
           Recording[] recordings = featureMembers?.Recordings;
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Start writing number of recordings: {recordings?.Length ?? 0}");
 
           if (Layer != null && recordings != null)
           {
@@ -716,19 +727,21 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                     {
                       if (Filter(recording))
                       {
+                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Start writing recording to database: {recording.ImageId}");
                         Dictionary<string, object> toAddFields = Recording.Fields.ToDictionary(fieldId => fieldId.Key,
                           fieldId => recording.FieldToItem(fieldId.Key));
 
-                        MapPoint newPoint = MapPointBuilder.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
+                        MapPoint newPoint = MapPointBuilderEx.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
                         toAddFields.Add(Recording.ShapeFieldName, newPoint);
                         editOperation.Create(Layer, toAddFields);
+                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Finished writing recording to database: {recording.ImageId}");
                       }
                     }
                     else
                     {
                       if (Filter(recording))
                       {
-                        exists.Remove((string)recording.FieldToItem(idField));
+                        exists.Remove((string) recording.FieldToItem(idField));
                       }
                     }
                   }
@@ -736,6 +749,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                 foreach (var row in exists)
                 {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) delete element from database: {row.Value}, {row.Key}");
                   editOperation.Delete(Layer, row.Value);
                 }
               }
@@ -743,7 +757,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           }
         }
 
-        return editOperation.IsEmpty ? Task.FromResult(true) : editOperation.ExecuteAsync();
+        return editOperation;
       });
     }
 
@@ -760,7 +774,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected CIMMarker GetPipSymbol(Color color)
     {
-      var size025 = (int)_constants.SizeLayer;
+      var size025 = (int) _constants.SizeLayer;
       var size05 = size025 * 2;
       var size075 = size025 * 3;
       var size = size025 * 4;
@@ -800,7 +814,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected CIMMarker GetForbiddenSymbol(Color color)
     {
-      var size025 = (int)_constants.SizeLayer;
+      var size025 = (int) _constants.SizeLayer;
       var size075 = size025 * 3;
       var size = size025 * 4;
       var size15 = size025 * 6;
@@ -828,19 +842,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       CIMMarker marker = SymbolFactory.Instance.ConstructMarkerFromFile(writePath);
       marker.Size = size075;
       return marker;
-    }
-
-    public static string FixMapNameByReplacingSpecialCharacters(string mapName)
-    {
-      char[] charsToReplace = {
-   ' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+',
-   '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'
-  };
-      foreach (char c in charsToReplace)
-      {
-        mapName = mapName?.Replace(c, '_') ?? string.Empty;
-      }
-      return mapName;
     }
 
     #endregion
@@ -873,7 +874,24 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
               if (_addData != null && _addData.NumberOfFeatures >= 1)
               {
-                await SaveFeatureMembersAsync(_addData, thisEnvelope);
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) loaded features, start saving: {_addData.NumberOfFeatures}");
+                EditOperation editOperation = await SaveFeatureMembersAsync(_addData, thisEnvelope);
+
+                if (editOperation.IsEmpty)
+                {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) there are no features to write to the layer");
+                }
+                else
+                {
+                  bool value = await editOperation.ExecuteAsync();
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) finished writing features, result: {value}");
+
+                  if (value == false)
+                  {
+                    string errorMessage = editOperation.ErrorMessage;
+                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (OnMapViewCameraChanged) the error message is: {errorMessage}");
+                  }
+                }
               }
 
               await PostEntryStepAsync(thisEnvelope);
@@ -928,6 +946,18 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
+    public string fixMapNameByReplacingSpecialCharacters(string mapName)
+    {
+      char[] charsToReplace = {
+   ' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+',
+   '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'
+  };
+      foreach (char c in charsToReplace)
+      {
+        mapName = mapName?.Replace(c, '_') ?? string.Empty;
+      }
+      return mapName;
+    }
     #endregion
   }
 }

@@ -16,30 +16,35 @@
  * License along with this library.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
+
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
-using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
+using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using StreetSmartArcGISPro.Utilities;
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
 {
+
   public enum SrsUnit
   {
     Unknown,
@@ -48,13 +53,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     Error
   }
 
-  public sealed class MeasurementList : Dictionary<string, Measurement>
+  class MeasurementList : Dictionary<string, Measurement>
   {
     #region Members
 
     private bool _drawingSketch;
     private VectorLayer _lastVectorLayer;
     private bool _lastSketch;
+    private IOptions _options;
+    private readonly FileConfiguration _configuration;
 
     #endregion
 
@@ -71,8 +78,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public EventWaitHandle InUpdateMeasurementMode { get; set; }
 
     public IFeatureCollection FeatureCollection { get; set; }
-
-    public bool MeasurementStarted { get; private set; } = false;
+    public int stop_count { get; private set; }
+    public bool start_check { get; private set; } = false;
 
     #endregion
 
@@ -182,7 +189,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             measurement2.IsDisposed = false;
             FromMap = true;
 
-            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
+            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType, MeasureMethods.DepthMap, true);
             try
             {
               string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(MapView.Active);
@@ -202,7 +209,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
       }
     }
-
     public static SrsUnit GetSrsUnit(string srsString)
     {
       try
@@ -221,7 +227,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         SpatialReference spatialReference = SpatialReferenceBuilder.CreateSpatialReference(srsCode);
 
+#if ARCGISPRO29
         if (spatialReference.Name.Contains("Mercator") && (spatialReference.Name.Contains("Sphere") || spatialReference.Name.Contains("Spherical")))
+#elif ARCGISPRO3X
+if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCase) && (spatialReference.Name.Contains("Sphere", StringComparison.OrdinalIgnoreCase) || spatialReference.Name.Contains("Spherical", StringComparison.OrdinalIgnoreCase)))
+#endif
         {
           return SrsUnit.Unknown;
         }
@@ -317,16 +327,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       return measurement;
     }
 
-    #endregion
+#endregion
 
     #region streetSmart events
 
     public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
-      if (MeasurementStarted == false)
+      if (this.start_check == false)
       {
-        MeasurementStarted = true;
+        this.start_check = true;
       }
     }
 
@@ -386,7 +396,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 await QueuedTask.Run(async () =>
                 {
                   List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO29
                   Polygon surface = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                  Polygon surface = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+#endif
                   await mapView.SetCurrentSketchAsync(surface);
                 });
               }
@@ -404,7 +418,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 await QueuedTask.Run(async () =>
                 {
                   List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO29
                   Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                  Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+#endif
                   await mapView.SetCurrentSketchAsync(line);
                 });
               }
@@ -457,23 +475,24 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       var validGeom = (bool)FeatureCollection.Features[0].Properties.ElementAt(10).Value;
       var measureDetails = FeatureCollection.Features[0].Properties.ElementAt(4);
-      var measureCount = ((List<IMeasureDetails>)measureDetails.Value).Count;
+      var measureCount = ((System.Collections.Generic.List<StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails>)measureDetails.Value).Count;
       string currentTool2 = FrameworkApplication.CurrentTool;
       //var reliability = (string) FeatureCollection.Features[0].Properties.ElementAt(8).Value;
       //var relString = reliability.GetString();
 
       //GC: new if statement that saves the feature if the old save button is pressed
-      if (validGeom == true && FromMap == false && measureCount != 0 && api != null && await api.GetApiReadyState() && MeasurementStarted == true && _lastVectorLayer != null)
+      if (validGeom == true && this.FromMap == false && measureCount != 0 && api != null && await api.GetApiReadyState() && this.start_check == true && this._lastVectorLayer != null)
       {
-        OnMeasurementSaved(sender, args);
+        this.OnMeasurementSaved(sender, args);
       }
       //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
-      else if (_lastVectorLayer != null && (validGeom == true || validGeom == false && measureCount < 3) && currentTool2 != "esri_editing_ModifyFeatureImpl"
-        && api != null && await api.GetApiReadyState() && MeasurementStarted == true && (FromMap == false || (FromMap == true && validGeom == false) || FromMap == true && validGeom == true
-        && Open != null && _drawingSketch && _lastSketch == true && measureCount != 0 /*&& reliability != false*/))
+      else if (this._lastVectorLayer != null && (validGeom == true || validGeom == false && measureCount < 3) && currentTool2 != "esri_editing_ModifyFeatureImpl"
+        && api != null && await api.GetApiReadyState() && this.start_check == true && (this.FromMap == false || (this.FromMap == true && validGeom == false) || this.FromMap == true && validGeom == true
+        && this.Open != null && this._drawingSketch && this._lastSketch == true && measureCount != 0 /*&& reliability != false*/))
       {
         api.StopMeasurementMode();
-        MeasurementStarted = false;
+        var states = FrameworkApplication.State;
+        this.start_check = false;
         //this.RemoveAll();
         foreach (IFeature feature in FeatureCollection.Features)
         {
@@ -499,8 +518,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             {
               measurement = this.ElementAt(0).Value;
             }
-
             MapView mapView = MapView.Active;
+            Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+
             RemoveLineStringPoints(measurement);
             RemovePolygonPoints(measurement);
             RemovePointPoints(measurement);
@@ -516,7 +536,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
       var errors = FeatureCollection.Features[0].Properties.ElementAt(9);
-      var errorCount = ((List<int>)errors.Value).Count;
+      var errorCount = ((System.Collections.Generic.List<int>)errors.Value).Count;
+
       //GC: add new if statement that catches when error points are trying to be made
       /*if (errorCount == 0)
       {*/
@@ -614,7 +635,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       await QueuedTask.Run(async () =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO29
                         Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                        Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+#endif
                         await mapView.SetCurrentSketchAsync(line);
                       });
                     }
@@ -646,7 +671,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     }
 
                     measurement.Geometry = geometry;
-                    await Task.Delay(250); // GC: added task delay to allow the line feature to be completed 
+                    //GC: added task delay to allow the line feature to be completed 
+                    await Task.Delay(250);
                     await measurement.UpdateMap();
                   }
                   else
@@ -685,7 +711,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                       await QueuedTask.Run(async () =>
                       {
                         List<MapPoint> points = new List<MapPoint>();
+#if ARCGISPRO29
                         Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                        Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+#endif
                         await mapView.SetCurrentSketchAsync(polygon);
                       });
                     }
@@ -697,6 +727,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     int polySrcCount = polySrc[0].Count;
                     int pylyDstCount = polyDst[0].Count;
+                    int j = 0;
 
                     for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
                     {
@@ -726,7 +757,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     }
 
                     measurement.Geometry = geometry;
-                    await Task.Delay(250); // GC: added task delay to allow the polygon feature to be completed 
+                    //GC: added task delay to allow the line feature to be completed 
+                    await Task.Delay(250);
                     await measurement.UpdateMap();
                   }
                   else
@@ -824,6 +856,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       }
     }
 
-    #endregion
+#endregion
   }
 }

@@ -16,11 +16,12 @@
  * License along with this library.
  */
 
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Utilities;
 using System;
 using System.IO;
 using System.Xml.Serialization;
+
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
 {
@@ -39,7 +40,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
 
     static FeatureCollection()
     {
-      XmlFeatureCollection = new XmlSerializer(typeof(FeatureCollection));
+      XmlFeatureCollection = new XmlSerializer(typeof (FeatureCollection));
       Web = Web.Instance;
     }
 
@@ -76,13 +77,14 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           if (featuresStream != null)
           {
             featuresStream.Position = 0;
-            features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
+            features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) (Load (Envelope)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
-        catch (Exception e)
+        catch
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load) error: {e}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection) (Load (Envelope)) Error loading features");
         }
       }
 
@@ -102,13 +104,14 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           if (featuresStream != null)
           {
             featuresStream.Position = 0;
-            features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
+            features = (FeatureCollection) XmlFeatureCollection.Deserialize(featuresStream);
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
-        catch (Exception e)
+        catch
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load) error: {e}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Error loading features");
         }
       }
 

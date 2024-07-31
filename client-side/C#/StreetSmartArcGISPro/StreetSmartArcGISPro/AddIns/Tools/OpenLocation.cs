@@ -19,28 +19,32 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Resources;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+
+using WinPoint = System.Windows.Point;
 
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
-using System.Resources;
+
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
-using System.Windows;
+
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using WinPoint = System.Windows.Point;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
-using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
-  public sealed class OpenLocation : MapTool
+  class OpenLocation : MapTool
   {
     #region Members
 
@@ -84,8 +88,8 @@ namespace StreetSmartArcGISPro.AddIns.Tools
         string openLocationNotSupportedInSceneTxt = res.GetString("OpenLocationNotSupportedInScene", _languageSettings.CultureInfo);
         MessageBox.Show(
           openLocationNotSupportedInSceneTxt,
-          openLocationNotSupportedInSceneTxt,
-          MessageBoxButton.OK,
+          openLocationNotSupportedInSceneTxt, 
+          MessageBoxButton.OK, 
           MessageBoxImage.Error);
 
         return false;
@@ -108,7 +112,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           var pointMapMin = activeView.ScreenToMap(pointScreenMin);
           var pointMapMax = activeView.ScreenToMap(pointScreenMax);
 
-          Envelope envelope = EnvelopeBuilder.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
+          Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
           var features = activeView.GetFeatures(envelope);
 
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
@@ -152,9 +156,15 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
             else
             {
+              //3.0 code change
+#if ARCGISPRO29
               foreach (var feature in features)
+#elif ARCGISPRO3X
+              foreach (var feature in features.ToDictionary())
+#endif
+
               {
-                Layer layer = feature.Key;
+                Layer layer = (Layer)feature.Key;
                 CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
 
                 if (cycloMediaLayer != null)
@@ -182,6 +192,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
         if (streetSmart != null)
         {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (OpenLocation.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
           streetSmart.MapView = activeView;
           streetSmart.LookAt = null;
           streetSmart.Replace = replace;
@@ -193,6 +204,6 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       return true;
     }
 
-    #endregion
+#endregion
   }
 }

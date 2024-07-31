@@ -16,27 +16,31 @@
  * License along with this library.
  */
 
-namespace StreetSmartArcGISPro.AddIns.Views
-{
-  /// <summary>
-  /// Interaction logic for streetSmartApi.xaml
-  /// </summary>
-  public partial class StreetSmartApi
-  {
-    #region Constructor
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
-    public StreetSmartApi()
+namespace StreetSmartArcGISPro.Configuration.Remote.Models
+{
+    [XmlRoot("UserInfo", Namespace = "http://atlas.cyclomedia.com")]
+    public class UserInfo
     {
-      try
-      {
-        InitializeComponent();
-      }
-      catch(System.Exception e)
-      { 
-        return;
-      }
+        [XmlArray("Packages")]
+        [XmlArrayItem("Package")]
+        public List<Package> Packages { get; set; }
     }
 
-    #endregion
-  }
+    public class Package
+    {
+        [XmlElement("ConfigId")]
+        public string ConfigId { get; set; }
+
+        [XmlElement("Name")]
+        public string Name { get; set; }
+
+        [XmlElement("Description")]
+        public string Description { get; set; }
+
+        [XmlElement("ApiPackage")]
+        public bool ApiPackage { get; set; }
+    }
 }
