@@ -699,7 +699,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       MapViewInitializedEvent.Unsubscribe(OnMapViewInitialized);
       MapClosedEvent.Unsubscribe(OnMapClosed);
 
-      this.Remove(mapView);
+      Remove(mapView);
     }
 
     private async void OnLayersAdded(LayerEventsArgs args)

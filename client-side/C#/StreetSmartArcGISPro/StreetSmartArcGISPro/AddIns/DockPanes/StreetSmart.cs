@@ -16,19 +16,6 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Resources;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Core.Events;
 using ArcGIS.Desktop.Framework;
@@ -37,12 +24,11 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
 using StreetSmart.Common.Exceptions;
 using StreetSmart.Common.Factories;
+using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.DomElement;
-using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmart.Common.Interfaces.SLD;
@@ -56,12 +42,23 @@ using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
-
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Resources;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Login = StreetSmartArcGISPro.Configuration.File.Login;
 using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
-using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
@@ -185,7 +182,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           settings.PropertyChanged += OnSettingsPropertyChanged;
         }
       }
-	  
+
       //New API call
       InitializeApi();
       WpfApi = new WpfApi();
@@ -410,8 +407,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               await Api.CloseViewer(await viewers[0].GetId());
             }
-            catch (StreetSmartCloseViewerException)
+            catch (StreetSmartCloseViewerException e)
             {
+              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
             }
           }
         }
@@ -440,7 +438,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi): Cache: {cachePath}, locale: {_languageSettings.Locale}");
         StreetSmartAPIFactory.Initialize(settings);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitializeApi): exception: {e}");
         return;
@@ -460,7 +458,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             Api.RestartStreetSmart(_configuration.StreetSmartLocation);
           }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
           EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Initialize): Error: {e}");
           return;
@@ -505,9 +503,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         _currentDispatcher.Invoke(Hide, DispatcherPriority.ContextIdle);
       }
-      catch (TaskCanceledException)
+      catch (TaskCanceledException e)
       {
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (DoHide) TaskCanceledException");
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (DoHide): exception: {e}");
       }
     }
 
@@ -591,7 +589,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         await QueuedTask.Run(() =>
         {
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Create map point {x}, {y}");
-          point = MapPointBuilderEx.CreateMapPoint(x, y, _lastSpatialReference);
+          point = MapPointBuilder.CreateMapPoint(x, y, _lastSpatialReference);
         });
 
         if (_lastSpatialReference != null && thisSpatialReference.Wkid != _lastSpatialReference.Wkid)
@@ -681,10 +679,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                                     await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
           }
         }
-        catch (StreetSmartImageNotFoundException)
+        catch (StreetSmartImageNotFoundException e)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage");
-          ResourceManager res = ThisResources.ResourceManager;
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}"); ResourceManager res = ThisResources.ResourceManager;
           string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
           MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
             canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -846,6 +843,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
+
       await vectorLayer.GenerateJsonAsync(_mapView);
     }
 
@@ -883,13 +881,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               try
               {
-                if(feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
+                if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
                 {
                   feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
                 }
               }
-              catch(Exception e)
+              catch (Exception e)
               {
+                EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
                 return;
               }
             }
@@ -927,6 +926,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async Task RemoveVectorLayerAsync(VectorLayer vectorLayer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (RemoveVectorLayerAsync)");
+
       IOverlay overlay = vectorLayer?.Overlay;
 
       if (overlay != null)
@@ -943,18 +943,21 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void OnProjectClosed(ProjectEventArgs args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (OnProjectClosed)");
+
       DoHide();
     }
 
     private async void ApiReady(object sender, EventArgs args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
+
       await InitApi();
     }
 
     private async Task InitApi()
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi)");
+
       if (_constants.ShowDevTools)
       {
         Api.ShowDevTools();
@@ -968,10 +971,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
         IDomElement element = DomElementFactory.Create();
         _options = _configuration.UseDefaultConfigurationUrl
-          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            addressSettings, element)
-          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale,
-            Web.Instance.ConfigServiceUrl, addressSettings, element);
+          ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element)
+          : OptionsFactory.Create(_login.Username, _login.Password, null, _apiKey.Value, epsgCode, _languageSettings.Locale, Web.Instance.ConfigServiceUrl, addressSettings, element);
 
         try
         {
@@ -1006,9 +1007,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             await OpenImageAsync();
           }
         }
-        catch (StreetSmartLoginFailedException)
+        catch (StreetSmartLoginFailedException e)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ApiInit) Login failed");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ApiInit) Login failed: {e}");
           ResourceManager res = ThisResources.ResourceManager;
           string loginFailedTxt = res.GetString("StreetSmartOnLoginFailed", _languageSettings.CultureInfo);
           MessageBox.Show(loginFailedTxt, loginFailedTxt, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1020,6 +1021,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
+
       IViewer cyclViewer = args.Value;
       //GC: added an extra condition in order for the viewing cone to only be created once
       if (cyclViewer is IPanoramaViewer panoramaViewer && _restart == false)
@@ -1027,7 +1029,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
-        this._panorama = panoramaViewer;
+        _panorama = panoramaViewer;
 
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
@@ -1064,7 +1066,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location");
           await MoveToLocationAsync(panoramaViewer);
         }
-        catch(Exception e) { }
+        catch (Exception e)
+        {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location exception: {e}");
+        }
 
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;
@@ -1077,7 +1082,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           {
             case "addressLayer":
               //GC: Remove Address Layer if cyclorama not in the Netherlands
-              if (this._epsgCode == "EPSG:28992")
+              if (_epsgCode == "EPSG:28992")
               {
                 EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) add address layer");
                 panoramaViewer.ToggleAddressesVisible(layer.Visible);
@@ -1118,6 +1123,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void OnLayerVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
+      
       ILayerInfo layerInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(layerInfo.LayerId, MapView);
       _storedLayerList.Update(vectorLayer?.NameAndUri ?? layerInfo.LayerId, layerInfo.Visible);
@@ -1131,7 +1137,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnFeatureClick)");
-      string id = await(sender as IPanoramaViewer).GetId();
+      
+      string id = await (sender as IPanoramaViewer).GetId();
       IFeatureInfo featureInfo = args.Value;
       VectorLayer layer = _vectorLayerList.GetLayer(featureInfo.LayerId, MapView);
       layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
@@ -1140,6 +1147,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewerRemoved)");
+      
       IViewer cyclViewer = args.Value;
 
       if (cyclViewer is IPanoramaViewer panoramaViewer)
@@ -1192,6 +1200,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void RemovePanoramaViewer(IPanoramaViewer panoramaViewer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RemovePanoramaViewer)");
+      
       Viewer viewer = _viewerList.GetViewer(panoramaViewer);
       panoramaViewer.ImageChange -= OnImageChange;
 
@@ -1411,7 +1420,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     }
 
     private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
-    {//GC: this is where map layer transparency and layer list toggle can be found
+    {
+      //GC: this is where map layer transparency and layer list toggle can be found
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
 
       if (GlobeSpotterConfiguration.AddLayerWfs)
@@ -1453,8 +1463,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
       }
 
-      if(changeVectorLayer)
-      { 
+      if (changeVectorLayer)
+      {
         try
         {
           //GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
@@ -1502,7 +1512,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       else if (switcher && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        this._panorama.ToggleOverlay(vectorLayer.Overlay);
+        _panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 
@@ -1513,7 +1523,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (args.MapPane.MapView == MapView)
       {
         await CloseViewersAsync();
-    //    _restart = true;
       }
     }
 
