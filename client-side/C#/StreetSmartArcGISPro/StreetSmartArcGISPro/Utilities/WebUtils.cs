@@ -12,7 +12,6 @@ namespace StreetSmartArcGISPro.Utilities
     #region Constants
     private const int BufferImageLengthService = 2048;
     private const int LeaseTimeOut = 5000;
-    private const int DefaultConnectionLimit = 5;
     #endregion
 
     #region Members

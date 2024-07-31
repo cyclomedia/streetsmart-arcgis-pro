@@ -56,8 +56,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private bool _drawingSketch;
     private VectorLayer _lastVectorLayer;
     private bool _lastSketch;
-    private IOptions _options;
-    private readonly FileConfiguration _configuration;
 
     #endregion
 
@@ -74,8 +72,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public EventWaitHandle InUpdateMeasurementMode { get; set; }
 
     public IFeatureCollection FeatureCollection { get; set; }
-    public int stop_count { get; private set; }
-    public bool start_check { get; private set; } = false;
+    public bool MeasurementStarted { get; private set; } = false;
 
     #endregion
 
@@ -330,9 +327,9 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
     public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
-      if (start_check == false)
+      if (MeasurementStarted == false)
       {
-        start_check = true;
+        MeasurementStarted = true;
       }
     }
 
@@ -477,18 +474,18 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
       //var relString = reliability.GetString();
 
       //GC: new if statement that saves the feature if the old save button is pressed
-      if (validGeom == true && FromMap == false && measureCount != 0 && api != null && await api.GetApiReadyState() && start_check == true && _lastVectorLayer != null)
+      if (validGeom == true && FromMap == false && measureCount != 0 && api != null && await api.GetApiReadyState() && MeasurementStarted == true && _lastVectorLayer != null)
       {
         OnMeasurementSaved(sender, args);
       }
       //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
       else if (_lastVectorLayer != null && (validGeom == true || validGeom == false && measureCount < 3) && currentTool2 != "esri_editing_ModifyFeatureImpl"
-        && api != null && await api.GetApiReadyState() && start_check == true && (FromMap == false || (FromMap == true && validGeom == false) || FromMap == true && validGeom == true
+        && api != null && await api.GetApiReadyState() && MeasurementStarted == true && (FromMap == false || (FromMap == true && validGeom == false) || FromMap == true && validGeom == true
         && Open != null && _drawingSketch && _lastSketch == true && measureCount != 0 /*&& reliability != false*/))
       {
         api.StopMeasurementMode();
         var states = FrameworkApplication.State;
-        start_check = false;
+        MeasurementStarted = false;
         //this.RemoveAll();
         foreach (IFeature feature in FeatureCollection.Features)
         {
