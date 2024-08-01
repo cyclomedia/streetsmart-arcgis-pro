@@ -1,11 +1,11 @@
-﻿using System;
+﻿using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Properties;
+using System;
 using System.Collections.Generic;
 using System.Resources;
 using System.Windows;
 using System.Windows.Controls;
-
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Properties;
 
 namespace StreetSmartArcGISPro.Utilities
 {
@@ -17,8 +17,8 @@ namespace StreetSmartArcGISPro.Utilities
 
     static LocalizationProvider()
     {
-      _toolTipObjects = new List<DependencyObject>();
-      _contentObjects = new List<DependencyObject>();
+      _toolTipObjects = [];
+      _contentObjects = [];
       _languageSettings = LanguageSettings.Instance;
     }
 
@@ -63,7 +63,7 @@ namespace StreetSmartArcGISPro.Utilities
 
     public static string GetContentId(DependencyObject obj)
     {
-      return (string) obj.GetValue(ContentIdProperty);
+      return (string)obj.GetValue(ContentIdProperty);
     }
 
     public static void SetContentId(DependencyObject obj, string value)
@@ -73,7 +73,7 @@ namespace StreetSmartArcGISPro.Utilities
 
     public static string GetTooltipId(DependencyObject obj)
     {
-      return (string) obj.GetValue(TooltipIdProperty);
+      return (string)obj.GetValue(TooltipIdProperty);
     }
 
     public static void SetTooltipId(DependencyObject obj, string value)
@@ -94,9 +94,9 @@ namespace StreetSmartArcGISPro.Utilities
         {
           resourceValue = res.GetString(name, _languageSettings.CultureInfo);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
         }
 
         if (resourceValue != null)
@@ -117,9 +117,9 @@ namespace StreetSmartArcGISPro.Utilities
         {
           resourceValue = res.GetString(text, _languageSettings.CultureInfo);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
         }
 
         if (resourceValue != null)
@@ -146,9 +146,9 @@ namespace StreetSmartArcGISPro.Utilities
         {
           resourceValue = res.GetString(name, _languageSettings.CultureInfo);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-          // ignored
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnTooltipChanged) error: {ex}");
         }
 
         if (resourceValue != null)

@@ -16,6 +16,18 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Utilities;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Resource;
+using StreetSmartArcGISPro.CycloMediaLayers;
+using StreetSmartArcGISPro.Overlays;
+using StreetSmartArcGISPro.Overlays.Measurement;
+using StreetSmartArcGISPro.Utilities;
+using StreetSmartArcGISPro.VectorLayers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,20 +36,6 @@ using System.Resources;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Contracts;
-using ArcGIS.Desktop.Framework.Utilities;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Resource;
-using StreetSmartArcGISPro.CycloMediaLayers;
-using StreetSmartArcGISPro.Overlays;
-using StreetSmartArcGISPro.Overlays.Measurement;
-using StreetSmartArcGISPro.Utilities;
-using StreetSmartArcGISPro.VectorLayers;
-
 using Project = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
@@ -66,10 +64,10 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     public static StreetSmart Current
       =>
         _streetSmart ??
-        (_streetSmart = (StreetSmart) FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}"));
+        (_streetSmart = (StreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}"));
 
     public Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer =>
-      _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = new Dictionary<MapView, CycloMediaGroupLayer>());
+      _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = []);
 
     private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
@@ -109,9 +107,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       return result;
     }
 
-    public ViewerList ViewerList => _viewerList ?? (_viewerList = new ViewerList());
+    public ViewerList ViewerList => _viewerList ?? (_viewerList = []);
 
-    public MeasurementList MeasurementList => _measurementList ?? (_measurementList = new MeasurementList());
+    public MeasurementList MeasurementList => _measurementList ?? (_measurementList = []);
 
     #endregion
 
@@ -167,8 +165,6 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-
-
 
       return base.Initialize();
     }
@@ -263,7 +259,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (_vectorLayerList == null)
       {
-        _vectorLayerList = new VectorLayerList();
+        _vectorLayerList = [];
       }
 
       if (mapView != null && !_vectorLayerList.ContainsKey(mapView))
@@ -468,7 +464,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-      HandleException("Current_DispatcherUnhandledException",e.Exception);
+      HandleException("Current_DispatcherUnhandledException", e.Exception);
       //e.Handled = true;   // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
 
