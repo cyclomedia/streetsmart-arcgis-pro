@@ -44,7 +44,7 @@ using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialRefe
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 
-#if ARCGISPRO3X
+#if !ARCGISPRO29
 using ArcGIS.Core.Data.Exceptions;
 #endif
 

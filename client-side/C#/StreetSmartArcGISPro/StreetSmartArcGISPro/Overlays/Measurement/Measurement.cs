@@ -659,7 +659,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               {
 #if ARCGISPRO29
                 geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
-#elif ARCGISPRO3X
+#else
                 geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
 #endif
               }
@@ -667,7 +667,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               {
 #if ARCGISPRO29
                 geometry = PolygonBuilder.CreatePolygon(points, srs);
-#elif ARCGISPRO3X
+#else
                 geometry = PolygonBuilderEx.CreatePolygon(points, srs);
 #endif
               }
@@ -678,7 +678,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               {
 #if ARCGISPRO29
                 geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
-#elif ARCGISPRO3X
+#else
                 geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
 #endif
               }
@@ -686,7 +686,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               {
 #if ARCGISPRO29
                 geometry = PolylineBuilder.CreatePolyline(points, srs);
-#elif ARCGISPRO3X
+#else
                 geometry = PolylineBuilderEx.CreatePolyline(points, srs);
 #endif
               }

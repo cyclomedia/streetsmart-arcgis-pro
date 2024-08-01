@@ -203,10 +203,10 @@ namespace StreetSmartArcGISPro.Overlays
             IList<MapPoint> polygonPointList = [_mapPoint, point1, point2, _mapPoint];
 #if ARCGISPRO29
             Polygon polygon = PolygonBuilder.CreatePolygon(polygonPointList);
-#elif ARCGISPRO3X
+#else
             Polygon polygon = PolygonBuilderEx.CreatePolygon(polygonPointList);
 #endif
-            Color colorPolygon = SystCol.FromArgb(Alpha, thisColor);
+            var colorPolygon = SystCol.FromArgb(Alpha, thisColor);
             CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
             CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
             polygonSymbol.SetColor(cimColorPolygon);

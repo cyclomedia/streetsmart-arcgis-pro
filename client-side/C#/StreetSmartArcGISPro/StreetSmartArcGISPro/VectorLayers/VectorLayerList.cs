@@ -263,7 +263,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 {
 #if ARCGISPRO29
                   polyline = PolylineBuilder.CreatePolyline(mapLinePoints, polyline.SpatialReference);
-#elif ARCGISPRO3X
+#else
                   polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
 #endif
                 });
@@ -313,7 +313,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 {
 #if ARCGISPRO29
                   polygon = PolygonBuilder.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
-#elif ARCGISPRO3X
+#else
                   polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
 #endif
                 });

@@ -589,7 +589,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         await QueuedTask.Run(() =>
         {
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Create map point {x}, {y}");
-          point = MapPointBuilder.CreateMapPoint(x, y, _lastSpatialReference);
+          point = MapPointBuilderEx.CreateMapPoint(x, y, _lastSpatialReference);
         });
 
         if (_lastSpatialReference != null && thisSpatialReference.Wkid != _lastSpatialReference.Wkid)
@@ -912,7 +912,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           var numIds = await QueuedTask.Run<List<long>>(() =>
           {
             var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
+#if ARCGISPRO29
             return listOfMapMemberDictionaries[searchThisLayer];
+#else
+            return (List<long>)listOfMapMemberDictionaries[searchThisLayer];
+#endif
           });
 
           //should reset the image if the first feature was created so it isn't invisible
@@ -937,7 +941,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    #endregion
+#endregion
 
     #region Event handlers
 
