@@ -19,34 +19,28 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
+namespace StreetSmartArcGISPro.Configuration.Remote.Models
 {
-  [XmlType(AnonymousType = true, Namespace = "http://www.cyclomedia.com/atlas")]
-  [XmlRoot(Namespace = "http://www.cyclomedia.com/atlas", IsNullable = false)]
-  public class Images
-  {
-    private List<Image> _images;
-
-    #region Properties
-
-    [XmlElement("Image", Namespace = "http://www.cyclomedia.com/atlas")]
-    public Image[] Image
+    [XmlRoot("UserInfo", Namespace = "http://atlas.cyclomedia.com")]
+    public class UserInfo
     {
-      get => _images?.ToArray() ?? new Image[0];
-      set
-      {
-        if (value != null)
-        {
-          if (_images == null)
-          {
-            _images = [];
-          }
-
-          _images.AddRange(value);
-        }
-      }
+        [XmlArray("Packages")]
+        [XmlArrayItem("Package")]
+        public List<Package> Packages { get; set; }
     }
 
-    #endregion
-  }
+    public class Package
+    {
+        [XmlElement("ConfigId")]
+        public string ConfigId { get; set; }
+
+        [XmlElement("Name")]
+        public string Name { get; set; }
+
+        [XmlElement("Description")]
+        public string Description { get; set; }
+
+        [XmlElement("ApiPackage")]
+        public bool ApiPackage { get; set; }
+    }
 }

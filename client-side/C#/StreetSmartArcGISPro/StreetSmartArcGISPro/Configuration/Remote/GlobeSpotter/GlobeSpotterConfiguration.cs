@@ -41,7 +41,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
 
     static GlobeSpotterConfiguration()
     {
-      XmlstreetSmartconfiguration = new XmlSerializer(typeof (GlobeSpotterConfiguration));
+      XmlstreetSmartconfiguration = new XmlSerializer(typeof(GlobeSpotterConfiguration));
       Web = Web.Instance;
     }
 
@@ -143,17 +143,17 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
     {
       try
       {
+        Web.CreateUrls();
         Stream streetSmartConf = Web.GlobeSpotterConfiguration();
 
         if (streetSmartConf != null)
         {
           streetSmartConf.Position = 0;
-          _globeSpotterConfiguration =
-            (GlobeSpotterConfiguration) XmlstreetSmartconfiguration.Deserialize(streetSmartConf);
+          _globeSpotterConfiguration = (GlobeSpotterConfiguration)XmlstreetSmartconfiguration.Deserialize(streetSmartConf);
           streetSmartConf.Close();
         }
       }
-      catch(Exception e)
+      catch (Exception e)
       {
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (GlobeSpotter.cs) (Instance) error: {e}");
       }

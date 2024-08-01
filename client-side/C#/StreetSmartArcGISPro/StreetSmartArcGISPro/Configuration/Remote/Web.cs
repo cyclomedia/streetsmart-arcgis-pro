@@ -16,53 +16,36 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Resource;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
-
-using ArcGIS.Core.Geometry;
-
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Resource;
-
+using static StreetSmartArcGISPro.Utilities.WebUtils;
 using mySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 
 namespace StreetSmartArcGISPro.Configuration.Remote
 {
-  public class Web: Urls
+  public class Web : Urls
   {
     #region Constants
 
     private const int BufferImageLengthService = 2048;
-    private const int LeaseTimeOut = 5000;
     private const int DefaultConnectionLimit = 5;
 
     #endregion
 
     #region Members
 
-    private readonly int[] _waitTimeInternalServerError = {5000, 0};
-    private readonly int[] _timeOutService = {3000, 1000};
-    private readonly int[] _retryTimeService = {3, 1};
-
     private static Web _web;
 
     private readonly Login _login;
     private readonly ApiKey _apiKey;
     private readonly CultureInfo _ci;
-
-    #endregion
-
-    #region Enums
-
-    private enum TypeDownloadConfig
-    {
-      // ReSharper disable once InconsistentNaming
-      XML = 0
-    }
 
     #endregion
 
@@ -80,6 +63,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       _apiKey = ApiKey.Instance;
       _ci = CultureInfo.InvariantCulture;
       ServicePointManager.DefaultConnectionLimit = DefaultConnectionLimit;
+      CreateUrls();
     }
 
     #endregion
@@ -88,13 +72,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     public Stream SpatialReferences()
     {
-      return GetRequest(SpatialReferenceUrl, GetStreamCallback, TypeDownloadConfig.XML, false) as Stream;
+      return GetRequest(SpatialReferenceUrl, GetStreamCallback, TypeDownloadConfig.XML, Configuration, _login, _apiKey, false) as Stream;
     }
 
     public Stream GlobeSpotterConfiguration()
     {
       const string authorizationItem = "";
-      return PostRequest(ConfigurationUrl, GetStreamCallback, authorizationItem, TypeDownloadConfig.XML) as Stream;
+      return PostRequest(ConfigurationUrl, GetStreamCallback, authorizationItem, TypeDownloadConfig.XML, Configuration, _login, _apiKey) as Stream;
     }
 
     public Stream GetByBbox(Envelope envelope, string wfsRequest)
@@ -104,221 +88,16 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       string dateString = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:00-00:00");
       string recordingItem = string.Format(_ci, wfsRequest, epsgCode, envelope.XMin, envelope.YMin, envelope.XMax,
         envelope.YMax, dateString);
-      return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML) as Stream;
+      EventLog.Write(EventLog.EventType.Information,
+        $"Street Smart: (Web) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
+      return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML, Configuration, _login, _apiKey) as Stream;
     }
 
     public Stream GetByImageId(string imageId, string epsgCode)
     {
       epsgCode = mySpatialReferenceList.Instance.ToKnownSrsName(epsgCode);
       string imageIdUrl = ImageIdUrl(imageId, epsgCode);
-      return GetRequest(imageIdUrl, GetStreamCallback, TypeDownloadConfig.XML) as Stream;
-    }
-
-    #endregion
-
-    #region Web request functions
-
-    private object GetRequest(string remoteLocation, AsyncCallback asyncCallback, TypeDownloadConfig typeDownloadConfig, bool useAuthorisation = true)
-    {
-      object result = null;
-      bool download = false;
-      int retry = 0;
-      var configId = (int) typeDownloadConfig;
-      WebRequest request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Get, 0, useAuthorisation);
-      var state = new State {Request = request};
-
-      while (download == false && retry < _retryTimeService[configId])
-      {
-        try
-        {
-          lock (this)
-          {
-            ManualResetEvent waitObject = state.OperationComplete;
-            request.BeginGetResponse(asyncCallback, state);
-
-            if (!waitObject.WaitOne(_timeOutService[configId]))
-            {
-              throw new Exception("Time out download item");
-            }
-
-            if (state.OperationException != null)
-            {
-              throw state.OperationException;
-            }
-
-            result = state.Result;
-            download = true;
-          }
-        }
-        catch (WebException ex)
-        {
-          retry++;
-          var responce = ex.Response as HttpWebResponse;
-
-          if (responce?.StatusCode == HttpStatusCode.InternalServerError && (retry < _retryTimeService[configId]))
-          {
-            Thread.Sleep(_waitTimeInternalServerError[configId]);
-          }
-
-          if (retry == _retryTimeService[configId])
-          {
-            throw;
-          }
-        }
-        catch (Exception)
-        {
-          retry++;
-
-          if (retry == _retryTimeService[configId])
-          {
-            throw;
-          }
-        }
-      }
-
-      return result;
-    }
-
-    private object PostRequest(string remoteLocation, AsyncCallback asyncCallback, string postItem, TypeDownloadConfig typeDownloadConfig, bool useAuthorisation = true)
-    {
-      object result = null;
-      bool download = false;
-      int retry = 0;
-      var configId = (int) typeDownloadConfig;
-      var bytes = (new UTF8Encoding()).GetBytes(postItem);
-      WebRequest request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Post, bytes.Length, useAuthorisation);
-      var state = new State {Request = request};
-
-      lock (this)
-      {
-        using (Stream reqstream = request.GetRequestStream())
-        {
-          reqstream.Write(bytes, 0, bytes.Length);
-        }
-      }
-
-      while (download == false && retry < _retryTimeService[configId])
-      {
-        try
-        {
-          lock (this)
-          {
-            ManualResetEvent waitObject = state.OperationComplete;
-            request.BeginGetResponse(asyncCallback, state);
-
-            if (!waitObject.WaitOne(_timeOutService[configId]))
-            {
-              throw new Exception("Time out download item.");
-            }
-
-            if (state.OperationException != null)
-            {
-              throw state.OperationException;
-            }
-
-            result = state.Result;
-            download = true;
-          }
-        }
-        catch (WebException ex)
-        {
-          retry++;
-
-          if (ex.Response is HttpWebResponse responce)
-          {
-            Uri responseUri = responce.ResponseUri;
-
-            if (responseUri != null)
-            {
-              string absoluteUri = responseUri.AbsoluteUri;
-
-              if (absoluteUri != remoteLocation)
-              {
-                remoteLocation = absoluteUri;
-                request = OpenWebRequest(remoteLocation, WebRequestMethods.Http.Post, bytes.Length);
-                state = new State {Request = request};
-
-                lock (this)
-                {
-                  using (Stream reqstream = request.GetRequestStream())
-                  {
-                    reqstream.Write(bytes, 0, bytes.Length);
-                  }
-                }
-              }
-            }
-
-            if (responce.StatusCode == HttpStatusCode.InternalServerError && retry < _retryTimeService[configId])
-            {
-              Thread.Sleep(_waitTimeInternalServerError[configId]);
-            }
-          }
-
-          if (retry == _retryTimeService[configId])
-          {
-            throw;
-          }
-        }
-        catch (Exception)
-        {
-          retry++;
-
-          if (retry == _retryTimeService[configId])
-          {
-            throw;
-          }
-        }
-      }
-
-      return result;
-    }
-
-    private WebRequest OpenWebRequest(string remoteLocation, string webRequest, int length, bool useAuthorization = true)
-    {
-      IWebProxy proxy;
-
-      if (Configuration.UseProxyServer)
-      {
-        var webProxy = new WebProxy(Configuration.ProxyAddress, Configuration.ProxyPort)
-        {
-          BypassProxyOnLocal = Configuration.ProxyBypassLocalAddresses,
-          UseDefaultCredentials = Configuration.ProxyUseDefaultCredentials
-        };
-
-        if (!Configuration.ProxyUseDefaultCredentials)
-        {
-          webProxy.Credentials = new NetworkCredential(Configuration.ProxyUsername, Configuration.ProxyPassword, Configuration.ProxyDomain);
-        }
-
-        proxy = webProxy;
-      }
-      else
-      {
-        proxy = WebRequest.GetSystemWebProxy();
-      }
-
-      string credentials1 = Base64Encode($"{_login.Username}:{_login.Password}");
-      string credentials = $"Basic {credentials1}";
-
-      var request = (HttpWebRequest) WebRequest.Create(remoteLocation);
-      request.Credentials = new NetworkCredential(_login.Username, _login.Password);
-      request.Method = webRequest;
-      request.ContentLength = length;
-      request.KeepAlive = true;
-      request.Pipelined = true;
-      request.Proxy = proxy;
-      request.PreAuthenticate = true;
-      request.ContentType = "text/xml";
-      request.Headers.Add("ApiKey", _apiKey.Value);
-
-      if (useAuthorization)
-      {
-        request.Headers.Add("authorization", credentials);
-      }
-
-      request.ServicePoint.ConnectionLeaseTimeout = LeaseTimeOut;
-      request.ServicePoint.MaxIdleTime = LeaseTimeOut;
-      return request;
+      return GetRequest(imageIdUrl, GetStreamCallback, TypeDownloadConfig.XML, Configuration, _login, _apiKey) as Stream;
     }
 
     #endregion
@@ -333,7 +112,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     private static void GetStreamCallback(IAsyncResult ar)
     {
-      var state = (State) ar.AsyncState;
+      var state = (State)ar.AsyncState;
 
       try
       {
@@ -344,7 +123,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
         {
           var readFile = new BinaryReader(responseStream);
           state.Result = new MemoryStream();
-          var writeFile = new BinaryWriter((Stream) state.Result);
+          var writeFile = new BinaryWriter((Stream)state.Result);
           var buffer = new byte[BufferImageLengthService];
           int readBytes;
 

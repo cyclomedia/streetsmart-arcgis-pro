@@ -54,7 +54,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
           Load();
         }
 
-        return _languages ?? (_languages = new Languages());
+        return _languages ?? (_languages = []);
       }
     }
 

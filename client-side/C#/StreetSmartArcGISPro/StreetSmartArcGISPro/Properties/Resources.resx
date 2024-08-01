@@ -268,7 +268,7 @@
   <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
     <value>There is no pdf viewer installed on your system</value>
   </data>
-  <data name="OpenLocationNotSupportedInScene" xml:space="preserve">
+	<data name="OpenLocationNotSupportedInScene" xml:space="preserve">
     <value>Open Location is not supported in Scene</value>
   </data>
 </root>

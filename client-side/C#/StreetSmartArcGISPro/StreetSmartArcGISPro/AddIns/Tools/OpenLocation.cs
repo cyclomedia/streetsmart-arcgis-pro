@@ -16,31 +16,31 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
+using ArcGIS.Desktop.Mapping;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.Recordings;
+using StreetSmartArcGISPro.CycloMediaLayers;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Input;
-
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
 using System.Resources;
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.Recordings;
-using StreetSmartArcGISPro.CycloMediaLayers;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using WinPoint = System.Windows.Point;
-using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
+using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+using ThisResources = StreetSmartArcGISPro.Properties.Resources;
+using WinPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
-  public sealed class OpenLocation : MapTool
+  class OpenLocation : MapTool
   {
     #region Members
 
@@ -108,7 +108,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           var pointMapMin = activeView.ScreenToMap(pointScreenMin);
           var pointMapMax = activeView.ScreenToMap(pointScreenMax);
 
-          Envelope envelope = EnvelopeBuilder.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
+          Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(pointMapMin, pointMapMax, pointSpatialReference);
           var features = activeView.GetFeatures(envelope);
 
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
@@ -125,13 +125,11 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
               if (cycloCoordSystem != null)
               {
-                SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ??
-                                                         await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
+                SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ?? await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
 
                 if (pointSpatialReference.Wkid != cycloSpatialReference.Wkid)
                 {
-                  ProjectionTransformation projection = ProjectionTransformation.Create(pointSpatialReference,
-                    cycloSpatialReference);
+                  ProjectionTransformation projection = ProjectionTransformation.Create(pointSpatialReference, cycloSpatialReference);
                   point = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
                 }
 
@@ -152,7 +150,12 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
             else
             {
+#if ARCGISPRO29
               foreach (var feature in features)
+#elif ARCGISPRO3X
+              foreach (var feature in features.ToDictionary())
+#endif
+
               {
                 Layer layer = feature.Key;
                 CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
@@ -163,7 +166,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
                   {
                     Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
 
-                    if (recording.IsAuthorized == null || (bool) recording.IsAuthorized)
+                    if (recording.IsAuthorized == null || (bool)recording.IsAuthorized)
                     {
                       location = recording.ImageId;
                     }
@@ -182,6 +185,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
         if (streetSmart != null)
         {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (OpenLocation.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
           streetSmart.MapView = activeView;
           streetSmart.LookAt = null;
           streetSmart.Replace = replace;

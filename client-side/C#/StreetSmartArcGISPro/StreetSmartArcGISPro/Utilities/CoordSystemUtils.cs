@@ -16,15 +16,12 @@
  * License along with this library.
  */
 
-using System.Linq;
-using System.Threading.Tasks;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-
 using StreetSmartArcGISPro.Configuration.File;
-
+using System.Linq;
+using System.Threading.Tasks;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 
@@ -55,7 +52,7 @@ namespace StreetSmartArcGISPro.Utilities
 
       await QueuedTask.Run(() =>
       {
-        MapPoint mapPoint = MapPointBuilder.CreateMapPoint(x, y, z, gsSpatialReference);
+        MapPoint mapPoint = MapPointBuilderEx.CreateMapPoint(x, y, z, gsSpatialReference);
 
         if (mapSpatialReference != null && gsSpatialReference != null &&
             gsSpatialReference.Wkid != mapSpatialReference.Wkid)
@@ -65,7 +62,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         else
         {
-          point = (MapPoint) mapPoint.Clone();
+          point = (MapPoint)mapPoint.Clone();
         }
       });
 

@@ -16,29 +16,26 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
 using StreetSmartArcGISPro.CycloMediaLayers;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
-using ArcGIS.Desktop.Framework.Utilities;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -59,7 +56,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #endregion
 
-    #region Fields
+    #region Properties
 
     private readonly MeasurementList _measurementList;
     private string _currentToolId;
@@ -160,7 +157,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
       else
       {
-        layerList = new List<VectorLayer>();
+        layerList = [];
         Add(mapView, layerList);
       }
 
@@ -213,7 +210,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       var window = FrameworkApplication.ActiveWindow;
       //GC: Added an additional requirement for measurement tool to activate
-      if (vectorLayer != null && (((PlugIn)window).Caption == "Create Features" || ((PlugIn)window).Caption == "Créer des entités"))
+      if (vectorLayer != null && (((PlugIn)window).Caption == "Map" || ((PlugIn)window).Caption == "Carte"
+        || ((PlugIn)window).Caption == "Create Features" || ((PlugIn)window).Caption == "Créer des entités"))
       {
         await StartMeasurementSketchAsync(vectorLayer, mapView);
       }
@@ -240,7 +238,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             _updateHeight = true;
             await UpdateHeightAsync(mapView);
             Polyline polyline = geometry as Polyline;
-            List<MapPoint> mapLinePoints = new List<MapPoint>();
+            List<MapPoint> mapLinePoints = [];
             bool changesLine = false;
 
             if (polyline != null)
@@ -251,7 +249,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 {
                   changesLine = true;
                   MapPoint srcLinePoint = await AddHeightToMapPointAsync(point, mapView);
-                  mapLinePoints.Add(MapPointBuilder.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
+                  mapLinePoints.Add(MapPointBuilderEx.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
                 }
                 else
                 {
@@ -263,7 +261,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
+#if ARCGISPRO29
                   polyline = PolylineBuilder.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#elif ARCGISPRO3X
+                  polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#endif
                 });
 
                 await mapView.SetCurrentSketchAsync(polyline);
@@ -280,7 +282,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             _updateHeight = true;
             await UpdateHeightAsync(mapView);
             Polygon polygon = geometry as Polygon;
-            List<MapPoint> mapPolygonPoints = new List<MapPoint>();
+            List<MapPoint> mapPolygonPoints = [];
             bool changesPolygon = false;
 
             if (polygon != null)
@@ -309,7 +311,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
+#if ARCGISPRO29
                   polygon = PolygonBuilder.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+#elif ARCGISPRO3X
+                  polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+#endif
                 });
 
                 await mapView.SetCurrentSketchAsync(polygon);
@@ -336,7 +342,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         double centerX = (envelope.XMax - envelope.XMin) / 2 + envelope.XMin;
         double centerY = (envelope.YMax - envelope.YMin) / 2 + envelope.YMin;
         double centerZ = (envelope.ZMax - envelope.ZMin) / 2 + envelope.ZMin;
-        MapPoint srcPoint = MapPointBuilder.CreateMapPoint(centerX, centerY, centerZ);
+        MapPoint srcPoint = MapPointBuilderEx.CreateMapPoint(centerX, centerY, centerZ);
         MapPoint dstPoint = await AddHeightToMapPointAsync(srcPoint, mapView);
         ElevationCapturing.ElevationConstantValue = dstPoint.Z;
       });
@@ -361,7 +367,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           if (height != null)
           {
-            dstPoint = MapPointBuilder.CreateMapPoint(dstPoint.X, dstPoint.Y, (double)height, dstSpatialReference);
+            dstPoint = MapPointBuilderEx.CreateMapPoint(dstPoint.X, dstPoint.Y, (double)height, dstSpatialReference);
             ProjectionTransformation srcProjection = ProjectionTransformation.Create(dstSpatialReference,
               srcSpatialReference);
             srcPoint = GeometryEngine.Instance.ProjectEx(dstPoint, srcProjection) as MapPoint;
@@ -691,18 +697,16 @@ namespace StreetSmartArcGISPro.VectorLayers
       MapViewInitializedEvent.Unsubscribe(OnMapViewInitialized);
       MapClosedEvent.Unsubscribe(OnMapClosed);
 
-      this.Remove(mapView);
+      Remove(mapView);
     }
 
     private async void OnLayersAdded(LayerEventsArgs args)
     {
       foreach (Layer layer in args.Layers)
       {
-        MapView mapView = GetMapViewFromLayer(layer);
+        MapView mapView = GetMapViewFromLayer(layer) ?? MapView.Active;
         if (mapView != null)
-        {
           await AddLayerAsync(layer, mapView);
-        }
       }
     }
 

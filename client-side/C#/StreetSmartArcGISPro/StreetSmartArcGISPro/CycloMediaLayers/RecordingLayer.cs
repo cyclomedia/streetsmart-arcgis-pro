@@ -79,10 +79,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     }
 
     private static Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>> YearsVisible
-      => _yearsVisible ?? (_yearsVisible = new Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>>());
+      => _yearsVisible ?? (_yearsVisible = []);
 
     private static Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>> UniqueValueGroups
-      => _uniqueValueGroups ?? (_uniqueValueGroups = new Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>>());
+      => _uniqueValueGroups ?? (_uniqueValueGroups = []);
 
     private List<int> GetYearValue(FeatureLayer layer, TypeOfLayer type)
     {
@@ -90,7 +90,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         if (!YearsVisible.ContainsKey(layer))
         {
-          YearsVisible.Add(layer, new Dictionary<TypeOfLayer, List<int>>());
+          YearsVisible.Add(layer, []);
         }
       }
 
@@ -101,7 +101,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       if (!yearValue.ContainsKey(type))
       {
-        yearValue.Add(type, new List<int>());
+        yearValue.Add(type, []);
       }
 
       return yearValue[type];
@@ -121,7 +121,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       if (!UniqueValueGroups.ContainsKey(year))
       {
-        UniqueValueGroups.Add(year, new Dictionary<TypeOfLayer, CIMUniqueValueGroup>());
+        UniqueValueGroups.Add(year, []);
       }
 
       return UniqueValueGroups[year];

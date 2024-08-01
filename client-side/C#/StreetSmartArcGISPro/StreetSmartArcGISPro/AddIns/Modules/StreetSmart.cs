@@ -67,7 +67,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         (_streetSmart = (StreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}"));
 
     public Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer =>
-      _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = new Dictionary<MapView, CycloMediaGroupLayer>());
+      _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = []);
 
     private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
@@ -107,9 +107,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       return result;
     }
 
-    public ViewerList ViewerList => _viewerList ?? (_viewerList = new ViewerList());
+    public ViewerList ViewerList => _viewerList ?? (_viewerList = []);
 
-    public MeasurementList MeasurementList => _measurementList ?? (_measurementList = new MeasurementList());
+    public MeasurementList MeasurementList => _measurementList ?? (_measurementList = []);
 
     #endregion
 
@@ -165,6 +165,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
       TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+
       return base.Initialize();
     }
 
@@ -186,7 +187,15 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     internal bool InsideScale(MapView mapView)
     {
-      return GetCycloMediaGroupLayer(mapView).InsideScale;
+      //GC: added a new catch statement for mapView when opening attribute table while editing
+      if (mapView != null)
+      {
+        return GetCycloMediaGroupLayer(mapView).InsideScale;
+      }
+      else
+      {
+        return false;
+      }
     }
 
     private bool ContainsCycloMediaLayer(MapView mapView)
@@ -250,7 +259,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (_vectorLayerList == null)
       {
-        _vectorLayerList = new VectorLayerList();
+        _vectorLayerList = [];
       }
 
       if (mapView != null && !_vectorLayerList.ContainsKey(mapView))

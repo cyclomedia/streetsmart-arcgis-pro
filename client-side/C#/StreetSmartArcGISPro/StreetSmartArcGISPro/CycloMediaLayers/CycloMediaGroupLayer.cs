@@ -67,10 +67,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public MapView MapView { get; }
 
-    public IList<CycloMediaLayer> AllLayers => _allLayers ?? (_allLayers = new List<CycloMediaLayer>
-    {
+    public IList<CycloMediaLayer> AllLayers => _allLayers ?? (_allLayers =
+    [
       new RecordingLayer(this, InitialExtent),
-    });
+    ]);
 
     public bool ContainsLayers => Count != 0;
 

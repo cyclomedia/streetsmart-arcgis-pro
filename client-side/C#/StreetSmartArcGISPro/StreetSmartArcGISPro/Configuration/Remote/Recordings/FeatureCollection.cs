@@ -77,6 +77,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection) (Load (Envelope)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
@@ -103,6 +104,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }

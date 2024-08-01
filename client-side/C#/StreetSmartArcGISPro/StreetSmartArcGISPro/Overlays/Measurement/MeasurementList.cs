@@ -35,6 +35,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
@@ -48,7 +49,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     Error
   }
 
-  public sealed class MeasurementList : Dictionary<string, Measurement>
+  public class MeasurementList : Dictionary<string, Measurement>
   {
     #region Members
 
@@ -71,6 +72,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     public EventWaitHandle InUpdateMeasurementMode { get; set; }
 
     public IFeatureCollection FeatureCollection { get; set; }
+    public bool MeasurementStarted { get; private set; } = false;
 
     #endregion
 
@@ -180,7 +182,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             measurement2.IsDisposed = false;
             FromMap = true;
 
-            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType);
+            IMeasurementOptions options = MeasurementOptionsFactory.Create(measurementGeometryType, MeasureMethods.DepthMap, true);
             try
             {
               string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(MapView.Active);
@@ -200,7 +202,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         }
       }
     }
-
     public static SrsUnit GetSrsUnit(string srsString)
     {
       try
@@ -219,7 +220,11 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         SpatialReference spatialReference = SpatialReferenceBuilder.CreateSpatialReference(srsCode);
 
+#if ARCGISPRO29
         if (spatialReference.Name.Contains("Mercator") && (spatialReference.Name.Contains("Sphere") || spatialReference.Name.Contains("Spherical")))
+#elif ARCGISPRO3X
+if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCase) && (spatialReference.Name.Contains("Sphere", StringComparison.OrdinalIgnoreCase) || spatialReference.Name.Contains("Spherical", StringComparison.OrdinalIgnoreCase)))
+#endif
         {
           return SrsUnit.Unknown;
         }
@@ -319,12 +324,213 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     #region streetSmart events
 
+    public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
+    {
+      FeatureCollection = args.Value;
+      if (MeasurementStarted == false)
+      {
+        MeasurementStarted = true;
+      }
+    }
+
+    public async void OnMeasurementSaved(object sender, IEventArgs<IFeatureCollection> args)
+    {
+      FeatureCollection = args.Value;
+      IStreetSmartAPI api = sender as IStreetSmartAPI;
+
+      foreach (IFeature feature in FeatureCollection.Features)
+      {
+        IGeometry geometry = feature.Geometry;
+        StreetSmartGeometryType geometryType = geometry.Type;
+        Measurement measurement;
+
+        if (feature.Properties is IMeasurementProperties properties)
+        {
+          if (Count == 0)
+          {
+            measurement = new Measurement(properties, feature.Geometry, api)
+            {
+              VectorLayer = _lastVectorLayer
+            };
+
+            Add(properties.Id, measurement);
+            measurement.Open();
+
+            if (_lastSketch)
+            {
+              measurement.SetSketch();
+            }
+          }
+          else
+          {
+            measurement = this.ElementAt(0).Value;
+          }
+
+          MapView mapView = MapView.Active;
+          Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+
+          switch (geometryType)
+          {
+            case StreetSmartGeometryType.Point:
+              RemoveLineStringPoints(measurement);
+              RemovePolygonPoints(measurement);
+              await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+              await mapView.ClearSketchAsync();
+              measurement.Dispose();
+              break;
+            case StreetSmartGeometryType.Polygon:
+              RemovePointPoints(measurement);
+              RemoveLineStringPoints(measurement);
+              await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+              await mapView.ClearSketchAsync();
+
+              if (geometrySketch != null)
+              {
+                await QueuedTask.Run(async () =>
+                {
+                  List<MapPoint> points = [];
+#if ARCGISPRO29
+                  Polygon surface = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                  Polygon surface = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+#endif
+                  await mapView.SetCurrentSketchAsync(surface);
+                });
+              }
+
+              measurement.Dispose();
+              break;
+            case StreetSmartGeometryType.LineString:
+              RemovePointPoints(measurement);
+              RemovePolygonPoints(measurement);
+              await measurement.VectorLayer.AddUpdateFeature(ObjectId, geometrySketch, measurement);
+              await mapView.ClearSketchAsync();
+
+              if (geometrySketch != null)
+              {
+                await QueuedTask.Run(async () =>
+                {
+                  List<MapPoint> points = [];
+#if ARCGISPRO29
+                  Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                  Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+#endif
+                  await mapView.SetCurrentSketchAsync(line);
+                });
+              }
+
+              measurement.Dispose();
+              break;
+          }
+        }
+      }
+      //api.StopMeasurementMode();
+      //await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
+    }
+
+    public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
+    {
+      FeatureCollection = args.Value;
+      IStreetSmartAPI api = sender as IStreetSmartAPI;
+      /*object editor = new EditCompletingEventArgs;
+        editor.CancelEdit();*/
+
+      if (FeatureCollection.Type == FeatureType.Unknown)
+      {
+        if (Count == 1)
+        {
+          string currentTool = FrameworkApplication.CurrentTool;
+
+          switch (currentTool)
+          {
+            case "esri_editing_SketchLineTool":
+            case "esri_editing_SketchPolygonTool":
+            case "esri_editing_SketchPointTool":
+              await FrameworkApplication.SetCurrentToolAsync(string.Empty);
+              break;
+            case "esri_editing_ModifyFeatureImpl":
+              var geometry = await MapView.Active.GetCurrentSketchAsync();
+
+              if (geometry != null)
+              {
+                if (geometry.GeometryType == ArcGISGeometryType.Polygon ||
+                    geometry.GeometryType == ArcGISGeometryType.Polyline)
+                {
+                  await MapView.Active.ClearSketchAsync();
+                }
+              }
+
+              break;
+          }
+        }
+      }
+
+      var validGeom = (bool)FeatureCollection.Features[0].Properties.ElementAt(10).Value;
+      var measureDetails = FeatureCollection.Features[0].Properties.ElementAt(4);
+      var measureCount = ((System.Collections.Generic.List<StreetSmart.Common.Interfaces.GeoJson.IMeasureDetails>)measureDetails.Value).Count;
+      string currentTool2 = FrameworkApplication.CurrentTool;
+      //var reliability = (string) FeatureCollection.Features[0].Properties.ElementAt(8).Value;
+      //var relString = reliability.GetString();
+
+      //GC: new if statement that saves the feature if the old save button is pressed
+      if (validGeom == true && FromMap == false && measureCount != 0 && api != null && await api.GetApiReadyState() && MeasurementStarted == true && _lastVectorLayer != null)
+      {
+        OnMeasurementSaved(sender, args);
+      }
+      //GC: new if statement that should activate when the close measurement button is pressed from the cyclorama or from the esri cancel button
+      else if (_lastVectorLayer != null && (validGeom == true || validGeom == false && measureCount < 3) && currentTool2 != "esri_editing_ModifyFeatureImpl"
+        && api != null && await api.GetApiReadyState() && MeasurementStarted == true && (FromMap == false || (FromMap == true && validGeom == false) || FromMap == true && validGeom == true
+        && Open != null && _drawingSketch && _lastSketch == true && measureCount != 0 /*&& reliability != false*/))
+      {
+        api.StopMeasurementMode();
+        var states = FrameworkApplication.State;
+        MeasurementStarted = false;
+        //this.RemoveAll();
+        foreach (IFeature feature in FeatureCollection.Features)
+        {
+          IGeometry geometry = feature.Geometry;
+          StreetSmartGeometryType geometryType = geometry.Type;
+          Measurement measurement;
+          if (feature.Properties is IMeasurementProperties properties)
+          {
+            if (Count == 0)
+            {
+              measurement = new Measurement(properties, feature.Geometry, api)
+              {
+                VectorLayer = _lastVectorLayer
+              };
+              Add(properties.Id, measurement);
+              measurement.Open();
+              if (_lastSketch)
+              {
+                measurement.SetSketch();
+              }
+            }
+            else
+            {
+              measurement = this.ElementAt(0).Value;
+            }
+            MapView mapView = MapView.Active;
+            Geometry geometrySketch = await mapView.GetCurrentSketchAsync();
+
+            RemoveLineStringPoints(measurement);
+            RemovePolygonPoints(measurement);
+            RemovePointPoints(measurement);
+            await mapView.ClearSketchAsync();
+          }
+        }
+        await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
+      }
+    }
+
     public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {
       FeatureCollection = args.Value;
       IStreetSmartAPI api = sender as IStreetSmartAPI;
       var errors = FeatureCollection.Features[0].Properties.ElementAt(9);
-      var errorCount = ((List<int>)errors.Value).Count;
+      var errorCount = ((System.Collections.Generic.List<int>)errors.Value).Count;
+
       //GC: add new if statement that catches when error points are trying to be made
       /*if (errorCount == 0)
       {*/
@@ -421,8 +627,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     {
                       await QueuedTask.Run(async () =>
                       {
-                        List<MapPoint> points = new List<MapPoint>();
+                        List<MapPoint> points = [];
+#if ARCGISPRO29
                         Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                        Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
+#endif
                         await mapView.SetCurrentSketchAsync(line);
                       });
                     }
@@ -454,7 +664,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     }
 
                     measurement.Geometry = geometry;
-                    //await measurement.UpdateMap();
                     //GC: added task delay to allow the line feature to be completed 
                     await Task.Delay(250);
                     await measurement.UpdateMap();
@@ -494,8 +703,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     {
                       await QueuedTask.Run(async () =>
                       {
-                        List<MapPoint> points = new List<MapPoint>();
+                        List<MapPoint> points = [];
+#if ARCGISPRO29
                         Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
+#elif ARCGISPRO3X
+                        Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
+#endif
                         await mapView.SetCurrentSketchAsync(polygon);
                       });
                     }
@@ -507,6 +720,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     int polySrcCount = polySrc[0].Count;
                     int pylyDstCount = polyDst[0].Count;
+                    int j = 0;
 
                     for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
                     {
@@ -536,8 +750,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     }
 
                     measurement.Geometry = geometry;
-                    //await measurement.UpdateMap();
-                    //GC: added task delay to allow the polygon feature to be completed 
+                    //GC: added task delay to allow the line feature to be completed 
                     await Task.Delay(250);
                     await measurement.UpdateMap();
                   }
@@ -571,11 +784,13 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       //}
 
       FromMap = false;
+
       if (FeatureCollection.Type == FeatureType.Unknown)
       {
         if (Count == 1)
         {
           string currentTool = FrameworkApplication.CurrentTool;
+
           switch (currentTool)
           {
             case "esri_editing_SketchLineTool":
@@ -585,6 +800,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               break;
             case "esri_editing_ModifyFeatureImpl":
               var geometry = await MapView.Active.GetCurrentSketchAsync();
+
               if (geometry != null)
               {
                 if (geometry.GeometryType == ArcGISGeometryType.Polygon ||
@@ -593,6 +809,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                   await MapView.Active.ClearSketchAsync();
                 }
               }
+
               break;
           }
         }

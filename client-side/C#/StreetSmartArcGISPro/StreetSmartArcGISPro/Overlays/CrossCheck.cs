@@ -16,17 +16,14 @@
  * License along with this library.
  */
 
-using System;
-using System.Drawing;
-using System.Threading.Tasks;
-
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-
 using StreetSmartArcGISPro.Configuration.File;
-
+using System;
+using System.Drawing;
+using System.Threading.Tasks;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 
 namespace StreetSmartArcGISPro.Overlays
@@ -53,7 +50,7 @@ namespace StreetSmartArcGISPro.Overlays
 
         SpatialReference mapSpatialReference = map?.SpatialReference;
         SpatialReference spatialReference = spatRel?.ArcGisSpatialReference ?? mapSpatialReference;
-        MapPoint point = MapPointBuilder.CreateMapPoint(x, y, spatialReference);
+        MapPoint point = MapPointBuilderEx.CreateMapPoint(x, y, spatialReference);
         MapPoint mapPoint;
 
         if (mapSpatialReference != null && spatialReference.Wkid != mapSpatialReference.Wkid)
@@ -63,7 +60,7 @@ namespace StreetSmartArcGISPro.Overlays
         }
         else
         {
-          mapPoint = (MapPoint) point.Clone();
+          mapPoint = (MapPoint)point.Clone();
         }
 
         if (mapPoint != null && !mapPoint.IsEmpty)
