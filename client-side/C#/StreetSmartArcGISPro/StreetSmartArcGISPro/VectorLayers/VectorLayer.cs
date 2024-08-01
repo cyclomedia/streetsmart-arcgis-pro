@@ -16,10 +16,6 @@
  * License along with this library.
  */
 
-#if ARCGISPRO3X
-using ArcGIS.Core.Internal.Geometry;
-#endif
-
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Events;
@@ -266,7 +262,11 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           var featureTasks = geometries.Select(async geom =>
           {
+#if ARCGISPRO29
             Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
+#else
+            Polygon polygon = PolygonBuilderEx.CreatePolygon(geom, layerSpatRef);
+#endif
             //this is where the new pop-up attributes are made
             using (FeatureClass featureClass = Layer?.GetFeatureClass())
             {
@@ -767,9 +767,9 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
 
 #if ARCGISPRO29
-          if (!(editingFeatureTemplate?.GetDefinition() is CIMBasicFeatureTemplate definition) || definition.DefaultValues == null)
-#elif ARCGISPRO3X
-          if (!(editingFeatureTemplate?.GetDefinition() is CIMRowTemplate definition) || definition.DefaultValues == null)
+          if (editingFeatureTemplate?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
+#else
+          if (editingFeatureTemplate?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
 #endif
           {
             editOperation.Create(Layer, geometry);
@@ -827,14 +827,14 @@ namespace StreetSmartArcGISPro.VectorLayers
             case GeometryType.Polygon:
 #if ARCGISPRO29
               geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
-#elif ARCGISPRO3X
+#else
               geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
 #endif
               break;
             case GeometryType.Polyline:
 #if ARCGISPRO29
               geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
-#elif ARCGISPRO3X
+#else
               geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
 #endif
               break;
@@ -973,7 +973,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
 #if ARCGISPRO29
       foreach (var selection in args.Selection)
-#elif ARCGISPRO3X
+#else
       foreach (var selection in args.Selection.ToDictionary())
 #endif
 

@@ -222,8 +222,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
 #if ARCGISPRO29
         if (spatialReference.Name.Contains("Mercator") && (spatialReference.Name.Contains("Sphere") || spatialReference.Name.Contains("Spherical")))
-#elif ARCGISPRO3X
-if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCase) && (spatialReference.Name.Contains("Sphere", StringComparison.OrdinalIgnoreCase) || spatialReference.Name.Contains("Spherical", StringComparison.OrdinalIgnoreCase)))
+#else
+        if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCase) && (spatialReference.Name.Contains("Sphere", StringComparison.OrdinalIgnoreCase) || spatialReference.Name.Contains("Spherical", StringComparison.OrdinalIgnoreCase)))
 #endif
         {
           return SrsUnit.Unknown;
@@ -391,7 +391,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
                   List<MapPoint> points = [];
 #if ARCGISPRO29
                   Polygon surface = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
-#elif ARCGISPRO3X
+#else
                   Polygon surface = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
 #endif
                   await mapView.SetCurrentSketchAsync(surface);
@@ -413,7 +413,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
                   List<MapPoint> points = [];
 #if ARCGISPRO29
                   Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
-#elif ARCGISPRO3X
+#else
                   Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
 #endif
                   await mapView.SetCurrentSketchAsync(line);
@@ -630,7 +630,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
                         List<MapPoint> points = [];
 #if ARCGISPRO29
                         Polyline line = PolylineBuilder.CreatePolyline(points, geometrySketch.SpatialReference);
-#elif ARCGISPRO3X
+#else
                         Polyline line = PolylineBuilderEx.CreatePolyline(points, geometrySketch.SpatialReference);
 #endif
                         await mapView.SetCurrentSketchAsync(line);
@@ -706,7 +706,7 @@ if (spatialReference.Name.Contains("Mercator", StringComparison.OrdinalIgnoreCas
                         List<MapPoint> points = [];
 #if ARCGISPRO29
                         Polygon polygon = PolygonBuilder.CreatePolygon(points, geometrySketch.SpatialReference);
-#elif ARCGISPRO3X
+#else
                         Polygon polygon = PolygonBuilderEx.CreatePolygon(points, geometrySketch.SpatialReference);
 #endif
                         await mapView.SetCurrentSketchAsync(polygon);

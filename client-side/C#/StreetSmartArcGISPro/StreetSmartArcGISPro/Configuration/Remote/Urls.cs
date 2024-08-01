@@ -16,6 +16,7 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Utilities;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Models;
 using System.IO;
@@ -142,7 +143,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       }
       catch (System.Exception ex)
       {
-
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Urls.cs) (FetchConfigIdFromUserInfoConfiguration) error: {ex}");
       }
       return configId;
     }
@@ -173,8 +174,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       var globeSpotterConfig = new GlobeSpotterConfiguration();
       try
       {
-        var configStream =
-            GetRequest(
+        if (GetRequest(
                 ConfigurationUrl,
                 GetStreamCallback,
                 TypeDownloadConfig.XML,
@@ -182,9 +182,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
                 Login.Instance,
                 Resource.ApiKey.Instance,
                 true
-                ) as Stream;
-
-        if (configStream != null)
+                ) is Stream configStream)
         {
           configStream.Position = 0;
 
@@ -196,7 +194,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       }
       catch (System.Exception ex)
       {
-
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Urls.cs) (FetchConfigurationByConfigId) error: {ex}");
       }
       return globeSpotterConfig;
     }

@@ -152,25 +152,30 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             {
 #if ARCGISPRO29
               foreach (var feature in features)
-#elif ARCGISPRO3X
+#else
               foreach (var feature in features.ToDictionary())
 #endif
-
               {
-                Layer layer = feature.Key;
-                CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
-
-                if (cycloMediaLayer != null)
+                if (feature.Key is Layer layer)
                 {
-                  foreach (long uid in feature.Value)
-                  {
-                    Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
+                  CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
 
-                    if (recording.IsAuthorized == null || (bool)recording.IsAuthorized)
+                  if (cycloMediaLayer != null)
+                  {
+                    foreach (long uid in feature.Value)
                     {
-                      location = recording.ImageId;
+                      Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
+
+                      if (recording.IsAuthorized == null || (bool)recording.IsAuthorized)
+                      {
+                        location = recording.ImageId;
+                      }
                     }
                   }
+                }
+                else
+                {
+                  EventLog.Write(EventLog.EventType.Warning, $"A feature is not a layer, should we cover this? Its: {feature.Key}");
                 }
               }
             }
