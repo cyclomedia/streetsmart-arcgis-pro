@@ -16,20 +16,17 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Dialogs;
+using Microsoft.Win32;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Properties;
+using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Resources;
-
-using ArcGIS.Desktop.Framework.Dialogs;
-using ArcGIS.Desktop.Framework.Contracts;
-
-using StreetSmartArcGISPro.Properties;
-using StreetSmartArcGISPro.Utilities;
-
-using Microsoft.Win32;
-using StreetSmartArcGISPro.Configuration.File;
 using EventLog = ArcGIS.Desktop.Framework.Utilities.EventLog;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons

@@ -64,7 +64,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
     {
       TextBox textBox = sender as TextBox;
       string imageId = textBox?.Text ?? string.Empty;
-      PaneImageIdSearch paneImageIdSearch = (dynamic) DataContext;
+      PaneImageIdSearch paneImageIdSearch = (dynamic)DataContext;
       paneImageIdSearch.ImageInfo.Clear();
 
       if (imageId.Length == 8)

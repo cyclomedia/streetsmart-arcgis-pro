@@ -16,6 +16,14 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.CIM;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmart.Common.Interfaces.GeoJson;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,22 +34,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-using ArcGIS.Core.CIM;
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-using StreetSmart.Common.Interfaces.Data;
-using StreetSmart.Common.Interfaces.GeoJson;
-
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Utilities;
-
-using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
-
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-
+using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 using WindowsPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays.Measurement
@@ -218,21 +212,21 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         switch (geom.Type)
         {
           case StreetSmartGeometryType.Point:
-            IPoint point = (IPoint) geom;
+            IPoint point = (IPoint)geom;
             result = point.X == null || point.Y == null;
             x = point.X ?? 0;
             y = point.Y ?? 0;
             z = point.Z ?? 0;
             break;
           case StreetSmartGeometryType.LineString:
-            ILineString line = (ILineString) geom;
+            ILineString line = (ILineString)geom;
             result = line[index].X == null || line[index].Y == null;
             x = line[index].X ?? 0;
             y = line[index].Y ?? 0;
             z = line[index].Z ?? 0;
             break;
           case StreetSmartGeometryType.Polygon:
-            IPolygon polygon = (IPolygon) geom;
+            IPolygon polygon = (IPolygon)geom;
             result = polygon[0][index].X == null || polygon[0][index].Y == null;
             x = polygon[0][index].X ?? 0;
             y = polygon[0][index].Y ?? 0;
@@ -242,7 +236,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         IMeasurementProperties properties = measurementPoint.Properties as IMeasurementProperties;
         IMeasureDetails details = properties?.MeasureDetails?.Count > index ? properties.MeasureDetails[index] : null;
-        List<string> imageIds = new List<string>();
+        List<string> imageIds = [];
 
         if (details?.Details is IDetailsForwardIntersection detailForwardIntersection)
         {
@@ -253,7 +247,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           }
         }
 
-        List<string> toRemove = new List<string>();
+        List<string> toRemove = [];
 
         foreach (string observation in Keys)
         {
@@ -345,9 +339,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             MapView thisView = MapView.Active;
             WindowsPoint winPoint = thisView.MapToScreen(Point);
             float fontSize = _constants.MeasurementFontSize;
-            int fontSizeT = (int) (fontSize * 2);
-            int fontSizeR = (int) (fontSize * 3 / 2);
-            int fontSizeK = (int) (fontSize / 4);
+            int fontSizeT = (int)(fontSize * 2);
+            int fontSizeR = (int)(fontSize * 3 / 2);
+            int fontSizeK = (int)(fontSize / 4);
             string text = (PointId + 1).ToString(_ci);
             int characters = text.Length;
             Bitmap bitmap = new Bitmap((fontSizeT * characters), fontSizeT);
@@ -355,7 +349,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             double pointSize = _constants.MeasurementPointSize;
             double pointSizePoint = pointSize * 6 / 4;
             WindowsPoint winPointText = new WindowsPoint
-              {X = winPoint.X + pointSizePoint, Y = winPoint.Y - pointSizePoint};
+            { X = winPoint.X + pointSizePoint, Y = winPoint.Y - pointSizePoint };
             MapPoint pointText = thisView.ScreenToMap(winPointText);
 
             using (var sf = new StringFormat())

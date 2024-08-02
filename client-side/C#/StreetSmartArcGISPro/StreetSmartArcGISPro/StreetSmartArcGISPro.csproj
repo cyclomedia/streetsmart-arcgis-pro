@@ -11,6 +11,7 @@
 		<SignAssembly>False</SignAssembly>
 		<OutputType>Library</OutputType>
 		<Platforms>AnyCPU;x64</Platforms>
+		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<PlatformTarget>x64</PlatformTarget>
@@ -28,9 +29,6 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<Optimize>True</Optimize>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Remove="StreetSmartArcGISPro.csproj.bak" />
-	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Config.fr.daml" />
 		<Content Include="Config.daml" />
@@ -66,7 +64,7 @@
 	<ItemGroup>
 		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.0.0.36056" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
-		<PackageReference Include="StreetSmart.WPF" Version="24.4.0-rc09" />
+		<PackageReference Include="StreetSmart.WPF" Version="24.5.0.1" />
 		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
 	</ItemGroup>
 	<ItemGroup>
@@ -78,16 +76,5 @@
 			<AutoGen>True</AutoGen>
 			<DependentUpon>Resources.resx</DependentUpon>
 		</Compile>
-		<Compile Update="Properties\Settings.Designer.cs">
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Settings.settings</DependentUpon>
-		</Compile>
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
 	</ItemGroup>
 </Project>
