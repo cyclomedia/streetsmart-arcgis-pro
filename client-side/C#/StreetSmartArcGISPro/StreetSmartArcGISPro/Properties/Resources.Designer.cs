@@ -521,16 +521,5 @@ namespace StreetSmartArcGISPro.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
-    /// <summary>
-    ///   Looks up a localized string similar to Error while trying to CreateRenderer.
-    /// </summary>
-    internal static string ErrorCreateRenderer
-    {
-      get
-      {
-        return ResourceManager.GetString("ErrorCreateRenderer", resourceCulture);
-      }
-    }
   }
 }

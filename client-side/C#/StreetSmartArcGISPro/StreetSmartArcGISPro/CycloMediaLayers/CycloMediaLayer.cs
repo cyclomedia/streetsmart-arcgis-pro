@@ -43,8 +43,6 @@ using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
-using ArcGIS.Desktop.Framework.Dialogs;
-using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 
 #if !ARCGISPRO29
 using ArcGIS.Core.Data.Exceptions;

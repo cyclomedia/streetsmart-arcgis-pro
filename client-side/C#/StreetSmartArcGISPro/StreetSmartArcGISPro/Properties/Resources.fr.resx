@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -122,7 +122,7 @@
     <value>..\Images\FocusMode16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StreetSmartOnLoginFailed" xml:space="preserve">
-  <value>Impossible de se connecter à Street Smart</value>
+    <value>Impossible de se connecter à Street Smart</value>
   </data>
   <data name="SystemSearch16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SystemSearch16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -131,149 +131,146 @@
     <value>..\Images\UserTrash16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="StreetSmartCanNotOpenImage" xml:space="preserve">
-  <value>Impossible d'ouvrir l'image</value>
+    <value>Impossible d'ouvrir l'image</value>
   </data>
   <data name="LanguageLanguage" xml:space="preserve">
-  <value>Langue</value>
+    <value>Langue</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
-  <value>version</value>
+    <value>version</value>
   </data>
   <data name="AgreementAcceptance" xml:space="preserve">
-  <value>J'ai lu et accepté les conditions d'utilisation</value>
+    <value>J'ai lu et accepté les conditions d'utilisation</value>
   </data>
   <data name="ConfigurationAddress" xml:space="preserve">
-  <value>Adresse</value>
+    <value>Adresse</value>
   </data>
   <data name="ConfigurationBypassProxy" xml:space="preserve">
-  <value>Contourner le serveur proxy pour les adresses locales</value>
+    <value>Contourner le serveur proxy pour les adresses locales</value>
   </data>
   <data name="ConfigurationConfigurationUrl" xml:space="preserve">
-  <value>URL de configuration</value>
+    <value>URL de configuration</value>
   </data>
   <data name="ConfigurationDomain" xml:space="preserve">
-  <value>Domaine</value>
+    <value>Domaine</value>
   </data>
   <data name="ConfigurationLocation" xml:space="preserve">
-  <value>Emplacement</value>
+    <value>Emplacement</value>
   </data>
   <data name="ConfigurationPassword" xml:space="preserve">
-  <value>Mot de passe</value>
+    <value>Mot de passe</value>
   </data>
   <data name="ConfigurationPort" xml:space="preserve">
-  <value>Port</value>
+    <value>Port</value>
   </data>
   <data name="ConfigurationProxyServer" xml:space="preserve">
-  <value>Serveur proxy</value>
+    <value>Serveur proxy</value>
   </data>
   <data name="ConfigurationStreetSmartLocation" xml:space="preserve">
-  <value>Street Smart location</value>
+    <value>Street Smart location</value>
   </data>
   <data name="ConfigurationUseDefault" xml:space="preserve">
-  <value>L'utilisation par défaut</value>
+    <value>L'utilisation par défaut</value>
   </data>
   <data name="ConfigurationUseDefaultCredentials" xml:space="preserve">
-  <value>Utiliser les informations d'identification par défaut</value>
+    <value>Utiliser les informations d'identification par défaut</value>
   </data>
   <data name="ConfigurationUseProxyServer" xml:space="preserve">
-  <value>Utiliser un serveur proxy</value>
+    <value>Utiliser un serveur proxy</value>
   </data>
   <data name="ConfigurationUsername" xml:space="preserve">
-  <value>Nom d'utilisateur</value>
+    <value>Nom d'utilisateur</value>
   </data>
   <data name="ImageIdSearchDate" xml:space="preserve">
-  <value>Date:</value>
+    <value>Date:</value>
   </data>
   <data name="ImageIdSearchImageId" xml:space="preserve">
-  <value>Image id:</value>
+    <value>Image id:</value>
   </data>
   <data name="ImageIdSearchLocation" xml:space="preserve">
-  <value>Emplacement:</value>
+    <value>Emplacement:</value>
   </data>
   <data name="ImageIdSearchProductType" xml:space="preserve">
-  <value>Type de produit:
+    <value>Type de produit:
 Type de produit:
 Type de produit:</value>
   </data>
   <data name="ImageIdSearchTime" xml:space="preserve">
-  <value>Temps:</value>
+    <value>Temps:</value>
   </data>
   <data name="LanguageGeneral" xml:space="preserve">
-  <value>Général</value>
+    <value>Général</value>
   </data>
   <data name="LoginCheck" xml:space="preserve">
-  <value>Vérifier</value>
+    <value>Vérifier</value>
   </data>
   <data name="LoginCheckText" xml:space="preserve">
-  <value>Vérifiez la combinaison nom d'utilisateur et mot de passe</value>
+    <value>Vérifiez la combinaison nom d'utilisateur et mot de passe</value>
   </data>
   <data name="LoginFailed" xml:space="preserve">
-  <value>Échec de la connexion</value>
+    <value>Échec de la connexion</value>
   </data>
   <data name="LoginLogin" xml:space="preserve">
-  <value>S'identifier</value>
+    <value>S'identifier</value>
   </data>
   <data name="LoginPassword" xml:space="preserve">
-  <value>Mot de passe</value>
+    <value>Mot de passe</value>
   </data>
   <data name="LoginSuccessfully" xml:space="preserve">
-  <value>Se connecter avec succès</value>
+    <value>Se connecter avec succès</value>
   </data>
   <data name="LoginUsername" xml:space="preserve">
-  <value>Nom d'utilisateur</value>
+    <value>Nom d'utilisateur</value>
   </data>
   <data name="SettingsCoordinateSystems" xml:space="preserve">
-  <value>Systèmes de coordonnées</value>
+    <value>Systèmes de coordonnées</value>
   </data>
   <data name="SettingsCycloramaViewer" xml:space="preserve">
-  <value>Cyclorama viewer</value>
+    <value>Cyclorama viewer</value>
   </data>
   <data name="SettingsGeneral" xml:space="preserve">
-  <value>Général</value>
+    <value>Général</value>
   </data>
   <data name="SettingsOverlayDrawDistance" xml:space="preserve">
-  <value>Superposition distance de tirage (mètres)</value>
+    <value>Superposition distance de tirage (mètres)</value>
   </data>
   <data name="SettingsRecordingLayer" xml:space="preserve">
-  <value>Calque enregistrement</value>
+    <value>Calque enregistrement</value>
   </data>
   <data name="SettingsSetsOverlayDrawDistance" xml:space="preserve">
-  <value>Définit la distance superposée dans le cyclorama.</value>
+    <value>Définit la distance superposée dans le cyclorama.</value>
   </data>
   <data name="LoginStatus" xml:space="preserve">
-  <value>Statut</value>
+    <value>Statut</value>
   </data>
   <data name="SettingsMeasurementNotSupported" xml:space="preserve">
-  <value>Mesure non prise en charge</value>
+    <value>Mesure non prise en charge</value>
   </data>
   <data name="SettingsMeasurementSupported" xml:space="preserve">
-  <value>Mesure prise en charge</value>
+    <value>Mesure prise en charge</value>
   </data>
   <data name="RecordingLayerDepthMap" xml:space="preserve">
-  <value>Carte de profondeur</value>
+    <value>Carte de profondeur</value>
   </data>
   <data name="RecordingLayerDetailImages" xml:space="preserve">
-  <value>Détail images</value>
+    <value>Détail images</value>
   </data>
   <data name="RecordingLayerGroupName" xml:space="preserve">
-  <value>Street Smart</value>
+    <value>Street Smart</value>
   </data>
   <data name="RecordingLayerName" xml:space="preserve">
-  <value>Enregistrements</value>
+    <value>Enregistrements</value>
   </data>
   <data name="RecordingLayerNoAuthorization" xml:space="preserve">
-  <value>Aucune autorisation</value>
+    <value>Aucune autorisation</value>
   </data>
   <data name="HelpErrorOpenHelpDocument" xml:space="preserve">
-  <value>Une erreur lors de l'ouverture du document d'aide</value>
+    <value>Une erreur lors de l'ouverture du document d'aide</value>
   </data>
   <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
-  <value>Il n'y a pas de lecteur de pdf installé sur votre système</value>
+    <value>Il n'y a pas de lecteur de pdf installé sur votre système</value>
   </data>
   <data name="OpenLocationNotSupportedInScene" xml:space="preserve">
-  <value>Open Location is not supported in Scene</value>
-  </data>
-  <data name="ErrorCreateRenderer" xml:space="preserve">
-    <value>Désactivez la couche d'enregistrement, puis réactivez-la dans l'onglet StreetSmart.</value>
+    <value>Open Location is not supported in Scene</value>
   </data>
 </root>
