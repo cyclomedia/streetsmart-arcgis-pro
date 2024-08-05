@@ -43,6 +43,8 @@ using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
+using ArcGIS.Desktop.Framework.Dialogs;
+using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 
 #if !ARCGISPRO29
 using ArcGIS.Core.Data.Exceptions;
@@ -547,7 +549,18 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         string[] fieldNames = { Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap };
         var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
-        var uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
+        var uniqueValueRenderer = new CIMUniqueValueRenderer();
+        try
+        {
+          uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
+        }
+        catch (Exception ex)
+        {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (CycloMediaLayer.cs) (CreateUniqueValueRendererAsync) {ex}");
+          var res = ThisResources.ResourceManager;
+          string errorCreateRenderer = res.GetString("ErrorCreateRenderer", LanguageSettings.Instance.CultureInfo);
+          MessageBox.Show(errorCreateRenderer);
+        }
         uniqueValueRenderer.Fields = fieldNames;
         uniqueValueRenderer.DefaultLabel = string.Empty;
         uniqueValueRenderer.DefaultSymbol = null;
