@@ -557,9 +557,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         catch (Exception ex)
         {
           EventLog.Write(EventLog.EventType.Error, $"Street Smart: (CycloMediaLayer.cs) (CreateUniqueValueRendererAsync) {ex}");
-          var res = ThisResources.ResourceManager;
-          string errorCreateRenderer = res.GetString("ErrorCreateRenderer", LanguageSettings.Instance.CultureInfo);
-          MessageBox.Show(errorCreateRenderer);
         }
         uniqueValueRenderer.Fields = fieldNames;
         uniqueValueRenderer.DefaultLabel = string.Empty;
