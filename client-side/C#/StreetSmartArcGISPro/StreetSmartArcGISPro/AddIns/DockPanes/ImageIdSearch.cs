@@ -44,7 +44,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     public string ImageId { get; set; }
 
     public ObservableCollection<Recording> ImageInfo
-      => _imageInfo ?? (_imageInfo = new ObservableCollection<Recording>());
+      => _imageInfo ?? (_imageInfo = []);
 
     #endregion
 

@@ -16,33 +16,32 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
 using StreetSmartArcGISPro.CycloMediaLayers;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
-    #region Delegates
+  #region Delegates
 
-    public delegate void VectorLayerDelegate(VectorLayer layer);
+  public delegate void VectorLayerDelegate(VectorLayer layer);
   public delegate void VectorUpdatedDelegate();
 
   #endregion
@@ -158,7 +157,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
       else
       {
-        layerList = new List<VectorLayer>();
+        layerList = [];
         Add(mapView, layerList);
       }
 
@@ -211,7 +210,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       var window = FrameworkApplication.ActiveWindow;
       //GC: Added an additional requirement for measurement tool to activate
-      if (vectorLayer != null && (((PlugIn)window).Caption == "Map" || ((PlugIn)window).Caption == "Carte" 
+      if (vectorLayer != null && (((PlugIn)window).Caption == "Map" || ((PlugIn)window).Caption == "Carte"
         || ((PlugIn)window).Caption == "Create Features" || ((PlugIn)window).Caption == "Créer des entités"))
       {
         await StartMeasurementSketchAsync(vectorLayer, mapView);
@@ -239,7 +238,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             _updateHeight = true;
             await UpdateHeightAsync(mapView);
             Polyline polyline = geometry as Polyline;
-            List<MapPoint> mapLinePoints = new List<MapPoint>();
+            List<MapPoint> mapLinePoints = [];
             bool changesLine = false;
 
             if (polyline != null)
@@ -262,7 +261,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
+#if ARCGISPRO29
+                  polyline = PolylineBuilder.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#else
                   polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#endif
                 });
 
                 await mapView.SetCurrentSketchAsync(polyline);
@@ -279,12 +282,12 @@ namespace StreetSmartArcGISPro.VectorLayers
             _updateHeight = true;
             await UpdateHeightAsync(mapView);
             Polygon polygon = geometry as Polygon;
-            List<MapPoint> mapPolygonPoints = new List<MapPoint>();
+            List<MapPoint> mapPolygonPoints = [];
             bool changesPolygon = false;
 
             if (polygon != null)
             {
-              for(int j = 0; j < polygon.Points.Count; j++)
+              for (int j = 0; j < polygon.Points.Count; j++)
               {
                 MapPoint mapPoint = polygon.Points[j];
 
@@ -308,7 +311,11 @@ namespace StreetSmartArcGISPro.VectorLayers
               {
                 await QueuedTask.Run(() =>
                 {
+#if ARCGISPRO29
+                  polygon = PolygonBuilder.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+#else
                   polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+#endif
                 });
 
                 await mapView.SetCurrentSketchAsync(polygon);
@@ -332,9 +339,9 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
 
         Envelope envelope = mapView.Extent;
-        double centerX = (envelope.XMax - envelope.XMin)/2 + envelope.XMin;
-        double centerY = (envelope.YMax - envelope.YMin)/2 + envelope.YMin;
-        double centerZ = (envelope.ZMax - envelope.ZMin)/2 + envelope.ZMin;
+        double centerX = (envelope.XMax - envelope.XMin) / 2 + envelope.XMin;
+        double centerY = (envelope.YMax - envelope.YMin) / 2 + envelope.YMin;
+        double centerZ = (envelope.ZMax - envelope.ZMin) / 2 + envelope.ZMin;
         MapPoint srcPoint = MapPointBuilderEx.CreateMapPoint(centerX, centerY, centerZ);
         MapPoint dstPoint = await AddHeightToMapPointAsync(srcPoint, mapView);
         ElevationCapturing.ElevationConstantValue = dstPoint.Z;
@@ -360,7 +367,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           if (height != null)
           {
-            dstPoint = MapPointBuilderEx.CreateMapPoint(dstPoint.X, dstPoint.Y, (double) height, dstSpatialReference);
+            dstPoint = MapPointBuilderEx.CreateMapPoint(dstPoint.X, dstPoint.Y, (double)height, dstSpatialReference);
             ProjectionTransformation srcProjection = ProjectionTransformation.Create(dstSpatialReference,
               srcSpatialReference);
             srcPoint = GeometryEngine.Instance.ProjectEx(dstPoint, srcProjection) as MapPoint;
@@ -446,13 +453,13 @@ namespace StreetSmartArcGISPro.VectorLayers
               _closeMeasurement = true;
               await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
             }
-              
+
             if (_currentToolId == "esri_mapping_exploreTool" && args.PreviousID == "streetSmartArcGISPro_openImageTool" && _closeMeasurement == true)
             {
               _closeMeasurement = false;
               await FrameworkApplication.SetCurrentToolAsync("streetSmartArcGISPro_openImageTool");
             }
-              
+
 
             if (_measurementList?.Api != null && await _measurementList.Api.GetApiReadyState())
             {
@@ -478,13 +485,17 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       //GC: Checks if the editing tool was turned off before changing templates
       var active = FrameworkApplication.ActiveTool;
-      if(active == null)
+      if (active == null)
       {
         //force the tool to change manually then go back and turn on the sketch tool
         await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
-        await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+
+        if (args.IncomingTemplate != null)
+          await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+        else
+          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
       }
-      
+
       if (args.IncomingTemplate != null && args.IncomingTemplate.IsActive != false)
       {
         switch (args.IncomingTemplate.DefaultToolID)
@@ -682,14 +693,20 @@ namespace StreetSmartArcGISPro.VectorLayers
         VectorLayer vectorLayer = this[mapView][0];
         await RemoveLayer(vectorLayer, mapView);
       }
+
+      MapViewInitializedEvent.Unsubscribe(OnMapViewInitialized);
+      MapClosedEvent.Unsubscribe(OnMapClosed);
+
+      Remove(mapView);
     }
 
     private async void OnLayersAdded(LayerEventsArgs args)
     {
       foreach (Layer layer in args.Layers)
       {
-        MapView mapView = GetMapViewFromLayer(layer);
-        await AddLayerAsync(layer, mapView ?? MapView.Active);
+        MapView mapView = GetMapViewFromLayer(layer) ?? MapView.Active;
+        if (mapView != null)
+          await AddLayerAsync(layer, mapView);
       }
     }
 

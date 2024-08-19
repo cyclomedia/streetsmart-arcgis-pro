@@ -1,11 +1,11 @@
-﻿using System;
+﻿using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Properties;
+using System;
 using System.Collections.Generic;
 using System.Resources;
 using System.Windows;
 using System.Windows.Controls;
-using ArcGIS.Desktop.Framework.Utilities;
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Properties;
 
 namespace StreetSmartArcGISPro.Utilities
 {
@@ -17,8 +17,8 @@ namespace StreetSmartArcGISPro.Utilities
 
     static LocalizationProvider()
     {
-      _toolTipObjects = new List<DependencyObject>();
-      _contentObjects = new List<DependencyObject>();
+      _toolTipObjects = [];
+      _contentObjects = [];
       _languageSettings = LanguageSettings.Instance;
     }
 
@@ -96,8 +96,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         catch (Exception ex)
         {
-          // ignored
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) {ex}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
         }
 
         if (resourceValue != null)
@@ -120,8 +119,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         catch (Exception ex)
         {
-          // ignored
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) {ex}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
         }
 
         if (resourceValue != null)
@@ -150,8 +148,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         catch (Exception ex)
         {
-          // ignored
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnTooltipChanged) {ex}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnTooltipChanged) error: {ex}");
         }
 
         if (resourceValue != null)

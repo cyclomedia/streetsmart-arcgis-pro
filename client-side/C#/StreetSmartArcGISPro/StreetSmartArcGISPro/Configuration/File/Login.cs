@@ -16,6 +16,9 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework;
+using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
+using StreetSmartArcGISPro.Utilities;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -23,12 +26,6 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
-
-using ArcGIS.Desktop.Framework;
-
-using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
-using StreetSmartArcGISPro.Utilities;
-
 using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
@@ -74,10 +71,10 @@ namespace StreetSmartArcGISPro.Configuration.File
     static Login()
     {
       XmlLogin = new XmlSerializer(typeof(Login));
-      Salt = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+      Salt = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
     }
 
-    public Login()
+    private Login()
     {
       Credentials = false;
       IsOAuth = false;

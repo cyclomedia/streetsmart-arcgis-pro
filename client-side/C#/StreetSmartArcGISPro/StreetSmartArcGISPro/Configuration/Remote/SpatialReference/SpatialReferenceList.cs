@@ -72,13 +72,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
           {
             Load();
           }
-          // ReSharper disable once EmptyGeneralCatchClause
-          catch
+          catch (Exception e)
           {
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Instance) error: {e}");
           }
         }
 
-        return _spatialReferenceList ?? (_spatialReferenceList = new SpatialReferenceList());
+        return _spatialReferenceList ??= [];
       }
     }
 
@@ -117,10 +117,9 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
           spatialRef.Close();
         }
       }
-      catch (Exception ex)
+      catch (Exception e)
       {
-        // ignored
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Load) {ex}");
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Load) error: {e}");
       }
 
       return _spatialReferenceList;

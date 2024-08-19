@@ -16,13 +16,13 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Utilities;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-
-using StreetSmartArcGISPro.Utilities;
-
 using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
@@ -59,9 +59,9 @@ namespace StreetSmartArcGISPro.Configuration.File
           {
             Load();
           }
-          // ReSharper disable once EmptyGeneralCatchClause
-          catch
+          catch (Exception e)
           {
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StoredLayerList.cs) (Instance) error: {e}");
           }
         }
 
@@ -87,7 +87,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       if (SystemIOFile.Exists(FileName))
       {
         var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _storedLayerList = (StoredLayerList) XmlStoredLayerList.Deserialize(streamFile);
+        _storedLayerList = (StoredLayerList)XmlStoredLayerList.Deserialize(streamFile);
         streamFile.Close();
       }
     }

@@ -150,15 +150,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
         if (streetSmartConf != null)
         {
           streetSmartConf.Position = 0;
-          _globeSpotterConfiguration =
-            (GlobeSpotterConfiguration)XmlstreetSmartconfiguration.Deserialize(streetSmartConf);
+          _globeSpotterConfiguration = (GlobeSpotterConfiguration)XmlstreetSmartconfiguration.Deserialize(streetSmartConf);
           streetSmartConf.Close();
         }
       }
-      catch (Exception ex)
+      catch (Exception e)
       {
-        // ignored
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (GlobeSpotterConfiguration.cs) (Load) {ex}");
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (GlobeSpotter.cs) (Instance) error: {e}");
       }
 
       return _globeSpotterConfiguration;

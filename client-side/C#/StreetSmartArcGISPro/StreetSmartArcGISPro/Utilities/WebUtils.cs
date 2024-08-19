@@ -1,4 +1,4 @@
-﻿using CefSharp.DevTools.Debugger;
+using CefSharp.DevTools.Debugger;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote;
 using System;

@@ -16,31 +16,38 @@
  * License along with this library.
  */
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Input;
-
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
-
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
-
+using System;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Resources;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+using ThisResources = StreetSmartArcGISPro.Properties.Resources;
 using WinPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.AddIns.Tools
 {
   class OpenLocation : MapTool
   {
+    #region Members
+
+    private readonly LanguageSettings _languageSettings;
+
+    #endregion
+
     #region Constructor
 
     public OpenLocation()
@@ -49,6 +56,8 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       string cursorPath = $@"StreetSmartArcGISPro.Images.{thisType.Name}.cur";
       Assembly thisAssembly = Assembly.GetAssembly(thisType);
       Stream cursorStream = thisAssembly.GetManifestResourceStream(cursorPath);
+
+      _languageSettings = LanguageSettings.Instance;
 
       if (cursorStream != null)
       {
@@ -68,6 +77,19 @@ namespace StreetSmartArcGISPro.AddIns.Tools
       bool nearest = false;
       string location = string.Empty;
       MapView activeView = MapView.Active;
+
+      if (activeView.Map?.MapType == ArcGIS.Core.CIM.MapType.Scene)
+      {
+        ResourceManager res = ThisResources.ResourceManager;
+        string openLocationNotSupportedInSceneTxt = res.GetString("OpenLocationNotSupportedInScene", _languageSettings.CultureInfo);
+        MessageBox.Show(
+          openLocationNotSupportedInSceneTxt,
+          openLocationNotSupportedInSceneTxt,
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+
+        return false;
+      }
 
       await QueuedTask.Run(async () =>
       {
@@ -103,13 +125,11 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
               if (cycloCoordSystem != null)
               {
-                SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ??
-                                                         await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
+                SpatialReference cycloSpatialReference = cycloCoordSystem.ArcGisSpatialReference ?? await cycloCoordSystem.CreateArcGisSpatialReferenceAsync();
 
                 if (pointSpatialReference.Wkid != cycloSpatialReference.Wkid)
                 {
-                  ProjectionTransformation projection = ProjectionTransformation.Create(pointSpatialReference,
-                    cycloSpatialReference);
+                  ProjectionTransformation projection = ProjectionTransformation.Create(pointSpatialReference, cycloSpatialReference);
                   point = GeometryEngine.Instance.ProjectEx(point, projection) as MapPoint;
                 }
 
@@ -130,23 +150,32 @@ namespace StreetSmartArcGISPro.AddIns.Tools
             }
             else
             {
-              //3.0 code change
+#if ARCGISPRO29
+              foreach (var feature in features)
+#else
               foreach (var feature in features.ToDictionary())
+#endif
               {
-                Layer layer = (Layer)feature.Key;
-                CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
-
-                if (cycloMediaLayer != null)
+                if (feature.Key is Layer layer)
                 {
-                  foreach (long uid in feature.Value)
-                  {
-                    Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
+                  CycloMediaLayer cycloMediaLayer = groupLayer.GetLayer(layer);
 
-                    if (recording.IsAuthorized == null || (bool)recording.IsAuthorized)
+                  if (cycloMediaLayer != null)
+                  {
+                    foreach (long uid in feature.Value)
                     {
-                      location = recording.ImageId;
+                      Recording recording = await cycloMediaLayer.GetRecordingAsync(uid);
+
+                      if (recording.IsAuthorized == null || (bool)recording.IsAuthorized)
+                      {
+                        location = recording.ImageId;
+                      }
                     }
                   }
+                }
+                else
+                {
+                  EventLog.Write(EventLog.EventType.Warning, $"A feature is not a layer, should we cover this? Its: {feature.Key}");
                 }
               }
             }
