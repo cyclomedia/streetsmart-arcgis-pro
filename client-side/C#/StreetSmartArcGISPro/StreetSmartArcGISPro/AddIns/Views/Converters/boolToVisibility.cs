@@ -34,8 +34,7 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if ((Visibility)value == Visibility.Visible) return true;
-      else return false;
+      return (Visibility)value == Visibility.Visible;
     }
 
     #endregion
