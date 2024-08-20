@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
@@ -1098,9 +1098,18 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             toast.ImageSource = Application.Current.Resources["ToastLicensing32"] as System.Windows.Media.ImageSource;
             FrameworkApplication.AddNotification(toast);
           }
+
           if (_login.IsOAuth)
           {
+            try
+          {
             await Api.Destroy(_options);
+            }
+            catch (Exception ex)
+            {
+              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitApi) Login and API Destroy failed: {ex}");
+            }
+
             _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedOut;
           }
         }
