@@ -168,7 +168,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         if (streetSmart.Api != null)
           await QueuedTask.Run(async () => await streetSmart.InitialApi());
         else
-          streetSmart = DockPaneStreetSmart.ActivateStreet();
+          streetSmart = DockPaneStreetSmart.ActivateStreetSmart();
         Login.Instance.Check();
       }
 
@@ -182,7 +182,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       if (Login.Instance.IsOAuth)
       {
         Login.Instance.IsFromSettingsPage = false;
-        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.ActivateStreet();
+        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.ActivateStreetSmart();
       }
     }
 
