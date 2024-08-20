@@ -207,7 +207,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       try
       {
-        DockPaneStreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find("streetSmartArcGISPro_streetSmartDockPane") as DockPaneStreetSmart;
+        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
         await streetSmart.Destroy(true);
       }
       catch (Exception ex)
@@ -224,7 +224,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       try
       {
-        DockPaneStreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find("streetSmartArcGISPro_streetSmartDockPane") as DockPaneStreetSmart;
+        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
         if (streetSmart.Api != null)
         {
           await streetSmart.Destroy(false);

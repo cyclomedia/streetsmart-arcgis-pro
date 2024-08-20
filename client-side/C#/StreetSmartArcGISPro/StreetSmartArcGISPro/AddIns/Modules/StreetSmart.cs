@@ -162,8 +162,8 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (!Login.Instance.IsOAuth && Login.Instance.Credentials)
       {
-        DockPaneStreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find("streetSmartArcGISPro_streetSmartDockPane") as DockPaneStreetSmart;
-        //streetSmart.Api.RestartStreetSmart();
+        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
+
         await streetSmart.Destroy(false);
         if (streetSmart.Api != null)
           await QueuedTask.Run(async () => await streetSmart.InitialApi());

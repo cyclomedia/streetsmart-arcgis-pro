@@ -79,6 +79,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Members
 
+    private static StreetSmart _streetSmart;
     private string _location;
     private bool _isActive;
     private bool _replace;
@@ -195,6 +196,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     #endregion
 
     #region Properties
+
+    public static StreetSmart Current => _streetSmart ??= FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
 
     public IStreetSmartAPI Api { get; set; }
 
@@ -822,6 +825,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         streetSmart.Activate();
       }
+
       return streetSmart;
     }
 
