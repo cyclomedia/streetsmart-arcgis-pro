@@ -54,6 +54,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Login = StreetSmartArcGISPro.Configuration.File.Login;
 using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
@@ -1010,6 +1011,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
 
       string epsgCode = "EPSG:4326";
+
       if (_mapView != null)
       {
         epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
@@ -1022,9 +1024,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         IDomElement element = DomElementFactory.Create();
         if (_login.IsOAuth)
           if (_login.IsFromSettingsPage)
-            _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: false);
+            _options = OptionsFactory.CreateOauth(_login.OAuthUsername, "DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: false);
           else
-            _options = OptionsFactory.CreateOauth("DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: true);
+            _options = OptionsFactory.CreateOauth(_login.OAuthUsername, "DAC6C8E5-77AB-4F04-AFA5-D2A94DE6713F", _apiKey.Value, epsgCode, _languageSettings.Locale, addressSettings, element, loginOauthSilentOnly: true);
         else
           _options = _configuration.UseDefaultConfigurationUrl
            ? OptionsFactory.Create(_login.Username, _login.Password, _apiKey.Value, epsgCode, _languageSettings.Locale,
@@ -1037,15 +1039,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Start api init");
           await Api.Init(_options);
 
-          if (_login.IsOAuth)
-          {
-            _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedIn;
-            _login.Bearer = await Api.GetBearerToken();
-          }
+          _login.CheckAuthenticationStatus(await Api.GetBearerToken());
 
           if (MapView != null)
           {
             GlobeSpotterConfiguration.Load();
+
             _measurementList.Api = Api;
             Api.MeasurementChanged += _measurementList.OnMeasurementChanged;
             Api.MeasurementStarted += _measurementList.OnMeasurementStarted;

@@ -201,6 +201,18 @@ Type de produit:</value>
   <data name="LanguageGeneral" xml:space="preserve">
     <value>Général</value>
   </data>
+	<data name="SigningIn" xml:space="preserve">
+    <value>Signing In</value>
+  </data>
+	<data name="SignedIn" xml:space="preserve">
+    <value>Signed In</value>
+  </data>
+	<data name="SigningOut" xml:space="preserve">
+    <value>Signing Out</value>
+  </data>
+	<data name="SignedOut" xml:space="preserve">
+    <value>Signed Out</value>
+  </data>
   <data name="LoginCheck" xml:space="preserve">
     <value>Vérifier</value>
   </data>

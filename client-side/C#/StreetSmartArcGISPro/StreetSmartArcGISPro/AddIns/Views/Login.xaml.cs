@@ -13,11 +13,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
       InitializeComponent();
     }
 
-    private void OAuthToBeVisible(object sender, ExecutedRoutedEventArgs e)
-    {
-      ((dynamic)DataContext).LoginPage_OAuth();
-    }
-
     private void OnPasswordChanged(object sender, RoutedEventArgs e)
     {
       if (DataContext != null && sender is PasswordBox passwordBox)

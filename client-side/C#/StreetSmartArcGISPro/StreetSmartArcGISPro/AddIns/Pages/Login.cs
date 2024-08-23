@@ -44,85 +44,14 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     private readonly FileLogin _login;
 
-    private bool _isOAuthChecked;
     private readonly string _username;
+    private readonly string _oAuthUsername;
     private readonly string _password;
     private readonly bool _isOAuth;
-    private bool _isSignOutVisible;
-    private Visibility _isOAuthVisible;
-    private Visibility _isOAuthButtonsVisible;
-    private bool _isSignInVisible;
-    private bool _isOAuthEnabled;
-    private Visibility _areLoginElementsVisible;
 
     public ICommand SignInCommand { get; }
     public ICommand SignOutCommand { get; }
 
-    public Visibility IsOAuthVisible
-    {
-      get => _isOAuthVisible;
-      private set
-      {
-        _isOAuthVisible = value;
-        NotifyPropertyChanged();
-      }
-    }
-    public Visibility IsOAuthButtonsVisible
-    {
-      get => _isOAuthButtonsVisible;
-      private set
-      {
-        _isOAuthButtonsVisible = value;
-        NotifyPropertyChanged();
-      }
-    }
-    public bool IsSignInVisible
-    {
-      get => _isSignInVisible;
-      private set
-      {
-        _isSignInVisible = value;
-        NotifyPropertyChanged();
-      }
-    }
-    public bool IsOAuthEnabled
-    {
-      get => _isOAuthEnabled;
-      private set
-      {
-        _isOAuthEnabled = value;
-        NotifyPropertyChanged();
-      }
-    }
-    public bool IsOAuthChecked
-    {
-      get => _login.IsOAuthChecked;
-      private set
-      {
-        IsModified = true;
-        _login.IsOAuthChecked = value;
-        OnStartUpSetSettingsPageLogin();
-        NotifyPropertyChanged();
-      }
-    }
-    public bool IsSignOutVisible
-    {
-      get => _isSignOutVisible;
-      private set
-      {
-        _isSignOutVisible = value;
-        NotifyPropertyChanged();
-      }
-    }
-    public Visibility AreLoginElementsVisible
-    {
-      get => _areLoginElementsVisible;
-      private set
-      {
-        _areLoginElementsVisible = value;
-        NotifyPropertyChanged();
-      }
-    }
     #endregion
 
     #region Constructors
@@ -131,25 +60,21 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       _login = FileLogin.Instance;
       _username = _login.Username;
+      _oAuthUsername = _login.OAuthUsername;
       _password = _login.Password;
       _isOAuth = _login.IsOAuth;
-      _isOAuthChecked = _login.IsOAuthChecked;
 
       _login.PropertyChanged += OnLoginPropertyChanged;
 
-
       SignInCommand = new RelayCommand(async () => await SignInOAuth());
       SignOutCommand = new RelayCommand(async () => await SignOutOAuth());
-
-      OnStartUpSetSettingsPageLogin();
     }
-
 
     private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged)");
 
-      Application.Current.Dispatcher.Invoke(() =>
+      Application.Current.Dispatcher.Invoke(() => //TODO: check if we actually need this here at all
       {
         switch (args.PropertyName)
         {
@@ -159,42 +84,21 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
             switch (_login.OAuthAuthenticationStatus)
             {
-              case FileLogin.OAuthStatus.SigningIn:
-                IsOAuthButtonsVisible = Visibility.Visible;
-                IsOAuthVisible = Visibility.Visible;
-                IsOAuthEnabled = false;
-                IsSignInVisible = false;
-                IsSignOutVisible = false;
-                AreLoginElementsVisible = Visibility.Collapsed;
-                break;
               case FileLogin.OAuthStatus.SignedIn:
-                IsOAuthButtonsVisible = Visibility.Visible;
-                IsOAuthVisible = Visibility.Visible;
-                IsOAuthEnabled = false;
-                IsSignInVisible = false;
-                IsSignOutVisible = true;
-                AreLoginElementsVisible = Visibility.Collapsed;
                 _login.Check();
-                break;
-              case FileLogin.OAuthStatus.SigningOut:
-                IsOAuthButtonsVisible = Visibility.Visible;
-                IsOAuthEnabled = false;
-                IsOAuthVisible = Visibility.Collapsed;
-                IsSignInVisible = false;
-                IsSignOutVisible = false;
-                AreLoginElementsVisible = Visibility.Collapsed;
                 break;
               case FileLogin.OAuthStatus.SignedOut:
-                IsOAuthButtonsVisible = Visibility.Visible;
-                IsOAuthEnabled = true;
-                IsOAuthVisible = Visibility.Visible;
-                IsSignInVisible = true;
-                IsSignOutVisible = false;
-                AreLoginElementsVisible = Visibility.Collapsed;
-                _login.Check();
+                _login.Clear();
                 break;
             }
-            NotifyPropertyChanged();
+
+            NotifyPropertyChanged("OAuthAuthenticationStatus");
+
+            break;
+          case "OAuthUsername":
+
+            NotifyPropertyChanged("Username");
+
             break;
         }
       });
@@ -251,14 +155,26 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     public string Username
     {
-      get => _login.Username;
+      get => _login.IsOAuth ? _login.OAuthUsername : _login.Username;
       set
       {
-        if (_login.Username != value)
+        if (_login.IsOAuth)
         {
-          IsModified = true;
-          _login.Username = value;
-          NotifyPropertyChanged();
+          if (_login.OAuthUsername != value)
+          {
+            IsModified = true;
+            _login.OAuthUsername = value;
+            NotifyPropertyChanged();
+          }
+        }
+        else
+        {
+          if (_login.Username != value)
+          {
+            IsModified = true;
+            _login.Username = value;
+            NotifyPropertyChanged();
+          }
         }
       }
     }
@@ -268,11 +184,11 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       get => _login.Password;
       set
       {
-        if (_login.Password != value)
-        {
-          IsModified = true;
-          _login.Password = value;
-          NotifyPropertyChanged();
+          if (_login.Password != value)
+          {
+            IsModified = true;
+            _login.Password = value;
+            NotifyPropertyChanged();
         }
       }
     }
@@ -296,70 +212,27 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         {
           IsModified = true;
           _login.IsOAuth = value;
-          if (value)
-          {
-            IsOAuthButtonsVisible = Visibility.Visible;
-            IsOAuthVisible = Visibility.Visible;
-            IsOAuthEnabled = true;
-            IsSignInVisible = true;
-            IsSignOutVisible = false;
-            AreLoginElementsVisible = Visibility.Collapsed;
-          }
-          if (!value)
-          {
-            IsOAuthButtonsVisible = Visibility.Collapsed;
-            IsOAuthVisible = Visibility.Visible;
-            IsOAuthEnabled = true;
-            IsSignInVisible = false;
-            IsSignOutVisible = false;
-            AreLoginElementsVisible = Visibility.Visible;
-          }
 
+          NotifyPropertyChanged();
+          NotifyPropertyChanged("Username");
+          NotifyPropertyChanged("OAuthAuthenticationStatus");
+        }
+      }
+    }
+
+    public OAuthStatus OAuthAuthenticationStatus
+    {
+      get => _login.OAuthAuthenticationStatus;
+      set
+      {
+        if (_login.OAuthAuthenticationStatus != value)
+        {
+          _login.OAuthAuthenticationStatus = value;
           NotifyPropertyChanged();
         }
       }
     }
-    public void OnStartUpSetSettingsPageLogin()
-    {
-      if (IsOAuthChecked)
-        if (_login.IsOAuth && _login.OAuthAuthenticationStatus != FileLogin.OAuthStatus.SignedIn)
-        {
-          IsOAuthButtonsVisible = Visibility.Visible;
-          AreLoginElementsVisible = Visibility.Collapsed;
-          IsOAuthEnabled = true;
-          IsSignInVisible = true;
-          IsSignOutVisible = false;
-          IsOAuthVisible = Visibility.Visible;
 
-        }
-        else if (_login.IsOAuth && _login.OAuthAuthenticationStatus == FileLogin.OAuthStatus.SignedIn)
-        {
-          IsOAuthButtonsVisible = Visibility.Visible;
-          AreLoginElementsVisible = Visibility.Collapsed;
-          IsOAuthEnabled = false;
-          IsSignOutVisible = true;
-          IsSignInVisible = false;
-          IsOAuthVisible = Visibility.Visible;
-        }
-        else
-        {
-          IsOAuthButtonsVisible = Visibility.Collapsed;
-          AreLoginElementsVisible = Visibility.Visible;
-          IsSignInVisible = false;
-          IsSignOutVisible = false;
-          IsOAuthEnabled = true;
-          IsOAuthVisible = Visibility.Visible;
-        }
-      else
-      {
-        IsOAuthButtonsVisible = Visibility.Collapsed;
-        AreLoginElementsVisible = Visibility.Visible;
-        IsSignInVisible = false;
-        IsSignOutVisible = false;
-        IsOAuthEnabled = true;
-        IsOAuthVisible = Visibility.Collapsed;
-      }
-    }
     public bool Credentials => _login.Credentials;
 
     #endregion
@@ -368,7 +241,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     protected override Task CommitAsync()
     {
-      if (_login.Username != _username || _login.Password != _password || _login.IsOAuth != _isOAuth || _login.IsOAuthChecked != _isOAuthChecked)
+      if (_login.Username != _username || _login.Password != _password || _login.IsOAuth != _isOAuth || _login.OAuthUsername != _oAuthUsername)
       {
         Save();
       }
@@ -379,9 +252,9 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     protected override Task CancelAsync()
     {
       _login.Username = _username;
+      _login.OAuthUsername = _oAuthUsername;
       _login.Password = _password;
       _login.IsOAuth = _isOAuth;
-      _login.IsOAuthChecked = _isOAuthChecked;
 
       Save();
 
@@ -404,17 +277,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       NotifyPropertyChanged("Credentials");
     }
 
-    public void LoginPage_OAuth()
-    {
-      if (IsOAuthChecked)
-      {
-        IsOAuthChecked = false;
-      }
-      else
-      {
-        IsOAuthChecked = true;
-      }
-    }
     #endregion
   }
 }
