@@ -108,6 +108,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private async Task SignOutOAuth()
     {
       _login.OAuthAuthenticationStatus = OAuthStatus.SigningOut;
+      _login.OAuthUsername = string.Empty;
 
       try
       {

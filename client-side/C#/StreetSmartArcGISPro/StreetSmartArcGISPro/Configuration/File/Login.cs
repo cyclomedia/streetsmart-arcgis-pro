@@ -112,6 +112,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
     }
 
+    [XmlIgnore]
     public string OAuthUsername
     {
       get => _oAuthUsername;
@@ -367,7 +368,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       var handler = new JwtSecurityTokenHandler();
       var jwtSecurityToken = handler.ReadJwtToken(_login.Bearer);
 
-      _oAuthUsername = jwtSecurityToken.Claims.First(x => x.Type == "sub").Value;
+      OAuthUsername = jwtSecurityToken.Claims.First(x => x.Type == "sub").Value;
     }
 
     public void CheckAuthenticationStatus(string bearerToken)
