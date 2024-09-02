@@ -307,7 +307,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     protected override async void OnShow(bool isVisible)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnShow) Start");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnShow)");
 
       var contentControl = ((Views.StreetSmart)Content).StreetSmartApi;
 
@@ -388,6 +388,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void InitializeApi()
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi)");
+
       string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
 
       try
@@ -403,6 +404,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitializeApi): exception: {e}");
         return;
       }
+
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi) Finished");
     }
 
     private void Restart()
@@ -430,6 +433,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           DoHide();
         }
       }
+
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Restart) Finished");
     }
 
     private void DoHide()
@@ -448,11 +453,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (DoHide) Exception: {e}");
       }
+
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (DoHide) Finished");
     }
 
     private async Task RestartStreetSmart(bool reloadApi)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RestartStreetSmart) Start {reloadApi}");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (RestartStreetSmart) {reloadApi}");
 
       EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (RestartStreetSmart) Api is null: {Api == null}");
       EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (RestartStreetSmart) Ready state is: {await Api?.GetApiReadyState()}");
@@ -477,7 +484,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async Task Destroy()
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Destroy) Start");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (Destroy)");
 
       _measurementList.RemoveAll();
 
@@ -770,7 +777,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     internal static StreetSmart ActivateStreetSmart()
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ActivateStreetSmart) Start");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ActivateStreetSmart)");
 
       StreetSmart streetSmart = FrameworkApplication.DockPaneManager.Find(DockPaneId) as StreetSmart;
 
@@ -825,17 +832,19 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (_vectorLayerList.ContainsKey(MapView))
       {
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Start function");
+        EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Will execute");
 
         for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
         {
           VectorLayer vectorLayer = _vectorLayerList[MapView][i];
 
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
+          EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Update vector layer: " + vectorLayer.NameAndUri);
 
           await UpdateVectorLayerAsync(vectorLayer);
         }
       }
+
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerAsync) Finished");
     }
 
     private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
@@ -958,7 +967,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
    
     private async Task InitApi()
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Start");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi)");
 
       if (_constants.ShowDevTools)
       {
@@ -974,7 +983,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (!epsgCode.Equals("EPSG:0"))
       {
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Will be xecuted");
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Will execute");
 
         IAddressSettings addressSettings =
           AddressSettingsFactory.Create(_constants.AddressLanguageCode, _constants.AddressDatabase);
