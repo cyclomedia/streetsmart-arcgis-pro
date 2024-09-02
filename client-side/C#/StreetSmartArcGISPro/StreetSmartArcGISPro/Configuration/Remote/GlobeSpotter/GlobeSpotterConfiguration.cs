@@ -20,7 +20,6 @@ using ArcGIS.Desktop.Framework.Utilities;
 using System;
 using System.IO;
 using System.Net;
-using System.Windows;
 using System.Xml.Serialization;
 
 namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter

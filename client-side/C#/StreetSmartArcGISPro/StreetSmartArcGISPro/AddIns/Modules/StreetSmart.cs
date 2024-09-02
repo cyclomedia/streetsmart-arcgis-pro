@@ -22,6 +22,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Resources;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
@@ -36,18 +38,9 @@ using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Resources;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
+
 using Project = ArcGIS.Desktop.Core.Project;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using ArcGIS.Desktop.Core.Events;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
 {

@@ -1,11 +1,11 @@
-using CefSharp.DevTools.Debugger;
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote;
 using System;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote;
 
 namespace StreetSmartArcGISPro.Utilities
 {
@@ -14,7 +14,6 @@ namespace StreetSmartArcGISPro.Utilities
     #region Constants
     private const int BufferImageLengthService = 2048;
     private const int LeaseTimeOut = 5000;
-    private const int DefaultConnectionLimit = 5;
     #endregion
 
     #region Members

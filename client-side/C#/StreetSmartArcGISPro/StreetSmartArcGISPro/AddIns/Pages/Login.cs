@@ -28,7 +28,6 @@ using ArcGIS.Desktop.Framework.Utilities;
 using FileLogin = StreetSmartArcGISPro.Configuration.File.Login;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using static StreetSmartArcGISPro.Configuration.File.Login;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
@@ -72,19 +71,19 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
 
-      Application.Current.Dispatcher.Invoke(() => //TODO: check if we actually need this here at all
+      Application.Current.Dispatcher.Invoke(() => //TODO: check if we can do this better
       {
         switch (args.PropertyName)
         {
           case "Credentials":
 
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (Credentials) {_login.Credentials}");
+            EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (Credentials) {_login.Credentials}");
 
             break;
 
           case "OAuthAuthenticationStatus":
 
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthAuthenticationStatus) {_login.OAuthAuthenticationStatus}");
+            EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthAuthenticationStatus) {_login.OAuthAuthenticationStatus}");
 
             IsModified = true;
 
@@ -103,7 +102,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
             break;
           case "OAuthUsername":
 
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthUsername) {_login.OAuthUsername}");
+            EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthUsername) {_login.OAuthUsername}");
 
             NotifyPropertyChanged("Username");
 
@@ -121,8 +120,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       try
       {
-        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
-        await streetSmart.SignOutOAuth();
+        await DockPaneStreetSmart.Current.SignOutOAuth();
       }
       catch (Exception ex)
       {
@@ -139,8 +137,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       try
       {
         _login.IsFromSettingsPage = true;
-        DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
-        await streetSmart.SignInOAuth();
+        await DockPaneStreetSmart.Current.SignInOAuth();
       }
       catch (Exception ex)
       {

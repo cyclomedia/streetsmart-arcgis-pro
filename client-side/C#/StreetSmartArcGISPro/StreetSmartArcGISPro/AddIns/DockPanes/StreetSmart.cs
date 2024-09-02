@@ -711,7 +711,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-      if (_login.Credentials && Api != null && await Api.GetApiReadyState()) //|| (Api != null)) && Login.Instance.IsFromOAuthToBasic == true)
+      if (_login.Credentials && Api != null && await Api.GetApiReadyState())
       {
         switch (propertyName)
         {
@@ -748,7 +748,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               }
             }
 
-            //if (!string.IsNullOrEmpty(_epsgCode) && _epsgCode != newEpsgCode)
             if (_epsgCode != newEpsgCode)
             {
               await RestartStreetSmart(false);
@@ -763,12 +762,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             if (!IsActive)
             {
               await CloseViewersAsync();
-            }
-            else
-            {
-              // TODO: decide to leave this or not
-              //GC: This is where the API is restarted after a new map is opened
-              //await OpenImageAsync();
             }
             break;
         }
@@ -974,7 +967,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         Api.ShowDevTools();
       }
 
-      string epsgCode = "EPSG:4326";
+      string epsgCode = "EPSG:4326"; // used for OAuth SignIn when project is not alive yet and no map view at all
 
       if (_mapView != null)
       {
@@ -1030,12 +1023,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
             if (string.IsNullOrEmpty(Location) && _toRestartImages.Count == 0)
             {
-              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) DoHide call");
+              EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (InitApi) DoHide call");
               DoHide();
             }
             else
             {
-              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) OpenImageAsync call");
+              EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (InitApi) OpenImageAsync call");
               await OpenImageAsync();
             }
           }
@@ -1070,7 +1063,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
             catch (Exception ex)
             {
-              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitApi) API Destroy failed after login failure: {ex}");
+              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (InitApi) Destroy failed after login failure: {ex}");
             }
 
             _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedOut;

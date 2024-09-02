@@ -19,7 +19,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows;
 using ArcGIS.Desktop.Framework.Contracts;
 
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
@@ -123,20 +122,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       get => _configuration.UseDefaultStreetSmartUrl;
       set
       {
-        /*if (_login.IsOAuth)
-        {
-            if (!_configuration.UseDefaultStreetSmartUrl)
-            {
-                IsModified = true;
-                _configuration.UseDefaultStreetSmartUrl = true;
-                NotifyPropertyChanged();
-            }
-            else
-            {
-                MessageBox.Show("You only can use default location for StreetSmart because you turned OAuth ON", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        else*/
         if (_configuration.UseDefaultStreetSmartUrl != value)
         {
           IsModified = true;
