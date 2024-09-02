@@ -150,6 +150,12 @@ namespace StreetSmartArcGISPro.Configuration.File
         if (_oAuthAuthenticationStatus != value)
         {
           _oAuthAuthenticationStatus = value;
+
+          if (_oAuthAuthenticationStatus == OAuthStatus.SignedIn)
+          {
+            Check();
+          }
+
           OnPropertyChanged();
         }
       }
@@ -255,6 +261,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     public void Clear()
     {
       GlobeSpotterConfiguration.Delete();
+      Credentials = false;
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

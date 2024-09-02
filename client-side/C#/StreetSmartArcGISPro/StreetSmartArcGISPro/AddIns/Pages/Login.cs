@@ -45,7 +45,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly FileLogin _login;
 
     private readonly string _username;
-    private readonly string _oAuthUsername;
     private readonly string _password;
     private readonly bool _isOAuth;
 
@@ -60,7 +59,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       _login = FileLogin.Instance;
       _username = _login.Username;
-      _oAuthUsername = _login.OAuthUsername;
       _password = _login.Password;
       _isOAuth = _login.IsOAuth;
 
@@ -70,15 +68,23 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       SignOutCommand = new RelayCommand(async () => await SignOutOAuth());
     }
 
-    private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
+    private void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged)");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
 
       Application.Current.Dispatcher.Invoke(() => //TODO: check if we actually need this here at all
       {
         switch (args.PropertyName)
         {
+          case "Credentials":
+
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (Credentials) {_login.Credentials}");
+
+            break;
+
           case "OAuthAuthenticationStatus":
+
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthAuthenticationStatus) {_login.OAuthAuthenticationStatus}");
 
             IsModified = true;
 
@@ -97,6 +103,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
             break;
           case "OAuthUsername":
 
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthUsername) {_login.OAuthUsername}");
+
             NotifyPropertyChanged("Username");
 
             break;
@@ -109,11 +117,12 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       _login.OAuthAuthenticationStatus = OAuthStatus.SigningOut;
       _login.OAuthUsername = string.Empty;
+      _login.Bearer = null;
 
       try
       {
         DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
-        await streetSmart.Destroy(true);
+        await streetSmart.SignOutOAuth();
       }
       catch (Exception ex)
       {
@@ -129,18 +138,9 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       try
       {
+        _login.IsFromSettingsPage = true;
         DockPaneStreetSmart streetSmart = DockPaneStreetSmart.Current;
-        if (streetSmart.Api != null)
-        {
-          await streetSmart.Destroy(false);
-          _login.IsFromSettingsPage = true;
-          await QueuedTask.Run(async () => await streetSmart.InitialApi());
-        }
-        else
-        {
-          _login.IsFromSettingsPage = true;
-          streetSmart = DockPaneStreetSmart.ActivateStreetSmart();
-        }
+        await streetSmart.SignInOAuth();
       }
       catch (Exception ex)
       {
@@ -242,7 +242,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     protected override Task CommitAsync()
     {
-      if (_login.Username != _username || _login.Password != _password || _login.IsOAuth != _isOAuth || _login.OAuthUsername != _oAuthUsername)
+      if (_login.Username != _username || _login.Password != _password || _login.IsOAuth != _isOAuth)
       {
         Save();
       }
@@ -253,7 +253,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     protected override Task CancelAsync()
     {
       _login.Username = _username;
-      _login.OAuthUsername = _oAuthUsername;
       _login.Password = _password;
       _login.IsOAuth = _isOAuth;
 
