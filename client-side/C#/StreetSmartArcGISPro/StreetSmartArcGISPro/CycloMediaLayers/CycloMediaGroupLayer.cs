@@ -16,6 +16,13 @@
  * License along with this library.
  */
 
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,18 +31,9 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.Recordings;
-
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
-  public class CycloMediaGroupLayer: List<CycloMediaLayer>, INotifyPropertyChanged
+  public class CycloMediaGroupLayer : List<CycloMediaLayer>, INotifyPropertyChanged
   {
     #region Members
 
@@ -53,7 +51,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     #region Properties
 
-    private string GroupLayerName
+    private static string GroupLayerName
     {
       get
       {
@@ -67,10 +65,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public MapView MapView { get; }
 
-    public IList<CycloMediaLayer> AllLayers => _allLayers ?? (_allLayers =
-    [
-      new RecordingLayer(this, InitialExtent),
-    ]);
+    public IList<CycloMediaLayer> AllLayers => _allLayers ??= [new RecordingLayer(this, InitialExtent)];
 
     public bool ContainsLayers => Count != 0;
 
@@ -79,7 +74,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       get { return this.Aggregate(false, (current, layer) => layer.InsideScale || current); }
     }
 
-    public Envelope InitialExtent => _initialExtent ?? (_initialExtent = MapView.Extent);
+    public Envelope InitialExtent => _initialExtent ??= MapView.Extent;
 
     #endregion
 
@@ -154,23 +149,22 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public async Task<CycloMediaLayer> AddLayerAsync(string name)
     {
-      CycloMediaLayer thisLayer = null;
-
-      if (!this.Aggregate(false, (current, cycloLayer) => cycloLayer.Name == name || current))
+      if (this.Any(cycloLayer => cycloLayer.Name == name))
       {
-        thisLayer = AllLayers.Aggregate<CycloMediaLayer, CycloMediaLayer>
-          (null, (current, checkLayer) => (checkLayer.Name == name) ? checkLayer : current);
-
-        if (thisLayer != null)
-        {
-          Add(thisLayer);
-          await thisLayer.AddToLayersAsync();
-          // ReSharper disable once ExplicitCallerInfoArgument
-          NotifyPropertyChanged(nameof(Count));
-          FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
-        }
+        return null;
       }
 
+      var thisLayer = AllLayers.FirstOrDefault(checkLayer => checkLayer.Name == name);
+      if (thisLayer == null)
+      {
+        return null;
+      }
+
+      Add(thisLayer);
+      await thisLayer.AddToLayersAsync();
+      // ReSharper disable once ExplicitCallerInfoArgument
+      NotifyPropertyChanged(nameof(Count));
+      FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
       return thisLayer;
     }
 
@@ -264,7 +258,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
       }
 
-      result = result != null ? result/Math.Max(count, 1) : null;
+      result = result != null ? result / Math.Max(count, 1) : null;
       return result;
     }
 
