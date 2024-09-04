@@ -216,22 +216,17 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       Setting config = ProjectList.Instance.GetSettings(MapView);
       MySpatialReference spatialReferenceRecording = config.RecordingLayerCoordinateSystem;
 
-      if (spatialReferenceRecording == null)
+      if (spatialReferenceRecording == null && map != null)
       {
-        if (map != null)
-        {
-          spatialReference = map.SpatialReference;
-        }
+        spatialReference = map.SpatialReference;
       }
       else
       {
-        spatialReference = spatialReferenceRecording.ArcGisSpatialReference ??
-                           await spatialReferenceRecording.CreateArcGisSpatialReferenceAsync();
+        spatialReference = spatialReferenceRecording.ArcGisSpatialReference ?? await spatialReferenceRecording.CreateArcGisSpatialReferenceAsync();
       }
 
       int wkid = spatialReference?.Wkid ?? 0;
-      string mapName = map?.Name;
-      string fixedMapName = fixMapNameByReplacingSpecialCharacters(mapName);
+      string fixedMapName = FixMapNameByReplacingSpecialCharacters(map?.Name);
       string fcNameWkid = string.Concat(FcName, fixedMapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
@@ -477,51 +472,45 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        using (FeatureClass featureClass = Layer?.GetFeatureClass())
+        using FeatureClass featureClass = Layer?.GetFeatureClass();
+        if (featureClass != null)
         {
-          if (featureClass != null)
+          const double searchBox = 25.0;
+          double xMin = x - searchBox;
+          double xMax = x + searchBox;
+          double yMin = y - searchBox;
+          double yMax = y + searchBox;
+          Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, xMax, yMin, yMax);
+
+          SpatialQueryFilter spatialFilter = new SpatialQueryFilter
           {
-            const double searchBox = 25.0;
-            double xMin = x - searchBox;
-            double xMax = x + searchBox;
-            double yMin = y - searchBox;
-            double yMax = y + searchBox;
-            Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, xMax, yMin, yMax);
+            FilterGeometry = envelope,
+            SpatialRelationship = SpatialRelationship.Contains,
+            SubFields = $"{Recording.FieldGroundLevelOffset}, {Recording.FieldHeight}, SHAPE"
+          };
 
-            SpatialQueryFilter spatialFilter = new SpatialQueryFilter
+          using RowCursor existsResult = featureClass.Search(spatialFilter, false);
+          int groundLevelId = existsResult.FindField(Recording.FieldGroundLevelOffset);
+          int heightId = existsResult.FindField(Recording.FieldHeight);
+
+          while (existsResult.MoveNext())
+          {
+            using Row row = existsResult.Current;
+            double? groundLevel = row?.GetOriginalValue(groundLevelId) as double?;
+            double heightValue = row?.GetOriginalValue(heightId) as double? ?? 0.0;
+            const double tolerance = 0.01;
+
+            if (groundLevel != null)
             {
-              FilterGeometry = envelope,
-              SpatialRelationship = SpatialRelationship.Contains,
-              SubFields = $"{Recording.FieldGroundLevelOffset}, {Recording.FieldHeight}, SHAPE"
-            };
+              Feature feature = row as Feature;
+              Geometry geometry = feature?.GetShape();
+              MapPoint point = geometry as MapPoint;
+              double height = Math.Abs(heightValue) < tolerance ? point?.Z ?? 0 : heightValue;
 
-            using (RowCursor existsResult = featureClass.Search(spatialFilter, false))
-            {
-              int groundLevelId = existsResult.FindField(Recording.FieldGroundLevelOffset);
-              int heightId = existsResult.FindField(Recording.FieldHeight);
-
-              while (existsResult.MoveNext())
-              {
-                using (Row row = existsResult.Current)
-                {
-                  double? groundLevel = row?.GetOriginalValue(groundLevelId) as double?;
-                  double heightValue = row?.GetOriginalValue(heightId) as double? ?? 0.0;
-                  const double tolerance = 0.01;
-
-                  if (groundLevel != null)
-                  {
-                    Feature feature = row as Feature;
-                    Geometry geometry = feature?.GetShape();
-                    MapPoint point = geometry as MapPoint;
-                    double height = Math.Abs(heightValue) < tolerance ? point?.Z ?? 0 : heightValue;
-
-                    // ReSharper disable once AccessToModifiedClosure
-                    result = result ?? 0.0;
-                    result = result + height - ((double)groundLevel);
-                    count++;
-                  }
-                }
-              }
+              // ReSharper disable once AccessToModifiedClosure
+              result = result ?? 0.0;
+              result = result + height - ((double)groundLevel);
+              count++;
             }
           }
         }
@@ -921,9 +910,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     private async void OnLayersRemoved(LayerEventsArgs args)
     {
-      IEnumerable<Layer> layers = args.Layers;
-      bool contains = layers.Aggregate(false, (current, layer) => (layer == Layer) || current);
-
+      bool contains = args.Layers.Any(layer => layer == Layer);
       if (contains)
       {
         await _cycloMediaGroupLayer.RemoveLayerAsync(Name, false);
@@ -941,16 +928,19 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public string fixMapNameByReplacingSpecialCharacters(string mapName)
+    public static string FixMapNameByReplacingSpecialCharacters(string mapName)
     {
-      char[] charsToReplace = {
-   ' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+',
-   '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'
-  };
+      if (mapName == null)
+      {
+        return string.Empty;
+      }
+
+      char[] charsToReplace = [' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+', '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'];
       foreach (char c in charsToReplace)
       {
-        mapName = mapName?.Replace(c, '_') ?? string.Empty;
+        mapName = mapName.Replace(c, '_');
       }
+
       return mapName;
     }
     #endregion
