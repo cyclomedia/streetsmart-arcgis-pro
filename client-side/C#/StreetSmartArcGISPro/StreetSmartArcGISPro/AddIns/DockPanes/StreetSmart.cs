@@ -863,14 +863,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           //GC: create transparency value here
           string layerName = vectorLayer.Name;
           string layerNameAndUri = vectorLayer.NameAndUri;
-          bool hasCycloramaVisibility = _storedLayerList.GetVisibility(layerNameAndUri);
           bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
           double transparency = vectorLayer.Layer.Transparency;
-
-          if (!hasCycloramaVisibility)
-          {
-            await vectorLayer.GeoJsonToOld();
-          }
 
           IFeatureCollection geoJson = vectorLayer.GeoJson;
           IStyledLayerDescriptor sld = vectorLayer.Sld;
