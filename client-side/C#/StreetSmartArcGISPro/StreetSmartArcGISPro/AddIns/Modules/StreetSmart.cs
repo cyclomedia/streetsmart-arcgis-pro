@@ -38,6 +38,8 @@ using System.Windows;
 using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using Project = ArcGIS.Desktop.Core.Project;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using StreetSmartArcGISPro.Logging;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
 {
@@ -54,6 +56,11 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     #endregion
 
     #region Properties
+
+    public static IDisposable SentrySdkInit =
+      _configuration.UseSentryLogging ?
+      EventLog.InitializeSentry(_configuration.SentryDsnUrl) :
+      null;
 
     /// <summary>
     /// Retrieve the singleton instance to this module here
@@ -474,7 +481,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void HandleException(string exceptionSource, Exception ex)
     {
-      EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
     }
 
     #endregion

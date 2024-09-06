@@ -24,7 +24,6 @@ using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.CycloMediaLayers;
@@ -34,6 +33,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using StreetSmartArcGISPro.Logging;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
@@ -484,7 +484,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (args.IncomingTemplate != null)
           await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
         else
-          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
       }
 
       if (args.IncomingTemplate != null && args.IncomingTemplate.IsActive != false)

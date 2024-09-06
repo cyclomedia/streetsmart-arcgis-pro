@@ -16,7 +16,8 @@
  * License along with this library.
  */
 
-using ArcGIS.Desktop.Framework.Utilities;
+
+using StreetSmartArcGISPro.Logging;
 
 namespace StreetSmartArcGISPro.AddIns.Views
 {
@@ -35,7 +36,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
       catch(System.Exception e)
       {
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmartApi.cs) (Constructor) error: {e}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmartApi.cs) (Constructor) error: {e}");
         return;
       }
     }

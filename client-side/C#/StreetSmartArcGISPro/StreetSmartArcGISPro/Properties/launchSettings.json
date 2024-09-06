@@ -2,7 +2,8 @@
   "profiles": {
     "StreetSmart": {
       "commandName": "Executable",
-      "executablePath": "C:\\Program Files\\ArcGIS\\Pro\\bin\\ArcGISPro.exe"
+      "executablePath": "C:\\Program Files\\ArcGIS\\Pro\\bin\\ArcGISPro.exe",
+      "commandLineArgs": "/enablediagnostics"
     },
     "StreetSmart with diagnostics": {
       "commandName": "Executable",
