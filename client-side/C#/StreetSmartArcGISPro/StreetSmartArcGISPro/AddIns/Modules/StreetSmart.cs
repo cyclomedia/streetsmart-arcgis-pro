@@ -39,6 +39,8 @@ using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Project = ArcGIS.Desktop.Core.Project;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using StreetSmartArcGISPro.Logging;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
 {

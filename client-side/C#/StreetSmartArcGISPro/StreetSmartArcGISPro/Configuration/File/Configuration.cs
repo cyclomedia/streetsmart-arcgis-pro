@@ -162,6 +162,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private static string FileName => Path.Combine(FileUtils.FileDir, "Configuration.xml");
 
+
     #endregion
 
     #region Functions

@@ -37,6 +37,7 @@ namespace StreetSmartArcGISPro.Logging
     public static void Write(EventLogLevel type, string entry, bool flush = false, [CallerMemberName] string methodName = "")
     {
       ArcGIS.Desktop.Framework.Utilities.EventLog.Write(MapEventLogTypeToEventLog(type), entry, flush);
+      SentryLevel loggingLevel = MapEventLogTypeToSentryLevel(type);
 
       if(!SentrySdk.IsEnabled)
       {

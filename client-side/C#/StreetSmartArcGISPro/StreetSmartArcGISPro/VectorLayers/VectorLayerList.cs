@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using StreetSmartArcGISPro.Logging;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
