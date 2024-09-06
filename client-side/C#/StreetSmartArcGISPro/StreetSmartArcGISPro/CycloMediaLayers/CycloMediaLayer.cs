@@ -41,6 +41,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
+using StreetSmartArcGISPro.Logging;
 
 
 
