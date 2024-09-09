@@ -246,6 +246,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         var layersByName = map.FindLayers(Name);
         bool leave = false;
 
+        Layer = layersByName.OfType<FeatureLayer>().FirstOrDefault();
         foreach (Layer layer in layersByName)
         {
           if (layer is FeatureLayer featureLayer)
@@ -667,10 +668,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             string idField = Recording.ObjectId;
             var exists = new Dictionary<string, long>();
 
-            using (FeatureClass featureClass = Layer?.GetFeatureClass())
-            {
-              if (featureClass != null)
+            using FeatureClass featureClass = Layer?.GetFeatureClass();
+            if (featureClass == null)
               {
+              return editOperation;
+            }
+
                 SpatialQueryFilter spatialFilter = new SpatialQueryFilter
                 {
                   FilterGeometry = envelope,
@@ -684,8 +687,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                   while (existsResult.MoveNext())
                   {
-                    using (Row row = existsResult.Current)
-                    {
+                using Row row = existsResult.Current;
                       string recValue = row?.GetOriginalValue(imId) as string;
 
                       if (!string.IsNullOrEmpty(recValue) && !exists.ContainsKey(recValue))
@@ -695,7 +697,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                       }
                     }
                   }
-                }
 
                 FeatureClassDefinition definition = featureClass.GetDefinition();
                 SpatialReference spatialReference = definition.GetSpatialReference();
@@ -703,10 +704,13 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                 foreach (Recording recording in recordings)
                 {
                   Location location = recording?.Location;
-                  RecordingPoint point = location?.Point;
+              var point = location?.Point;
 
-                  if (location != null && point != null)
+              if (location == null || point == null)
                   {
+                continue;
+              }
+
                     if (!exists.ContainsKey((string)recording.FieldToItem(idField)))
                     {
                       if (Filter(recording))
@@ -729,15 +733,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                       }
                     }
                   }
-                }
 
                 foreach (var row in exists)
                 {
                   EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) delete element from database: {row.Value}, {row.Key}");
                   editOperation.Delete(Layer, row.Value);
                 }
-              }
-            }
+
+            return editOperation;
           }
         }
 
@@ -747,14 +750,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public static void ResetYears(FeatureLayer layer)
     {
-      if (layer != null)
-      {
-        if (YearMonth.ContainsKey(layer))
+      if (layer != null && YearMonth.ContainsKey(layer))
         {
           YearMonth[layer].Clear();
         }
       }
-    }
 
     protected CIMMarker GetPipSymbol(Color color)
     {

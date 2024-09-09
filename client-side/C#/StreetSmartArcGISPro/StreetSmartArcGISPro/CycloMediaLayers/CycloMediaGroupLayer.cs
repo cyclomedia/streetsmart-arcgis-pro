@@ -37,7 +37,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
   {
     #region Members
 
-    private IList<CycloMediaLayer> _allLayers;
+    private IList<CycloMediaLayer> _acceptableLayers;
     private bool _updateVisibility;
     private Envelope _initialExtent;
 
@@ -65,7 +65,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public MapView MapView { get; }
 
-    public IList<CycloMediaLayer> AllLayers => _allLayers ??= [new RecordingLayer(this, InitialExtent)];
+    public IList<CycloMediaLayer> AcceptableLayers => _acceptableLayers ??= [new RecordingLayer(this, InitialExtent)];
 
     public bool ContainsLayers => Count != 0;
 
@@ -101,26 +101,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         var layers = map.GetLayersAsFlattenedList();
         var layersForGroupLayer = map.FindLayers(GroupLayerName);
-        bool leave = false;
-
-        foreach (Layer layer in layersForGroupLayer)
-        {
-          if (layer is GroupLayer groupLayer)
-          {
-            if (!leave)
-            {
-              GroupLayer = groupLayer;
-              leave = true;
-            }
-          }
-          else
-          {
+        GroupLayer = layersForGroupLayer.OfType<GroupLayer>().FirstOrDefault();
+        var layersToRemove = layersForGroupLayer.Except(GroupLayer == null ? [] : [GroupLayer]);
             await QueuedTask.Run(() =>
             {
-              map.RemoveLayer(layer);
+          map.RemoveLayers(layersToRemove);
             });
-          }
-        }
 
         if (GroupLayer == null)
         {
@@ -133,7 +119,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         foreach (Layer layer in layers)
         {
-          await AddLayerAsync(layer.Name);
+          await AddAcceptableLayerAsync(layer.Name);
         }
       }
 
@@ -147,14 +133,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         (current, layerCheck) => layerCheck.Layer == layer ? layerCheck : current);
     }
 
-    public async Task<CycloMediaLayer> AddLayerAsync(string name)
+    public async Task<CycloMediaLayer> AddAcceptableLayerAsync(string name)
     {
       if (this.Any(cycloLayer => cycloLayer.Name == name))
       {
         return null;
       }
 
-      var thisLayer = AllLayers.FirstOrDefault(checkLayer => checkLayer.Name == name);
+      var thisLayer = AcceptableLayers.FirstOrDefault(checkLayer => checkLayer.Name == name);
       if (thisLayer == null)
       {
         return null;
@@ -268,7 +254,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         _updateVisibility = true;
 
-        foreach (var layer in AllLayers)
+        foreach (var layer in AcceptableLayers)
         {
           if (!this.Aggregate(false, (current, visLayer) => current || visLayer == layer))
           {
