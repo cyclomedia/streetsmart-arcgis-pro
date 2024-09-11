@@ -48,7 +48,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     private readonly SpatialReference _recordingLayerCoordinateSystem;
     private readonly SpatialReference _cycloramaViewerCoordinateSystem;
-
+    private readonly bool? _syncLayerVisibility;
     private readonly int _overlayDrawDistance;
 
     #endregion
@@ -68,6 +68,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _cycloramaViewerCoordinateSystem = _settings.CycloramaViewerCoordinateSystem;
 
       _overlayDrawDistance = _settings.OverlayDrawDistance;
+      _syncLayerVisibility = _settings.SyncLayerVisibility;
     }
 
     ~Settings()
@@ -111,6 +112,23 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         {
           IsModified = true;
           _settings.RecordingLayerCoordinateSystem = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Recording layer coordinate system
+    /// </summary>
+    public bool? SyncLayerVisibility
+    {
+      get => _settings.SyncLayerVisibility;
+      set
+      {
+        if (_settings.SyncLayerVisibility != value)
+        {
+          IsModified = true;
+          _settings.SyncLayerVisibility = value;
           NotifyPropertyChanged();
         }
       }

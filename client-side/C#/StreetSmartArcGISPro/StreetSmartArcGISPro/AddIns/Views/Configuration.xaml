@@ -76,7 +76,7 @@
     </StackPanel>
     <StackPanel Grid.Row="2" Margin="5,10,5,0">
       <TextBlock Style="{DynamicResource H6TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ConfigurationVisibility" />
-      <CheckBox util:LocalizationProvider.ContentId="ConfigurationVisibilitySynced" HorizontalAlignment="Stretch" IsChecked="{Binding IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
+      <CheckBox util:LocalizationProvider.ContentId="ConfigurationVisibilitySynced" HorizontalAlignment="Stretch" IsChecked="{Binding IsSyncOfVisibilityEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Margin="5,5,0,0" />
     </StackPanel>
     <StackPanel Grid.Row="3" Margin="5,10,5,0">
       <TextBlock Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="ConfigurationProxyServer" />

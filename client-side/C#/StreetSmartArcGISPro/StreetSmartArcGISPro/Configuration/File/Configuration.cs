@@ -44,7 +44,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     private bool _useDefaultStreetSmartUrl;
     private string _streetSmartLocation;
 
-    private bool _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays;
+    private bool _isSyncOfVisibilityEnabled;
 
     private bool _useDefaultConfigurationUrl;
     private string _configurationUrlLocation;
@@ -107,14 +107,14 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
     }
 
-    public bool IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays
+    public bool IsSyncOfVisibilityEnabled
     {
-      get => _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays;
+      get => _isSyncOfVisibilityEnabled;
       set
       {
-        if (_isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays != value)
+        if (_isSyncOfVisibilityEnabled != value)
         {
-          _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays = value;
+          _isSyncOfVisibilityEnabled = value;
           OnPropertyChanged();
         }
       }
@@ -201,7 +201,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         _useDefaultConfigurationUrl = true,
         _configurationUrlLocation = string.Empty,
         _useDefaultStreetSmartUrl = true,
-        _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays = true,
+        _isSyncOfVisibilityEnabled = true,
         _streetSmartLocation = string.Empty,
         UseProxyServer = false,
         ProxyAddress = string.Empty,

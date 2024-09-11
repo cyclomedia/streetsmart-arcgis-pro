@@ -863,7 +863,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           //GC: create transparency value here
           string layerName = vectorLayer.Name;
           string layerNameAndUri = vectorLayer.NameAndUri;
-          bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
+          bool visible = CalculateOverlayVisibility(vectorLayer); //vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri); 
+
           double transparency = vectorLayer.Layer.Transparency;
 
           IFeatureCollection geoJson = vectorLayer.GeoJson;
@@ -922,6 +923,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
+    private bool CalculateOverlayVisibility(VectorLayer vectorLayer)
+    {
+      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(_mapView).SyncLayerVisibility;
+      bool visible = syncLayerVisibility ?? _configuration.IsSyncOfVisibilityEnabled
+          ? vectorLayer.IsVisible
+          : _storedLayerList.GetVisibility(vectorLayer.NameAndUri);
+      return visible;
+    }
+
     private async Task RemoveVectorLayerAsync(VectorLayer vectorLayer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (RemoveVectorLayerAsync)");
@@ -935,7 +945,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-#endregion
+    #endregion
 
     #region Event handlers
 
@@ -1511,7 +1521,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       else if (switcher && vectorLayer.Overlay != null)
       {
         //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        _panorama.ToggleOverlay(vectorLayer.Overlay);
+        if (ProjectList.Instance.GetSettings(_mapView).SyncLayerVisibility == true ||
+          (ProjectList.Instance.GetSettings(_mapView).SyncLayerVisibility == null && _configuration.IsSyncOfVisibilityEnabled))
+          _panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 

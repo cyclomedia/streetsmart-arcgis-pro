@@ -28,6 +28,7 @@
 			<groups>
 				<group id="streetSmartArcGISPro_layerGroup" caption="Layer" appearsOnAddInTab="false" keytip="GL">
 					<button refID="streetSmartArcGISPro_recordingLayerButton" size="large" />
+					<button refID="streetSmartArcGISPro_VisibilitySyncing" size="large" />
 				</group>
 				<group id="streetSmartArcGISPro_inquiryGroup" caption="Inquiry" appearsOnAddInTab="false" keytip="GI">
 					<button refID="streetSmartArcGISPro_ImageIdSearchButton" size="large" />
@@ -35,8 +36,7 @@
 				<group id="streetSmartArcGISPro_navigateGroup" caption="Navigate" appearsOnAddInTab="false" keytip="GN">
 					<tool refID="streetSmartArcGISPro_openImageTool" size="large" />
 					<tool refID="esri_mapping_exploreTool" size="large" />
-					<button refID="streetSmartArcGISPro_VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays" size="large" />
-				</group>
+					</group>
 			</groups>
 			<controls>
 				<tool id="streetSmartArcGISPro_openImageTool" caption="Open Location" className="AddIns.Tools.OpenLocation" loadOnClick="false" largeImage="Images\OpenLocation32.png" condition="streetSmartArcGISPro_openImageToolReadyCondition" keytip="GO">
@@ -63,8 +63,8 @@
 						<disabledText />
 					</tooltip>
 				</button>
-				<button id="streetSmartArcGISPro_VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays" caption="Sync the visibility" className="AddIns.Buttons.VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GV">
-					<tooltip heading="Sync the visibility">
+				<button id="streetSmartArcGISPro_VisibilitySyncing" caption="Sync the visibility" className="AddIns.Buttons.VisibilitySyncing" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GV">
+					<tooltip heading="Sync the visibility on project level">
 						Visibility syncing between MapView Layers and Cyclorama Overlays
 						<disabledText />
 					</tooltip>

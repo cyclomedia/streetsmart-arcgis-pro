@@ -9,18 +9,32 @@ using System.Threading.Tasks;
 using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 using FileProjectList = StreetSmartArcGISPro.Configuration.File.ProjectList;
 using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
-  internal class VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays : Button
+  internal class VisibilitySyncing : Button
   {
     private static readonly FileProjectList _projectList = FileProjectList.Instance;
-    private static readonly FileSettings _settings = _projectList.GetSettings(MapView.Active);
+    private static FileSettings _settings = _projectList.GetSettings(MapView.Active);
 
+    protected VisibilitySyncing()
+    {
+      IsChecked = _settings?.SyncLayerVisibility == true ? true : false;
+
+      ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+    }
     protected override void OnClick()
     {
       _settings.SyncLayerVisibility = !(_settings.SyncLayerVisibility ?? false);
       _projectList.Save();
+      IsChecked = !IsChecked;
+    }
+
+    private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
+    {
+      _settings = _projectList.GetSettings(MapView.Active);
+      IsChecked = _settings?.SyncLayerVisibility == true ? true : false;
     }
   }
 }
