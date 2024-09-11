@@ -19,7 +19,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-
+using ArcGIS.Desktop.Internal.Catalog;
 using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
 
 namespace StreetSmartArcGISPro.Configuration.File
@@ -38,11 +38,30 @@ namespace StreetSmartArcGISPro.Configuration.File
     private SpatialReference _cycloramaViewerCoordinateSystem;
     private int _overlayDrawDistance;
     private string _map;
+    private bool? _syncLayerVisibility;
 
     #endregion
 
     #region Properties
-
+    /// <summary>
+    /// Enable/disable of syncing visibility on project level between ArcGIS Pro map layers and cyclorama overlays
+    /// </summary>
+    [XmlElement(IsNullable = true,ElementName = "SyncLayerVisibility")]
+    public bool? SyncLayerVisibility
+    {
+      get
+      {
+        return _syncLayerVisibility;
+      }
+      set
+      {
+        if(_syncLayerVisibility != value)
+        { 
+          _syncLayerVisibility = value;
+          OnPropertyChanged();
+        }
+      } 
+    }
     /// <summary>
     /// Name of the map
     /// </summary>
@@ -149,6 +168,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       var result = new Setting
       {
+        SyncLayerVisibility = null,
         RecordingLayerCoordinateSystem = null,
         CycloramaViewerCoordinateSystem = null,
         OverlayDrawDistance = 30,

@@ -35,6 +35,7 @@
 				<group id="streetSmartArcGISPro_navigateGroup" caption="Navigate" appearsOnAddInTab="false" keytip="GN">
 					<tool refID="streetSmartArcGISPro_openImageTool" size="large" />
 					<tool refID="esri_mapping_exploreTool" size="large" />
+					<button refID="streetSmartArcGISPro_VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays" size="large" />
 				</group>
 			</groups>
 			<controls>
@@ -59,6 +60,12 @@
 				<button id="streetSmartArcGISPro_ImageIdSearchButton" caption="ImageId Search" className="AddIns.Buttons.ImageIdSearch" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GIS">
 					<tooltip heading="ImageId Search">
 						Search for the imageId
+						<disabledText />
+					</tooltip>
+				</button>
+				<button id="streetSmartArcGISPro_VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays" caption="Sync the visibility" className="AddIns.Buttons.VisibilitySyncingOnProjectLevelBetweenMapViewLayersAndCycloramaOverlays" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GV">
+					<tooltip heading="Sync the visibility">
+						Visibility syncing between MapView Layers and Cyclorama Overlays
 						<disabledText />
 					</tooltip>
 				</button>

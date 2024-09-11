@@ -273,4 +273,10 @@ Type de produit:</value>
 	<data name="OpenLocationNotSupportedInScene" xml:space="preserve">
     <value>Open Location is not supported in Scene</value>
   </data>
+	<data name="ConfigurationVisibility" xml:space="preserve">
+    <value>Keep overlays visibility in sync with map view</value>
+  </data>
+	<data name="ConfigurationVisibilitySynced" xml:space="preserve">
+    <value>Sync visibility</value>
+  </data>
 </root>

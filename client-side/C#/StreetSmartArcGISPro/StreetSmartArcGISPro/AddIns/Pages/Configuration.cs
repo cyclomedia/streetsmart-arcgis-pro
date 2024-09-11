@@ -46,6 +46,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly bool _useDefaultStreetSmartUrl;
     private readonly string _streetSmartLocation;
 
+    private readonly bool _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays;
+
     private readonly bool _useProxyServer;
     private readonly string _proxyAddress;
     private readonly int _proxyPort;
@@ -69,6 +71,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       _useDefaultStreetSmartUrl = _configuration.UseDefaultStreetSmartUrl;
       _streetSmartLocation = _configuration.StreetSmartLocation;
+
+      _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays = _configuration.IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays;
 
       _useProxyServer = _configuration.UseProxyServer;
       _proxyAddress = _configuration.ProxyAddress;
@@ -127,6 +131,20 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         {
           IsModified = true;
           _configuration.UseDefaultStreetSmartUrl = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public bool IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays
+    {
+      get => _configuration.IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays;
+      set
+      {
+        if (_configuration.IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays != value)
+        {
+          IsModified = true;
+          _configuration.IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays = value;
           NotifyPropertyChanged();
         }
       }
@@ -278,6 +296,9 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       _configuration.UseDefaultStreetSmartUrl = _useDefaultStreetSmartUrl;
       _configuration.StreetSmartLocation = _streetSmartLocation;
+
+
+      _configuration.IsSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays = _isSyncEnabledForVisibilityBetweenMapViewLayersAndCycloramaOverlays;
 
       _configuration.UseProxyServer = _useProxyServer;
       _configuration.ProxyAddress = _proxyAddress;
