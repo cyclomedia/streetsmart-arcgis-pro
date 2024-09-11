@@ -61,7 +61,7 @@
       <StackPanel x:Name="LoginElementsGroup" Visibility="{Binding AreLoginElementsVisible, UpdateSourceTrigger=PropertyChanged}">
         <DockPanel Margin="5,5,5,0">
           <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,5,5,0"/>
-          <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" IsEnabled="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthAuthenticationStatusToEnabled}}"/>
+          <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" IsEnabled="{Binding IsOAuth, Converter={StaticResource InverseBoolean}}"/>
         </DockPanel>
         <DockPanel Margin="5,5,5,0">
           <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,5,5,0" Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}"/>
