@@ -288,7 +288,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (!string.IsNullOrEmpty(name))
       {
-        await cycloMediaGroupLayer.AddLayerAsync(name);
+        await cycloMediaGroupLayer.AddAcceptableLayerAsync(name);
       }
     }
 

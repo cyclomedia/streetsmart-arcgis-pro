@@ -204,7 +204,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         Layer oldLayer = Layer;
         await CreateFeatureLayerAsync();
         ClearYears();
-        await RemoveLayerAsync(_cycloMediaGroupLayer.GroupLayer, oldLayer);
+        await RemoveLayersAsync(_cycloMediaGroupLayer.GroupLayer, [oldLayer]);
         await RefreshAsync();
       }
     }
@@ -244,24 +244,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       if (map != null)
       {
         var layersByName = map.FindLayers(Name);
-        bool leave = false;
-
         Layer = layersByName.OfType<FeatureLayer>().FirstOrDefault();
-        foreach (Layer layer in layersByName)
-        {
-          if (layer is FeatureLayer featureLayer)
-          {
-            if (!leave)
-            {
-              Layer = featureLayer;
-              leave = true;
-            }
-          }
-          else
-          {
-            await RemoveLayerAsync(map, layer);
-          }
-        }
+        var layersToRemove = layersByName.Except([Layer]);
+        await RemoveLayersAsync(map, layersToRemove);
       }
 
       var project = ArcGISProject.Current;
@@ -322,13 +307,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    private async Task RemoveLayerAsync(ILayerContainerEdit layerContainer, Layer layer)
+    private async Task RemoveLayersAsync(ILayerContainerEdit layerContainer, IEnumerable<ArcGIS.Desktop.Mapping.Layer> layers)
     {
       await QueuedTask.Run(() =>
       {
-        if (layerContainer?.Layers.Contains(layer) ?? false)
+        var intersectLayers = layerContainer?.Layers.Intersect(layers).ToArray();
+        if (layerContainer != null && intersectLayers?.Length > 0)
         {
-          layerContainer.RemoveLayer(layer);
+          layerContainer.RemoveLayers(intersectLayers);
         }
       });
     }
@@ -337,7 +323,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       if (fromGroup)
       {
-        await RemoveLayerAsync(_cycloMediaGroupLayer.GroupLayer, Layer);
+        await RemoveLayersAsync(_cycloMediaGroupLayer.GroupLayer, [Layer]);
       }
 
       Remove();
@@ -535,7 +521,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        string[] fieldNames = { Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap };
+        string[] fieldNames = [Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap];
         var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
         var uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
         uniqueValueRenderer.Fields = fieldNames;

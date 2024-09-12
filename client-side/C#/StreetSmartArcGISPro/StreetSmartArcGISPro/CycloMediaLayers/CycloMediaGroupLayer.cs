@@ -103,10 +103,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         var layersForGroupLayer = map.FindLayers(GroupLayerName);
         GroupLayer = layersForGroupLayer.OfType<GroupLayer>().FirstOrDefault();
         var layersToRemove = layersForGroupLayer.Except(GroupLayer == null ? [] : [GroupLayer]);
-            await QueuedTask.Run(() =>
-            {
+        await QueuedTask.Run(() =>
+        {
           map.RemoveLayers(layersToRemove);
-            });
+        });
 
         if (GroupLayer == null)
         {
@@ -115,11 +115,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             GroupLayer = LayerFactory.Instance.CreateGroupLayer(map, 0, GroupLayerName);
             GroupLayer.SetExpanded(true);
           });
-        }
-
-        foreach (Layer layer in layers)
-        {
-          await AddAcceptableLayerAsync(layer.Name);
         }
       }
 
