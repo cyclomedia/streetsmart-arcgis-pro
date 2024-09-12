@@ -934,7 +934,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-#endregion
+    #endregion
 
     #region Event handlers
 
