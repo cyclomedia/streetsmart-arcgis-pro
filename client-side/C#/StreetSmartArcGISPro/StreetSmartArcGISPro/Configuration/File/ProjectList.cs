@@ -89,7 +89,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       catch (Exception ex)
       {
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Save) error: {ex}");
-      }     
+      }
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -98,7 +98,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     }
 
     private static void Load()
-    {      
+    {
       if (SystemIOFile.Exists(FileName))
       {
         try
