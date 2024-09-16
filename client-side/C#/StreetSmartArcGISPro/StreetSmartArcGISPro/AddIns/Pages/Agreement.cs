@@ -30,7 +30,7 @@ using FileAgreement = StreetSmartArcGISPro.Configuration.File.Agreement;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
-  internal class Agreement: Page
+  internal class Agreement : Page
   {
     #region Events
 

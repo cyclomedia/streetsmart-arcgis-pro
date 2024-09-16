@@ -18,23 +18,37 @@
 
 using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
+using static StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
-  class BoolToVisibility : IValueConverter
+  class OAuthSignStatus : IValueConverter
   {
-    #region IMultiValueConverter Members
+    #region IValueConverter Members
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && (bool)value ? Visibility.Visible : Visibility.Hidden;
+      var status = (OAuthStatus)value;
+
+      switch (status)
+      {
+        case OAuthStatus.SigningIn:
+          return "SigningIn";
+        case OAuthStatus.SignedIn:
+          return "SignedIn";
+        case OAuthStatus.SigningOut:
+          return "SigningOut";
+        case OAuthStatus.SignedOut:
+          return "SignedOut";
+        default:
+          return string.Empty;
+      }
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return (Visibility)value == Visibility.Visible;
+      throw new NotSupportedException();
     }
 
     #endregion

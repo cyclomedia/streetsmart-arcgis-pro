@@ -63,8 +63,10 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.0.0.36056" />
+		<PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
 		<PackageReference Include="StreetSmart.WPF" Version="24.7.1-rc1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
 		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
 	</ItemGroup>
 	<ItemGroup>
@@ -77,4 +79,13 @@
 			<DependentUpon>Resources.resx</DependentUpon>
 		</Compile>
 	</ItemGroup>
+	<Target Name="CopyLocalesInArcGisProAddInX" BeforeTargets="PackageArcGISContents">
+		<Error Condition="!Exists('$(TargetDir)locales')" Text="Expected CefSharp locales folder is missing." /> 
+		<ItemGroup>
+			<!-- this is WORKAROUND for having CefSharp .pak files delivered properly to the AddInX package -->
+			<!-- this target is needed to ensure CefSharp runtime pak files are restored properly (even in other applications using .NET API nuget package) -->
+			<LocalesSourceFiles Include="$(TargetDir)locales\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(LocalesSourceFiles)" DestinationFolder="$(IntermediateOutputPath)temp_archive\Install\locales" />
+	</Target>
 </Project>
