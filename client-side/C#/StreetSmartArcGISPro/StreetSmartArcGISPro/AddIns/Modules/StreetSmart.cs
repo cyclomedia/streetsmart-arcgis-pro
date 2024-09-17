@@ -69,7 +69,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
-    public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
+    public CycloMediaGroupLayer GetOrAddCycloMediaGroupLayer(MapView mapView)
     {
       if (mapView == null)
       {
@@ -198,12 +198,12 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         return false;
       }
 
-      return GetCycloMediaGroupLayer(mapView).InsideScale;
+      return GetOrAddCycloMediaGroupLayer(mapView).InsideScale;
     }
 
     private bool ContainsCycloMediaLayer(MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(mapView);
       return mapView?.Map?.Layers.Aggregate(false, (current, layer) =>
                  (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
                   layer.Name == GroupLayerName) || current) ?? false;
@@ -226,7 +226,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (closeMap)
       {
-        CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+        CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(mapView);
 
         if (cycloMediaGroupLayer != null)
         {
@@ -285,7 +285,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public async Task AddLayersAsync(string name, MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(mapView);
 
       if (cycloMediaGroupLayer.Count == 0)
       {
@@ -300,13 +300,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public async Task RemoveLayerAsync(string name, MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(mapView);
       await cycloMediaGroupLayer.RemoveLayerAsync(name, true);
     }
 
     public async Task RemoveLayersAsync(bool fromMap, MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(mapView);
 
       if (cycloMediaGroupLayer != null)
       {
@@ -330,7 +330,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private async void OnMapViewInitialized(MapViewEventArgs args)
     {
-      CycloMediaGroupLayer cycloMediaLayer = GetCycloMediaGroupLayer(args.MapView);
+      CycloMediaGroupLayer cycloMediaLayer = GetOrAddCycloMediaGroupLayer(args.MapView);
 
       if (cycloMediaLayer != null)
       {
@@ -381,7 +381,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (args.PropertyName == "RecordingLayerCoordinateSystem")
       {
-        CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(MapView.Active);
+        CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(MapView.Active);
 
         foreach (var layer in cycloMediaGroupLayer)
         {
@@ -450,7 +450,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (args.IncomingView != null)
       {
-        CycloMediaGroupLayer groupLayer = GetCycloMediaGroupLayer(args.IncomingView);
+        CycloMediaGroupLayer groupLayer = GetOrAddCycloMediaGroupLayer(args.IncomingView);
 
         if (groupLayer.ContainsLayers)
         {

@@ -148,7 +148,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       FeatureLayer featureLayer = layer as FeatureLayer;
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetOrAddCycloMediaGroupLayer(mapView);
       List<VectorLayer> layerList;
 
       if (ContainsKey(mapView))
@@ -362,7 +362,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (GeometryEngine.Instance.ProjectEx(srcPoint, dstProjection) is MapPoint dstPoint)
         {
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-          CycloMediaGroupLayer cycloMediaGroupLayer = streetSmart.GetCycloMediaGroupLayer(mapView);
+          CycloMediaGroupLayer cycloMediaGroupLayer = streetSmart.GetOrAddCycloMediaGroupLayer(mapView);
           double? height = await cycloMediaGroupLayer.GetHeightAsync(dstPoint.X, dstPoint.Y);
 
           if (height != null)

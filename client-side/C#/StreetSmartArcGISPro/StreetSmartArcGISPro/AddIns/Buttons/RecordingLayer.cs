@@ -63,7 +63,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
 
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      CycloMediaGroupLayer groupLayer = streetSmart.GetCycloMediaGroupLayer(_mapView);
+      CycloMediaGroupLayer groupLayer = streetSmart.GetOrAddCycloMediaGroupLayer(_mapView);
 
       if (groupLayer != null)
       {
@@ -108,7 +108,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
       _mapView = args.IncomingView;
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
 
-      CycloMediaGroupLayer outGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.OutgoingView);
+      CycloMediaGroupLayer outGroupLayer = streetSmart.GetOrAddCycloMediaGroupLayer(args.OutgoingView);
 
       if (outGroupLayer != null)
       {
@@ -117,7 +117,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
 
       if (args.IncomingView != null)
       {
-        CycloMediaGroupLayer inGroupLayer = streetSmart.GetCycloMediaGroupLayer(args.IncomingView);
+        CycloMediaGroupLayer inGroupLayer = streetSmart.GetOrAddCycloMediaGroupLayer(args.IncomingView);
 
         if (inGroupLayer != null)
         {
