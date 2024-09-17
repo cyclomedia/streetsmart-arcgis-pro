@@ -50,7 +50,7 @@
 						<disabledText />
 					</tooltip>
 				</button>
-				<button id="streetSmartArcGISPro_recordingLayerButton" caption="Recording Layer" className="AddIns.Buttons.RecordingLayer" loadOnClick="false" largeImage="Images\RecordingLayer32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GR">
+				<button id="streetSmartArcGISPro_recordingLayerButton" caption="Recording Layer" className="AddIns.Buttons.RecordingLayerButton" loadOnClick="false" largeImage="Images\RecordingLayer32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GR">
 					<tooltip heading="Recording Layer">
 						Add recording layer to the map
 						<disabledText />
