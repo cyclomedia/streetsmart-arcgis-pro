@@ -305,7 +305,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       base.OnHidden();
     }
 
-    protected override async void OnShow(bool isVisible)
+    protected override void OnShow(bool isVisible)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnShow)");
 
@@ -875,12 +875,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             {
               try
               {
-                if  (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
+                if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
                 {
                   feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
                 }
               }
-              catch  (Exception e)
+              catch (Exception e)
               {
                 EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
                 return;
@@ -951,7 +951,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       await InitApi();
     }
-   
+
     private async Task InitApi()
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi)");
