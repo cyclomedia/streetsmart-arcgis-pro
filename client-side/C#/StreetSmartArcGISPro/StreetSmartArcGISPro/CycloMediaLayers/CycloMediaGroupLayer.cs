@@ -116,6 +116,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             GroupLayer.SetExpanded(true);
           });
         }
+
+        foreach (Layer layer in layers)
+        {
+          await AddAcceptableLayerAsync(layer.Name);
+        }
       }
 
       MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertiesChanged);

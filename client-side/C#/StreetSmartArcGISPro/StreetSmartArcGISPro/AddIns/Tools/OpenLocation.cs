@@ -112,7 +112,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
           var features = activeView.GetFeatures(envelope);
 
           ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-          CycloMediaGroupLayer groupLayer = streetSmart?.GetCycloMediaGroupLayer(activeView);
+          CycloMediaGroupLayer groupLayer = streetSmart?.GetOrAddCycloMediaGroupLayer(activeView);
 
           if (features != null && groupLayer != null)
           {
