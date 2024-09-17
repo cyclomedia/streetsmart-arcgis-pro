@@ -124,6 +124,12 @@
   <data name="StreetSmartOnLoginFailed" xml:space="preserve">
     <value>Can not login to Street Smart</value>
   </data>
+  <data name="StreetSmartOnLoginFailedTitle" xml:space="preserve">
+    <value>Attention!</value>
+  </data>
+  <data name="StreetSmartOnLoginFailedMessage" xml:space="preserve">
+    <value>You need to LogIn to StreetSmart in Settings->StreetSmart->Login</value>
+  </data>
   <data name="SystemSearch16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SystemSearch16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -205,6 +211,18 @@
   <data name="LanguageGeneral" xml:space="preserve">
     <value>General</value>
   </data>
+  <data name="SigningIn" xml:space="preserve">
+    <value>Signing In</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Signed In</value>
+  </data>
+  <data name="SigningOut" xml:space="preserve">
+    <value>Signing Out</value>
+  </data>
+  <data name="SignedOut" xml:space="preserve">
+    <value>Signed Out</value>
+  </data>
   <data name="LoginCheck" xml:space="preserve">
     <value>Check</value>
   </data>
@@ -225,6 +243,15 @@
   </data>
   <data name="LoginUsername" xml:space="preserve">
     <value>Username</value>
+  </data>
+  <data name="LoginOAuth" xml:space="preserve">
+    <value>Use Single Sign-on</value>
+  </data>
+  <data name="LoginSignInOAuth" xml:space="preserve">
+    <value>Sign In</value>
+  </data>
+  <data name="LoginSignOutOAuth" xml:space="preserve">
+    <value>Sign Out</value>
   </data>
   <data name="SettingsCoordinateSystems" xml:space="preserve">
     <value>Coordinate systems</value>
@@ -274,7 +301,7 @@
   <data name="HelpNoPdfViewerInstalledOnYourSystem" xml:space="preserve">
     <value>There is no pdf viewer installed on your system</value>
   </data>
-	<data name="OpenLocationNotSupportedInScene" xml:space="preserve">
+  <data name="OpenLocationNotSupportedInScene" xml:space="preserve">
     <value>Open Location is not supported in Scene</value>
   </data>
 </root>

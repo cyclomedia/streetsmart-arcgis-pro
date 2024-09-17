@@ -78,3 +78,72 @@ Bugs / Uitbreidingen in het meten:
 
 - Bug met streetSmart, als 2 viewers open, problemen met het zien van lijn vector lagen
 - Kijken wat we met drawpoint moeten, of deze misschien kan worden weggehaald
+
+------------------------------------------------------------------------------------------------
+
+Street Smart to do:
+
+Remove the streetSmart libraries
+Remove the streetSmart links names in the resources
+Change streetSmart32 symbol to StreetSmart32 symbol
+Update APIKey
+Update Agreement
+
+Migration to ArcGIS Pro 2.0:
+
+Test if all functionality still works well, especially measuring tests, restarting and ending up in the same state, test if that also works well.
+Test if the geodatabase link via file works properly
+Review all xaml styles and ensure they are properly aligned with ArcGIS Pro 2.0
+
+Recent Recording Layer:
+
+Remove the limit of 10 characters per item in the database.
+Also place the recent recording layer button in the layer tab of the map group.
+Rotation needs to be added to PIP images.
+
+Open Location Tool:
+
+The open location tool should lose focus when it can no longer be used.
+
+Historical data:
+
+It should be possible to indicate color markers on the slider to show which year has which color.
+
+ImageId search functionality:
+
+It should be possible to integrate the search functionality properly into ArcGIS Pro.
+
+Bugs in ArcGIS Pro / SDK:
+
+If ArcGIS Pro icons are provided, they should be made in the ArcGIS Pro style.
+When calling a geoprocessing tool twice from the code, the second call does not work properly, even though I wait for the first one to finish.
+There is a bug in ArcGIS Pro: when a tool's cursor is changed, the cursor does not change on the map.
+When the coordinate system of the map is changed, the 'open location tool' must first be switched and then switched back before the 'open location' tool works again.
+The Sketch of the linemeasurement contains 0 or 2 points, it cannot exist with 1 point, how is that possible?
+
+Bugs in ArcGIS Pro:
+
+When a featureLayer is deleted, ArcGIS Pro wants to remove the unsaved edits from the other layers that occur in the same feature database.
+
+Recommended SDK extensions:
+
+It should also be possible to create geo-databases from the code.
+Is it also possible to update a value in a mappoint like a z? or to delete or add or update an item in a geometry?
+
+Bugs / Extensions in measurement:
+
+If a selection is discarded, or cancelled, it is not executed properly in the cyclorama.
+When editing a polygon, the height is not automatically added.
+Selecting a vertex, the correct point should also enter edit mode in the cyclorama.
+Misuse the M with point numbers.
+The measurement detail button should also appear in the edit features tab.
+Deleting a vertex, does not work perfectly during the update.
+In move mode, you should not be able to open a measuring point.
+The height still needs to be added for point, line, and polygon measurements on the map.
+Area measurements, behavior sometimes a bit strange, images are deleted, measuring points are deleted.
+It may be necessary to restart ArcGIS Pro once after adding the recording layer.
+=====================
+
+Flat layers are not working smoothly yet.
+Bug with streetSmart, if 2 viewers are open, problems with seeing line vector layers.
+Consider what to do with drawpoint, whether it can be removed.

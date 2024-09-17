@@ -1,9 +1,11 @@
-﻿using StreetSmartArcGISPro.Configuration.Remote;
 using System;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote;
 
 namespace StreetSmartArcGISPro.Utilities
 {
@@ -246,7 +248,16 @@ namespace StreetSmartArcGISPro.Utilities
 
       if (useAuthorization)
       {
-        request.Headers.Add("authorization", credentials);
+        if (Login.Instance.IsOAuth)
+        {
+          var bearer = Login.Instance.Bearer;
+
+          request.Headers.Add("authorization", "Bearer " + bearer);
+        }
+        else
+        {
+          request.Headers.Add("authorization", credentials);
+        }
       }
 
       request.ServicePoint.ConnectionLeaseTimeout = LeaseTimeOut;

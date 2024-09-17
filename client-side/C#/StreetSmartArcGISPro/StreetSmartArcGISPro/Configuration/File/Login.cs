@@ -21,7 +21,9 @@ using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
 using StreetSmartArcGISPro.Utilities;
 using System;
 using System.ComponentModel;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -33,6 +35,15 @@ namespace StreetSmartArcGISPro.Configuration.File
   [XmlRoot("Login")]
   public class Login : INotifyPropertyChanged
   {
+    public enum OAuthStatus
+    {
+      None,
+      SigningIn,
+      SignedIn,
+      SigningOut,
+      SignedOut
+    }
+
     #region Events
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -40,10 +51,8 @@ namespace StreetSmartArcGISPro.Configuration.File
     #endregion
 
     #region Constants
-
     private const string CheckWord = "1234567890!";
     private const int HashSize = 32; // SHA256
-
     #endregion
 
     #region Members
@@ -54,7 +63,10 @@ namespace StreetSmartArcGISPro.Configuration.File
     private static Login _login;
 
     private bool _credentials;
-
+    private bool _isOAuth;
+    private string _oAuthUsername;
+    private OAuthStatus _oAuthAuthenticationStatus;
+    private bool _isFromSettingsPage;
     #endregion
 
     #region Constructors
@@ -67,7 +79,10 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private Login()
     {
-      Credentials = false;
+      _credentials = false;
+      _isOAuth = false;
+      _oAuthAuthenticationStatus = OAuthStatus.None;
+      _isFromSettingsPage = false;
     }
 
     #endregion
@@ -79,6 +94,75 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     [XmlIgnore]
     public string Password { get; set; }
+
+    public bool IsOAuth
+    {
+      get => _isOAuth;
+      set
+      {
+        if (_isOAuth != value)
+        {
+          _isOAuth = value;
+
+          _oAuthAuthenticationStatus = _isOAuth ? OAuthStatus.SignedOut : OAuthStatus.None;
+
+          OnPropertyChanged();
+          OnPropertyChanged("OAuthAuthenticationStatus");
+        }
+      }
+    }
+
+    [XmlIgnore]
+    public string OAuthUsername
+    {
+      get => _oAuthUsername;
+      set
+      {
+        if (_oAuthUsername != value)
+        {
+          _oAuthUsername = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
+
+    [XmlIgnore]
+    public bool IsFromSettingsPage
+    {
+      get => _isFromSettingsPage;
+      set
+      {
+        if (_isFromSettingsPage != value)
+        {
+          _isFromSettingsPage = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
+    [XmlIgnore]
+    public OAuthStatus OAuthAuthenticationStatus
+    {
+      get => _oAuthAuthenticationStatus;
+      set
+      {
+        if (_oAuthAuthenticationStatus != value)
+        {
+          _oAuthAuthenticationStatus = value;
+
+          if (_oAuthAuthenticationStatus == OAuthStatus.SignedIn)
+          {
+            Check();
+          }
+
+          OnPropertyChanged();
+        }
+      }
+    }
+
+    [XmlIgnore]
+    public string Bearer { get; set; }
 
     [XmlIgnore]
     public bool Credentials
@@ -155,7 +239,8 @@ namespace StreetSmartArcGISPro.Configuration.File
         var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
         _login = (Login)XmlLogin.Deserialize(streamFile);
         streamFile.Close();
-        _login.Check();
+        if (!_login.IsOAuth)
+          _login.Check();
       }
 
       return _login;
@@ -168,12 +253,15 @@ namespace StreetSmartArcGISPro.Configuration.File
       return result;
     }
 
-    public bool Check()
+    public void Check()
     {
-      return
-        Credentials =
-          !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password) &&
-          GlobeSpotterConfiguration.CheckCredentials();
+      Credentials = (IsOAuth || (!string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password))) && GlobeSpotterConfiguration.CheckCredentials();
+    }
+
+    public void Clear()
+    {
+      GlobeSpotterConfiguration.Delete();
+      Credentials = false;
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -280,6 +368,25 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
 
       return result;
+    }
+
+    private void ExtractOAuthUsername()
+    {
+      var handler = new JwtSecurityTokenHandler();
+      var jwtSecurityToken = handler.ReadJwtToken(_login.Bearer);
+
+      OAuthUsername = jwtSecurityToken.Claims.First(x => x.Type == "sub").Value;
+    }
+
+    public void CheckAuthenticationStatus(string bearerToken)
+    {
+      if (_isOAuth)
+      {
+        _login.Bearer = bearerToken;
+        _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedIn;
+
+        ExtractOAuthUsername();
+      }
     }
 
     #endregion

@@ -19,7 +19,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
 using ArcGIS.Desktop.Framework.Contracts;
 
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
@@ -27,7 +26,7 @@ using FileLogin = StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
-  internal class Configuration: Page, INotifyPropertyChanged
+  internal class Configuration : Page, INotifyPropertyChanged
   {
     #region Events
 
