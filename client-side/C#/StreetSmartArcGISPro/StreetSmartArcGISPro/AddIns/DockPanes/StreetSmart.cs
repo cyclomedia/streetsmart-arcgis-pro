@@ -1231,10 +1231,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (Api != null && !_inRestart)
       {
-        IList<IViewer> viewers = await Api.GetViewers();
+        IList<IViewer> viewers = await Api.GetViewers(); //method returns wrong value
         int nrViewers = viewers.Count;
 
-        if (nrViewers == 0)
+        if (_viewerList.Count() == 0)
         {
           _inClose = false;
           DoHide();
