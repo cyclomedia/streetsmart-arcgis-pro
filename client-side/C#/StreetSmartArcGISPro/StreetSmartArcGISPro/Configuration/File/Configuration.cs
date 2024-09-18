@@ -44,7 +44,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     private bool _useDefaultStreetSmartUrl;
     private string _streetSmartLocation;
 
-    private bool _isSyncOfVisibilityEnabled;
+    private bool _isSyncOfVisibilityEnabled = true;
 
     private bool _useDefaultConfigurationUrl;
     private string _configurationUrlLocation;

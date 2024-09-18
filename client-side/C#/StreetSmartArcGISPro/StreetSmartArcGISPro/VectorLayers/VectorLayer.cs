@@ -54,6 +54,17 @@ namespace StreetSmartArcGISPro.VectorLayers
 {
   public class VectorLayer : INotifyPropertyChanged
   {
+    #region Enums
+
+    public enum VectorLayerVisibilityChangeStatus
+    {
+      Undefined,
+      InUpdate,
+      Updated
+    }
+
+    #endregion
+
     #region Events
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -119,7 +130,11 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
 
-    public bool IsVisible => Layer != null && Layer.IsVisible;
+    public bool IsLayerVisible => Layer != null && Layer.IsVisible;
+
+    public VectorLayerVisibilityChangeStatus VisibilityChangeStatus { get; internal set; }
+
+
     //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;
 
@@ -127,7 +142,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Functions
 
-    public async Task GeoJsonToOld()
+    public async Task GenerateEmptyJsonAsync()
     {
       await QueuedTask.Run(() =>
       {
