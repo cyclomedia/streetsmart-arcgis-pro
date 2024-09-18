@@ -38,7 +38,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
 
     static Languages()
     {
-      XmlLanguages = new XmlSerializer(typeof (Languages));
+      XmlLanguages = new XmlSerializer(typeof(Languages));
     }
 
     #endregion
@@ -64,7 +64,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
 
     public Language Get(string locale)
     {
-      return this.Aggregate<Language, Language>(null, (current, check) => check.Locale == locale ? check : current);
+      return this.FirstOrDefault(check => check.Locale == locale);
     }
 
     private static void Load()
@@ -75,7 +75,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
 
       if (manualStream != null)
       {
-        _languages = (Languages) XmlLanguages.Deserialize(manualStream);
+        _languages = (Languages)XmlLanguages.Deserialize(manualStream);
         manualStream.Close();
       }
     }

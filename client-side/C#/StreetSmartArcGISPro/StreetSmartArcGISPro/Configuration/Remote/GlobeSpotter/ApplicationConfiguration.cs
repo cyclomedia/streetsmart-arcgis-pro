@@ -58,8 +58,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
 
     public Functionality GetFunctionality(string name)
     {
-      return _functionalities.Aggregate<Functionality, Functionality>
-        (null, (current, functionality) => functionality.Name == name ? functionality : current);
+      return _functionalities.FirstOrDefault(functionality => functionality.Name == name);
     }
 
     #endregion
