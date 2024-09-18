@@ -206,8 +206,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public MeasurementPoint GetPoint(MapPoint point)
     {
-      return Values.Aggregate<MeasurementPoint, MeasurementPoint>
-        (null, (current, value) => value.IsSame(point) ? value : current);
+      return Values.FirstOrDefault(value => value.IsSame(point));
     }
 
     public async Task UpdatePointAsync(int pointId, IFeature apiMeasurementPoint)

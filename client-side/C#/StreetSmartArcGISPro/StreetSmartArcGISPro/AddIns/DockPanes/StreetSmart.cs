@@ -935,7 +935,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-#endregion
+    #endregion
 
     #region Event handlers
 
@@ -1164,7 +1164,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         foreach (var keyValueViewer in _viewerList)
         {
           IViewer viewer = keyValueViewer.Key;
-          bool exists = viewers.Aggregate(false, (current, viewer2) => viewer2 == viewer || current);
+          bool exists = viewers.Any(viewer2 => viewer2 == viewer);
 
           if (!exists)
           {
