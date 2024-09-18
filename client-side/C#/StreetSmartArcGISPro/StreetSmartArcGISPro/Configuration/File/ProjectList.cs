@@ -124,10 +124,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public Setting GetSettings(string projectUri, string mapUri)
     {
-      var project =
-        this.Aggregate<FileProject, FileProject>(null,
-          (current, element) => element.Uri == projectUri ? element : current);
-
+      var project = this.FirstOrDefault(element => element.Uri == projectUri);
       if (project == null && !string.IsNullOrEmpty(projectUri))
       {
         project = FileProject.Create(projectUri);

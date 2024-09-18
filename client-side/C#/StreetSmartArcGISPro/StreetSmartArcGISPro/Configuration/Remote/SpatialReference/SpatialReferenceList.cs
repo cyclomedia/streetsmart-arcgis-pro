@@ -88,14 +88,12 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
     public SpatialReference GetItem(string srsName)
     {
-      return this.Aggregate<SpatialReference, SpatialReference>
-        (null, (current, spatialReference) => spatialReference.SRSName == srsName ? spatialReference : current);
+      return this.FirstOrDefault(spatialReference => spatialReference.SRSName == srsName);
     }
 
     public SpatialReference GetCompatibleSrsNameItem(string srsName)
     {
-      return this.Aggregate<SpatialReference, SpatialReference>
-        (null, (current, spatialReference) => spatialReference.CompatibleSRSNames == srsName ? spatialReference : current);
+      return this.FirstOrDefault(spatialReference => spatialReference.CompatibleSRSNames == srsName);
     }
 
     public string ToKnownSrsName(string srsName)

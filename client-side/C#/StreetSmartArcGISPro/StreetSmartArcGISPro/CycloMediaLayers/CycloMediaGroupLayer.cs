@@ -69,11 +69,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool ContainsLayers => Count != 0;
 
-    public bool InsideScale
-    {
-      get { return this.Aggregate(false, (current, layer) => layer.InsideScale || current); }
-    }
-
     public Envelope InitialExtent => _initialExtent ??= MapView.Extent;
 
     #endregion
@@ -129,8 +124,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public CycloMediaLayer GetLayer(Layer layer)
     {
-      return this.Aggregate<CycloMediaLayer, CycloMediaLayer>(null,
-        (current, layerCheck) => layerCheck.Layer == layer ? layerCheck : current);
+      return this.FirstOrDefault(layerCheck => layerCheck.Layer == layer);
     }
 
     public async Task<CycloMediaLayer> AddAcceptableLayerAsync(string name)
@@ -156,9 +150,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public async Task RemoveLayerAsync(string name, bool fromGroup)
     {
-      CycloMediaLayer layer = this.Aggregate<CycloMediaLayer, CycloMediaLayer>
-        (null, (current, checkLayer) => checkLayer.Name == name ? checkLayer : current);
-
+      var layer = this.FirstOrDefault(checkLayer => checkLayer.Name == name);
       if (layer != null)
       {
         Remove(layer);
@@ -175,10 +167,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      bool result = this.Aggregate(name == GroupLayerName, (current, layer) => layer.Name == name || current);
-      return result || this.Aggregate(name == GroupLayerName,
-               (current, layer) =>
-                 layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)) || current);
+      return name == GroupLayerName || this.Any(layer => layer.Name == name) || this.Any(layer => layer.FcName == name?[..Math.Min(layer.FcName.Length, name.Length)]);
     }
 
     public async Task DisposeAsync(bool fromMap)
@@ -256,15 +245,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         foreach (var layer in AcceptableLayers)
         {
-          if (!this.Aggregate(false, (current, visLayer) => current || visLayer == layer))
+          if (!this.Any(visLayer => visLayer == layer))
           {
             await layer.SetVisibleAsync(true);
             layer.Visible = false;
           }
         }
 
-        CycloMediaLayer changedLayer = this.Aggregate<CycloMediaLayer, CycloMediaLayer>
-          (null, (current, layer) => layer.IsVisible && !layer.Visible ? layer : current);
+        CycloMediaLayer changedLayer = this.FirstOrDefault(layer => layer.IsVisible && !layer.Visible);
         CycloMediaLayer refreshLayer = null;
 
         foreach (var layer in this)

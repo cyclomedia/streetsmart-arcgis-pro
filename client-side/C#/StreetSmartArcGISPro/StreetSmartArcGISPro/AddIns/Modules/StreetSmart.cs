@@ -49,6 +49,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     private static LanguageSettings _langSettings;
     private VectorLayerList _vectorLayerList;
     private readonly Agreement _agreement;
+    private readonly Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer = [];
 
     #endregion
 
@@ -58,8 +59,6 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     /// Retrieve the singleton instance to this module here
     /// </summary>
     public static StreetSmart Current => _streetSmart ??= (StreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}");
-
-    private readonly Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer = [];
 
     private static string GroupLayerName => Properties.Resources.ResourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
@@ -204,7 +203,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         return false;
       }
 
-      return GetOrAddCycloMediaGroupLayer(mapView).InsideScale;
+      return GetOrAddCycloMediaGroupLayer(mapView).Any(layer => layer.InsideScale);
     }
 
     private bool ContainsCycloMediaLayer(MapView mapView)
@@ -332,7 +331,8 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       }
 
       bool addEvents = CycloMediaGroupLayer.Count == 0 ||
-                       CycloMediaGroupLayer.Count == 1 && CycloMediaGroupLayer.ContainsKey(args.MapView);
+                       CycloMediaGroupLayer.Count == 1 &&
+                       CycloMediaGroupLayer.ContainsKey(args.MapView);
 
       if (addEvents)
       {

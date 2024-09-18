@@ -96,15 +96,17 @@ namespace StreetSmartArcGISPro.VectorLayers
     public VectorLayer GetLayer(Layer layer, MapView mapView)
     {
       var layerList = ContainsKey(mapView) ? this[mapView] : null;
-      return layerList?.Aggregate<VectorLayer, VectorLayer>(null,
-        (current, layerCheck) => layerCheck?.Layer == layer ? layerCheck : current);
+      return layerList?.FirstOrDefault(layerCheck => layerCheck?.Layer == layer);
     }
 
     public VectorLayer GetLayer(string layerId, MapView mapView)
     {
-      var layerList = ContainsKey(mapView) ? this[mapView] : null;
-      return layerList?.Aggregate<VectorLayer, VectorLayer>(null,
-        (current, layerCheck) => (layerCheck?.Overlay?.Id ?? string.Empty) == layerId ? layerCheck : current);
+      if (TryGetValue(mapView, out var layerList))
+      {
+        return layerList?.FirstOrDefault(layerCheck => (layerCheck?.Overlay?.Id ?? string.Empty) == layerId);
+      }
+
+      return null;
     }
 
     public async Task LoadMeasurementsAsync(MapView mapView)
@@ -163,7 +165,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       if (featureLayer != null && cycloGrouplayer != null && !cycloGrouplayer.IsKnownName(featureLayer.Name))
       {
-        if (!layerList.Aggregate(false, (current, vecLayer) => vecLayer.Layer == layer || current))
+        if (!layerList.Any(vecLayer => vecLayer.Layer == layer))
         {
           var vectorLayer = new VectorLayer(featureLayer, this);
           bool initialized = await vectorLayer.InitializeEventsAsync();
@@ -629,9 +631,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Measurement measurement = _measurementList?.Sketch;
       VectorLayer vectorLayer = measurement?.VectorLayer;
       FeatureLayer measurementLayer = vectorLayer?.Layer;
-      bool completed = args.Members.Select(mapMember => mapMember as FeatureLayer).Aggregate
-        (false, (current, featureLayer)
-          => featureLayer != null && featureLayer == measurementLayer || current);
+      bool completed = args.Members.Select(mapMember => mapMember as FeatureLayer).Any(featureLayer => featureLayer != null && featureLayer == measurementLayer);
 
       if (completed)
       {

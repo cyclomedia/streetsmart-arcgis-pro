@@ -16,17 +16,14 @@
  * License along with this library.
  */
 
-using System.ComponentModel;
-using System.Linq;
-using System.Resources;
-
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
-
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.CycloMediaLayers;
-
+using System.ComponentModel;
+using System.Linq;
+using System.Resources;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
@@ -99,7 +96,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
     {
       if (sender is CycloMediaGroupLayer groupLayer && args.PropertyName == "Count")
       {
-        IsChecked = groupLayer.Aggregate(false, (current, layer) => layer.Name == RecordingLayerName || current);
+        IsChecked = groupLayer.Any(layer => layer.Name == RecordingLayerName);
       }
     }
 
