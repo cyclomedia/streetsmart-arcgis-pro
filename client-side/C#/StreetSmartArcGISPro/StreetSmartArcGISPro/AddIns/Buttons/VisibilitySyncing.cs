@@ -10,6 +10,7 @@ using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 using FileProjectList = StreetSmartArcGISPro.Configuration.File.ProjectList;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using DockPanestreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
@@ -24,11 +25,13 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
 
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
     }
-    protected override void OnClick()
+    protected override async void OnClick()
     {
       _settings.SyncLayerVisibility = !(_settings.SyncLayerVisibility ?? false);
       _projectList.Save();
       IsChecked = !IsChecked;
+      if (IsChecked)
+        await DockPanestreetSmart.Current.UpdateAllVectorLayersAsync();
     }
 
     private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
