@@ -569,9 +569,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           Map map = MapView?.Map;
 
-          Layer thisLayer =
-            map?.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(
-              checkLayer => checkLayer.Name == fcName);
+          Layer thisLayer = map?.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(checkLayer => checkLayer.Name == fcName);
 
           if (thisLayer != null)
           {
