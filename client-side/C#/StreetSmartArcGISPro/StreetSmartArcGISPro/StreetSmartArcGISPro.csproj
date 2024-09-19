@@ -324,6 +324,9 @@
     <PackageReference Include="StreetSmart.WPF">
       <Version>24.7.1-rc1</Version>
     </PackageReference>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt">
+      <Version>8.0.2</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
