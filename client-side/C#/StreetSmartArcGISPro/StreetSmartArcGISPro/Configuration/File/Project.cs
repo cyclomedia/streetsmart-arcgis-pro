@@ -16,16 +16,17 @@
  * License along with this library.
  */
 
-using ArcGIS.Desktop.Internal.Framework.Utilities;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
+using ArcGIS.Desktop.Internal.Framework.Utilities;
+
 namespace StreetSmartArcGISPro.Configuration.File
 {
-  public class Project : INotifyPropertyChanged
+  public class Project: INotifyPropertyChanged
   {
     #region Events
 
@@ -78,7 +79,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public static Project Create(string uri)
     {
-      return new Project { Uri = uri };
+      return new Project {Uri = uri};
     }
 
     public Setting GetSettings(string map)
@@ -88,7 +89,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         Settings = new SortableObservableCollection<Setting>();
       }
 
-      return Settings?.FirstOrDefault(element => element.Map == map);
+      return Settings?.Aggregate<Setting, Setting>(null, (current, element) => element.Map == map ? element : current);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

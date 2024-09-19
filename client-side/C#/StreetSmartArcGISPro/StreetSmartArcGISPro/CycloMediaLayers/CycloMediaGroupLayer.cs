@@ -16,13 +16,6 @@
  * License along with this library.
  */
 
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-using StreetSmartArcGISPro.Configuration.File;
-using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,13 +24,22 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Mapping.Events;
+
+using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.Recordings;
+
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
-  public class CycloMediaGroupLayer : List<CycloMediaLayer>, INotifyPropertyChanged
+  public class CycloMediaGroupLayer: List<CycloMediaLayer>, INotifyPropertyChanged
   {
     #region Members
 
-    private IList<CycloMediaLayer> _acceptableLayers;
+    private IList<CycloMediaLayer> _allLayers;
     private bool _updateVisibility;
     private Envelope _initialExtent;
 
@@ -51,7 +53,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     #region Properties
 
-    private static string GroupLayerName
+    private string GroupLayerName
     {
       get
       {
@@ -65,11 +67,19 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public MapView MapView { get; }
 
-    public IList<CycloMediaLayer> AcceptableLayers => _acceptableLayers ??= [new RecordingLayer(this, InitialExtent)];
+    public IList<CycloMediaLayer> AllLayers => _allLayers ?? (_allLayers =
+    [
+      new RecordingLayer(this, InitialExtent),
+    ]);
 
     public bool ContainsLayers => Count != 0;
 
-    public Envelope InitialExtent => _initialExtent ??= MapView.Extent;
+    public bool InsideScale
+    {
+      get { return this.Aggregate(false, (current, layer) => layer.InsideScale || current); }
+    }
+
+    public Envelope InitialExtent => _initialExtent ?? (_initialExtent = MapView.Extent);
 
     #endregion
 
@@ -96,12 +106,26 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         var layers = map.GetLayersAsFlattenedList();
         var layersForGroupLayer = map.FindLayers(GroupLayerName);
-        GroupLayer = layersForGroupLayer.OfType<GroupLayer>().FirstOrDefault();
-        var layersToRemove = layersForGroupLayer.Except(GroupLayer == null ? [] : [GroupLayer]);
-        await QueuedTask.Run(() =>
+        bool leave = false;
+
+        foreach (Layer layer in layersForGroupLayer)
         {
-          map.RemoveLayers(layersToRemove);
-        });
+          if (layer is GroupLayer groupLayer)
+          {
+            if (!leave)
+            {
+              GroupLayer = groupLayer;
+              leave = true;
+            }
+          }
+          else
+          {
+            await QueuedTask.Run(() =>
+            {
+              map.RemoveLayer(layer);
+            });
+          }
+        }
 
         if (GroupLayer == null)
         {
@@ -114,7 +138,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         foreach (Layer layer in layers)
         {
-          await AddAcceptableLayerAsync(layer.Name);
+          await AddLayerAsync(layer.Name);
         }
       }
 
@@ -124,33 +148,37 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public CycloMediaLayer GetLayer(Layer layer)
     {
-      return this.FirstOrDefault(layerCheck => layerCheck.Layer == layer);
+      return this.Aggregate<CycloMediaLayer, CycloMediaLayer>(null,
+        (current, layerCheck) => layerCheck.Layer == layer ? layerCheck : current);
     }
 
-    public async Task<CycloMediaLayer> AddAcceptableLayerAsync(string name)
+    public async Task<CycloMediaLayer> AddLayerAsync(string name)
     {
-      if (this.Any(cycloLayer => cycloLayer.Name == name))
+      CycloMediaLayer thisLayer = null;
+
+      if (!this.Aggregate(false, (current, cycloLayer) => cycloLayer.Name == name || current))
       {
-        return null;
+        thisLayer = AllLayers.Aggregate<CycloMediaLayer, CycloMediaLayer>
+          (null, (current, checkLayer) => (checkLayer.Name == name) ? checkLayer : current);
+
+        if (thisLayer != null)
+        {
+          Add(thisLayer);
+          await thisLayer.AddToLayersAsync();
+          // ReSharper disable once ExplicitCallerInfoArgument
+          NotifyPropertyChanged(nameof(Count));
+          FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
+        }
       }
 
-      var thisLayer = AcceptableLayers.FirstOrDefault(checkLayer => checkLayer.Name == name);
-      if (thisLayer == null)
-      {
-        return null;
-      }
-
-      Add(thisLayer);
-      await thisLayer.AddToLayersAsync();
-      // ReSharper disable once ExplicitCallerInfoArgument
-      NotifyPropertyChanged(nameof(Count));
-      FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
       return thisLayer;
     }
 
     public async Task RemoveLayerAsync(string name, bool fromGroup)
     {
-      var layer = this.FirstOrDefault(checkLayer => checkLayer.Name == name);
+      CycloMediaLayer layer = this.Aggregate<CycloMediaLayer, CycloMediaLayer>
+        (null, (current, checkLayer) => checkLayer.Name == name ? checkLayer : current);
+
       if (layer != null)
       {
         Remove(layer);
@@ -167,7 +195,10 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      return name == GroupLayerName || this.Any(layer => layer.Name == name) || this.Any(layer => layer.FcName == name?[..Math.Min(layer.FcName.Length, name.Length)]);
+      bool result = this.Aggregate(name == GroupLayerName, (current, layer) => layer.Name == name || current);
+      return result || this.Aggregate(name == GroupLayerName,
+               (current, layer) =>
+                 layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)) || current);
     }
 
     public async Task DisposeAsync(bool fromMap)
@@ -233,7 +264,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         }
       }
 
-      result = result != null ? result / Math.Max(count, 1) : null;
+      result = result != null ? result/Math.Max(count, 1) : null;
       return result;
     }
 
@@ -243,16 +274,17 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         _updateVisibility = true;
 
-        foreach (var layer in AcceptableLayers)
+        foreach (var layer in AllLayers)
         {
-          if (!this.Any(visLayer => visLayer == layer))
+          if (!this.Aggregate(false, (current, visLayer) => current || visLayer == layer))
           {
             await layer.SetVisibleAsync(true);
             layer.Visible = false;
           }
         }
 
-        CycloMediaLayer changedLayer = this.FirstOrDefault(layer => layer.IsVisible && !layer.Visible);
+        CycloMediaLayer changedLayer = this.Aggregate<CycloMediaLayer, CycloMediaLayer>
+          (null, (current, layer) => layer.IsVisible && !layer.Visible ? layer : current);
         CycloMediaLayer refreshLayer = null;
 
         foreach (var layer in this)

@@ -70,7 +70,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
       if (imageId.Length == 8)
       {
         ModulestreetSmart streetSmart = ModulestreetSmart.Current;
-        CycloMediaGroupLayer groupLayer = streetSmart.GetOrAddCycloMediaGroupLayer(MapView.Active);
+        CycloMediaGroupLayer groupLayer = streetSmart.GetCycloMediaGroupLayer(MapView.Active);
 
         if (groupLayer != null)
         {

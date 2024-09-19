@@ -101,7 +101,8 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public StoredLayer GetLayer(string name)
     {
-      return this.FirstOrDefault(storedLayer => storedLayer.Name == name);
+      return this.Aggregate<StoredLayer, StoredLayer>(null,
+        (current, storedLayer) => storedLayer.Name == name ? storedLayer : current);
     }
 
     public bool GetVisibility(string name)
