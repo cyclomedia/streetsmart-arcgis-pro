@@ -87,6 +87,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private bool _nearest;
     private bool _inRestart;
     private bool _inClose;
+    private bool _inUpdateAllVectorLayers;
+
     private string _epsgCode;
     private ICoordinate _lookAt;
     private IOptions _options;
@@ -822,9 +824,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     public async Task UpdateAllVectorLayersAsync()
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync)");
-
+      if(_inUpdateAllVectorLayers)
+      {
+        EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) SKIPPED");
+        return;
+      }
       if (_vectorLayerList.ContainsKey(MapView))
       {
+        _inUpdateAllVectorLayers = true;
         EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Will execute");
 
         if (_vectorLayerList[MapView].All(x => x.VisibilityChangeStatus != VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate))
@@ -840,6 +847,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             await UpdateVectorLayerAsync(vectorLayer);
           }
         }
+        _inUpdateAllVectorLayers = false;
       }
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Finished");
@@ -902,6 +910,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           {
             _storedLayerList.Update(layerNameAndUri, visible);
           }
+          EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): {overlay.Name}{ overlay.Visible}");
           vectorLayer.Overlay = overlay;
 
           //GC: trying to show layers created for the first time
@@ -943,6 +952,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (overlay != null)
       {
         await Api.RemoveOverlay(overlay.Id);
+
+        EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart:  (StreetSmart.cs) (RemoveVectorLayerAsync) REMOVED");
         vectorLayer.Overlay = null;
       }
     }
@@ -1189,6 +1200,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       ILayerInfo overlayInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(overlayInfo.LayerId, MapView);
+
+      EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged){vectorLayer?.NameAndUri}");
       _storedLayerList.Update(vectorLayer?.NameAndUri ?? overlayInfo.LayerId, overlayInfo.Visible);
 
       if (vectorLayer != null)
@@ -1197,18 +1210,19 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
 
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) doing sync");
+          EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) doing sync");
           if (ShouldSyncLayersVisibility())
           {
             await QueuedTask.Run(() => vectorLayer.Layer.SetVisibility(overlayInfo.Visible));
 
           }
           await UpdateVectorLayerAsync(vectorLayer);
-          vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
         }
+        vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
       }
 
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) finished");
+
+      EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) finished");
     }
 
     private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
@@ -1554,8 +1568,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         try
         {
+          EventLog.Write(EventLog.EventType.Error, $"LOGS-Street Smart: (StreetSmart.cs) (UpdateVectorLayer): vectorLayer: {vectorLayer.NameAndUri}{vectorLayer.IsLayerVisible}");
+
           await RemoveVectorLayerOverlayAsync(vectorLayer);
+          EventLog.Write(EventLog.EventType.Error, $"LOGS-Street Smart: (StreetSmart.cs) (UpdateVectorLayer): Remove-vectorLayer: {vectorLayer.NameAndUri}{vectorLayer.IsLayerVisible}");
+
           await AddVectorLayerOverlayAsync(vectorLayer);
+          EventLog.Write(EventLog.EventType.Error, $"LOGS-Street Smart: (StreetSmart.cs) (UpdateVectorLayer): Add-vectorLayer: {vectorLayer.NameAndUri}{vectorLayer.IsLayerVisible}");
+
 
           ////GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
           //if (sender is IPanoramaViewer panoramaViewer)
@@ -1601,6 +1621,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       else if (switcher && vectorLayer.Overlay != null && ShouldSyncLayersVisibility())
       {
+        EventLog.Write(EventLog.EventType.Error, $"LOGS-Street Smart: (StreetSmart.cs) (UpdateVectorLayer): vectorLayer.Overlay: {vectorLayer.Overlay.Name}{vectorLayer.Overlay.Visible}");
         vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
 
         _panorama.ToggleOverlay(vectorLayer.Overlay);
