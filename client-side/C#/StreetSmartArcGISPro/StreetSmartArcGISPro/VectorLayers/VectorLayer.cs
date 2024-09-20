@@ -549,7 +549,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
             string[] parts = url.Split(';');
             string base64 = parts.Length >= 2 ? parts[1] : string.Empty;
-            base64 = base64.Replace("base64,", string.Empty);
+            base64 = base64.Replace("base64,", string.Empty).Replace('\n', ' ');
             return SLDFactory.CreateImageSymbol(size, base64);
           }
         }
