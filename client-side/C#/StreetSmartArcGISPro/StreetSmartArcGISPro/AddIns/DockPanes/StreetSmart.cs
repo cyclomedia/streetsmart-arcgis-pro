@@ -853,6 +853,18 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Finished");
     }
 
+    public async Task UpdateAllOverlays()
+    {
+      if (_vectorLayerList.ContainsKey(MapView))
+      {
+        for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+        {
+          VectorLayer vectorLayer = _vectorLayerList[MapView][i];
+          _storedLayerList.Update(vectorLayer.NameAndUri, vectorLayer.IsLayerVisible);
+        }
+      }
+    }
+
     private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
@@ -910,7 +922,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           {
             _storedLayerList.Update(layerNameAndUri, visible);
           }
-          EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): {overlay.Name}{ overlay.Visible}");
+          EventLog.Write(EventLog.EventType.Information, $"LOGS-Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): {overlay.Name}{overlay.Visible}");
           vectorLayer.Overlay = overlay;
 
           //GC: trying to show layers created for the first time
