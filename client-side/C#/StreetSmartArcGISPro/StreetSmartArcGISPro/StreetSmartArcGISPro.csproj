@@ -30,6 +30,9 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="Images\sync32.png" />
+	</ItemGroup>
+	<ItemGroup>
 		<Content Include="Config.fr.daml" />
 		<Content Include="Config.daml" />
 		<Content Include="Images\StreetSmartArcGISPro32.png" />
@@ -44,6 +47,7 @@
 		<Content Include="..\..\Doc\LGPL-3.0.txt" Link="LGPL-3.0.txt" />
 		<Content Include="..\..\Doc\Release notes.txt" Link="Release notes.txt" />
 		<Content Include="..\..\Doc\ToDo.txt" Link="ToDo.txt" />
+		<Content Include="Images\sync32.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\Agreement.txt" />
