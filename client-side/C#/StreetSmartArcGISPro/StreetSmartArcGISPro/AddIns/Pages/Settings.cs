@@ -118,7 +118,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     }
 
     /// <summary>
-    /// Recording layer coordinate system
+    /// Sync layer visibility
     /// </summary>
     public bool? SyncLayerVisibility
     {
