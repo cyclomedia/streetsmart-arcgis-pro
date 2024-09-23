@@ -32,8 +32,6 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
       IsChecked = !IsChecked;
       if (IsChecked)
         await DockPanestreetSmart.Current.UpdateAllVectorLayersAsync();
-      if (!IsChecked)
-        await DockPanestreetSmart.Current.UpdateAllOverlays();
     }
 
     private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
