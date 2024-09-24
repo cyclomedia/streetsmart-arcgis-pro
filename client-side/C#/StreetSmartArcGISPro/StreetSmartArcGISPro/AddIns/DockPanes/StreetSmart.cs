@@ -1076,6 +1076,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: added an extra condition in order for the viewing cone to only be created once
       if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
+        panoramaViewer.ImageChange += OnImageChange;
+        panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.FeatureClick += OnFeatureClick;
+        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
+
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
@@ -1084,32 +1089,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
 
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) function get recording from panorama");
-        IRecording recording = await panoramaViewer.GetRecording();
-        string imageId = recording.Id;
-        _viewerList.Add(panoramaViewer, imageId);
-
-        // ToDo: set culture: date and time
-        Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-        ICoordinate coordinate = recording.XYZ;
-        IOrientation orientation = await panoramaViewer.GetOrientation();
-        Color color = await panoramaViewer.GetViewerColor();
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
-        await viewer.SetAsync(coordinate, orientation, color, _mapView);
-
-        if (_openNearest.Contains(imageId))
-        {
-          // ToDo: get pitch and draw marker in the Cyclorama
-          viewer.HasMarker = true;
-          _openNearest.Remove(imageId);
-        }
-
-        if (LookAt != null)
-        {
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) look at coordinate");
-          await panoramaViewer.LookAtCoordinate(LookAt);
-          LookAt = null;
-        }
+        await InitializeViewerAsync(panoramaViewer);
 
         try
         {
@@ -1120,11 +1100,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location exception: {e}");
         }
-
-        panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += OnViewChange;
-        panoramaViewer.FeatureClick += OnFeatureClick;
-        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
 
         foreach (StoredLayer layer in _storedLayerList)
         {
@@ -1167,6 +1142,38 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Toggle vector layer async");
         await UpdateVectorLayerAsync();
+      }
+    }
+
+    private async Task InitializeViewerAsync(IPanoramaViewer panoramaViewer)
+    {
+      IRecording recording = await panoramaViewer.GetRecording();
+      string imageId = recording.Id;
+
+      _viewerList.Add(panoramaViewer, imageId);
+
+      Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+
+      ICoordinate coordinate = recording.XYZ;
+      IOrientation orientation = await panoramaViewer.GetOrientation();
+      Color color = await panoramaViewer.GetViewerColor();
+
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
+
+      await viewer.SetAsync(coordinate, orientation, color, _mapView);
+
+      if (_openNearest.Contains(imageId))
+      {
+        // ToDo: get pitch and draw marker in the Cyclorama
+        viewer.HasMarker = true;
+        _openNearest.Remove(imageId);
+      }
+
+      if (LookAt != null)
+      {
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) look at coordinate");
+        await panoramaViewer.LookAtCoordinate(LookAt);
+        LookAt = null;
       }
     }
 
@@ -1428,13 +1435,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnViewChange(object sender, IEventArgs<IOrientation> args)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewChange)");
+      EventLog.Write(EventLog.EventType.Information, $"LOGS - Street Smart: (StreetSmart.cs) (OnViewChange)");
 
       if (sender is IPanoramaViewer panoramaViewer)
       {
         _viewerList.ActiveViewer = panoramaViewer;
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
         if (viewer != null)
         {
           IOrientation orientation = args.Value;
