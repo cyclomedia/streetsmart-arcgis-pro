@@ -80,6 +80,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Members
 
+    private bool _isInitializing = false;
+    private List<Action> _pendingEvents = new List<Action>();
+
     private static StreetSmart _streetSmart;
     private string _location;
     private bool _isActive;
@@ -1067,9 +1070,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Finished");
     }
-
+    
     private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
     {
+      _isInitializing = true;
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
 
       IViewer cyclViewer = args.Value;
@@ -1077,7 +1081,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
         panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.ViewChange += (s, e) => QueueOrInvoke(() => OnViewChange(s, e));
         panoramaViewer.FeatureClick += OnFeatureClick;
         panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
 
@@ -1090,6 +1094,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
 
         await InitializeViewerAsync(panoramaViewer);
+
+        _isInitializing = false;
+
+        foreach (var pendingEvent in _pendingEvents)
+        {
+          pendingEvent.Invoke();
+        }
+
+        _pendingEvents.Clear();
 
         try
         {
@@ -1174,6 +1187,18 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) look at coordinate");
         await panoramaViewer.LookAtCoordinate(LookAt);
         LookAt = null;
+      }
+    }
+
+    private void QueueOrInvoke(Action eventAction)
+    {
+      if (_isInitializing)
+      {
+        _pendingEvents.Add(eventAction);
+      }
+      else
+      {
+        eventAction.Invoke();
       }
     }
 
@@ -1435,7 +1460,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnViewChange(object sender, IEventArgs<IOrientation> args)
     {
-      EventLog.Write(EventLog.EventType.Information, $"LOGS - Street Smart: (StreetSmart.cs) (OnViewChange)");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnViewChange)");
 
       if (sender is IPanoramaViewer panoramaViewer)
       {
