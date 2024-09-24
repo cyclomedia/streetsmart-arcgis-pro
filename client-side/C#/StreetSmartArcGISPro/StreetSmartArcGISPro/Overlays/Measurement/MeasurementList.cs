@@ -135,6 +135,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         switch (geometryType)
         {
           case ArcGISGeometryType.Point:
+          case ArcGISGeometryType.Multipoint:
             if (GlobeSpotterConfiguration.MeasurePoint)
             {
               measurementGeometryType = MeasurementGeometryType.Point;
@@ -299,7 +300,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         ArcGISGeometryType geometryType = geometry?.GeometryType ?? ArcGISGeometryType.Unknown;
 
         if (geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon ||
-            geometryType == ArcGISGeometryType.Polyline)
+            geometryType == ArcGISGeometryType.Polyline || geometryType == ArcGISGeometryType.Multipoint)
         {
           if (measurement?.IsGeometryType(geometryType) ?? false)
           {
