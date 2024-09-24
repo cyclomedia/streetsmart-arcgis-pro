@@ -1082,7 +1082,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         _isInitializing = true;
 
         panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += (s, e) => QueueOrInvoke(() => OnViewChange(s, e));
+        //panoramaViewer.ViewChange += (s, e) => QueueOrInvoke(() => OnViewChange(s, e));
+        panoramaViewer.ViewChange += OnViewChange;
         panoramaViewer.FeatureClick += OnFeatureClick;
         panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
 
@@ -1123,14 +1124,17 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           LookAt = null;
         }
 
+        orientation = await panoramaViewer.GetOrientation();
+        await viewer.UpdateAsync(orientation);
+
         _isInitializing = false;
 
-        foreach (var pendingEvent in _pendingEvents)
-        {
-          pendingEvent.Invoke();
-        }
+        //foreach (var pendingEvent in _pendingEvents)
+        //{
+        //  pendingEvent.Invoke();
+        //}
 
-        _pendingEvents.Clear();
+        //_pendingEvents.Clear();
 
         try
         {
