@@ -693,6 +693,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             }
             else if (geometry is MapPoint or Multipoint)
             {
+              // Note: If future support for the Multipoint type of FeatureCollection is needed, this section should be modified to handle Multipoint geometry accordingly.
               MapPoint point = (Count >= 1 ? this.ElementAt(0).Value.Point : null) ?? geometry switch
               {
                 MapPoint mapPoint => mapPoint,

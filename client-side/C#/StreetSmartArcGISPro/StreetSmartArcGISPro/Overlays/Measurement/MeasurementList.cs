@@ -134,6 +134,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         switch (geometryType)
         {
+          // Note: If future support for the Multipoint type of FeatureCollection is needed, this section should be modified to handle Multipoint geometry accordingly.
           case ArcGISGeometryType.Point:
           case ArcGISGeometryType.Multipoint:
             if (GlobeSpotterConfiguration.MeasurePoint)
