@@ -80,9 +80,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     #region Members
 
-    private bool _isInitializing = false;
-    private List<Action> _pendingEvents = new List<Action>();
-
     private static StreetSmart _streetSmart;
     private string _location;
     private bool _isActive;
@@ -1079,10 +1076,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: added an extra condition in order for the viewing cone to only be created once
       if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        _isInitializing = true;
-
         panoramaViewer.ImageChange += OnImageChange;
-        //panoramaViewer.ViewChange += (s, e) => QueueOrInvoke(() => OnViewChange(s, e));
         panoramaViewer.ViewChange += OnViewChange;
         panoramaViewer.FeatureClick += OnFeatureClick;
         panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
@@ -1126,15 +1120,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         orientation = await panoramaViewer.GetOrientation();
         await viewer.UpdateAsync(orientation);
-
-        _isInitializing = false;
-
-        //foreach (var pendingEvent in _pendingEvents)
-        //{
-        //  pendingEvent.Invoke();
-        //}
-
-        //_pendingEvents.Clear();
 
         try
         {
@@ -1187,18 +1172,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Toggle vector layer async");
         await UpdateVectorLayerAsync();
-      }
-    }
-
-    private void QueueOrInvoke(Action eventAction)
-    {
-      if (_isInitializing)
-      {
-        _pendingEvents.Add(eventAction);
-      }
-      else
-      {
-        eventAction.Invoke();
       }
     }
 
