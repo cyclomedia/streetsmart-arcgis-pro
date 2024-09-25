@@ -934,7 +934,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private bool ShouldSyncLayersVisibility()
+    public bool ShouldSyncLayersVisibility()
     {
       bool? syncLayerVisibility = ProjectList.Instance.GetSettings(_mapView).SyncLayerVisibility;
       var result = syncLayerVisibility ?? _configuration.IsSyncOfVisibilityEnabled;

@@ -18,16 +18,18 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
   {
     private static readonly FileProjectList _projectList = FileProjectList.Instance;
     private static FileSettings _settings = _projectList.GetSettings(MapView.Active);
+    private bool _checked = true;
 
     protected VisibilitySyncing()
     {
-      IsChecked = _settings?.SyncLayerVisibility == true ? true : false;
-
+      _checked = DockPanestreetSmart.Current.ShouldSyncLayersVisibility();
+      IsChecked = _checked;
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
     }
     protected override async void OnClick()
     {
-      _settings.SyncLayerVisibility = !(_settings.SyncLayerVisibility ?? false);
+      _checked = DockPanestreetSmart.Current.ShouldSyncLayersVisibility();
+      _settings.SyncLayerVisibility = !_checked;
       _projectList.Save();
       IsChecked = !IsChecked;
       if (IsChecked)
@@ -36,8 +38,8 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
 
     private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
     {
-      _settings = _projectList.GetSettings(MapView.Active);
-      IsChecked = _settings?.SyncLayerVisibility == true ? true : false;
+      _checked = DockPanestreetSmart.Current.ShouldSyncLayersVisibility();
+      IsChecked = _checked;
     }
   }
 }
