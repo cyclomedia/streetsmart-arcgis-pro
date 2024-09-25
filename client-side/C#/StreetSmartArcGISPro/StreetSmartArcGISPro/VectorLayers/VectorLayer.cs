@@ -138,9 +138,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<bool> InitializeEventsAsync()
     {
-      bool result = Layer.ConnectionStatus == ConnectionStatus.Connected;
-
-      if (result)
+      if (Layer.ConnectionStatus == ConnectionStatus.Connected)
       {
         MapSelectionChangedEvent.Subscribe(OnMapSelectionChanged);
         DrawCompleteEvent.Subscribe(OnDrawCompleted);
@@ -150,7 +148,6 @@ namespace StreetSmartArcGISPro.VectorLayers
           try
           {
             var table = Layer?.GetTable();
-
             if (table != null)
             {
               _rowChanged = RowChangedEvent.Subscribe(OnRowChanged, table);
@@ -166,7 +163,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
 
       await LoadMeasurementsAsync();
-      return result;
+      return Layer.ConnectionStatus == ConnectionStatus.Connected;
     }
 
     public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView)
@@ -692,7 +689,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       await ReloadSelectionAsync();
 
-      if (_measurementList.Count >= 1)
+      if (_measurementList.Any())
       {
         _selection = [];
       }
@@ -868,88 +865,93 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task ReloadSelectionAsync()
     {
-      if (Layer.SelectionCount >= 1 && _measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
+      if (Layer.SelectionCount < 1 || _measurementList.Api == null || !await _measurementList.Api.GetApiReadyState())
       {
-        await QueuedTask.Run(async () =>
+        return;
+      }
+
+      IList<IViewer> viewers = await _measurementList.Api.GetViewers();
+      if (!viewers.Any())
+      {
+        return;
+      }
+
+      _vectorLayerList.LastSelectedLayer = this;
+
+      await QueuedTask.Run(async () =>
+      {
+        try
         {
-          try
+          Selection selectionFeatures = Layer?.GetSelection();
+          if (selectionFeatures == null)
           {
-            Selection selectionFeatures = Layer?.GetSelection();
-            _vectorLayerList.LastSelectedLayer = this;
+            return;
+          }
 
-            using (RowCursor rowCursor = selectionFeatures?.Search())
+          using (RowCursor rowCursor = selectionFeatures.Search())
+          {
+            while (rowCursor?.MoveNext() ?? false)
             {
-              while (rowCursor?.MoveNext() ?? false)
+              Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
+              IJson json = JsonFactory.Create(properties);
+
+              foreach (IViewer viewer in viewers)
               {
-
-                IList<IViewer> viewers = await _measurementList.Api.GetViewers();
-
-                foreach (IViewer viewer in viewers)
+                if (viewer is IPanoramaViewer panoramaViewer && Overlay != null && Counter == 0 && await viewer.GetId() == _clickedViewerId)
                 {
-                  string id = await viewer.GetId();
-                  if (viewer is IPanoramaViewer panoramaViewer && Overlay != null)
-                  {
-                    Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
-                    IJson json = JsonFactory.Create(properties);
-                    //GC: Added counter to make object info only show the first selection
-                    if (Overlay != null && id == _clickedViewerId && Counter == 0)
-                    {
-                      panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
-                      Counter += 1;
-                    }
-                  }
+                  panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
+                  ++Counter;
                 }
+
               }
             }
           }
-          catch (NullReferenceException e)
-          {
-            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
-          }
-        });
-      }
-
-      if (_selection == null)
-      {
-        if (_measurementList.Api != null && await _measurementList.Api.GetApiReadyState())
-        {
-          // todo: add functionality for deselect a feature in a layer
-          var test = 0;
         }
-      }
+        catch (NullReferenceException e)
+        {
+          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
+        }
+      });
     }
 
     public Dictionary<string, string> GetPropertiesFromRow(RowCursor rowCursor)
     {
       bool isExceptionAlreadyLogged = false;
-      Row row = rowCursor.Current;
-      Feature feature = row as Feature;
-      IReadOnlyList<Field> fields = feature?.GetFields();
       Dictionary<string, string> properties = [];
+      Row row = rowCursor.Current;
 
-      if (fields != null)
+      if (row is not Feature feature)
       {
-        foreach (Field field in fields)
-        {
-          string name = field.Name;
-          int fieldId = rowCursor.FindField(name);
+        return properties;
+      }
 
-          try
+      IReadOnlyList<Field> fields = feature?.GetFields();
+
+      if (fields == null || fields.Count == 0)
+      {
+        return properties;
+      }
+
+      foreach (Field field in fields)
+      {
+        string name = field.Name;
+        int fieldId = rowCursor.FindField(name);
+
+        try
+        {
+          properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
+        }
+        catch (ArgumentException e)
+        {
+          if (!isExceptionAlreadyLogged)
           {
-            properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
+            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
+            isExceptionAlreadyLogged = true;
           }
-          catch (ArgumentException e)
-          {
-            if (!isExceptionAlreadyLogged)
-            {
-              EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
-              isExceptionAlreadyLogged = true;
-            }
-          }
-          catch (Exception ex)
-          {
-            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
-          }
+        }
+        catch (Exception ex)
+        {
+          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
         }
       }
 
