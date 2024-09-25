@@ -1025,6 +1025,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: added an extra condition in order for the viewing cone to only be created once
       if (cyclViewer is IPanoramaViewer panoramaViewer && _restart == false)
       {
+        panoramaViewer.ImageChange += OnImageChange;
+        panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.FeatureClick += OnFeatureClick;
+        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
+
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
@@ -1041,7 +1046,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         // ToDo: set culture: date and time
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
         ICoordinate coordinate = recording.XYZ;
-        IOrientation orientation = await panoramaViewer.GetOrientation();
+        IOrientation orientation = OrientationFactory.Create(0, 0, 0);
         Color color = await panoramaViewer.GetViewerColor();
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
         await viewer.SetAsync(coordinate, orientation, color, _mapView);
@@ -1060,6 +1065,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           LookAt = null;
         }
 
+        orientation = await panoramaViewer.GetOrientation();
+        await viewer.UpdateAsync(orientation);
+
         try
         {
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location");
@@ -1069,11 +1077,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location exception: {e}");
         }
-
-        panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += OnViewChange;
-        panoramaViewer.FeatureClick += OnFeatureClick;
-        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
 
         foreach (StoredLayer layer in _storedLayerList)
         {
