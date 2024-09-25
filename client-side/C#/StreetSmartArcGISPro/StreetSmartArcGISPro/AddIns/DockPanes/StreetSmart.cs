@@ -1067,7 +1067,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Finished");
     }
-    
+
     private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
@@ -1091,17 +1091,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         IRecording recording = await panoramaViewer.GetRecording();
         string imageId = recording.Id;
-
         _viewerList.Add(panoramaViewer, imageId);
 
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
 
         ICoordinate coordinate = recording.XYZ;
-        IOrientation orientation = await panoramaViewer.GetOrientation();
+        IOrientation orientation = OrientationFactory.Create(0,0,0);
         Color color = await panoramaViewer.GetViewerColor();
-
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
-
         await viewer.SetAsync(coordinate, orientation, color, _mapView);
 
         if (_openNearest.Contains(imageId))
