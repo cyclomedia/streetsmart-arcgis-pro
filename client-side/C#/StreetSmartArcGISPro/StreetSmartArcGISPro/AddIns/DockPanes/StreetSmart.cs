@@ -852,7 +852,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       await vectorLayer.GenerateJsonAsync(_mapView);
     }
 
-    private async Task AddVectorLayerOverlayAsync(VectorLayer vectorLayer)
+    private async Task AddOrUpdateVectorLayerOverlayAsync(VectorLayer vectorLayer)
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart:  (StreetSmart.cs) (AddVectorLayerAsync)");
 
@@ -862,18 +862,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
         string srsName = cyclSpatRel?.SRSName;
 
-        if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
+        if (!string.IsNullOrEmpty(srsName))
         {
           //GC: create transparency value here
           string layerName = vectorLayer.Name;
           string layerNameAndUri = vectorLayer.NameAndUri;
-          bool visible = CalculateOverlayVisibility(vectorLayer); //vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri); 
-
-          if (!visible)
-          {
-            await vectorLayer.GenerateEmptyJsonAsync();
-          }
-
+          bool visible = CalculateOverlayVisibility(vectorLayer);
           double transparency = vectorLayer.Layer.Transparency;
 
           IFeatureCollection geoJson = vectorLayer.GeoJson;
@@ -900,14 +894,25 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
 
           IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
-          overlay = await Api.AddOverlay(overlay);
+
+          if (vectorLayer.Overlay == null)
+          {
+            overlay = await Api.AddOverlay(overlay);
+          }
+          else
+          {
+            overlay.Id = vectorLayer.Overlay.Id;
+            overlay = await Api.UpdateOverlay(overlay);
+          }
+
+          vectorLayer.Overlay = overlay;
+
           StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
 
           if (layer == null)
           {
             _storedLayerList.Update(layerNameAndUri, visible);
           }
-          vectorLayer.Overlay = overlay;
 
           //GC: trying to show layers created for the first time
           var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
@@ -1214,11 +1219,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) doing sync");
 
             await QueuedTask.Run(() => vectorLayer.Layer.SetVisibility(overlayInfo.Visible));
-            await UpdateVectorLayerAsync(vectorLayer);
           }
 
           vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
         }
+
+        await UpdateVectorLayerAsync(vectorLayer);
       }
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) finished");
@@ -1522,7 +1528,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      //GC: this is where map layer transparency and layer list toggle can be found
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
 
       if (!GlobeSpotterConfiguration.AddLayerWfs || sender is not VectorLayer vectorLayer)
@@ -1533,23 +1538,16 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       switch (args.PropertyName)
       {
         case "GeoJson":
-          await UpdateVectorLayerOverlay(vectorLayer, sender, false);
+          await UpdateVectorLayerOverlay(vectorLayer);
           break;
-      }
-      //GC: checks if the layer list visibilty is different from the overlay list visibilty
-      //fixed Pro crash bug because overlay was undefined
-
-      if (vectorLayer.Overlay != null && vectorLayer.IsLayerVisible != vectorLayer.Overlay.Visible)
-      {
-        await UpdateVectorLayerOverlay(vectorLayer, sender, true);
       }
       
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged) Finished");
     }
 
-    private async Task UpdateVectorLayerOverlay(VectorLayer vectorLayer, object sender, bool switcher)
+    private async Task UpdateVectorLayerOverlay(VectorLayer vectorLayer)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) switcher: {switcher}");
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) {vectorLayer.NameAndUri}");
 
       bool changeVectorLayer = false;
 
@@ -1567,40 +1565,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       {
         try
         {
-          await RemoveVectorLayerOverlayAsync(vectorLayer);
-          await AddVectorLayerOverlayAsync(vectorLayer);
-
-          ////GC: checks if the sender is a panoramaViewer in order to call the ToggleOverlay function
-          //if (sender is IPanoramaViewer panoramaViewer)
-          //{
-          //  //checks if the overlay is invisible to call the vector layer reset function
-          //  if (_invisible)
-          //  {
-          //    await RemoveVectorLayerOverlayAsync(vectorLayer);
-          //    await AddVectorLayerOverlayAsync(vectorLayer);
-          //    _invisible = false;
-          //  }
-          //  else
-          //  {
-          //    //calls the toggle overlay function to turn on/off the overlay which should show up without having to move first
-          //    panoramaViewer.ToggleOverlay(vectorLayer.Overlay);
-          //    //_invisible = true;
-          //  }
-          //}
-          //else
-          //{
-          //  //calls the vector layer reset function for the initial set up or if the selected overlay is still visible
-          //  if (vectorLayer.Overlay == null || vectorLayer.Overlay.Visible)
-          //  {
-          //    await RemoveVectorLayerOverlayAsync(vectorLayer);
-          //    await AddVectorLayerOverlayAsync(vectorLayer);
-          //  }
-          //  else
-          //  {
-          //    //turns the global variable ON if the selected overlay is invisible
-          //    _invisible = true;
-          //  }
-          //}
+          await AddOrUpdateVectorLayerOverlayAsync(vectorLayer);
         }
         catch (Exception e)
         {
@@ -1611,12 +1576,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           _vectorLayerInChange.Remove(vectorLayer);
         }
-      }
-      else if (switcher && vectorLayer.Overlay != null && ShouldSyncLayersVisibility())
-      {
-        vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
-
-        _panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 
