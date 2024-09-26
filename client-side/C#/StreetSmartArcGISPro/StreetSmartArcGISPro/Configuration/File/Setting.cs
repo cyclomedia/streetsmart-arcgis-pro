@@ -79,6 +79,7 @@ namespace StreetSmartArcGISPro.Configuration.File
             if (spatialReference.SRSName == value.SRSName)
             {
               _recordingLayerCoordinateSystem = spatialReference;
+              break;
             }
           }
 
