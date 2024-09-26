@@ -25,6 +25,7 @@ using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Resources;
@@ -33,19 +34,13 @@ using System.Threading.Tasks;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
 {
-  public class CycloMediaGroupLayer : List<CycloMediaLayer>, INotifyPropertyChanged
+  public class CycloMediaGroupLayer : ObservableCollection<CycloMediaLayer>
   {
     #region Members
 
     private IList<CycloMediaLayer> _acceptableLayers;
     private bool _updateVisibility;
     private Envelope _initialExtent;
-
-    #endregion
-
-    #region Events
-
-    public event PropertyChangedEventHandler PropertyChanged;
 
     #endregion
 
@@ -142,8 +137,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       Add(thisLayer);
       await thisLayer.AddToLayersAsync();
-      // ReSharper disable once ExplicitCallerInfoArgument
-      NotifyPropertyChanged(nameof(Count));
       FrameworkApplication.State.Activate("streetSmartArcGISPro_recordingLayerEnabledState");
       return thisLayer;
     }
@@ -155,8 +148,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       {
         Remove(layer);
         await layer.DisposeAsync(fromGroup);
-        // ReSharper disable once ExplicitCallerInfoArgument
-        NotifyPropertyChanged(nameof(Count));
 
         if (Count == 0)
         {
@@ -277,11 +268,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     private async void OnMapMemberPropertiesChanged(MapMemberPropertiesChangedEventArgs args)
     {
       await CheckVisibilityLayersAsync();
-    }
-
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     #endregion
