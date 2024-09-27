@@ -138,32 +138,35 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<bool> InitializeEventsAsync()
     {
-      if (Layer.ConnectionStatus == ConnectionStatus.Connected)
+      if (Layer.ConnectionStatus != ConnectionStatus.Connected)
       {
-        MapSelectionChangedEvent.Subscribe(OnMapSelectionChanged);
-        DrawCompleteEvent.Subscribe(OnDrawCompleted);
-
-        await QueuedTask.Run(() =>
-        {
-          try
-          {
-            var table = Layer?.GetTable();
-            if (table != null)
-            {
-              _rowChanged = RowChangedEvent.Subscribe(OnRowChanged, table);
-              _rowDeleted = RowDeletedEvent.Subscribe(OnRowDeleted, table);
-              _rowCreated = RowCreatedEvent.Subscribe(OnRowCreated, table);
-            }
-          }
-          catch (Exception e)
-          {
-            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (InitializeEventsAsync) error: {e}");
-          }
-        });
+        await LoadMeasurementsAsync();
+        return false;
       }
 
+      MapSelectionChangedEvent.Subscribe(OnMapSelectionChanged);
+      DrawCompleteEvent.Subscribe(OnDrawCompleted);
+
+      await QueuedTask.Run(() =>
+      {
+        try
+        {
+          var table = Layer?.GetTable();
+          if (table != null)
+          {
+            _rowChanged = RowChangedEvent.Subscribe(OnRowChanged, table);
+            _rowDeleted = RowDeletedEvent.Subscribe(OnRowDeleted, table);
+            _rowCreated = RowCreatedEvent.Subscribe(OnRowCreated, table);
+          }
+        }
+        catch (Exception e)
+        {
+          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (InitializeEventsAsync) error: {e}");
+        }
+      });
+
       await LoadMeasurementsAsync();
-      return Layer.ConnectionStatus == ConnectionStatus.Connected;
+      return true;
     }
 
     public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView)
