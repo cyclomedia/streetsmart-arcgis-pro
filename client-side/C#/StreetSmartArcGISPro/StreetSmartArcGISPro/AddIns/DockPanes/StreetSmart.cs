@@ -372,7 +372,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
             }
           }
-          if(!viewers.Any())
+          else
           {
             _inClose = false;
           }
