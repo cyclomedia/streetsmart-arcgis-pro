@@ -67,9 +67,9 @@ namespace StreetSmartArcGISPro.Configuration.File
       get => _recordingLayerCoordinateSystem;
       set
       {
-        if (_recordingLayerCoordinateSystem == null && value != null || value != null && value.SRSName != _recordingLayerCoordinateSystem.SRSName)
+        if (value != null && (_recordingLayerCoordinateSystem == null || value.SRSName != _recordingLayerCoordinateSystem.SRSName))
         {
-          _recordingLayerCoordinateSystem = SpatialReferenceList.Instance.TryGetValue(value.SRSName, out var result) ? result : value;
+          _recordingLayerCoordinateSystem = SpatialReferenceDictionary.Instance.TryGetValue(value.SRSName, out var result) ? result : value;
           OnPropertyChanged();
         }
       }
@@ -83,9 +83,9 @@ namespace StreetSmartArcGISPro.Configuration.File
       get => _cycloramaViewerCoordinateSystem;
       set
       {
-        if (value != null && value.SRSName != _cycloramaViewerCoordinateSystem.SRSName)
+        if (value != null && (_cycloramaViewerCoordinateSystem == null || value.SRSName != _cycloramaViewerCoordinateSystem.SRSName))
         {
-          _cycloramaViewerCoordinateSystem = SpatialReferenceList.Instance.TryGetValue(value.SRSName, out var result) ? result : value;
+          _cycloramaViewerCoordinateSystem = SpatialReferenceDictionary.Instance.TryGetValue(value.SRSName, out var result) ? result : value;
           OnPropertyChanged();
         }
       }

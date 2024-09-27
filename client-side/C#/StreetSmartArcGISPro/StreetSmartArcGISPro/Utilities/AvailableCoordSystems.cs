@@ -54,9 +54,9 @@ namespace StreetSmartArcGISPro.Utilities
     {
       ExistInAreaSpatialReferences = [];
       var existsInAreaSpatialReferences = new List<SpatialReference>();
-      SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
+      SpatialReferenceDictionary spatialReferenceList = SpatialReferenceDictionary.Instance;
 
-      foreach (var spatialReference in spatialReferenceList.Values)
+      foreach (var spatialReference in spatialReferenceList)
       {
         bool exists = await spatialReference.ExistsInAreaAsync();
 

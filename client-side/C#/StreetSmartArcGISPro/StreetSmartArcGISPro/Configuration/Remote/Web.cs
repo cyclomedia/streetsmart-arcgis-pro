@@ -26,7 +26,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using static StreetSmartArcGISPro.Utilities.WebUtils;
-using mySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
+using mySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceDictionary;
 
 namespace StreetSmartArcGISPro.Configuration.Remote
 {
