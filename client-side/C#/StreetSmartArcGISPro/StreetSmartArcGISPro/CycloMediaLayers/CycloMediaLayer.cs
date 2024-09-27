@@ -262,7 +262,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       else
       {
         await MakeEmptyAsync();
-        await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
         await project.SaveEditsAsync();
       }
@@ -272,21 +271,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       LayersRemovedEvent.Subscribe(OnLayersRemoved);
       await RefreshAsync();
       IsInitialized = true;
-    }
-
-    private async Task UpdateSpatialReferenceSettings()
-    {
-      SpatialReference spatialReference = await GetSpatialReferenceAsync();
-
-      if (spatialReference != null)
-      {
-        MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
-        MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
-        var projectList = ProjectList.Instance;
-        Setting settings = projectList.GetSettings(MapView);
-        settings.RecordingLayerCoordinateSystem = mySpatialReference;
-        projectList.Save();
-      }
     }
 
     private async Task<FeatureLayer> CreateLayerAsync(ArcGISProject project, string fcName, ILayerContainerEdit layerContainer)

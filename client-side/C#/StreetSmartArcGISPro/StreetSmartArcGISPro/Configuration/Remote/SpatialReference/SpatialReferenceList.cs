@@ -27,7 +27,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 {
   [XmlType(AnonymousType = true, Namespace = "https://www.globespotter.com/gsc")]
   [XmlRoot("SpatialReferences", Namespace = "https://www.globespotter.com/gsc", IsNullable = false)]
-  public class SpatialReferenceList : List<SpatialReference>
+  public class SpatialReferenceList : Dictionary<string, SpatialReference>
   {
     #region Members
 
@@ -52,12 +52,15 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
     public SpatialReference[] SpatialReference
     {
-      get => ToArray();
+      get => this.Values.ToArray();
       set
       {
         if (value != null)
         {
-          AddRange(value);
+          foreach (var item in value)
+          {
+            this.Add(item.SRSName, item);
+          }
         }
       }
     }
@@ -88,12 +91,12 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
     public SpatialReference GetItem(string srsName)
     {
-      return this.FirstOrDefault(spatialReference => spatialReference.SRSName == srsName);
+      return this.TryGetValue(srsName, out var result) ? result : null;
     }
 
     public SpatialReference GetCompatibleSrsNameItem(string srsName)
     {
-      return this.FirstOrDefault(spatialReference => spatialReference.CompatibleSRSNames == srsName);
+      return this.Values.FirstOrDefault(spatialReference => spatialReference.CompatibleSRSNames == srsName);
     }
 
     public string ToKnownSrsName(string srsName)

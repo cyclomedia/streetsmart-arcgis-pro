@@ -39,14 +39,7 @@ namespace StreetSmartArcGISPro.Utilities
       {
         if (MapView.Active != null && value != null)
         {
-          if (_existsInAreaSpatialReferences.TryGetValue(MapView.Active, out var r))
-          {
-            r = value;
-          }
-          else
-          {
-            _existsInAreaSpatialReferences.Add(MapView.Active, value);
-          }
+          _existsInAreaSpatialReferences[MapView.Active] = value;
         }
       }
     }
@@ -63,7 +56,7 @@ namespace StreetSmartArcGISPro.Utilities
       var existsInAreaSpatialReferences = new List<SpatialReference>();
       SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
 
-      foreach (var spatialReference in spatialReferenceList)
+      foreach (var spatialReference in spatialReferenceList.Values)
       {
         bool exists = await spatialReference.ExistsInAreaAsync();
 

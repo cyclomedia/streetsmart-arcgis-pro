@@ -16,15 +16,14 @@
  * License along with this library.
  */
 
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
-using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
-
 namespace StreetSmartArcGISPro.Configuration.File
 {
-  public class Setting: INotifyPropertyChanged
+  public class Setting : INotifyPropertyChanged
   {
     #region Events
 
@@ -68,25 +67,10 @@ namespace StreetSmartArcGISPro.Configuration.File
       get => _recordingLayerCoordinateSystem;
       set
       {
-        if (value != null)
+        if (_recordingLayerCoordinateSystem == null && value != null || value != null && value.SRSName != _recordingLayerCoordinateSystem.SRSName)
         {
-          bool changed = value != _recordingLayerCoordinateSystem;
-          SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
-          _recordingLayerCoordinateSystem = value;
-
-          foreach (var spatialReference in spatialReferenceList)
-          {
-            if (spatialReference.SRSName == value.SRSName)
-            {
-              _recordingLayerCoordinateSystem = spatialReference;
-              break;
-            }
-          }
-
-          if (changed)
-          {
-            OnPropertyChanged();
-          }
+          _recordingLayerCoordinateSystem = SpatialReferenceList.Instance.TryGetValue(value.SRSName, out var result) ? result : value;
+          OnPropertyChanged();
         }
       }
     }
@@ -99,24 +83,10 @@ namespace StreetSmartArcGISPro.Configuration.File
       get => _cycloramaViewerCoordinateSystem;
       set
       {
-        if (value != null)
+        if (value != null && value.SRSName != _cycloramaViewerCoordinateSystem.SRSName)
         {
-          bool changed = value != _cycloramaViewerCoordinateSystem;
-          SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
-          _cycloramaViewerCoordinateSystem = value;
-
-          foreach (var spatialReference in spatialReferenceList)
-          {
-            if (spatialReference.SRSName == value.SRSName)
-            {
-              _cycloramaViewerCoordinateSystem = spatialReference;
-            }
-          }
-
-          if (changed)
-          {
-            OnPropertyChanged();
-          }
+          _cycloramaViewerCoordinateSystem = SpatialReferenceList.Instance.TryGetValue(value.SRSName, out var result) ? result : value;
+          OnPropertyChanged();
         }
       }
     }

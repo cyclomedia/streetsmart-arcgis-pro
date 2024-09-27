@@ -90,6 +90,11 @@ namespace StreetSmartArcGISPro.Utilities
 
     public static string CheckCycloramaSpatialReferenceMapView(MapView mapView)
     {
+      if (mapView == null)
+      {
+        return null;
+      }
+
       Setting settings = ProjectList.Instance.GetSettings(mapView);
       MySpatialReference spatialReference = settings?.CycloramaViewerCoordinateSystem;
       return CheckCycloramaSpatialReference(spatialReference, mapView);
@@ -97,6 +102,11 @@ namespace StreetSmartArcGISPro.Utilities
 
     private static string CheckCycloramaSpatialReference(MySpatialReference spatialReference, MapView mapView)
     {
+      if (mapView == null)
+      {
+        return null; 
+      }
+
       ProjectList projectList = ProjectList.Instance;
       Setting settings = projectList.GetSettings(mapView);
       MySpatialReference recordingSpatialReference = settings?.RecordingLayerCoordinateSystem;
@@ -109,7 +119,7 @@ namespace StreetSmartArcGISPro.Utilities
       if (spatialReference?.ArcGisSpatialReference == null)
       {
         MySpatialReferenceList spatialReferences = MySpatialReferenceList.Instance;
-        spatialReference = spatialReferences.GetItem(epsgCode) ?? spatialReferences.FirstOrDefault(spatialReferenceComp => spatialReferenceComp.ArcGisSpatialReference != null);
+        spatialReference = spatialReferences.GetItem(epsgCode) ?? spatialReferences.Values.FirstOrDefault(spatialReferenceComp => spatialReferenceComp.ArcGisSpatialReference != null);
 
         if (spatialReference != null)
         {
