@@ -377,7 +377,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             _inClose = false;
           }
         }
-        //_inClose = false;
       }
     }
 
