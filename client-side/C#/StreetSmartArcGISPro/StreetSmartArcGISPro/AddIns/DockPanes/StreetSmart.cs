@@ -613,48 +613,51 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
         try
         {
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
-          IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
-
-          if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
+          if (!string.IsNullOrEmpty(toOpen))
           {
-            if (_crossCheck == null)
-            {
-              _crossCheck = new CrossCheck();
-            }
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
+            IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
 
-            double size = _constants.CrossCheckSize;
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open cross check: {point.X}, {point.Y}");
-            await _crossCheck.UpdateAsync(point.X, point.Y, size);
-
-            foreach (IViewer cyclViewer in viewers)
+            if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
             {
-              if (cyclViewer is IPanoramaViewer panoramaViewer)
+              if (_crossCheck == null)
               {
-                Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+                _crossCheck = new CrossCheck();
+              }
 
-                if (viewer != null)
+              double size = _constants.CrossCheckSize;
+              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open cross check: {point.X}, {point.Y}");
+              await _crossCheck.UpdateAsync(point.X, point.Y, size);
+
+              foreach (IViewer cyclViewer in viewers)
+              {
+                if (cyclViewer is IPanoramaViewer panoramaViewer)
                 {
-                  viewer.HasMarker = true;
-                }
-                else
-                {
-                  IRecording recording = await panoramaViewer.GetRecording();
-                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Add to open nearest: {recording.Id}");
-                  _openNearest.Add(recording.Id);
+                  Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+
+                  if (viewer != null)
+                  {
+                    viewer.HasMarker = true;
+                  }
+                  else
+                  {
+                    IRecording recording = await panoramaViewer.GetRecording();
+                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Add to open nearest: {recording.Id}");
+                    _openNearest.Add(recording.Id);
+                  }
                 }
               }
             }
-          }
 
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) get settings");
-          Setting settings = ProjectList.Instance.GetSettings(_mapView);
-          MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) get settings");
+            Setting settings = ProjectList.Instance.GetSettings(_mapView);
+            MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
 
-          if (cycloSpatialReference != null)
-          {
-            _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
-                                    await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+            if (cycloSpatialReference != null)
+            {
+              _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
+                                      await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
+            }
           }
         }
         catch (StreetSmartImageNotFoundException e)
