@@ -80,6 +80,20 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
     #region Functions
 
+#if ARCGISPRO29
+    public bool TryGetValue(string key, out SpatialReference value)
+    {
+      if (this.Contains(key))
+      {
+        value = this[key];
+        return true;
+      }
+
+      value = null;
+      return false;
+    }
+#endif 
+
     public SpatialReference GetItem(string srsName)
     {
       return this.TryGetValue(srsName, out var result) ? result : null;
