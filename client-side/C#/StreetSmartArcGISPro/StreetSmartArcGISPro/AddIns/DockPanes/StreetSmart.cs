@@ -611,9 +611,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
 
-        try
+        if (!string.IsNullOrEmpty(toOpen))
         {
-          if (!string.IsNullOrEmpty(toOpen))
+          try
           {
             EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
             IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
@@ -659,14 +659,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                                       await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
             }
           }
-        }
-        catch (StreetSmartImageNotFoundException e)
-        {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}");
-          ResourceManager res = ThisResources.ResourceManager;
-          string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
-          MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
-            canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+          catch (StreetSmartImageNotFoundException e)
+          {
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}");
+            ResourceManager res = ThisResources.ResourceManager;
+            string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
+            MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
+              canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+          }
         }
       } while (_toRestartImages.Count > 0 || toOpen != _location);
     }
@@ -1099,7 +1099,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
 
         ICoordinate coordinate = recording.XYZ;
-        IOrientation orientation = OrientationFactory.Create(0,0,0);
+        IOrientation orientation = OrientationFactory.Create(0, 0, 0);
         Color color = await panoramaViewer.GetViewerColor();
         EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
         await viewer.SetAsync(coordinate, orientation, color, _mapView);
