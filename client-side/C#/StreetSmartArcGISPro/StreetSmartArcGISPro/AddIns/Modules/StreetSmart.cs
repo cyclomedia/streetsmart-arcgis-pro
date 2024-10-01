@@ -77,9 +77,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (mapView != null)
       {
-        if (CycloMediaGroupLayer.ContainsKey(mapView))
+        if (CycloMediaGroupLayer.TryGetValue(mapView, out var groupLayer))
         {
-          result = CycloMediaGroupLayer[mapView];
+          return groupLayer;
         }
         else
         {
