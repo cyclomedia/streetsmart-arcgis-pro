@@ -134,7 +134,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         switch (geometryType)
         {
+          // Note: If future support for the Multipoint type of FeatureCollection is needed, this section should be modified to handle Multipoint geometry accordingly.
           case ArcGISGeometryType.Point:
+          case ArcGISGeometryType.Multipoint:
             if (GlobeSpotterConfiguration.MeasurePoint)
             {
               measurementGeometryType = MeasurementGeometryType.Point;
@@ -299,7 +301,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         ArcGISGeometryType geometryType = geometry?.GeometryType ?? ArcGISGeometryType.Unknown;
 
         if (geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon ||
-            geometryType == ArcGISGeometryType.Polyline)
+            geometryType == ArcGISGeometryType.Polyline || geometryType == ArcGISGeometryType.Multipoint)
         {
           if (measurement?.IsGeometryType(geometryType) ?? false)
           {
