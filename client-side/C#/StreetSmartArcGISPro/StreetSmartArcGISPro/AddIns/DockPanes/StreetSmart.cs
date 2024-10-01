@@ -611,63 +611,66 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
 
-        if (!string.IsNullOrEmpty(toOpen))
+        if (string.IsNullOrEmpty(toOpen))
         {
-          try
+          continue;
+        }
+
+        try
+        {
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
+          IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
+
+          if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
           {
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
-            IList<IViewer> viewers = await Api.Open(toOpen, viewerOptions);
-
-            if (Nearest && _toRestartImages.Count == 0 && toOpen == _location && point != null)
+            if (_crossCheck == null)
             {
-              if (_crossCheck == null)
-              {
-                _crossCheck = new CrossCheck();
-              }
+              _crossCheck = new CrossCheck();
+            }
 
-              double size = _constants.CrossCheckSize;
-              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open cross check: {point.X}, {point.Y}");
-              await _crossCheck.UpdateAsync(point.X, point.Y, size);
+            double size = _constants.CrossCheckSize;
+            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open cross check: {point.X}, {point.Y}");
+            await _crossCheck.UpdateAsync(point.X, point.Y, size);
 
-              foreach (IViewer cyclViewer in viewers)
+            foreach (IViewer cyclViewer in viewers)
+            {
+              if (cyclViewer is IPanoramaViewer panoramaViewer)
               {
-                if (cyclViewer is IPanoramaViewer panoramaViewer)
+                Viewer viewer = _viewerList.GetViewer(panoramaViewer);
+
+                if (viewer != null)
                 {
-                  Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-
-                  if (viewer != null)
-                  {
-                    viewer.HasMarker = true;
-                  }
-                  else
-                  {
-                    IRecording recording = await panoramaViewer.GetRecording();
-                    EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Add to open nearest: {recording.Id}");
-                    _openNearest.Add(recording.Id);
-                  }
+                  viewer.HasMarker = true;
+                }
+                else
+                {
+                  IRecording recording = await panoramaViewer.GetRecording();
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Add to open nearest: {recording.Id}");
+                  _openNearest.Add(recording.Id);
                 }
               }
             }
-
-            EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) get settings");
-            Setting settings = ProjectList.Instance.GetSettings(_mapView);
-            MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
-
-            if (cycloSpatialReference != null)
-            {
-              _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
-                                      await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
-            }
           }
-          catch (StreetSmartImageNotFoundException e)
+
+          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) get settings");
+          Setting settings = ProjectList.Instance.GetSettings(_mapView);
+          MySpatialReference cycloSpatialReference = settings?.CycloramaViewerCoordinateSystem;
+
+          if (cycloSpatialReference != null)
           {
-            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}");
-            ResourceManager res = ThisResources.ResourceManager;
-            string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
-            MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
-              canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+            _lastSpatialReference = cycloSpatialReference.ArcGisSpatialReference ??
+                                    await cycloSpatialReference.CreateArcGisSpatialReferenceAsync();
           }
         }
+        catch (StreetSmartImageNotFoundException e)
+        {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) StreetSmartCanNotOpenImage {toOpen} {_epsgCode}: error: {e}");
+          ResourceManager res = ThisResources.ResourceManager;
+          string canNotOpenImageTxt = res.GetString("StreetSmartCanNotOpenImage", _languageSettings.CultureInfo);
+          MessageBox.Show($"{canNotOpenImageTxt}: {toOpen} ({_epsgCode})",
+            canNotOpenImageTxt, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
       } while (_toRestartImages.Count > 0 || toOpen != _location);
     }
 
