@@ -41,8 +41,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
-using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 
 #if !ARCGISPRO29
 using ArcGIS.Core.Data.Exceptions;
@@ -282,7 +280,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       else
       {
         await MakeEmptyAsync();
-        await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
         await project.SaveEditsAsync();
       }
@@ -292,21 +289,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       LayersRemovedEvent.Subscribe(OnLayersRemoved);
       await RefreshAsync();
       IsInitialized = true;
-    }
-
-    private async Task UpdateSpatialReferenceSettings()
-    {
-      SpatialReference spatialReference = await GetSpatialReferenceAsync();
-
-      if (spatialReference != null)
-      {
-        MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
-        MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
-        var projectList = ProjectList.Instance;
-        Setting settings = projectList.GetSettings(MapView);
-        settings.RecordingLayerCoordinateSystem = mySpatialReference;
-        projectList.Save();
-      }
     }
 
     private async Task<FeatureLayer> CreateLayerAsync(ArcGISProject project, string fcName, ILayerContainerEdit layerContainer)
@@ -714,7 +696,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
                 foreach (Recording recording in recordings)
                 {
                   Location location = recording?.Location;
-                  RecordingPoint point = location?.Point;
+                  var point = location?.Point;
 
                   if (location != null && point != null)
                   {
