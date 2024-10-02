@@ -16,23 +16,20 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Mapping;
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
+using StreetSmartArcGISPro.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
-using ArcGIS.Desktop.Framework.Contracts;
-using ArcGIS.Desktop.Mapping;
-
-using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
-using StreetSmartArcGISPro.Utilities;
-
-using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 using FileProjectList = StreetSmartArcGISPro.Configuration.File.ProjectList;
+using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
-  internal class Settings: Page, INotifyPropertyChanged
+  internal class Settings : Page, INotifyPropertyChanged
   {
     #region Events
 

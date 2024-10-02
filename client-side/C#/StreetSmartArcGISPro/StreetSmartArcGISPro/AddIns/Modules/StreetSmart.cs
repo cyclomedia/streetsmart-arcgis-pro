@@ -154,9 +154,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         return null;
       }
 
-      if (CycloMediaGroupLayer.ContainsKey(mapView))
+      if (CycloMediaGroupLayer.TryGetValue(mapView, out var groupLayer))
       {
-        return CycloMediaGroupLayer[mapView];
+        return groupLayer;
       }
 
       var result = new CycloMediaGroupLayer(mapView);
