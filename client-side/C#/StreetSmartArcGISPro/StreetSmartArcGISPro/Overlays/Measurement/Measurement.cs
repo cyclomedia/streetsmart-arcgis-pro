@@ -321,7 +321,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (geometry != null)
       {
         double zScale = 1.0;
-        double modScale = 1.0;
         var srs = geometry.SpatialReference;
         var geoPointCount = geometry.PointCount;
         ArcGISGeometryType geometryType = geometry.GeometryType;
@@ -330,10 +329,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
-          /*if (srs?.ZUnit != spatialReference?.ZUnit)
-          {
-            conversionFactor = srs.ZUnit.ConversionFactor;
-          }*/
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
@@ -342,7 +337,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             zScale = 1 / modifierFactor;
           }
-          //modScale = 1 / modifierFactor;
         });
 
         result = [];
@@ -367,22 +361,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             if (geometry is Multipart multipart)
             {
               ReadOnlyPointCollection points = multipart.Points;
-
-              using (IEnumerator<MapPoint> enumPoints = points.GetEnumerator())
+              foreach (var point in points)
               {
-                while (enumPoints.MoveNext())
-                {
-                  MapPoint mapPointPart = enumPoints.Current;
-                  /*if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
-                  {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }
-                  else
-                  {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }*/
-                  result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                }
+                result.Add(await AddZOffsetAsync(point, zScale));
               }
             }
             break;
@@ -395,9 +376,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private async Task<MapPoint> AddZOffsetAsync(MapPoint mapPoint, double zScale)
     {
       return await QueuedTask.Run(async () => mapPoint.HasZ
-        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y,
-          (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0),
-          mapPoint.SpatialReference)
+        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0), mapPoint.SpatialReference)
         : MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
     }
 

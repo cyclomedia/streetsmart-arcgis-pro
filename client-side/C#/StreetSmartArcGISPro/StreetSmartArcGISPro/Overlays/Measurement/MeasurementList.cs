@@ -35,7 +35,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 

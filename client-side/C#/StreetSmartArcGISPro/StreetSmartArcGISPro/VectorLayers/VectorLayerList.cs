@@ -148,7 +148,6 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetOrAddCycloMediaGroupLayer(mapView);
-      List<VectorLayer> layerList;
 
       if (!TryGetValue(mapView, out List<VectorLayer> layerList))
       {
