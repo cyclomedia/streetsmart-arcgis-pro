@@ -633,6 +633,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
 
+        if (string.IsNullOrEmpty(toOpen))
+        {
+          continue;
+        }
+
         try
         {
           EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
