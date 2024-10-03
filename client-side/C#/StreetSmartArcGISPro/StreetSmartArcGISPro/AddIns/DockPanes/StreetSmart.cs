@@ -1124,7 +1124,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         panoramaViewer.ImageChange += OnImageChange;
         panoramaViewer.ViewChange += OnViewChange;
         panoramaViewer.FeatureClick += OnFeatureClick;
-        panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
+        panoramaViewer.LayerVisibilityChange += OnOverlayVisibilityChanged;
 
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
@@ -1172,11 +1172,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (ViewerAdded) move to location exception: {e}");
         }
-
-        panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += OnViewChange;
-        panoramaViewer.FeatureClick += OnFeatureClick;
-        panoramaViewer.LayerVisibilityChange += OnOverlayVisibilityChanged;
 
         foreach (StoredLayer layer in _storedLayerList)
         {
