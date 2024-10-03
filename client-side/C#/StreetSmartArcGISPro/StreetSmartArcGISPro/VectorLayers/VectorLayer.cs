@@ -49,11 +49,23 @@ using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Unit = ArcGIS.Core.Geometry.Unit;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
   public class VectorLayer : INotifyPropertyChanged
   {
+    #region Enums
+
+    public enum VectorLayerVisibilityChangeStatus
+    {
+      Undefined,
+      InUpdate,
+      Updated
+    }
+
+    #endregion
+
     #region Events
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -65,6 +77,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     private readonly ViewerList _viewerList;
     private readonly MeasurementList _measurementList;
     private readonly VectorLayerList _vectorLayerList;
+    private readonly FileConfiguration _configuration;
+    private readonly StoredLayerList _storedLayerList;
 
     private SubscriptionToken _rowChanged;
     private SubscriptionToken _rowDeleted;
@@ -87,6 +101,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       Overlay = null;
       _selection = null;
       _updateMeasurements = false;
+      _configuration = FileConfiguration.Instance;
+      _storedLayerList = StoredLayerList.Instance;
 
       StreetSmartModule streetSmart = StreetSmartModule.Current;
       _viewerList = streetSmart.ViewerList;
@@ -119,7 +135,13 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
 
-    public bool IsVisible => Layer != null && Layer.IsVisible;
+    public bool IsLayerVisible => Layer != null && Layer.IsVisible;
+
+    public VectorLayerVisibilityChangeStatus VisibilityChangeStatus { get; internal set; }
+
+    public bool DesiredOverlayVisibility => CalculateOverlayVisibility();
+
+
     //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;
 
@@ -127,7 +149,21 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Functions
 
-    public async Task GeoJsonToOld()
+    public bool CalculateOverlayVisibility()
+    {
+      return ShouldSyncLayersVisibility()
+          ? IsLayerVisible
+          : _storedLayerList.GetVisibility(NameAndUri);
+    }
+
+    public bool ShouldSyncLayersVisibility()
+    {
+      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
+      var result = syncLayerVisibility ?? _configuration.IsSyncOfVisibilityEnabled;
+      return result;
+    }
+
+    public async Task GenerateEmptyJsonAsync()
     {
       await QueuedTask.Run(() =>
       {
@@ -260,6 +296,8 @@ namespace StreetSmartArcGISPro.VectorLayers
           featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
           List<long> objectIds = [];
 
+          if(DesiredOverlayVisibility)
+          { 
           var featureTasks = geometries.Select(async geom =>
           {
 #if ARCGISPRO29
@@ -409,6 +447,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             }
           }).ToArray();
           await Task.WhenAll(featureTasks);
+        }
         });
 
         GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
