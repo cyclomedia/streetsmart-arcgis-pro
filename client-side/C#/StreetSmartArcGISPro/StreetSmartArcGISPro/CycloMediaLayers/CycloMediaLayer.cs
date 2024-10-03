@@ -504,7 +504,16 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       await QueuedTask.Run(() =>
       {
         string[] fieldNames = [Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap];
+
+        
         var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
+        var canCreateUniqueValueRenderer = Layer.CanCreateRenderer(uniqueValueRendererDefinition);
+        if (!canCreateUniqueValueRenderer)
+        {
+          EventLog.Write(EventLog.EventType.Error, "Cant create unique value renderer!");
+          return;
+        }
+
         var uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
         uniqueValueRenderer.Fields = fieldNames;
         uniqueValueRenderer.DefaultLabel = string.Empty;
