@@ -41,8 +41,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
-using RecordingPoint = StreetSmartArcGISPro.Configuration.Remote.Recordings.Point;
 
 #if !ARCGISPRO29
 using ArcGIS.Core.Data.Exceptions;
@@ -204,7 +202,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         Layer oldLayer = Layer;
         await CreateFeatureLayerAsync();
         ClearYears();
-        await RemoveLayerAsync(_cycloMediaGroupLayer.GroupLayer, oldLayer);
+        await RemoveLayersAsync(_cycloMediaGroupLayer.GroupLayer, [oldLayer]);
         await RefreshAsync();
       }
     }
@@ -216,22 +214,17 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       Setting config = ProjectList.Instance.GetSettings(MapView);
       MySpatialReference spatialReferenceRecording = config.RecordingLayerCoordinateSystem;
 
-      if (spatialReferenceRecording == null)
+      if (spatialReferenceRecording == null && map != null)
       {
-        if (map != null)
-        {
-          spatialReference = map.SpatialReference;
-        }
+        spatialReference = map.SpatialReference;
       }
       else
       {
-        spatialReference = spatialReferenceRecording.ArcGisSpatialReference ??
-                           await spatialReferenceRecording.CreateArcGisSpatialReferenceAsync();
+        spatialReference = spatialReferenceRecording.ArcGisSpatialReference ?? await spatialReferenceRecording.CreateArcGisSpatialReferenceAsync();
       }
 
       int wkid = spatialReference?.Wkid ?? 0;
-      string mapName = map?.Name;
-      string fixedMapName = fixMapNameByReplacingSpecialCharacters(mapName);
+      string fixedMapName = FixMapNameByReplacingSpecialCharacters(map?.Name);
       string fcNameWkid = string.Concat(FcName, fixedMapName, wkid);
       var project = ArcGISProject.Current;
       await CreateFeatureClassAsync(project, fcNameWkid, spatialReference);
@@ -249,23 +242,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       if (map != null)
       {
         var layersByName = map.FindLayers(Name);
-        bool leave = false;
-
-        foreach (Layer layer in layersByName)
-        {
-          if (layer is FeatureLayer featureLayer)
-          {
-            if (!leave)
-            {
-              Layer = featureLayer;
-              leave = true;
-            }
-          }
-          else
-          {
-            await RemoveLayerAsync(map, layer);
-          }
-        }
+        Layer = layersByName.OfType<FeatureLayer>().FirstOrDefault();
+        var layersToRemove = layersByName.Except([Layer]);
+        await RemoveLayersAsync(map, layersToRemove);
       }
 
       var project = ArcGISProject.Current;
@@ -282,7 +261,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       else
       {
         await MakeEmptyAsync();
-        await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
         await project.SaveEditsAsync();
       }
@@ -292,21 +270,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       LayersRemovedEvent.Subscribe(OnLayersRemoved);
       await RefreshAsync();
       IsInitialized = true;
-    }
-
-    private async Task UpdateSpatialReferenceSettings()
-    {
-      SpatialReference spatialReference = await GetSpatialReferenceAsync();
-
-      if (spatialReference != null)
-      {
-        MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
-        MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
-        var projectList = ProjectList.Instance;
-        Setting settings = projectList.GetSettings(MapView);
-        settings.RecordingLayerCoordinateSystem = mySpatialReference;
-        projectList.Save();
-      }
     }
 
     private async Task<FeatureLayer> CreateLayerAsync(ArcGISProject project, string fcName, ILayerContainerEdit layerContainer)
@@ -326,13 +289,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    private async Task RemoveLayerAsync(ILayerContainerEdit layerContainer, Layer layer)
+    private async Task RemoveLayersAsync(ILayerContainerEdit layerContainer, IEnumerable<ArcGIS.Desktop.Mapping.Layer> layers)
     {
       await QueuedTask.Run(() =>
       {
-        if (layerContainer?.Layers.Contains(layer) ?? false)
+        var intersectLayers = layerContainer?.Layers.Intersect(layers).ToArray();
+        if (layerContainer != null && intersectLayers?.Length > 0)
         {
-          layerContainer.RemoveLayer(layer);
+          layerContainer.RemoveLayers(intersectLayers);
         }
       });
     }
@@ -341,7 +305,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     {
       if (fromGroup)
       {
-        await RemoveLayerAsync(_cycloMediaGroupLayer.GroupLayer, Layer);
+        await RemoveLayersAsync(_cycloMediaGroupLayer.GroupLayer, [Layer]);
       }
 
       Remove();
@@ -477,51 +441,45 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        using (FeatureClass featureClass = Layer?.GetFeatureClass())
+        using FeatureClass featureClass = Layer?.GetFeatureClass();
+        if (featureClass != null)
         {
-          if (featureClass != null)
+          const double searchBox = 25.0;
+          double xMin = x - searchBox;
+          double xMax = x + searchBox;
+          double yMin = y - searchBox;
+          double yMax = y + searchBox;
+          Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, xMax, yMin, yMax);
+
+          SpatialQueryFilter spatialFilter = new SpatialQueryFilter
           {
-            const double searchBox = 25.0;
-            double xMin = x - searchBox;
-            double xMax = x + searchBox;
-            double yMin = y - searchBox;
-            double yMax = y + searchBox;
-            Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, xMax, yMin, yMax);
+            FilterGeometry = envelope,
+            SpatialRelationship = SpatialRelationship.Contains,
+            SubFields = $"{Recording.FieldGroundLevelOffset}, {Recording.FieldHeight}, SHAPE"
+          };
 
-            SpatialQueryFilter spatialFilter = new SpatialQueryFilter
+          using RowCursor existsResult = featureClass.Search(spatialFilter, false);
+          int groundLevelId = existsResult.FindField(Recording.FieldGroundLevelOffset);
+          int heightId = existsResult.FindField(Recording.FieldHeight);
+
+          while (existsResult.MoveNext())
+          {
+            using Row row = existsResult.Current;
+            double? groundLevel = row?.GetOriginalValue(groundLevelId) as double?;
+            double heightValue = row?.GetOriginalValue(heightId) as double? ?? 0.0;
+            const double tolerance = 0.01;
+
+            if (groundLevel != null)
             {
-              FilterGeometry = envelope,
-              SpatialRelationship = SpatialRelationship.Contains,
-              SubFields = $"{Recording.FieldGroundLevelOffset}, {Recording.FieldHeight}, SHAPE"
-            };
+              Feature feature = row as Feature;
+              Geometry geometry = feature?.GetShape();
+              MapPoint point = geometry as MapPoint;
+              double height = Math.Abs(heightValue) < tolerance ? point?.Z ?? 0 : heightValue;
 
-            using (RowCursor existsResult = featureClass.Search(spatialFilter, false))
-            {
-              int groundLevelId = existsResult.FindField(Recording.FieldGroundLevelOffset);
-              int heightId = existsResult.FindField(Recording.FieldHeight);
-
-              while (existsResult.MoveNext())
-              {
-                using (Row row = existsResult.Current)
-                {
-                  double? groundLevel = row?.GetOriginalValue(groundLevelId) as double?;
-                  double heightValue = row?.GetOriginalValue(heightId) as double? ?? 0.0;
-                  const double tolerance = 0.01;
-
-                  if (groundLevel != null)
-                  {
-                    Feature feature = row as Feature;
-                    Geometry geometry = feature?.GetShape();
-                    MapPoint point = geometry as MapPoint;
-                    double height = Math.Abs(heightValue) < tolerance ? point?.Z ?? 0 : heightValue;
-
-                    // ReSharper disable once AccessToModifiedClosure
-                    result = result ?? 0.0;
-                    result = result + height - ((double)groundLevel);
-                    count++;
-                  }
-                }
-              }
+              // ReSharper disable once AccessToModifiedClosure
+              result = result ?? 0.0;
+              result = result + height - ((double)groundLevel);
+              count++;
             }
           }
         }
@@ -545,7 +503,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       await QueuedTask.Run(() =>
       {
-        string[] fieldNames = { Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap };
+        string[] fieldNames = [Recording.FieldYear, Recording.FieldPip, Recording.FieldIsAuthorized, Recording.FieldHasDepthMap];
         var uniqueValueRendererDefinition = new UniqueValueRendererDefinition();
         var uniqueValueRenderer = (CIMUniqueValueRenderer)Layer.CreateRenderer(uniqueValueRendererDefinition);
         uniqueValueRenderer.Fields = fieldNames;
@@ -594,9 +552,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         {
           Map map = MapView?.Map;
 
-          Layer thisLayer =
-            map?.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(
-              checkLayer => checkLayer.Name == fcName);
+          Layer thisLayer = map?.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(checkLayer => checkLayer.Name == fcName);
 
           if (thisLayer != null)
           {
@@ -678,77 +634,79 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
             string idField = Recording.ObjectId;
             var exists = new Dictionary<string, long>();
 
-            using (FeatureClass featureClass = Layer?.GetFeatureClass())
+            using FeatureClass featureClass = Layer?.GetFeatureClass();
+            if (featureClass == null)
             {
-              if (featureClass != null)
+              return editOperation;
+            }
+
+            SpatialQueryFilter spatialFilter = new SpatialQueryFilter
+            {
+              FilterGeometry = envelope,
+              SpatialRelationship = SpatialRelationship.Contains,
+              SubFields = $"OBJECTID, {idField}"
+            };
+
+            using (RowCursor existsResult = featureClass.Search(spatialFilter, false))
+            {
+              int imId = existsResult.FindField(idField);
+
+              while (existsResult.MoveNext())
               {
-                SpatialQueryFilter spatialFilter = new SpatialQueryFilter
+                using Row row = existsResult.Current;
+                string recValue = row?.GetOriginalValue(imId) as string;
+
+                if (!string.IsNullOrEmpty(recValue) && !exists.ContainsKey(recValue))
                 {
-                  FilterGeometry = envelope,
-                  SpatialRelationship = SpatialRelationship.Contains,
-                  SubFields = $"OBJECTID, {idField}"
-                };
-
-                using (RowCursor existsResult = featureClass.Search(spatialFilter, false))
-                {
-                  int imId = existsResult.FindField(idField);
-
-                  while (existsResult.MoveNext())
-                  {
-                    using (Row row = existsResult.Current)
-                    {
-                      string recValue = row?.GetOriginalValue(imId) as string;
-
-                      if (!string.IsNullOrEmpty(recValue) && !exists.ContainsKey(recValue))
-                      {
-                        long objectId = row.GetObjectID();
-                        exists.Add(recValue, objectId);
-                      }
-                    }
-                  }
-                }
-
-                FeatureClassDefinition definition = featureClass.GetDefinition();
-                SpatialReference spatialReference = definition.GetSpatialReference();
-
-                foreach (Recording recording in recordings)
-                {
-                  Location location = recording?.Location;
-                  RecordingPoint point = location?.Point;
-
-                  if (location != null && point != null)
-                  {
-                    if (!exists.ContainsKey((string)recording.FieldToItem(idField)))
-                    {
-                      if (Filter(recording))
-                      {
-                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Start writing recording to database: {recording.ImageId}");
-                        Dictionary<string, object> toAddFields = Recording.Fields.ToDictionary(fieldId => fieldId.Key,
-                          fieldId => recording.FieldToItem(fieldId.Key));
-
-                        MapPoint newPoint = MapPointBuilderEx.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
-                        toAddFields.Add(Recording.ShapeFieldName, newPoint);
-                        editOperation.Create(Layer, toAddFields);
-                        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Finished writing recording to database: {recording.ImageId}");
-                      }
-                    }
-                    else
-                    {
-                      if (Filter(recording))
-                      {
-                        exists.Remove((string)recording.FieldToItem(idField));
-                      }
-                    }
-                  }
-                }
-
-                foreach (var row in exists)
-                {
-                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) delete element from database: {row.Value}, {row.Key}");
-                  editOperation.Delete(Layer, row.Value);
+                  long objectId = row.GetObjectID();
+                  exists.Add(recValue, objectId);
                 }
               }
             }
+
+            FeatureClassDefinition definition = featureClass.GetDefinition();
+            SpatialReference spatialReference = definition.GetSpatialReference();
+
+            foreach (Recording recording in recordings)
+            {
+              Location location = recording?.Location;
+              var point = location?.Point;
+
+              if (location == null || point == null)
+              {
+                continue;
+              }
+
+              if (!exists.ContainsKey((string)recording.FieldToItem(idField)))
+              {
+                if (Filter(recording))
+                {
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Start writing recording to database: {recording.ImageId}");
+                  Dictionary<string, object> toAddFields = Recording.Fields.ToDictionary(fieldId => fieldId.Key,
+                    fieldId => recording.FieldToItem(fieldId.Key));
+
+                  MapPoint newPoint = MapPointBuilderEx.CreateMapPoint(point.X, point.Y, point.Z, spatialReference);
+                  toAddFields.Add(Recording.ShapeFieldName, newPoint);
+                  editOperation.Create(Layer, toAddFields);
+                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) Finished writing recording to database: {recording.ImageId}");
+                }
+              }
+              else
+              {
+                if (Filter(recording))
+                {
+                  exists.Remove((string)recording.FieldToItem(idField));
+                }
+              }
+            }
+
+            foreach (var row in exists)
+            {
+              EventLog.Write(EventLog.EventType.Information, $"Street Smart: (CycloMediaLayer.cs) (SaveFeatureMembersAsync) delete element from database: {row.Value}, {row.Key}");
+              editOperation.Delete(Layer, row.Value);
+            }
+
+            return editOperation;
           }
         }
 
@@ -758,12 +716,9 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public static void ResetYears(FeatureLayer layer)
     {
-      if (layer != null)
+      if (layer != null && YearMonth.ContainsKey(layer))
       {
-        if (YearMonth.ContainsKey(layer))
-        {
-          YearMonth[layer].Clear();
-        }
+        YearMonth[layer].Clear();
       }
     }
 
@@ -921,9 +876,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     private async void OnLayersRemoved(LayerEventsArgs args)
     {
-      IEnumerable<Layer> layers = args.Layers;
-      bool contains = layers.Aggregate(false, (current, layer) => (layer == Layer) || current);
-
+      bool contains = args.Layers.Any(layer => layer == Layer);
       if (contains)
       {
         await _cycloMediaGroupLayer.RemoveLayerAsync(Name, false);
@@ -941,16 +894,19 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public string fixMapNameByReplacingSpecialCharacters(string mapName)
+    public static string FixMapNameByReplacingSpecialCharacters(string mapName)
     {
-      char[] charsToReplace = {
-   ' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+',
-   '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'
-  };
+      if (mapName == null)
+      {
+        return string.Empty;
+      }
+
+      char[] charsToReplace = [' ', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+', '[', '{', ']', '}', '\\', '|', ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?'];
       foreach (char c in charsToReplace)
       {
-        mapName = mapName?.Replace(c, '_') ?? string.Empty;
+        mapName = mapName.Replace(c, '_');
       }
+
       return mapName;
     }
     #endregion

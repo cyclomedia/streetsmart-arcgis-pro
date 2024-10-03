@@ -16,15 +16,6 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Resources;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
-
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Events;
@@ -38,9 +29,15 @@ using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
-
-using Project = ArcGIS.Desktop.Core.Project;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using Project = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
 {
@@ -50,13 +47,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private static StreetSmart _streetSmart;
     private static LanguageSettings _langSettings;
-
-    private Dictionary<MapView, CycloMediaGroupLayer> _cycloMediaGroupLayer;
     private VectorLayerList _vectorLayerList;
-    private ViewerList _viewerList;
-    private MeasurementList _measurementList;
     private readonly Agreement _agreement;
-    private ResourceManager _resourceManager;
+    private readonly Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer = [];
 
     #endregion
 
@@ -65,55 +58,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     /// <summary>
     /// Retrieve the singleton instance to this module here
     /// </summary>
-    public static StreetSmart Current
-      =>
-        _streetSmart ??
-        (_streetSmart = (StreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}"));
+    public static StreetSmart Current => _streetSmart ??= (StreetSmart)FrameworkApplication.FindModule($"streetSmartArcGISPro_module_{_langSettings.Locale}");
 
-    public Dictionary<MapView, CycloMediaGroupLayer> CycloMediaGroupLayer =>
-      _cycloMediaGroupLayer ?? (_cycloMediaGroupLayer = []);
+    private static string GroupLayerName => Properties.Resources.ResourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
 
-    private string GroupLayerName => _resourceManager.GetString("RecordingLayerGroupName", _langSettings.CultureInfo);
+    public readonly ViewerList ViewerList = [];
 
-    public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
-    {
-      CycloMediaGroupLayer result = null;
-
-      if (mapView != null)
-      {
-        if (CycloMediaGroupLayer.ContainsKey(mapView))
-        {
-          result = CycloMediaGroupLayer[mapView];
-        }
-        else
-        {
-          result = new CycloMediaGroupLayer(mapView);
-          result.PropertyChanged += OnLayerPropertyChanged;
-          CycloMediaGroupLayer.Add(mapView, result);
-        }
-      }
-
-      return result;
-    }
-
-    public CycloMediaGroupLayer GetCycloMediaGroupLayer(Map map)
-    {
-      CycloMediaGroupLayer result = null;
-
-      if (map != null)
-      {
-        foreach (var cycloMediaGroupLayer in CycloMediaGroupLayer.Values)
-        {
-          result = cycloMediaGroupLayer.MapView.Map == map ? cycloMediaGroupLayer : result;
-        }
-      }
-
-      return result;
-    }
-
-    public ViewerList ViewerList => _viewerList ?? (_viewerList = []);
-
-    public MeasurementList MeasurementList => _measurementList ?? (_measurementList = []);
+    public readonly MeasurementList MeasurementList = [];
 
     #endregion
 
@@ -123,7 +74,6 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       _langSettings = LanguageSettings.Instance;
       _agreement = Agreement.Instance;
-      _resourceManager = Properties.Resources.ResourceManager;
 
       if (_agreement.Value)
       {
@@ -197,33 +147,75 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     #region Functions
 
+    public CycloMediaGroupLayer GetOrAddCycloMediaGroupLayer(MapView mapView)
+    {
+      if (mapView == null)
+      {
+        return null;
+      }
+
+      if (CycloMediaGroupLayer.TryGetValue(mapView, out var groupLayer))
+      {
+        return groupLayer;
+      }
+
+      var result = new CycloMediaGroupLayer(mapView);
+      result.PropertyChanged += OnLayerPropertyChanged;
+      CycloMediaGroupLayer.Add(mapView, result);
+      return result;
+    }
+
+    public CycloMediaGroupLayer GetCycloMediaGroupLayer(MapView mapView)
+    {
+      if (mapView == null)
+      {
+        return null;
+      }
+
+      if (CycloMediaGroupLayer.TryGetValue(mapView, out var result))
+      {
+        return result;
+      }
+
+      return null;
+    }
+
+    public IEnumerable<CycloMediaGroupLayer> GetCycloMediaGroupLayers(Map map)
+    {
+      if (map == null)
+      {
+        yield break;
+      }
+
+      foreach (var cycloMediaGroupLayer in CycloMediaGroupLayer.Values)
+      {
+        if (cycloMediaGroupLayer.MapView.Map == map)
+        {
+          yield return cycloMediaGroupLayer;
+        }
+      }
+    }
+
     internal bool InsideScale(MapView mapView)
     {
-      //GC: added a new catch statement for mapView when opening attribute table while editing
-      if (mapView != null)
-      {
-        return GetCycloMediaGroupLayer(mapView).InsideScale;
-      }
-      else
+      if (mapView == null)
       {
         return false;
       }
+
+      return GetOrAddCycloMediaGroupLayer(mapView).Any(layer => layer.InsideScale);
     }
 
     private bool ContainsCycloMediaLayer(MapView mapView)
     {
       CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
-      return mapView?.Map?.Layers.Aggregate(false, (current, layer) =>
-                 (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
-                  layer.Name == GroupLayerName) || current) ?? false;
+      return mapView?.Map?.Layers.Any(layer => cycloMediaGroupLayer?.IsKnownName(layer.Name) ?? layer.Name == GroupLayerName) ?? false;
     }
 
     private bool ContainsCycloMediaLayer(Map map)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(map);
-      return map?.Layers.Aggregate(false, (current, layer) =>
-                 (cycloMediaGroupLayer?.IsKnownName(layer.Name) ??
-                  layer.Name == GroupLayerName) || current) ?? false;
+      var cycloMediaGroupLayers = GetCycloMediaGroupLayers(map);
+      return map?.Layers.Any(layer => cycloMediaGroupLayers?.Any(l => l.IsKnownName(layer.Name)) ?? layer.Name == GroupLayerName) ?? false;
     }
 
     private async Task CloseCycloMediaLayerAsync(bool closeMap, MapView mapView)
@@ -236,7 +228,6 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       if (closeMap)
       {
         CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
-
         if (cycloMediaGroupLayer != null)
         {
           cycloMediaGroupLayer.PropertyChanged -= OnLayerPropertyChanged;
@@ -269,10 +260,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public async Task<VectorLayerList> GetVectorLayerListAsync(MapView mapView)
     {
-      if (_vectorLayerList == null)
-      {
-        _vectorLayerList = [];
-      }
+      _vectorLayerList ??= [];
 
       if (mapView != null && !_vectorLayerList.ContainsKey(mapView))
       {
@@ -287,14 +275,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       return await GetVectorLayerListAsync(MapView.Active);
     }
 
-    public async Task AddLayersAsync(MapView mapView)
-    {
-      await AddLayersAsync(null, mapView);
-    }
-
     public async Task AddLayersAsync(string name, MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(mapView);
 
       if (cycloMediaGroupLayer.Count == 0)
       {
@@ -303,20 +286,19 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (!string.IsNullOrEmpty(name))
       {
-        await cycloMediaGroupLayer.AddLayerAsync(name);
+        await cycloMediaGroupLayer.AddAcceptableLayerAsync(name);
       }
     }
 
     public async Task RemoveLayerAsync(string name, MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
+      var cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
       await cycloMediaGroupLayer.RemoveLayerAsync(name, true);
     }
 
     public async Task RemoveLayersAsync(bool fromMap, MapView mapView)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
-
+      var cycloMediaGroupLayer = GetCycloMediaGroupLayer(mapView);
       if (cycloMediaGroupLayer != null)
       {
         await cycloMediaGroupLayer.DisposeAsync(fromMap);
@@ -325,11 +307,10 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public async Task RemoveLayersAsync(Map map)
     {
-      CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(map);
-
-      if (cycloMediaGroupLayer != null)
+      var cycloMediaGroupLayers = GetCycloMediaGroupLayers(map).ToList();
+      foreach (var layer in cycloMediaGroupLayers)
       {
-        await cycloMediaGroupLayer.DisposeAsync(false);
+        await layer.DisposeAsync(false);
       }
     }
 
@@ -339,7 +320,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private async void OnMapViewInitialized(MapViewEventArgs args)
     {
-      CycloMediaGroupLayer cycloMediaLayer = GetCycloMediaGroupLayer(args.MapView);
+      CycloMediaGroupLayer cycloMediaLayer = GetOrAddCycloMediaGroupLayer(args.MapView);
 
       if (cycloMediaLayer != null)
       {
@@ -350,16 +331,17 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       }
 
       bool addEvents = CycloMediaGroupLayer.Count == 0 ||
-                       CycloMediaGroupLayer.Count == 1 && CycloMediaGroupLayer.ContainsKey(args.MapView);
+                       CycloMediaGroupLayer.Count == 1 &&
+                       CycloMediaGroupLayer.ContainsKey(args.MapView);
 
       if (addEvents)
       {
         LayersRemovedEvent.Subscribe(OnLayerRemoved);
       }
 
-      if (ContainsCycloMediaLayer(args.MapView))
+      if (cycloMediaLayer.Count == 0)
       {
-        await AddLayersAsync(args.MapView);
+        await cycloMediaLayer.InitializeAsync();
       }
 
       Setting settings = ProjectList.Instance.GetSettings(args.MapView);
@@ -390,7 +372,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (args.PropertyName == "RecordingLayerCoordinateSystem")
       {
-        CycloMediaGroupLayer cycloMediaGroupLayer = GetCycloMediaGroupLayer(MapView.Active);
+        CycloMediaGroupLayer cycloMediaGroupLayer = GetOrAddCycloMediaGroupLayer(MapView.Active);
 
         foreach (var layer in cycloMediaGroupLayer)
         {
@@ -459,7 +441,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     {
       if (args.IncomingView != null)
       {
-        CycloMediaGroupLayer groupLayer = GetCycloMediaGroupLayer(args.IncomingView);
+        CycloMediaGroupLayer groupLayer = GetOrAddCycloMediaGroupLayer(args.IncomingView);
 
         if (groupLayer.ContainsLayers)
         {
