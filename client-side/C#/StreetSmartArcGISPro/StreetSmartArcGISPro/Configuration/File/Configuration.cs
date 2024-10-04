@@ -44,6 +44,8 @@ namespace StreetSmartArcGISPro.Configuration.File
     private bool _useDefaultStreetSmartUrl;
     private string _streetSmartLocation;
 
+    private bool _isSyncOfVisibilityEnabled = true;
+
     private bool _useDefaultConfigurationUrl;
     private string _configurationUrlLocation;
 
@@ -100,6 +102,19 @@ namespace StreetSmartArcGISPro.Configuration.File
         if (_useDefaultStreetSmartUrl != value)
         {
           _useDefaultStreetSmartUrl = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
+    public bool IsSyncOfVisibilityEnabled
+    {
+      get => _isSyncOfVisibilityEnabled;
+      set
+      {
+        if (_isSyncOfVisibilityEnabled != value)
+        {
+          _isSyncOfVisibilityEnabled = value;
           OnPropertyChanged();
         }
       }
@@ -186,6 +201,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         _useDefaultConfigurationUrl = true,
         _configurationUrlLocation = string.Empty,
         _useDefaultStreetSmartUrl = true,
+        _isSyncOfVisibilityEnabled = true,
         _streetSmartLocation = string.Empty,
         UseProxyServer = false,
         ProxyAddress = string.Empty,
