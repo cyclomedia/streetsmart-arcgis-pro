@@ -128,8 +128,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public IOverlay Overlay { get; set; }
 
-    public bool GeoJsonChanged { get; private set; }
-
     public string Name => Layer?.Name ?? string.Empty;
 
     public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
@@ -148,7 +146,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Functions
 
-    public bool CalculateOverlayVisibility()
+    private bool CalculateOverlayVisibility()
     {
       return ShouldSyncLayersVisibility()
           ? IsLayerVisible
@@ -214,7 +212,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
-      GeoJsonChanged = false;
       double distanceFactor = (cyclSpatRef?.IsGeographic ?? true) ? factor : 1 / factor;
 
       if (Layer.Map != map)
@@ -286,7 +283,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           var featureTasks = geometries.Select(async geom =>
           {
 #if ARCGISPRO29
-              Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
+            Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
 #else
             Polygon polygon = PolygonBuilderEx.CreatePolygon(geom, layerSpatRef);
 #endif
@@ -420,10 +417,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
       });
 
-      GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
       GeoJson = featureCollection;
-
-
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
       return featureCollection;
     }
@@ -454,35 +448,22 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (uniqueValueRendererRenderer?.Groups != null)
         {
           var fields = uniqueValueRendererRenderer.Fields;
-
           foreach (var group in uniqueValueRendererRenderer.Groups)
           {
             foreach (var uniqueClass in group.Classes)
             {
-              IFilter filter = null;
-
               foreach (var uniqueValue in uniqueClass.Values)
               {
                 for (int i = 0; i < fields.Length; i++)
                 {
                   string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
-                  //GC: made to fix apostrophe error for symbology
-                  if (value.Contains("'"))
-                  {
-                    value = value.Replace("'", "");
-                  }
-                  filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
-
+                  var filter = SLDFactory.CreateEqualIsFilter(fields[i], value.Replace("'", ""));
                   CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
                   ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
                   IRule rule = SLDFactory.CreateRule(symbolizer, filter);
                   SLDFactory.AddRuleToStyle(sld, rule);
                 }
               }
-              /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-              ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-              IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-              SLDFactory.AddRuleToStyle(Sld, rule);*/
             }
           }
         }
@@ -544,7 +525,6 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             double size = pictureMarker.Size;
             string url = pictureMarker.URL;
-
             string[] parts = url.Split(';');
             string base64 = parts.Length >= 2 ? parts[1] : string.Empty;
             base64 = base64.Replace("base64,", string.Empty);
@@ -577,7 +557,6 @@ namespace StreetSmartArcGISPro.VectorLayers
         double h = colorValues != null && colorValues.Length >= 1 ? colorValues[0] : 0.0;
         double s = colorValues != null && colorValues.Length >= 2 ? colorValues[1] : 0.0;
         double v = colorValues != null && colorValues.Length >= 3 ? colorValues[2] : 0.0;
-
 
         //GC: added catch statements that turns the s and v values to percentages because it was causing incorrect overlay colors
         if (s > 1) s /= 100;
