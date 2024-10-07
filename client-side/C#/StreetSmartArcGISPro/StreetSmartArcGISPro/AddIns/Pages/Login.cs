@@ -98,12 +98,12 @@ namespace StreetSmartArcGISPro.AddIns.Pages
             }
 
             NotifyPropertyChanged("OAuthAuthenticationStatus");
+            NotifyPropertyChanged("IsOAuth");
 
             break;
           case "OAuthUsername":
 
             EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthUsername) {_login.OAuthUsername}");
-
             NotifyPropertyChanged("Username");
 
             break;
@@ -127,11 +127,16 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Login.cs) (SignOutOAuth) {ex}");
       }
 
+      _login.IsOAuth = false;
+      _login.Credentials = false;
+      NotifyPropertyChanged("Credentials");
       _login.OAuthAuthenticationStatus = OAuthStatus.SignedOut;
+      
     }
 
     private async Task SignInOAuth()
     {
+      _login.IsOAuth = true;
       _login.OAuthAuthenticationStatus = OAuthStatus.SigningIn;
 
       try
@@ -144,6 +149,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Login.cs) (SignInOAuth) {ex}");
 
         _login.OAuthAuthenticationStatus = OAuthStatus.SignedOut;
+        _login.IsOAuth = false;
       }
     }
 
@@ -182,11 +188,11 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       get => _login.Password;
       set
       {
-          if (_login.Password != value)
-          {
-            IsModified = true;
-            _login.Password = value;
-            NotifyPropertyChanged();
+        if (_login.Password != value)
+        {
+          IsModified = true;
+          _login.Password = value;
+          NotifyPropertyChanged();
         }
       }
     }
@@ -251,7 +257,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       _login.Username = _username;
       _login.Password = _password;
-      _login.IsOAuth = _isOAuth;
+      //_login.IsOAuth = _isOAuth;
 
       Save();
 
@@ -270,8 +276,9 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     public void Save()
     {
       _login.Save();
-      // ReSharper disable once ExplicitCallerInfoArgument
       NotifyPropertyChanged("Credentials");
+      NotifyPropertyChanged("Username");
+
     }
 
     #endregion

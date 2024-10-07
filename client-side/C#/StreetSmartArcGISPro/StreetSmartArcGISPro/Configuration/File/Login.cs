@@ -174,6 +174,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         {
           _credentials = value;
           OnPropertyChanged();
+          OnPropertyChanged("Credentials");
 
           if (value)
           {

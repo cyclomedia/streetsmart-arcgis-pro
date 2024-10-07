@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using ArcGIS.Desktop.Internal.Mapping;
+using System;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace StreetSmartArcGISPro.AddIns.Views
@@ -29,12 +32,32 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
     }
 
-    private void OnCheckButtonClicked(object sender, RoutedEventArgs e)
+    private async void OnLoginButtonClicked(object sender, RoutedEventArgs e)
     {
       if (DataContext != null)
       {
         ((dynamic)DataContext).Save();
+
+        await ShowNotification();
       }
+    }
+    private void OnLogoutButtonClicked(object sender, RoutedEventArgs e)
+    {
+      if (DataContext != null)
+      {
+        var temp = ((dynamic)DataContext).Password;
+        ((dynamic)DataContext).Password = "";
+        ((dynamic)DataContext).Save();
+        ((dynamic)DataContext).Password = temp;
+      }
+    }
+
+
+    public async Task ShowNotification()
+    {
+      NotificationMessage.Visibility = Visibility.Visible;
+      await Task.Delay(3000);
+      NotificationMessage.Visibility = Visibility.Collapsed;
     }
   }
 }
