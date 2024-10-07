@@ -736,11 +736,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-      if (_login.Credentials && Api != null && await Api.GetApiReadyState())
+      if (!_login.Credentials || Api == null || !await Api.GetApiReadyState())
       {
+        return;
+      }
+
         switch (propertyName)
         {
-          case "Location":
+        case nameof(Location):
             string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
 
             if (_oldMapView != _mapView)
@@ -783,7 +786,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
 
             break;
-          case "IsActive":
+        case nameof(IsActive):
             if (!IsActive)
             {
               await CloseViewersAsync();
@@ -791,7 +794,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             break;
         }
       }
-    }
 
     internal static StreetSmart ActivateStreetSmart()
     {
@@ -894,9 +896,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
         string srsName = cyclSpatRel?.SRSName;
 
-        if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
+        if (vectorLayer.Overlay != null || string.IsNullOrEmpty(srsName))
         {
-          //GC: create transparency value here
+          return;
+        }
+
           string layerName = vectorLayer.Name;
           string layerNameAndUri = vectorLayer.NameAndUri;
           bool visible = vectorLayer.DesiredOverlayVisibility; //vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri); 
@@ -957,7 +961,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
       }
-    }
 
     public bool ShouldSyncLayersVisibility()
     {
@@ -1479,14 +1482,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                 _crossCheck = null;
               }
             }
-
-            if (GlobeSpotterConfiguration.AddLayerWfs)
-            {
-              await UpdateAllVectorLayersAsync();
             }
           }
         }
-      }
       catch (Exception e)
       {
         EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChange): exception: {e}");
@@ -1553,8 +1551,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       switch (args.PropertyName)
       {
-        case "GeoJson":
-          await UpdateVectorLayerOverlay(vectorLayer, sender, false);
+        case nameof(VectorLayer.GeoJson):
+          await UpdateVectorLayerOverlay(vectorLayer, sender);
           break;
       }
       //GC: checks if the layer list visibilty is different from the overlay list visibilty
