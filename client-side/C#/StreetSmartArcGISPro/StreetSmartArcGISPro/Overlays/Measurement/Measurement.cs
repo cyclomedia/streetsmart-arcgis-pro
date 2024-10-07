@@ -321,7 +321,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (geometry != null)
       {
         double zScale = 1.0;
-        double modScale = 1.0;
         var srs = geometry.SpatialReference;
         var geoPointCount = geometry.PointCount;
         ArcGISGeometryType geometryType = geometry.GeometryType;
@@ -330,10 +329,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
-          /*if (srs?.ZUnit != spatialReference?.ZUnit)
-          {
-            conversionFactor = srs.ZUnit.ConversionFactor;
-          }*/
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
@@ -342,7 +337,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
           {
             zScale = 1 / modifierFactor;
           }
-          //modScale = 1 / modifierFactor;
         });
 
         result = [];
