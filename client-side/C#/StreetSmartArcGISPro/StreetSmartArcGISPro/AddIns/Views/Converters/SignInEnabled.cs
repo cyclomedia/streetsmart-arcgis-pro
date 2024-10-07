@@ -16,6 +16,7 @@
  * License along with this library.
  */
 
+using CefSharp.DevTools.CSS;
 using System;
 using System.Globalization;
 using System.Windows;
@@ -24,18 +25,17 @@ using static StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
-  class SignInEnabled : IValueConverter
+  class SignInEnabled : IMultiValueConverter
   {
     #region IValueConverter Members
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && ((OAuthStatus)value) == OAuthStatus.SignedOut;
+        return values[0] != null && (((OAuthStatus)values[0]) == OAuthStatus.SignedOut || ((OAuthStatus)values[0]) == OAuthStatus.None) && values[1] != null && !(bool)values[1];
     }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
-      throw new NotSupportedException();
+      throw new NotImplementedException();
     }
 
     #endregion
