@@ -16,10 +16,10 @@
  * License along with this library.
  */
 
+using StreetSmart.Common.Interfaces.API;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using StreetSmart.Common.Interfaces.API;
 
 namespace StreetSmartArcGISPro.Overlays
 {
@@ -63,7 +63,7 @@ namespace StreetSmartArcGISPro.Overlays
 
     public Viewer GetImageId(string imageId)
     {
-      return Viewers.Aggregate<Viewer, Viewer>(null, (current, viewer) => viewer.ImageId == imageId ? viewer : current);
+      return Viewers.FirstOrDefault(viewer => viewer.ImageId == imageId);
     }
 
     public void Add(IPanoramaViewer panoramaViewer, string imageId)

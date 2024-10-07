@@ -16,20 +16,16 @@
  * License along with this library.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Resources;
-using System.Threading.Tasks;
-
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
-
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 using Color = System.Drawing.Color;
 using Envelope = ArcGIS.Core.Geometry.Envelope;
 
@@ -53,14 +49,11 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     private static readonly ConstantsRecordingLayer Constants;
 
-    private readonly ResourceManager _resourceManager;
-    private readonly LanguageSettings _language;
-
     #endregion
 
     #region Properties
 
-    public override string Name => _resourceManager.GetString("RecordingLayerName", _language.CultureInfo);
+    public override string Name => Properties.Resources.ResourceManager.GetString("RecordingLayerName", LanguageSettings.Instance.CultureInfo);
 
     public override string FcName => Constants.RecordingLayerFeatureClassName;
 
@@ -78,23 +71,23 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       set => _minimumScale = value;
     }
 
-    private static Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>> YearsVisible
-      => _yearsVisible ?? (_yearsVisible = []);
+    private static Dictionary<FeatureLayer, Dictionary<TypeOfLayer, List<int>>> YearsVisible => _yearsVisible ??= [];
 
-    private static Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>> UniqueValueGroups
-      => _uniqueValueGroups ?? (_uniqueValueGroups = []);
+    private static Dictionary<int, Dictionary<TypeOfLayer, CIMUniqueValueGroup>> UniqueValueGroups => _uniqueValueGroups ??= [];
 
     private List<int> GetYearValue(FeatureLayer layer, TypeOfLayer type)
     {
-      if (layer != null)
+      if (layer == null)
       {
-        if (!YearsVisible.ContainsKey(layer))
-        {
-          YearsVisible.Add(layer, []);
-        }
+        return null;
       }
 
-      return layer == null ? null : GetValue(YearsVisible[layer], type);
+      if (!YearsVisible.ContainsKey(layer))
+      {
+        YearsVisible.Add(layer, []);
+      }
+
+      return GetValue(YearsVisible[layer], type);
     }
 
     private List<int> GetValue(Dictionary<TypeOfLayer, List<int>> yearValue, TypeOfLayer type)
@@ -164,7 +157,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
         if (result)
         {
-          var dateTime = (DateTime) recordedAt;
+          var dateTime = (DateTime)recordedAt;
           int year = dateTime.Year;
           int month = dateTime.Month;
           var yearMonth = GetYearMonth(Layer);
@@ -217,14 +210,14 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                   if (value != null)
                   {
-                    var dateTime = (DateTime) value;
+                    var dateTime = (DateTime)value;
                     int year = dateTime.Year;
 
                     object pipValue = row?.GetOriginalValue(pipId);
 
                     if (pipValue != null)
                     {
-                      bool pip = bool.Parse((string) pipValue);
+                      bool pip = bool.Parse((string)pipValue);
 
                       if (pip)
                       {
@@ -236,7 +229,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
                     if (forbiddenValue != null)
                     {
-                      bool forbidden = !bool.Parse((string) forbiddenValue);
+                      bool forbidden = !bool.Parse((string)forbiddenValue);
 
                       if (forbidden)
                       {
@@ -388,25 +381,22 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       CIMMarker marker = GetPipSymbol(color);
       var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
       var pointSymbolReference = pointSymbol.MakeSymbolReference();
-      string detailImagesString = _resourceManager.GetString("RecordingLayerDetailImages", _language.CultureInfo);
+      string detailImagesString = Properties.Resources.ResourceManager.GetString("RecordingLayerDetailImages", LanguageSettings.Instance.CultureInfo);
 
-      CIMUniqueValue uniqueValue = new CIMUniqueValue
-      {
-        FieldValues = new[] { value.ToString(), true.ToString(), true.ToString(), false.ToString() }
-      };
+      CIMUniqueValue uniqueValue = new() { FieldValues = [value.ToString(), true.ToString(), true.ToString(), false.ToString()] };
 
       var uniqueValueClass = new CIMUniqueValueClass
       {
         Editable = true,
         Visible = true,
-        Values = new[] { uniqueValue },
+        Values = [uniqueValue],
         Symbol = pointSymbolReference,
         Label = $"{value} ({detailImagesString})"
       };
 
       return new CIMUniqueValueGroup
       {
-        Classes = new[] { uniqueValueClass },
+        Classes = [uniqueValueClass],
         Heading = string.Empty
       };
     }
@@ -417,22 +407,13 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       CIMMarker marker = GetForbiddenSymbol(color);
       var pointSymbol = SymbolFactory.Instance.ConstructPointSymbol(marker);
       var pointSymbolReference = pointSymbol.MakeSymbolReference();
-      string noAuthorizationString = _resourceManager.GetString("RecordingLayerNoAuthorization", _language.CultureInfo);
+      string noAuthorizationString = Properties.Resources.ResourceManager.GetString("RecordingLayerNoAuthorization", LanguageSettings.Instance.CultureInfo);
 
-      CIMUniqueValue uniqueValue = new CIMUniqueValue
-      {
-        FieldValues = new[] { value.ToString(), false.ToString(), false.ToString(), false.ToString() }
-      };
+      CIMUniqueValue uniqueValue = new() { FieldValues = [value.ToString(), false.ToString(), false.ToString(), false.ToString()] };
 
-      CIMUniqueValue uniqueValuePip = new CIMUniqueValue
-      {
-        FieldValues = new[] { value.ToString(), true.ToString(), false.ToString(), false.ToString() }
-      };
+      CIMUniqueValue uniqueValuePip = new() { FieldValues = [value.ToString(), true.ToString(), false.ToString(), false.ToString()] };
 
-      CIMUniqueValue depthMap = new CIMUniqueValue
-      {
-        FieldValues = new[] { value.ToString(), false.ToString(), false.ToString(), true.ToString() }
-      };
+      CIMUniqueValue depthMap = new() { FieldValues = [value.ToString(), false.ToString(), false.ToString(), true.ToString()] };
 
       var uniqueValueClass = new CIMUniqueValueClass
       {
@@ -445,7 +426,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
       return new CIMUniqueValueGroup
       {
-        Classes = new[] { uniqueValueClass },
+        Classes = [uniqueValueClass],
         Heading = string.Empty
       };
     }
@@ -473,8 +454,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     protected override void ClearYears()
     {
-      TypeOfLayer[] typeOfLayers =
-        {TypeOfLayer.YearNoDepthMap, TypeOfLayer.YearDepthMap, TypeOfLayer.YearPip, TypeOfLayer.YearForbidden};
+      TypeOfLayer[] typeOfLayers = [TypeOfLayer.YearNoDepthMap, TypeOfLayer.YearDepthMap, TypeOfLayer.YearPip, TypeOfLayer.YearForbidden];
 
       foreach (TypeOfLayer typeOfLayer in typeOfLayers)
       {
@@ -496,8 +476,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
     public RecordingLayer(CycloMediaGroupLayer layer, Envelope initialExtent = null)
       : base(layer, initialExtent)
     {
-      _resourceManager = Properties.Resources.ResourceManager;
-      _language = LanguageSettings.Instance;
     }
 
     #endregion

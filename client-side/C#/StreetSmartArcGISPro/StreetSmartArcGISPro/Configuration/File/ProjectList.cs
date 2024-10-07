@@ -16,8 +16,10 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using StreetSmartArcGISPro.Utilities;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -78,9 +80,16 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlProjects.Serialize(streamFile, this);
-      streamFile.Close();
+      try
+      {
+        FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
+        XmlProjects.Serialize(streamFile, this);
+        streamFile.Close();
+      }
+      catch (Exception ex)
+      {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Save) error: {ex}");
+      }
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -92,9 +101,17 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _projectList = (ProjectList)XmlProjects.Deserialize(streamFile);
-        streamFile.Close();
+        try
+        {
+          var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
+          _projectList = (ProjectList)XmlProjects.Deserialize(streamFile);
+          streamFile.Close();
+        }
+        catch (Exception ex)
+        {
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Load) error: {ex}");
+          _projectList = [];
+        }
       }
     }
 
@@ -107,10 +124,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public Setting GetSettings(string projectUri, string mapUri)
     {
-      var project =
-        this.Aggregate<FileProject, FileProject>(null,
-          (current, element) => element.Uri == projectUri ? element : current);
-
+      var project = this.FirstOrDefault(element => element.Uri == projectUri);
       if (project == null && !string.IsNullOrEmpty(projectUri))
       {
         project = FileProject.Create(projectUri);

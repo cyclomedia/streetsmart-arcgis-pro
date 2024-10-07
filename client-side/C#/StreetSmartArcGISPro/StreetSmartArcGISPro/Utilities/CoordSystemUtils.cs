@@ -109,10 +109,7 @@ namespace StreetSmartArcGISPro.Utilities
       if (spatialReference?.ArcGisSpatialReference == null)
       {
         MySpatialReferenceList spatialReferences = MySpatialReferenceList.Instance;
-        spatialReference = spatialReferences.GetItem(epsgCode) ??
-                           spatialReferences.Aggregate<MySpatialReference, MySpatialReference>(null,
-                             (current, spatialReferenceComp) =>
-                               spatialReferenceComp.ArcGisSpatialReference != null ? spatialReferenceComp : current);
+        spatialReference = spatialReferences.GetItem(epsgCode) ?? spatialReferences.FirstOrDefault(spatialReferenceComp => spatialReferenceComp.ArcGisSpatialReference != null);
 
         if (spatialReference != null)
         {
