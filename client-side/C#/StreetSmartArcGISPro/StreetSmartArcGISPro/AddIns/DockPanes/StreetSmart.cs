@@ -921,7 +921,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
 
           //returns number of features created
-          var numIds = await QueuedTask.Run<List<long>>(() =>
+          List<long> numIds = await QueuedTask.Run<List<long>>(() =>
           {
             var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
 #if ARCGISPRO29
@@ -1272,12 +1272,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           await Api.CloseViewer(await _viewerList.First().Key.GetId());
         }
       }
-    }
-
-    private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
-    {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
-      Login.Instance.Bearer = args.Value.BearerToken;
     }
 
     private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)

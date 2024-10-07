@@ -44,7 +44,7 @@ using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialRefe
 using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 
 #if !ARCGISPRO29
-using ArcGIS.Core.Data.Exceptions;
+//using ArcGIS.Core.Data.Exceptions;
 #endif
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
@@ -246,13 +246,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         Layer = layersByName.OfType<FeatureLayer>().FirstOrDefault();
         var layersToRemove = layersByName.Except([Layer]);
         await RemoveLayersAsync(map, layersToRemove);
-      }
-
-      var project = ArcGISProject.Current;
-
-      if (!project.IsEditingEnabled)
-      {
-        await project.SetIsEditingEnabledAsync(true);
       }
 
       var project = ArcGISProject.Current;
