@@ -735,11 +735,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-      if (_login.Credentials && Api != null && await Api.GetApiReadyState())
+      if (!_login.Credentials || Api == null || !await Api.GetApiReadyState())
       {
+        return;
+      }
+
         switch (propertyName)
         {
-          case "Location":
+        case nameof(Location):
             string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
 
             if (_oldMapView != _mapView)
@@ -782,7 +785,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
 
             break;
-          case "IsActive":
+        case nameof(IsActive):
             if (!IsActive)
             {
               await CloseViewersAsync();
@@ -790,7 +793,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             break;
         }
       }
-    }
 
     internal static StreetSmart ActivateStreetSmart()
     {
@@ -881,9 +883,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
         string srsName = cyclSpatRel?.SRSName;
 
-        if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
+        if (vectorLayer.Overlay != null || string.IsNullOrEmpty(srsName))
         {
-          //GC: create transparency value here
+          return;
+        }
+
           string layerName = vectorLayer.Name;
           string layerNameAndUri = vectorLayer.NameAndUri;
           bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
@@ -943,7 +947,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
       }
-    }
 
     private async Task RemoveVectorLayerAsync(VectorLayer vectorLayer)
     {
@@ -1445,14 +1448,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                 _crossCheck = null;
               }
             }
-
-            if (GlobeSpotterConfiguration.AddLayerWfs)
-            {
-              await UpdateVectorLayerAsync();
             }
           }
         }
-      }
       catch (Exception e)
       {
         EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChange): exception: {e}");
@@ -1512,28 +1510,27 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: this is where map layer transparency and layer list toggle can be found
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
 
-      if (GlobeSpotterConfiguration.AddLayerWfs)
+      if (!GlobeSpotterConfiguration.AddLayerWfs || sender is not VectorLayer vectorLayer)
       {
-        if (sender is VectorLayer vectorLayer)
-        {
-          switch (args.PropertyName)
-          {
-            case "GeoJson":
-              await UpdateVectorLayer(vectorLayer, sender, false);
-              break;
-          }
-          //GC: checks if the layer list visibilty is different from the overlay list visibilty
-          //fixed Pro crash bug because overlay was undefined
-          if (vectorLayer.Overlay != null)
-          {
-            if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
-            {
-              await UpdateVectorLayer(vectorLayer, sender, true);
-            }
-          }
-        }
+        return;
       }
-    }
+
+      switch (args.PropertyName)
+      {
+        case nameof(VectorLayer.GeoJson):
+          await UpdateVectorLayer(vectorLayer, sender, false);
+          break;
+      }
+            //GC: checks if the layer list visibilty is different from the overlay list visibilty
+            //fixed Pro crash bug because overlay was undefined
+            if (vectorLayer.Overlay != null)
+            {
+                if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
+                {
+                    await UpdateVectorLayer(vectorLayer, sender, true);
+                }
+            }
+        }
 
     private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender, bool switcher)
     {
