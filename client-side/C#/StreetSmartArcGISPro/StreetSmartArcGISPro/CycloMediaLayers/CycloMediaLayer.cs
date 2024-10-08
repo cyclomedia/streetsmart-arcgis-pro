@@ -1,20 +1,20 @@
 ﻿/*
- * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3.0 of the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library.
- */
+* Street Smart integration in ArcGIS Pro
+* Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
+* 
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 3.0 of the License, or (at your option) any later version.
+* 
+* This library is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+* 
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library.
+*/
 
 using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
@@ -41,10 +41,9 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using MySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 
 #if !ARCGISPRO29
-//using ArcGIS.Core.Data.Exceptions;
+using ArcGIS.Core.Data.Exceptions;
 #endif
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
@@ -262,7 +261,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       else
       {
         await MakeEmptyAsync();
-        await UpdateSpatialReferenceSettings();
         await CreateUniqueValueRendererAsync();
         await project.SaveEditsAsync();
       }
@@ -272,21 +270,6 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       LayersRemovedEvent.Subscribe(OnLayersRemoved);
       await RefreshAsync();
       IsInitialized = true;
-    }
-
-    private async Task UpdateSpatialReferenceSettings()
-    {
-      SpatialReference spatialReference = await GetSpatialReferenceAsync();
-
-      if (spatialReference != null)
-      {
-        MySpatialReferenceList mySpatialReferenceList = MySpatialReferenceList.Instance;
-        MySpatialReference mySpatialReference = mySpatialReferenceList.GetItem($"EPSG:{spatialReference.Wkid}");
-        var projectList = ProjectList.Instance;
-        Setting settings = projectList.GetSettings(MapView);
-        settings.RecordingLayerCoordinateSystem = mySpatialReference;
-        projectList.Save();
-      }
     }
 
     private async Task<FeatureLayer> CreateLayerAsync(ArcGISProject project, string fcName, ILayerContainerEdit layerContainer)
