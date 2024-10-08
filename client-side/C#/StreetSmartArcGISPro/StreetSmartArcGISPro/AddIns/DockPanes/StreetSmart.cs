@@ -24,6 +24,7 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using Nancy.ViewEngines;
 using StreetSmart.Common.Exceptions;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
@@ -361,7 +362,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           IList<IViewer> viewers = await Api.GetViewers();
 
-          if (viewers.Count >= 1)
+          if (viewers.Any())
           {
             try
             {
@@ -372,9 +373,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
             }
           }
+          else
+          {
+            _inClose = false;
+          }
         }
-
-        _inClose = false;
       }
     }
 
