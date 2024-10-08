@@ -162,6 +162,7 @@
     <Compile Include="Configuration\Remote\SpatialReference\Bounds.cs" />
     <Compile Include="Configuration\Remote\Recordings\Recording.cs" />
     <Compile Include="Configuration\Remote\SpatialReference\SpatialReference.cs" />
+    <Compile Include="Configuration\Remote\SpatialReference\SpatialReferenceDictionary.cs" />
     <Compile Include="Configuration\Remote\SpatialReference\SpatialReferenceList.cs" />
     <Compile Include="Configuration\Resource\Language.cs" />
     <Compile Include="Configuration\Resource\Languages.cs" />
