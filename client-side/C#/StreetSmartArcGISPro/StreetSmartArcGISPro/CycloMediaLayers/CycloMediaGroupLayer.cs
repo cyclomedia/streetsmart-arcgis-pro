@@ -275,7 +275,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       }
     }
 
-    #endregion
+#endregion
 
     #region Event handlers
 
