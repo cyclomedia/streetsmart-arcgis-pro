@@ -880,7 +880,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
 
       _vectorLayerList.LastSelectedLayer = this;
-
       await QueuedTask.Run(async () =>
       {
         try
@@ -897,7 +896,6 @@ namespace StreetSmartArcGISPro.VectorLayers
             {
               Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
               IJson json = JsonFactory.Create(properties);
-
               foreach (IViewer viewer in viewers)
               {
                 if (viewer is IPanoramaViewer panoramaViewer && Overlay != null && Counter == 0 && await viewer.GetId() == _clickedViewerId)
@@ -905,7 +903,6 @@ namespace StreetSmartArcGISPro.VectorLayers
                   panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
                   ++Counter;
                 }
-
               }
             }
           }
@@ -929,7 +926,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
 
       IReadOnlyList<Field> fields = feature?.GetFields();
-
       if (fields == null || fields.Count == 0)
       {
         return properties;
