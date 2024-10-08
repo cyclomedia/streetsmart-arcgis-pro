@@ -361,22 +361,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             if (geometry is Multipart multipart)
             {
               ReadOnlyPointCollection points = multipart.Points;
-
-              using (IEnumerator<MapPoint> enumPoints = points.GetEnumerator())
+              foreach (var point in points)
               {
-                while (enumPoints.MoveNext())
-                {
-                  MapPoint mapPointPart = enumPoints.Current;
-                  /*if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
-                  {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }
-                  else
-                  {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }*/
-                  result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                }
+                result.Add(await AddZOffsetAsync(point, zScale));
               }
             }
             break;
@@ -389,9 +376,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private async Task<MapPoint> AddZOffsetAsync(MapPoint mapPoint, double zScale)
     {
       return await QueuedTask.Run(async () => mapPoint.HasZ
-        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y,
-          (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0),
-          mapPoint.SpatialReference)
+        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0), mapPoint.SpatialReference)
         : MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
     }
 
@@ -694,7 +679,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 Multipoint multipoint => multipoint.Points.Count >= 1 ? multipoint.Points[0] : null,
                 _ => null
               };
-
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
               if (spatialReference.ZUnit == null || srs == null)
