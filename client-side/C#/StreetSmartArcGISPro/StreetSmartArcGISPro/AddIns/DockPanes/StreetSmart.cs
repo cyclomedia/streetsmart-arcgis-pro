@@ -368,7 +368,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           IList<IViewer> viewers = await Api.GetViewers();
 
-          if (viewers.Count >= 1)
+          if (viewers.Any())
           {
             try
             {
@@ -379,9 +379,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
               EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
             }
           }
+          else
+          {
+            _inClose = false;
+          }
         }
-
-        _inClose = false;
       }
     }
 
