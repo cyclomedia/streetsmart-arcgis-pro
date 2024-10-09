@@ -149,20 +149,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Functions
 
-    private bool CalculateOverlayVisibility()
-    {
-      return ShouldSyncLayersVisibility()
-          ? IsLayerVisible
-          : _storedLayerList.GetVisibility(NameAndUri);
-    }
-
-    private bool ShouldSyncLayersVisibility()
-    {
-      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active)?.SyncLayerVisibility;
-      var result = syncLayerVisibility ?? _configuration.IsSyncOfVisibilityEnabled;
-      return result;
-    }
-
     public async Task<bool> InitializeEventsAsync()
     {
       if (Layer.ConnectionStatus != ConnectionStatus.Connected)
@@ -286,7 +272,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
 
-          if(DesiredOverlayVisibility)
+          if (DesiredOverlayVisibility)
           {
             List<long> objectIds = [];
 
@@ -438,8 +424,8 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
               }
             }).ToArray();
-          await Task.WhenAll(featureTasks);
-        }
+            await Task.WhenAll(featureTasks);
+          }
         });
       
         GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
@@ -448,6 +434,20 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
       return featureCollection;
+    }
+
+    private bool CalculateOverlayVisibility()
+    {
+      return ShouldSyncLayersVisibility()
+          ? IsLayerVisible
+          : StoredLayerList.Instance.GetVisibility(NameAndUri);
+    }
+
+    private bool ShouldSyncLayersVisibility()
+    {
+      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
+      var result = syncLayerVisibility ?? Configuration.File.Configuration.Instance.IsSyncOfVisibilityEnabled;
+      return result;
     }
 
     //fix missing line feature bug with this new method

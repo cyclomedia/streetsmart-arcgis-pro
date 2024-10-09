@@ -906,8 +906,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           //GC: create transparency value here
           string layerName = vectorLayer.Name;
           string layerNameAndUri = vectorLayer.NameAndUri;
-          bool visible = vectorLayer.DesiredOverlayVisibility; //vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri); 
-
+          bool visible = vectorLayer.DesiredOverlayVisibility;
           double transparency = vectorLayer.Layer.Transparency;
 
           IFeatureCollection geoJson = vectorLayer.GeoJson;
@@ -1253,12 +1252,15 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           if (ShouldSyncLayersVisibility())
           {
             await QueuedTask.Run(() => vectorLayer.Layer.SetVisibility(overlayInfo.Visible));
-
           }
-          await UpdateVectorLayerAsync(vectorLayer);
+
+          vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
         }
-        vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
+
+        await UpdateVectorLayerAsync(vectorLayer);
       }
+
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) finished");
     }
 
     private async void OnFeatureClick(object sender, IEventArgs<IFeatureInfo> args)
