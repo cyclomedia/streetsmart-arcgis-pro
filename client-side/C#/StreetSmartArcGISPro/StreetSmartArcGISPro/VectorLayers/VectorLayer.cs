@@ -149,16 +149,16 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Functions
 
-    public bool CalculateOverlayVisibility()
+    private bool CalculateOverlayVisibility()
     {
       return ShouldSyncLayersVisibility()
           ? IsLayerVisible
           : _storedLayerList.GetVisibility(NameAndUri);
     }
 
-    public bool ShouldSyncLayersVisibility()
+    private bool ShouldSyncLayersVisibility()
     {
-      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
+      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active)?.SyncLayerVisibility;
       var result = syncLayerVisibility ?? _configuration.IsSyncOfVisibilityEnabled;
       return result;
     }
@@ -286,16 +286,12 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
 
-          bool visible = CalculateOverlayVisibility();
-
-          if (visible)
+          if(DesiredOverlayVisibility)
           {
             List<long> objectIds = [];
 
-          if(DesiredOverlayVisibility)
-          { 
-          var featureTasks = geometries.Select(async geom =>
-          {
+            var featureTasks = geometries.Select(async geom =>
+            {
 #if ARCGISPRO29
               Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
 #else
@@ -427,21 +423,21 @@ namespace StreetSmartArcGISPro.VectorLayers
                               }
                             }
 
-                          break;
-                        case GeometryType.Envelope:
-                        case GeometryType.Multipatch:
-                        case GeometryType.Multipoint:
-                        case GeometryType.Unknown:
-                          break;
+                            break;
+                          case GeometryType.Envelope:
+                          case GeometryType.Multipatch:
+                          case GeometryType.Multipoint:
+                          case GeometryType.Unknown:
+                            break;
+                        }
                       }
                     }
+                    //this is where the point is made
+                    GeoJsonChanged = await CreateSld(featureCollection) || GeoJsonChanged;
                   }
-                  //this is where the point is made
-                  GeoJsonChanged = await CreateSld(featureCollection) || GeoJsonChanged;
                 }
               }
-            }
-          }).ToArray();
+            }).ToArray();
           await Task.WhenAll(featureTasks);
         }
         });
@@ -452,20 +448,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
       return featureCollection;
-    }
-
-    private bool CalculateOverlayVisibility()
-    {
-      return ShouldSyncLayersVisibility()
-          ? IsLayerVisible
-          : StoredLayerList.Instance.GetVisibility(NameAndUri);
-    }
-
-    private bool ShouldSyncLayersVisibility()
-    {
-      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
-      var result = syncLayerVisibility ?? Configuration.File.Configuration.Instance.IsSyncOfVisibilityEnabled;
-      return result;
     }
 
     //fix missing line feature bug with this new method

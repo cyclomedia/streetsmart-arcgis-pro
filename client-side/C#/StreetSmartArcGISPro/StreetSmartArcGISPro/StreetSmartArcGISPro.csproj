@@ -30,9 +30,6 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Images\sync32.png" />
-	</ItemGroup>
-	<ItemGroup>
 		<Content Include="Config.fr.daml" />
 		<Content Include="Config.daml" />
 		<Content Include="Images\StreetSmartArcGISPro32.png" />
@@ -47,7 +44,6 @@
 		<Content Include="..\..\Doc\LGPL-3.0.txt" Link="LGPL-3.0.txt" />
 		<Content Include="..\..\Doc\Release notes.txt" Link="Release notes.txt" />
 		<Content Include="..\..\Doc\ToDo.txt" Link="ToDo.txt" />
-		<Content Include="Images\sync32.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\Agreement.txt" />
@@ -57,6 +53,7 @@
 		<EmbeddedResource Include="Images\FocusMode16.png" />
 		<EmbeddedResource Include="Images\SystemSearch16.png" />
 		<EmbeddedResource Include="Images\OpenLocation.cur" />
+		<EmbeddedResource Include="Images\OverlaysSync.png" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
@@ -69,7 +66,7 @@
 		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.0.0.36056" />
 		<PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
-		<PackageReference Include="StreetSmart.WPF" Version="24.7.1-rc3" />
+		<PackageReference Include="StreetSmart.WPF" Version="24.7.1-rc6" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
 		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
 	</ItemGroup>

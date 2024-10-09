@@ -155,6 +155,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       _mapView = MapView.Active;
       _oldMapView = MapView.Active;
 
+      ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+
       _toRestartImages = [];
 
       if (_mapView != null)
@@ -347,6 +349,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
       }
+    }
+
+    private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
+    {
+      MapView = args.IncomingView;
     }
 
     private async Task CloseViewersAsync()
@@ -942,7 +949,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
           StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
 
-          if (layer == null || vectorLayer.ShouldSyncLayersVisibility())
+          if (layer == null || ShouldSyncLayersVisibility())
           {
             _storedLayerList.Update(layerNameAndUri, visible);
           }
@@ -972,7 +979,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     public bool ShouldSyncLayersVisibility()
     {
-      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(_mapView).SyncLayerVisibility;
+      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(_mapView)?.SyncLayerVisibility;
       var result = syncLayerVisibility ?? _configuration.IsSyncOfVisibilityEnabled;
       return result;
     }
