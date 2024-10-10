@@ -721,7 +721,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     int polySrcCount = polySrc[0].Count;
                     int pylyDstCount = polyDst[0].Count;
-                    int j = 0;
 
                     for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
                     {

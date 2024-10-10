@@ -18,6 +18,7 @@
 
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
@@ -93,11 +94,19 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         _langSettings.Language = Languages.Instance.Get("en-GB");
       }
 
-      Login login = Login.Instance;
-      login.Check();
       MapViewInitializedEvent.Subscribe(OnMapViewInitialized);
       MapClosedEvent.Subscribe(OnMapClosedDocument);
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+      ApplicationStartupEvent.Subscribe(OnApplicationStartupEvent);
+    }
+
+    private void OnApplicationStartupEvent(EventArgs args)
+    {
+      if (Login.Instance.IsOAuth)
+      {
+        Login.Instance.IsFromSettingsPage = false;
+        DockPaneStreetSmart.ActivateStreetSmart();
+      }
     }
 
     #endregion
@@ -145,9 +154,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         return null;
       }
 
-      if (CycloMediaGroupLayer.ContainsKey(mapView))
+      if (CycloMediaGroupLayer.TryGetValue(mapView, out var groupLayer))
       {
-        return CycloMediaGroupLayer[mapView];
+        return groupLayer;
       }
 
       var result = new CycloMediaGroupLayer(mapView);
@@ -374,9 +383,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
+      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
+
       if (args.PropertyName == "Credentials")
       {
         Login login = Login.Instance;
+
+        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) (Credentials) {login.Credentials}");
 
         foreach (CycloMediaGroupLayer cycloMediaGroupLayer in CycloMediaGroupLayer.Values)
         {
@@ -461,7 +474,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void HandleException(string exceptionSource, Exception ex)
     {
-      EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (Module) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
+      EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
     }
 
     #endregion

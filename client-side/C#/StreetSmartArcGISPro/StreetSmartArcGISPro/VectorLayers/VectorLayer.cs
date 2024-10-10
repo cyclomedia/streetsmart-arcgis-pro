@@ -872,11 +872,13 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         return;
       }
+
       IList<IViewer> viewers = await _measurementList.Api.GetViewers();
       if (!viewers.Any())
       {
         return;
       }
+
       _vectorLayerList.LastSelectedLayer = this;
       await QueuedTask.Run(async () =>
       {
@@ -887,6 +889,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             return;
           }
+
           using (RowCursor rowCursor = selectionFeatures.Search())
           {
             while (rowCursor?.MoveNext() ?? false)
@@ -916,12 +919,13 @@ namespace StreetSmartArcGISPro.VectorLayers
       bool isExceptionAlreadyLogged = false;
       Dictionary<string, string> properties = [];
       Row row = rowCursor.Current;
+
       if (row is not Feature feature)
       {
         return properties;
       }
-      IReadOnlyList<Field> fields = feature?.GetFields();
 
+      IReadOnlyList<Field> fields = feature?.GetFields();
       if (fields == null || fields.Count == 0)
       {
         return properties;
@@ -931,6 +935,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         string name = field.Name;
         int fieldId = rowCursor.FindField(name);
+
         try
         {
           properties.Add(name, feature.GetOriginalValue(fieldId)?.ToString() ?? string.Empty);
@@ -948,6 +953,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
         }
       }
+
       return properties;
     }
 

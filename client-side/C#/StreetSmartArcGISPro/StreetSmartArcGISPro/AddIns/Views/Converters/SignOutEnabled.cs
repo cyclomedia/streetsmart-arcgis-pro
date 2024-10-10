@@ -20,21 +20,22 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using static StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {
-  class BoolToVisibility : IValueConverter
+  class SignOutEnabled : IValueConverter
   {
-    #region IMultiValueConverter Members
+    #region IValueConverter Members
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && (bool)value ? Visibility.Visible : Visibility.Hidden;
+      return value != null && ((OAuthStatus)value) == OAuthStatus.SignedIn;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return (Visibility)value == Visibility.Visible;
+      throw new NotSupportedException();
     }
 
     #endregion

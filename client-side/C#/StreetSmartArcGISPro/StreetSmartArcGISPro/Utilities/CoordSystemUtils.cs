@@ -117,7 +117,7 @@ namespace StreetSmartArcGISPro.Utilities
 
       if (spatialReference?.ArcGisSpatialReference == null)
       {
-        var spatialReferences = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceDictionary.Instance;
+        var spatialReferences = Configuration.Remote.SpatialReference.SpatialReferenceDictionary.Instance;
         spatialReference = spatialReferences.GetItem(epsgCode) ?? spatialReferences.FirstOrDefault(spatialReferenceComp => spatialReferenceComp.ArcGisSpatialReference != null);
         if (spatialReference != null)
         {
