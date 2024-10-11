@@ -1251,15 +1251,16 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         if (vectorLayer.VisibilityChangeStatus != VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate)
         {
           vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
+
           if (ShouldSyncLayersVisibility())
           {
             await QueuedTask.Run(() => vectorLayer.Layer.SetVisibility(overlayInfo.Visible));
           }
 
-          vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
+          await UpdateVectorLayerAsync(vectorLayer);
         }
 
-        await UpdateVectorLayerAsync(vectorLayer);
+        vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
       }
 
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged) finished");
