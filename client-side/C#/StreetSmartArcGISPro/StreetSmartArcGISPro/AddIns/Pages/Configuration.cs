@@ -16,11 +16,10 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Contracts;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Contracts;
-
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using FileLogin = StreetSmartArcGISPro.Configuration.File.Login;
 
@@ -269,7 +268,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       get => _configuration.UseSentryLogging;
       set
       {
-        if(_configuration.UseSentryLogging != value)
+        if (_configuration.UseSentryLogging != value)
         {
           IsModified = true;
           _configuration.UseSentryLogging = value;

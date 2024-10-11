@@ -37,13 +37,13 @@ namespace StreetSmartArcGISPro.Logging
     public static void Write(EventLogLevel type, string entry, bool flush = false, [CallerMemberName] string methodName = "")
     {
       ArcGIS.Desktop.Framework.Utilities.EventLog.Write(MapEventLogTypeToEventLog(type), entry, flush);
-      SentryLevel loggingLevel = MapEventLogTypeToSentryLevel(type);
 
       if(!SentrySdk.IsEnabled)
       {
         return;
       }
 
+      SentryLevel loggingLevel = MapEventLogTypeToSentryLevel(type);
       if (loggingLevel == SentryLevel.Error)
       {
         SentrySdk.CaptureMessage(entry, SentryLevel.Error);
@@ -57,7 +57,7 @@ namespace StreetSmartArcGISPro.Logging
       EventLogLevel.Warning => SentryLevel.Warning,
       EventLogLevel.Information => SentryLevel.Info,
       EventLogLevel.Debug => SentryLevel.Debug,
-      _ => throw new ArgumentException(nameof(type))
+      _ => throw new ArgumentException($"Value {type.GetType()} not expected", nameof(type))
     };
 
     private static EventType MapEventLogTypeToEventLog(EventLogLevel type) => type switch
@@ -66,7 +66,7 @@ namespace StreetSmartArcGISPro.Logging
       EventLogLevel.Information => EventType.Information,
       EventLogLevel.Warning => EventType.Warning,
       EventLogLevel.Debug => EventType.Debug,
-      _ => throw new ArgumentException(nameof(type))
+      _ => throw new ArgumentException($"Value {type.GetType()} not expected", nameof(type))
     };
   }
 }

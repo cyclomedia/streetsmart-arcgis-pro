@@ -16,13 +16,11 @@
  * License along with this library.
  */
 
+using StreetSmartArcGISPro.Utilities;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-
-using StreetSmartArcGISPro.Utilities;
-
 using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
@@ -141,7 +139,9 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public bool UseSentryLogging { get; set; }
 
-    public string SentryDsnUrl { get
+    public string SentryDsnUrl
+    {
+      get
       {
         return _sentryDsnUrl;
       }
@@ -162,7 +162,6 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private static string FileName => Path.Combine(FileUtils.FileDir, "Configuration.xml");
 
-
     #endregion
 
     #region Functions
@@ -180,7 +179,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       if (SystemIOFile.Exists(FileName))
       {
         var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration) XmlConfiguration.Deserialize(streamFile);
+        _configuration = (Configuration)XmlConfiguration.Deserialize(streamFile);
         streamFile.Close();
       }
     }
