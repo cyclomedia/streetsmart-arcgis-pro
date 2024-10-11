@@ -39,6 +39,7 @@
 		<Content Include="Images\OpenLocation32.png" />
 		<Content Include="Images\ImageIdSearch32.png" />
 		<Content Include="Images\MeasurementDetail32.png" />
+		<Content Include="Images\OverlaysSync.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="..\..\Doc\LGPL-3.0.txt" Link="LGPL-3.0.txt" />
@@ -53,7 +54,6 @@
 		<EmbeddedResource Include="Images\FocusMode16.png" />
 		<EmbeddedResource Include="Images\SystemSearch16.png" />
 		<EmbeddedResource Include="Images\OpenLocation.cur" />
-		<EmbeddedResource Include="Images\OverlaysSync.png" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
