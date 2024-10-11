@@ -96,6 +96,9 @@
       <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
+    <Compile Include="AddIns\Views\Converters\BasicAuthLoggedInConverter.cs" />
+    <Compile Include="AddIns\Views\Converters\BasicLoginConverter.cs" />
+    <Compile Include="AddIns\Views\Converters\BasicLoginRevertConverter.cs" />
     <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
     <Compile Include="AddIns\Views\Converters\ContainsSrItems.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
@@ -103,6 +106,9 @@
     <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
     <Compile Include="AddIns\Views\Converters\InverseBoolToVisibility.cs" />
     <Compile Include="AddIns\Views\Converters\IsNotNull.cs" />
+    <Compile Include="AddIns\Views\Converters\IsOAuthToRowConverter.cs" />
+    <Compile Include="AddIns\Views\Converters\LoginBasicConverter.cs" />
+    <Compile Include="AddIns\Views\Converters\MarginSplitConverter.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementObservationSelected.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementOpenClose.cs" />
     <Compile Include="AddIns\Views\Converters\ConfigurationService.cs" />
@@ -121,6 +127,7 @@
     <Compile Include="AddIns\Views\Converters\LoginStatus.cs" />
     <Compile Include="AddIns\Views\Converters\OAuthAuthenticationStatusToEnabled.cs" />
     <Compile Include="AddIns\Views\Converters\OAuthSignStatus.cs" />
+    <Compile Include="AddIns\Views\Converters\OAuthUsernameDisplayConverter.cs" />
     <Compile Include="AddIns\Views\Converters\SignInEnabled.cs" />
     <Compile Include="AddIns\Views\Converters\SigningInProgressToVisibility.cs" />
     <Compile Include="AddIns\Views\Converters\SignInToVisibility.cs" />
