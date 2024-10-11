@@ -27,13 +27,13 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.CycloMediaLayers;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using StreetSmartArcGISPro.Logging;
 using ModuleStreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 

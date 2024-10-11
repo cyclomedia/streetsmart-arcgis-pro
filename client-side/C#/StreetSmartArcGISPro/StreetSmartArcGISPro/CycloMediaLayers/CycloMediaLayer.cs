@@ -27,6 +27,7 @@ using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ArcGISProject = ArcGIS.Desktop.Core.Project;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
-using StreetSmartArcGISPro.Logging;
 
 #if !ARCGISPRO29
 using ArcGIS.Core.Data.Exceptions;
