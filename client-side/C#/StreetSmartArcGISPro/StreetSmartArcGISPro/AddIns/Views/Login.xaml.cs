@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using ArcGIS.Desktop.Framework;
+using StreetSmartArcGISPro.Configuration.File;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Resources;
 
 namespace StreetSmartArcGISPro.AddIns.Views
 {
@@ -11,6 +12,8 @@ namespace StreetSmartArcGISPro.AddIns.Views
   /// </summary>
   public partial class Login
   {
+    ResourceManager resourceManager = Properties.Resources.ResourceManager;
+    LanguageSettings language = LanguageSettings.Instance;
     public Login()
     {
       InitializeComponent();
@@ -32,20 +35,13 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
     }
 
-    private async void OnLoginButtonClicked(object sender, RoutedEventArgs e)
+    private void OnLoginButtonClicked(object sender, RoutedEventArgs e)
     {
       if (DataContext != null)
       {
         var viewModel = (dynamic)DataContext;
         viewModel.Save();
-        if (!viewModel.Credentials)
-        {
-          NotificationMessage.Background = new SolidColorBrush(Colors.Red);
-          await ShowNotification();
-          NotificationMessage.Background = new SolidColorBrush(Colors.LightGreen);
-        }
-        else
-          await ShowNotification();
+        ShowNotification(viewModel.Credentials);
       }
     }
     private void OnLogoutButtonClicked(object sender, RoutedEventArgs e)
@@ -60,11 +56,14 @@ namespace StreetSmartArcGISPro.AddIns.Views
     }
 
 
-    public async Task ShowNotification()
+    public void ShowNotification(bool Credentials)
     {
-      NotificationMessage.Visibility = Visibility.Visible;
-      await Task.Delay(1000);
-      NotificationMessage.Visibility = Visibility.Collapsed;
+      Notification notification = new Notification()
+      {
+        Title = resourceManager.GetString("LoginStatus", language.CultureInfo),
+        Message = resourceManager.GetString(Credentials ? "LoginSuccessfully" : "LoginFailed", language.CultureInfo)
+      };
+      FrameworkApplication.AddNotification(notification);
     }
   }
 }

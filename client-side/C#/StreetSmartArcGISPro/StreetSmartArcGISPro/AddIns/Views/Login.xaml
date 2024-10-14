@@ -56,16 +56,6 @@
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <TextBlock x:Name="NotificationMessage" 
-                util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}"
-                Foreground="Black"
-                Background="LightGreen" 
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Padding="10"
-                Visibility="Collapsed"  
-                FontWeight="Bold"
-                FontSize="14"/>
     <StackPanel Grid.Row="0" Margin="5,10,5,-20" Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}">
       <Grid>
         <TextBlock FontWeight="Bold" Style="{DynamicResource H3TextBlock}" FontSize="14" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
