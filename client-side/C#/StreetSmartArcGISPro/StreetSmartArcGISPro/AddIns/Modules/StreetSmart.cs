@@ -37,7 +37,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Project = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
@@ -56,7 +55,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     #region Properties
 
-    public static IDisposable SentrySdkInit = FileConfiguration.Instance.UseSentryLogging ? EventLog.InitializeSentry(FileConfiguration.Instance.SentryDsnUrl) : null;
+    public static IDisposable SentrySdkInit = LogData.Instance.UseSentryLogging ? EventLog.InitializeSentry(LogData.Instance.SentryDsnUrl) : null;
 
     /// <summary>
     /// Retrieve the singleton instance to this module here
