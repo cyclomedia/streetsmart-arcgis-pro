@@ -334,10 +334,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         if (args.PropertyName == "Api")
         {
           Api = WpfApi.Api;
-          Api.APIReady += ApiReady;
-          Api.ViewerAdded += ViewerAdded;
-          Api.ViewerRemoved += ViewerRemoved;
-          Api.BearerTokenChanged += BearerTokenChanged;
+          Api.APIReady += OnApiReady;
+          Api.ViewerAdded += OnViewerAdded;
+          Api.ViewerRemoved += OnViewerRemoved;
+          Api.BearerTokenChanged += OnBearerTokenChanged;
 
           if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
           {
@@ -972,7 +972,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       DoHide();
     }
 
-    private async void ApiReady(object sender, EventArgs args)
+    private async void OnApiReady(object sender, EventArgs args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
 
@@ -1095,7 +1095,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Finished");
     }
 
-    private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
+    private async void OnViewerAdded(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
 
@@ -1103,8 +1103,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: added an extra condition in order for the viewing cone to only be created once
       if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.ImageChange += OnImageChanged;
+        panoramaViewer.ViewChange += OnViewChanged;
         panoramaViewer.FeatureClick += OnFeatureClick;
         panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
 
@@ -1222,7 +1222,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
     }
 
-    private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
+    private async void OnViewerRemoved(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewerRemoved)");
 
@@ -1280,7 +1280,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
+    private void OnBearerTokenChanged(object sender, IEventArgs<IBearer> args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
       Login.Instance.Bearer = args.Value.BearerToken;
@@ -1291,7 +1291,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (RemovePanoramaViewer)");
 
       Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-      panoramaViewer.ImageChange -= OnImageChange;
+      panoramaViewer.ImageChange -= OnImageChanged;
 
       if (viewer != null)
       {
@@ -1310,8 +1310,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
       }
 
-      panoramaViewer.ImageChange -= OnImageChange;
-      panoramaViewer.ViewChange -= OnViewChange;
+      panoramaViewer.ImageChange -= OnImageChanged;
+      panoramaViewer.ViewChange -= OnViewChanged;
       panoramaViewer.FeatureClick -= OnFeatureClick;
       panoramaViewer.LayerVisibilityChange -= OnLayerVisibilityChanged;
     }
@@ -1413,7 +1413,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private async void OnImageChange(object sender, EventArgs args)
+    private async void OnImageChanged(object sender, EventArgs args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnImageChanged)");
 
@@ -1453,13 +1453,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       catch (Exception e)
       {
-        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChange): exception: {e}");
+        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChanged): exception: {e}");
       }
     }
 
-    private async void OnViewChange(object sender, IEventArgs<IOrientation> args)
+    private async void OnViewChanged(object sender, IEventArgs<IOrientation> args)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewChange)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewChanged)");
 
       if (sender is IPanoramaViewer panoramaViewer)
       {
