@@ -30,17 +30,16 @@
 -->
   <UserControl.Resources>
     <ResourceDictionary>
-      <converters:BasicLoginConverter x:Key="BasicLoginConverter"/>
-      <converters:MarginSplitConverter x:Key="MarginSplitConverter"/>
-      <converters:LoginBasicConverter x:Key="LoginBasicConverter"/>
-      <converters:BasicAuthLoggedInConverter x:Key="BasicAuthLoggedInConverter"/>
-      <converters:BasicLoginRevertConverter x:Key="BasicLoginRevertConverter"/>
-      <converters:OAuthUsernameDisplayConverter x:Key="OAuthUsernameDisplayConverter"/>
+      <converters:MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter x:Key="MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter"/>
+      <converters:BasicAuthFieldsVisibilityConverter x:Key="BasicAuthFieldsVisibilityConverter"/>
+      <converters:BasicAuthLoginStatusToGridRowForLoginButtonConverter x:Key="BasicAuthLoginStatusToGridRowForLoginButtonConverter"/>
+      <converters:BasicAuthButtonVisibilityConverter x:Key="BasicAuthButtonVisibilityConverter"/>
+      <converters:OAuthUsernameVisibilityConverter x:Key="OAuthUsernameVisibilityConverter"/>
       <converters:LoginStatus x:Key="LoginStatusConverter" />
       <converters:OAuthSignStatus x:Key="OAuthSignStatus" />
       <converters:SignInToVisibility x:Key="SignInToVisibility" />
       <converters:SignOutToVisibility x:Key="SignOutToVisibility" />
-      <converters:IsOAuthToRowConverter x:Key="IsOAuthToRowConverter" />
+      <converters:GridRowPositionOfUsernameBasedOnLoggingStatusConverter x:Key="GridRowPositionOfUsernameBasedOnLoggingStatusConverter" />
       <converters:BoolToVisibility x:Key="BoolToVisibility" />
       <converters:InverseBoolToVisibility x:Key="InverseBoolToVisibility" />
       <converters:SignInEnabled x:Key="SignInEnabled" />
@@ -77,12 +76,12 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
-          <TextBlock Grid.Row="0" HorizontalAlignment="Left" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,10,5,5" Visibility="{Binding Credentials, Converter={StaticResource LoginBasicConverter}}"/>
-          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource IsOAuthToRowConverter}}" FontWeight="SemiBold" Margin="0,5,0,15" util:LocalizationProvider.ContentId="LoginUsername"/>
-          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource IsOAuthToRowConverter}}" FontWeight="SemiBold" Text=":" Margin="60,5,0,15"/>
-          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource IsOAuthToRowConverter}}" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding Username}" Width="300" Margin="67,5,5,5"/>
+          <TextBlock Grid.Row="0" HorizontalAlignment="Left" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,10,5,5" Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
+          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}}" FontWeight="SemiBold" Margin="0,5,0,15" util:LocalizationProvider.ContentId="LoginUsername"/>
+          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}}" FontWeight="SemiBold" Text=":" Margin="60,5,0,15"/>
+          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}}" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding Username}" Width="300" Margin="67,5,5,5"/>
           <TextBlock Grid.Row="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Right" Margin="0,5,10,0"/>
-          <TextBox Grid.Row="1" Style="{DynamicResource H6TextBlock}" Padding="5" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" Visibility="{Binding Credentials, Converter={StaticResource LoginBasicConverter}}"/>
+          <TextBox Grid.Row="1" Style="{DynamicResource H6TextBlock}" Padding="5" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
         </Grid>
       </StackPanel>
       <StackPanel Margin="5,5,5,0">
@@ -92,9 +91,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
-          <TextBlock Grid.Row="0" HorizontalAlignment="Left" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,10,5,5"  Visibility="{Binding Credentials, Converter={StaticResource LoginBasicConverter}}"/>
-          <PasswordBox Grid.Row="1" Style="{DynamicResource H6TextBlock}" Padding="5" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded"  Visibility="{Binding Credentials, Converter={StaticResource LoginBasicConverter}}"/>
-          <Button Grid.Row="{Binding Credentials, Converter={StaticResource BasicAuthLoggedInConverter}}"
+          <TextBlock Grid.Row="0" HorizontalAlignment="Left" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,10,5,5"  Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
+          <PasswordBox Grid.Row="1" Style="{DynamicResource H6TextBlock}" Padding="5" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded"  Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
+          <Button Grid.Row="{Binding Credentials, Converter={StaticResource BasicAuthLoginStatusToGridRowForLoginButtonConverter}}"
             Margin="0,20,0,10"
             Style="{DynamicResource Esri_Button}"
             util:LocalizationProvider.ContentId="LoginCheck"
@@ -116,7 +115,7 @@
               </ControlTemplate>
             </Button.Template>
           </Button>
-          <Button Grid.Row="{Binding Credentials, Converter={StaticResource BasicAuthLoggedInConverter}}"
+          <Button Grid.Row="{Binding Credentials, Converter={StaticResource BasicAuthLoginStatusToGridRowForLoginButtonConverter}}"
             Margin="0,20,0,10"
             Style="{DynamicResource Esri_Button}"
             util:LocalizationProvider.ContentId="LogoutCheck"
@@ -125,7 +124,7 @@
             Background="#005bbb"
             Foreground="White"
             Click="OnLogoutButtonClicked"
-            Visibility="{Binding Credentials, Converter={StaticResource BasicLoginRevertConverter}}">
+            Visibility="{Binding Credentials, Converter={StaticResource BasicAuthButtonVisibilityConverter}}">
                 <Button.Template>
                   <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
@@ -140,18 +139,18 @@
           </Button>
         </Grid>
       </StackPanel>
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="{Binding Credentials, Converter={StaticResource MarginSplitConverter}}">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="{Binding Credentials, Converter={StaticResource MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter}}">
         <Separator Width="200"/>
         <TextBlock Text="Or" HorizontalAlignment="Center" Margin="10,0"/>
         <Separator Width="200"/>
       </StackPanel>
     </StackPanel>
-    <StackPanel Grid.Row="{Binding IsOAuth, Converter={StaticResource IsOAuthToRowConverter}, UpdateSourceTrigger=PropertyChanged}" Margin="5,10,5,0" VerticalAlignment="Top">
+    <StackPanel Grid.Row="{Binding IsOAuth, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}, UpdateSourceTrigger=PropertyChanged}" Margin="5,10,5,0" VerticalAlignment="Top">
       <StackPanel >
         <Grid Visibility="{Binding IsOAuth, Converter={StaticResource BoolToVisibility}, UpdateSourceTrigger=PropertyChanged}">
-          <TextBlock FontWeight="SemiBold" Margin="5,15,0,15" util:LocalizationProvider.ContentId="LoginUsername" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameDisplayConverter}}"/>
-          <TextBlock FontWeight="SemiBold" Text=":" Margin="65,15,0,15" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameDisplayConverter}}"/>
-          <TextBlock Margin="80,15,0,15" Text="{Binding Username}" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameDisplayConverter}}"/>
+          <TextBlock FontWeight="SemiBold" Margin="5,15,0,15" util:LocalizationProvider.ContentId="LoginUsername" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameVisibilityConverter}}"/>
+          <TextBlock FontWeight="SemiBold" Text=":" Margin="65,15,0,15" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameVisibilityConverter}}"/>
+          <TextBlock Margin="80,15,0,15" Text="{Binding Username}" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameVisibilityConverter}}"/>
           <TextBlock Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthSignStatus}}" HorizontalAlignment="Right" Margin="0,15,10,15"/>
         </Grid>
         <Grid>

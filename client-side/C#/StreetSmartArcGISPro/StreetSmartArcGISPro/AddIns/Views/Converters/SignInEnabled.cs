@@ -16,10 +16,8 @@
  * License along with this library.
  */
 
-using CefSharp.DevTools.CSS;
 using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
 using static StreetSmartArcGISPro.Configuration.File.Login;
 
