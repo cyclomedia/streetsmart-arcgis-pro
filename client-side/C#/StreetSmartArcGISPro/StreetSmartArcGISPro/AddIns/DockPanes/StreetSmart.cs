@@ -60,7 +60,6 @@ using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using ThisResources = StreetSmartArcGISPro.Properties.Resources;
-using StreetSmartArcGISPro.Logging;
 
 namespace StreetSmartArcGISPro.AddIns.DockPanes
 {
