@@ -52,7 +52,7 @@ namespace StreetSmartArcGISPro.Logging
     static EventLog()
     {
       _logData = LogData.Instance;
-        _hasLogLimitBeenReached = _logData.LogCount >= _errorLogsLimit;
+      _hasLogLimitBeenReached = _logData.LogCount >= _errorLogsLimit;
       _logCount = _logData.LogCount;
       _lastLogLimitCheckTime = _logData.LastResetTime;
     }
@@ -72,12 +72,13 @@ namespace StreetSmartArcGISPro.Logging
       {
         if (_logCount >= _errorLogsLimit)
         {
-          if (!_hasLogLimitBeenReached)
+          if (_hasLogLimitBeenReached)
           {
-            ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {_timeUnit}", true);
-            SentrySdk.CaptureMessage($"Log rate limit exceeded for this {_timeUnit}.", SentryLevel.Warning);
-            _hasLogLimitBeenReached = true;
+            return;
           }
+          ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {_timeUnit}", true);
+          SentrySdk.CaptureMessage($"Log rate limit exceeded for this {_timeUnit}.", SentryLevel.Warning);
+          _hasLogLimitBeenReached = true;
           return;
         }
 
