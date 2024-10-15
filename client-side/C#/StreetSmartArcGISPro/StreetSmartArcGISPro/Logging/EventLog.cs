@@ -64,16 +64,16 @@ namespace StreetSmartArcGISPro.Logging
       }
       ResetCounterIfNeeded();
 
-      if (logCount >= LogsLimit)
-      {
-        ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {timeUnit}", true);
-        SentrySdk.CaptureMessage($"Log rate limit exceeded for this {timeUnit}.", SentryLevel.Warning);
-        return;
-      }
-
       SentryLevel loggingLevel = MapEventLogTypeToSentryLevel(type);
       if (loggingLevel == SentryLevel.Error)
       {
+        if (logCount >= LogsLimit)
+        {
+          ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {timeUnit}", true);
+          SentrySdk.CaptureMessage($"Log rate limit exceeded for this {timeUnit}.", SentryLevel.Warning);
+          return;
+        }
+
         SentrySdk.CaptureMessage(entry, SentryLevel.Error);
         logCount++;
         _logData.LogCount = logCount;
