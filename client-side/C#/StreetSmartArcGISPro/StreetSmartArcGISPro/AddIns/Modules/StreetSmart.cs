@@ -19,12 +19,12 @@
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Events;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.CycloMediaLayers;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Project = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
@@ -54,6 +55,8 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     #endregion
 
     #region Properties
+
+    public static IDisposable SentrySdkInit = FileConfiguration.Instance.UseSentryLogging ? EventLog.InitializeSentry(FileConfiguration.Instance.SentryDsnUrl) : null;
 
     /// <summary>
     /// Retrieve the singleton instance to this module here
@@ -383,13 +386,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
 
       if (args.PropertyName == "Credentials")
       {
         Login login = Login.Instance;
 
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) (Credentials) {login.Credentials}");
+        EventLog.Write(EventLogLevel.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) (Credentials) {login.Credentials}");
 
         foreach (CycloMediaGroupLayer cycloMediaGroupLayer in CycloMediaGroupLayer.Values)
         {
@@ -474,7 +477,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void HandleException(string exceptionSource, Exception ex)
     {
-      EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
     }
 
     #endregion
