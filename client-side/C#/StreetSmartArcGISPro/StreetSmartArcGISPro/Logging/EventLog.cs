@@ -23,18 +23,18 @@ namespace StreetSmartArcGISPro.Logging
 
   public static class EventLog
   {
-    private static int LogsLimit = LogData.Instance.LogLimit;
-    private static TimeUnit timeUnit = LogData.Instance.TimeUnit;
-    private static int logCount = 0;
-    private static DateTime lastReset;
+    private static int _errorLogsLimit = LogData.Instance.LogLimit;
+    private static TimeUnit _timeUnit = LogData.Instance.TimeUnit;
+    private static int _logCount = 0;
+    private static DateTime _lastLogLimitCheckTime;
     private static LogData _logData = LogData.Instance;
-    private static bool isLimitReachedBefore = false;
+    private static bool _hasLogLimitBeenReached = false;
 
     public static IDisposable InitializeSentry(string sentryDsnUrl)
     {
       try
       {
-        lastReset = DateTime.Now;
+        _lastLogLimitCheckTime = DateTime.Now;
         return SentrySdk.Init(options =>
         {
           options.Dsn = sentryDsnUrl;
@@ -52,12 +52,9 @@ namespace StreetSmartArcGISPro.Logging
     static EventLog()
     {
       _logData = LogData.Instance;
-      if(_logData.LogCount >= LogsLimit)
-      {
-        isLimitReachedBefore = true;
-      }
-      logCount = _logData.LogCount;
-      lastReset = _logData.LastResetTime;
+        _hasLogLimitBeenReached = _logData.LogCount >= _errorLogsLimit;
+      _logCount = _logData.LogCount;
+      _lastLogLimitCheckTime = _logData.LastResetTime;
     }
 
     public static void Write(EventLogLevel type, string entry, bool flush = false, [CallerMemberName] string methodName = "")
@@ -73,43 +70,43 @@ namespace StreetSmartArcGISPro.Logging
       SentryLevel loggingLevel = MapEventLogTypeToSentryLevel(type);
       if (loggingLevel == SentryLevel.Error)
       {
-        if (logCount >= LogsLimit)
+        if (_logCount >= _errorLogsLimit)
         {
-          if (!isLimitReachedBefore)
+          if (!_hasLogLimitBeenReached)
           {
-            ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {timeUnit}", true);
-            SentrySdk.CaptureMessage($"Log rate limit exceeded for this {timeUnit}.", SentryLevel.Warning);
-            isLimitReachedBefore = true;
+            ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {_timeUnit}", true);
+            SentrySdk.CaptureMessage($"Log rate limit exceeded for this {_timeUnit}.", SentryLevel.Warning);
+            _hasLogLimitBeenReached = true;
           }
           return;
         }
 
         SentrySdk.CaptureMessage(entry, SentryLevel.Error);
-        logCount++;
-        _logData.LogCount = logCount;
-        _logData.LastResetTime = lastReset;
+        _logCount++;
+        _logData.LogCount = _logCount;
+        _logData.LastResetTime = _lastLogLimitCheckTime;
         _logData.SaveLogData();
         return;
       }
     }
     private static void ResetCounterIfNeeded()
     {
-      if (TimeElapsedSinceLastRestart(timeUnit) >= 1)
+      if (TimeElapsedSinceLastRestart(_timeUnit) >= 1)
       {
-        logCount = 0;
-        lastReset = DateTime.Now;
-        isLimitReachedBefore = false;
-        _logData.LogCount = logCount;
-        _logData.LastResetTime = lastReset;
+        _logCount = 0;
+        _lastLogLimitCheckTime = DateTime.Now;
+        _hasLogLimitBeenReached = false;
+        _logData.LogCount = _logCount;
+        _logData.LastResetTime = _lastLogLimitCheckTime;
         _logData.SaveLogData();
       }
     }
 
     private static double TimeElapsedSinceLastRestart(TimeUnit timeUnit) => timeUnit switch
     {
-      TimeUnit.Minute => (DateTime.Now - lastReset).TotalMinutes,
-      TimeUnit.Hour => (DateTime.Now - lastReset).TotalHours,
-      TimeUnit.Day => (DateTime.Now - lastReset).TotalDays,
+      TimeUnit.Minute => (DateTime.Now - _lastLogLimitCheckTime).TotalMinutes,
+      TimeUnit.Hour => (DateTime.Now - _lastLogLimitCheckTime).TotalHours,
+      TimeUnit.Day => (DateTime.Now - _lastLogLimitCheckTime).TotalDays,
       _ => throw new ArgumentException($"Value {timeUnit.GetType()} not expected", nameof(timeUnit))
     };
 

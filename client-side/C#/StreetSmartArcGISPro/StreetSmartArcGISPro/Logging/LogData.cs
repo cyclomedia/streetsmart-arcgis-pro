@@ -30,25 +30,10 @@ public class LogData
       return "https://96100a2b9133a1f056bf8df35d72d201@o4508125690593280.ingest.de.sentry.io/4508125706387536"; // TODO: change to proper production key
     }
   }
-
-  private static string LogDataFileName => Path.Combine(FileUtils.FileDir, "logdata.xml");
+  private static string LogDataFileName => Path.Combine(FileUtils.FileDir, "LogData.xml");
   private static LogData _logData;
 
   public LogData() { }
-
-  public LogData(int logCount, DateTime lastResetTime)
-  {
-    LogCount = logCount;
-    LastResetTime = lastResetTime;
-  }
-  public LogData(int logCount, DateTime lastResetTime, bool useSentryLogging, int logLimit, TimeUnit timeUnit)
-  {
-    LogCount = logCount;
-    LastResetTime = lastResetTime;
-    UseSentryLogging = useSentryLogging;
-    LogLimit = logLimit;
-    TimeUnit = timeUnit;
-  }
 
   public static LogData Instance
   {
