@@ -55,7 +55,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     #region Properties
 
-    public static IDisposable SentrySdkInit = LogData.Instance.UseSentryLogging ? EventLog.InitializeSentry(LogData.Instance.SentryDsnUrl) : null;
+    public static IDisposable SentrySdkInit = LogData.Instance.UseSentryLogging ? EventLog.InitializeSentry(LogData.SentryDsnUrl) : null;
 
     /// <summary>
     /// Retrieve the singleton instance to this module here
