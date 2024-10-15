@@ -3,6 +3,7 @@ using StreetSmartArcGISPro.Utilities;
 using System;
 using System.IO;
 using System.Xml.Serialization;
+using static ArcGIS.Desktop.Framework.Utilities.EventLog;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -58,9 +59,9 @@ namespace StreetSmartArcGISPro.Configuration.File
           }
         }
       }
-      catch
+      catch (Exception ex)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (EventLog.cs) (LoadLogData)");
+        ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Error, $"Street Smart: (EventLog.cs) (SaveLogData) Failed to load log data: {ex} ");
       }
     }
 
@@ -68,14 +69,16 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       try
       {
-        FileStream streamFile = new FileStream(LogDataFileName, FileMode.Create);
-        XmlSerializer serializer = new XmlSerializer(typeof(LogData));
-        serializer.Serialize(streamFile, this);
-        streamFile.Close();
+        using (FileStream streamFile = new FileStream(LogDataFileName, FileMode.Create))
+        {
+          XmlSerializer serializer = new XmlSerializer(typeof(LogData));
+          serializer.Serialize(streamFile, this);
+          streamFile.Close();
+        }
       }
-      catch
+      catch (Exception ex)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (EventLog.cs) (SaveLogData)");
+        ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Error, $"Street Smart: (EventLog.cs) (SaveLogData) Failed to save log data: {ex} ");
       }
     }
 

@@ -23,18 +23,13 @@ namespace StreetSmartArcGISPro.Logging
 
   public static class EventLog
   {
-    private static int _errorLogsLimit = LogData.Instance.LogLimit;
-    private static TimeUnit _timeUnit = LogData.Instance.TimeUnit;
-    private static int _logCount = 0;
-    private static DateTime _lastLogLimitCheckTime;
-    private static LogData _logData = LogData.Instance;
-    private static bool _hasLogLimitBeenReached = false;
+    private static bool _hasLogLimitBeenReached = LogData.Instance.LogCount >= LogData.Instance.LogLimit;
 
     public static IDisposable InitializeSentry(string sentryDsnUrl)
     {
       try
       {
-        _lastLogLimitCheckTime = DateTime.Now;
+        LogData.Instance.LastResetTime = DateTime.Now;
         return SentrySdk.Init(options =>
         {
           options.Dsn = sentryDsnUrl;
@@ -49,13 +44,6 @@ namespace StreetSmartArcGISPro.Logging
         return null;
       }
     }
-    static EventLog()
-    {
-      _logData = LogData.Instance;
-      _hasLogLimitBeenReached = _logData.LogCount >= _errorLogsLimit;
-      _logCount = _logData.LogCount;
-      _lastLogLimitCheckTime = _logData.LastResetTime;
-    }
 
     public static void Write(EventLogLevel type, string entry, bool flush = false, [CallerMemberName] string methodName = "")
     {
@@ -65,12 +53,16 @@ namespace StreetSmartArcGISPro.Logging
       {
         return;
       }
-      ResetCounterIfNeeded();
+
+      if (TimeElapsedSinceLastRestart(LogData.Instance.TimeUnit) >= 1)
+      {
+        ResetCounterIfNeeded();
+      }
 
       SentryLevel loggingLevel = MapEventLogTypeToSentryLevel(type);
       if (loggingLevel == SentryLevel.Error)
       {
-        if (_logCount >= _errorLogsLimit)
+        if (LogData.Instance.LogCount >= LogData.Instance.LogLimit)
         {
           HandleRateLimitExceeded();
           return;
@@ -83,43 +75,32 @@ namespace StreetSmartArcGISPro.Logging
     }
     private static void ResetCounterIfNeeded()
     {
-      if (TimeElapsedSinceLastRestart(_timeUnit) >= 1)
-      {
-        _logCount = 0;
-        _lastLogLimitCheckTime = DateTime.Now;
-        _hasLogLimitBeenReached = false;
-        SaveLogState();
-      }
+      LogData.Instance.LogCount = 0;
+      LogData.Instance.LastResetTime = DateTime.Now;
+      _hasLogLimitBeenReached = false;
     }
 
     private static void HandleRateLimitExceeded()
     {
       if (!_hasLogLimitBeenReached)
       {
-        ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {_timeUnit}", true);
-        SentrySdk.CaptureMessage($"Log rate limit exceeded for this {_timeUnit}.", SentryLevel.Warning);
+        ArcGIS.Desktop.Framework.Utilities.EventLog.Write(EventType.Warning, $"Log rate limit reached for the {LogData.Instance.TimeUnit}", true);
+        SentrySdk.CaptureMessage($"Log rate limit exceeded for this {LogData.Instance.TimeUnit}.", SentryLevel.Warning);
         _hasLogLimitBeenReached = true;
       }
     }
 
     private static void IncrementLogCount()
     {
-      _logCount++;
-      SaveLogState();
+      LogData.Instance.LogCount++;
     }
 
-    private static void SaveLogState()
-    {
-      _logData.LogCount = _logCount;
-      _logData.LastResetTime = _lastLogLimitCheckTime;
-      _logData.Save();
-    }
 
     private static double TimeElapsedSinceLastRestart(TimeUnit timeUnit) => timeUnit switch
     {
-      TimeUnit.Minute => (DateTime.Now - _lastLogLimitCheckTime).TotalMinutes,
-      TimeUnit.Hour => (DateTime.Now - _lastLogLimitCheckTime).TotalHours,
-      TimeUnit.Day => (DateTime.Now - _lastLogLimitCheckTime).TotalDays,
+      TimeUnit.Minute => (DateTime.Now - LogData.Instance.LastResetTime).TotalMinutes,
+      TimeUnit.Hour => (DateTime.Now - LogData.Instance.LastResetTime).TotalHours,
+      TimeUnit.Day => (DateTime.Now - LogData.Instance.LastResetTime).TotalDays,
       _ => throw new ArgumentException($"Value {timeUnit.GetType()} not expected", nameof(timeUnit))
     };
 

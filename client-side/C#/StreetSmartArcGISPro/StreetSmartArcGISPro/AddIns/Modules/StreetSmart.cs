@@ -100,6 +100,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       MapClosedEvent.Subscribe(OnMapClosedDocument);
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
       ApplicationStartupEvent.Subscribe(OnApplicationStartupEvent);
+      ApplicationClosingEvent.Subscribe(OnApplicationClosingEvent);
+    }
+
+    private Task OnApplicationClosingEvent(CancelEventArgs args)
+    {
+      LogData.Instance.Save();
+      return Task.FromResult(0);
     }
 
     private void OnApplicationStartupEvent(EventArgs args)
@@ -458,18 +465,21 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
+      LogData.Instance.Save();
       Exception ex = e.ExceptionObject as Exception;
       HandleException("CurrentDomain_UnhandledException", ex);
     }
 
     private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
+      LogData.Instance.Save();
       HandleException("Current_DispatcherUnhandledException", e.Exception);
       //e.Handled = true;   // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
 
     private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
     {
+      LogData.Instance.Save();
       HandleException("TaskScheduler_UnobservedTaskException", e.Exception);
       //e.SetObserved();  // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
