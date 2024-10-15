@@ -190,7 +190,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       {
         if (_login.Password != value)
         {
-          IsModified = true;
           _login.Password = value;
           NotifyPropertyChanged();
         }
@@ -257,7 +256,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     {
       _login.Username = _username;
       _login.Password = _password;
-      //_login.IsOAuth = _isOAuth;
 
       Save();
 
@@ -278,7 +276,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _login.Save();
       NotifyPropertyChanged("Credentials");
       NotifyPropertyChanged("Username");
-
     }
 
     #endregion
