@@ -1,8 +1,8 @@
 ﻿using Sentry;
+using StreetSmartArcGISPro.Configuration.File;
 using System;
 using System.Runtime.CompilerServices;
 using static ArcGIS.Desktop.Framework.Utilities.EventLog;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 
 namespace StreetSmartArcGISPro.Logging
 {
@@ -52,7 +52,7 @@ namespace StreetSmartArcGISPro.Logging
     static EventLog()
     {
       _logData = LogData.Instance;
-      if(_logData.LogCount >= LogsLimit)
+      if (_logData.LogCount >= LogsLimit)
       {
         isLimitReachedBefore = true;
       }
@@ -88,7 +88,7 @@ namespace StreetSmartArcGISPro.Logging
         logCount++;
         _logData.LogCount = logCount;
         _logData.LastResetTime = lastReset;
-        _logData.SaveLogData();
+        _logData.Save();
         return;
       }
     }
@@ -101,7 +101,7 @@ namespace StreetSmartArcGISPro.Logging
         isLimitReachedBefore = false;
         _logData.LogCount = logCount;
         _logData.LastResetTime = lastReset;
-        _logData.SaveLogData();
+        _logData.Save();
       }
     }
 
