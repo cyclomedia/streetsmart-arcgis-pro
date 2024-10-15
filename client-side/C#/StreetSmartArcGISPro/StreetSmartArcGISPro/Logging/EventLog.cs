@@ -98,6 +98,7 @@ namespace StreetSmartArcGISPro.Logging
       {
         logCount = 0;
         lastReset = DateTime.Now;
+        isLimitReachedBefore = false;
         _logData.LogCount = logCount;
         _logData.LastResetTime = lastReset;
         _logData.SaveLogData();
