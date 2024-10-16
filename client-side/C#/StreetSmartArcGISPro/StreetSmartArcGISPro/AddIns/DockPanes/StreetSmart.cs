@@ -1108,7 +1108,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
 
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) function get recording from panorama");
+        EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) function get recording from panorama");
         IRecording recording = await panoramaViewer.GetRecording();
         string imageId = recording.Id;
         _viewerList.Add(panoramaViewer, imageId);
