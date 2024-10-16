@@ -156,7 +156,7 @@ namespace StreetSmartArcGISPro.Configuration.File
           Load();
         }
 
-        return _configuration ?? (_configuration = Create());
+        return _configuration ??= Create();
       }
     }
 

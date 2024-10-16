@@ -167,7 +167,12 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      return name == GroupLayerName || this.Any(layer => layer.Name == name) || this.Any(layer => layer.FcName == name?[..Math.Min(layer.FcName.Length, name.Length)]);
+      return name == GroupLayerName || this.Any(layer => layer.Name == name) ||
+#if ARCGISPRO29
+        this.Any(layer => layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)));
+#else
+        this.Any(layer => layer.FcName == name?[..Math.Min(layer.FcName.Length, name.Length)]);
+#endif
     }
 
     public async Task DisposeAsync(bool fromMap)
@@ -270,7 +275,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       }
     }
 
-    #endregion
+#endregion
 
     #region Event handlers
 

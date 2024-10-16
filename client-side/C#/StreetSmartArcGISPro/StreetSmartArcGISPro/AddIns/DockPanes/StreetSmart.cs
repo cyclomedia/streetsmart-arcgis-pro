@@ -334,10 +334,10 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         if (args.PropertyName == "Api")
         {
           Api = WpfApi.Api;
-          Api.APIReady += ApiReady;
-          Api.ViewerAdded += ViewerAdded;
-          Api.ViewerRemoved += ViewerRemoved;
-          Api.BearerTokenChanged += BearerTokenChanged;
+          Api.APIReady += OnApiReady;
+          Api.ViewerAdded += OnViewerAdded;
+          Api.ViewerRemoved += OnViewerRemoved;
+          Api.BearerTokenChanged += OnBearerTokenChanged;
 
           if (!_configuration.UseDefaultStreetSmartUrl && !string.IsNullOrEmpty(_configuration.StreetSmartLocation))
           {
@@ -735,60 +735,62 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (NotifyPropertyChanged) propertyName: {propertyName}");
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-      if (_login.Credentials && Api != null && await Api.GetApiReadyState())
+      if (!_login.Credentials || Api == null || !await Api.GetApiReadyState())
       {
-        switch (propertyName)
-        {
-          case "Location":
-            string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
+        return;
+      }
 
-            if (_oldMapView != _mapView)
+      switch (propertyName)
+      {
+        case nameof(Location):
+          string newEpsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(_mapView);
+
+          if (_oldMapView != _mapView)
+          {
+            if (_oldMapView != null && _vectorLayerList.ContainsKey(_oldMapView))
             {
-              if (_oldMapView != null && _vectorLayerList.ContainsKey(_oldMapView))
+              foreach (var vectorLayer in _vectorLayerList[_oldMapView])
               {
-                foreach (var vectorLayer in _vectorLayerList[_oldMapView])
-                {
-                  vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
-                }
-
-                foreach (var vectorLayer in _vectorLayerList[_oldMapView])
-                {
-                  IOverlay overlay = vectorLayer.Overlay;
-
-                  if (overlay != null && Api != null)
-                  {
-                    await Api.RemoveOverlay(overlay.Id);
-                    vectorLayer.Overlay = null;
-                  }
-                }
+                vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
               }
 
-              if (_mapView != null && _vectorLayerList.ContainsKey(_mapView))
+              foreach (var vectorLayer in _vectorLayerList[_oldMapView])
               {
-                foreach (var vectorLayer in _vectorLayerList[_mapView])
+                IOverlay overlay = vectorLayer.Overlay;
+
+                if (overlay != null && Api != null)
                 {
-                  vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+                  await Api.RemoveOverlay(overlay.Id);
+                  vectorLayer.Overlay = null;
                 }
               }
             }
 
-            if (_epsgCode != newEpsgCode)
+            if (_mapView != null && _vectorLayerList.ContainsKey(_mapView))
             {
-              await RestartStreetSmart(false);
+              foreach (var vectorLayer in _vectorLayerList[_mapView])
+              {
+                vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+              }
             }
-            else
-            {
-              await OpenImageAsync();
-            }
+          }
 
-            break;
-          case "IsActive":
-            if (!IsActive)
-            {
-              await CloseViewersAsync();
-            }
-            break;
-        }
+          if (_epsgCode != newEpsgCode)
+          {
+            await RestartStreetSmart(false);
+          }
+          else
+          {
+            await OpenImageAsync();
+          }
+
+          break;
+        case nameof(IsActive):
+          if (!IsActive)
+          {
+            await CloseViewersAsync();
+          }
+          break;
       }
     }
 
@@ -875,74 +877,71 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (AddVectorLayerAsync)");
 
-      if (vectorLayer.Layer.Map == _mapView.Map)
+      if (vectorLayer.Layer.Map != _mapView.Map)
       {
-        Setting settings = ProjectList.Instance.GetSettings(_mapView);
-        MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
-        string srsName = cyclSpatRel?.SRSName;
+        return;
+      }
 
-        if (vectorLayer.Overlay == null && !string.IsNullOrEmpty(srsName))
+      Setting settings = ProjectList.Instance.GetSettings(_mapView);
+      MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
+      string srsName = cyclSpatRel?.SRSName;
+
+      if (vectorLayer.Overlay != null || string.IsNullOrEmpty(srsName))
+      {
+        return;
+      }
+
+      string layerName = vectorLayer.Name;
+      string layerNameAndUri = vectorLayer.NameAndUri;
+      bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
+      double transparency = vectorLayer.Layer.Transparency;
+
+      IFeatureCollection geoJson = vectorLayer.GeoJson;
+      IStyledLayerDescriptor sld = vectorLayer.Sld;
+
+      // Feature property escape character sanitation.
+      foreach (var feature in geoJson.Features)
+      {
+        for (int i = 0; i < feature.Properties.Count; i++)
         {
-          //GC: create transparency value here
-          string layerName = vectorLayer.Name;
-          string layerNameAndUri = vectorLayer.NameAndUri;
-          bool visible = vectorLayer.IsVisible; // _storedLayerList.GetVisibility(layerNameAndUri);
-          double transparency = vectorLayer.Layer.Transparency;
-
-          IFeatureCollection geoJson = vectorLayer.GeoJson;
-          IStyledLayerDescriptor sld = vectorLayer.Sld;
-
-          // Feature property escape character sanitation.
-          foreach (var feature in geoJson.Features)
+          try
           {
-            for (int i = 0; i < feature.Properties.Count; i++)
+            if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
             {
-              try
-              {
-                if (feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Contains("\\"))
-                {
-                  feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
-                }
-              }
-              catch (Exception e)
-              {
-                EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
-                return;
-              }
+              feature.Properties[feature.Properties.Keys.ElementAt(i)] = feature.Properties[feature.Properties.Keys.ElementAt(i)].ToString().Replace("\\", "/");
             }
           }
-
-          IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
-          overlay = await Api.AddOverlay(overlay);
-          StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
-
-          if (layer == null)
+          catch (Exception e)
           {
-            _storedLayerList.Update(layerNameAndUri, visible);
-          }
-          vectorLayer.Overlay = overlay;
-
-          //GC: trying to show layers created for the first time
-          var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-
-          //returns number of features created
-          var numIds = await QueuedTask.Run<List<long>>(() =>
-          {
-            var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
-#if ARCGISPRO29
-            return listOfMapMemberDictionaries[searchThisLayer];
-#else
-            return (List<long>)listOfMapMemberDictionaries[searchThisLayer];
-#endif
-          });
-
-          //should reset the image if the first feature was created so it isn't invisible
-          if (numIds.Count > 0 && numIds[0] == 1)
-          {
-            await OpenImageAsync();
+            EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
+            return;
           }
         }
       }
+
+      IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
+      overlay = await Api.AddOverlay(overlay);
+      StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
+
+      if (layer == null)
+      {
+        _storedLayerList.Update(layerNameAndUri, visible);
+      }
+      vectorLayer.Overlay = overlay;
+
+      //GC: trying to show layers created for the first time
+      var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+
+      //returns number of features created
+      var numIds = await QueuedTask.Run<List<long>>(() =>
+      {
+        var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
+#if ARCGISPRO29
+            return listOfMapMemberDictionaries[searchThisLayer];
+#else
+        return (List<long>)listOfMapMemberDictionaries[searchThisLayer];
+#endif
+      });
     }
 
     private async Task RemoveVectorLayerAsync(VectorLayer vectorLayer)
@@ -969,7 +968,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       DoHide();
     }
 
-    private async void ApiReady(object sender, EventArgs args)
+    private async void OnApiReady(object sender, EventArgs args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
 
@@ -1092,7 +1091,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (InitApi) Finished");
     }
 
-    private async void ViewerAdded(object sender, IEventArgs<IViewer> args)
+    private async void OnViewerAdded(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded)");
 
@@ -1100,8 +1099,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: added an extra condition in order for the viewing cone to only be created once
       if (cyclViewer is IPanoramaViewer panoramaViewer)
       {
-        panoramaViewer.ImageChange += OnImageChange;
-        panoramaViewer.ViewChange += OnViewChange;
+        panoramaViewer.ImageChange += OnImageChanged;
+        panoramaViewer.ViewChange += OnViewChanged;
         panoramaViewer.FeatureClick += OnFeatureClick;
         panoramaViewer.LayerVisibilityChange += OnLayerVisibilityChanged;
 
@@ -1205,7 +1204,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (vectorLayer != null)
       {
-        await UpdateVectorLayer(vectorLayer, sender, false);
+        await UpdateVectorLayerOverlay(vectorLayer, sender);
       }
     }
 
@@ -1219,7 +1218,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       layer?.SelectFeature(featureInfo.FeatureProperties, MapView, id);
     }
 
-    private async void ViewerRemoved(object sender, IEventArgs<IViewer> args)
+    private async void OnViewerRemoved(object sender, IEventArgs<IViewer> args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewerRemoved)");
 
@@ -1277,7 +1276,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private void BearerTokenChanged(object sender, IEventArgs<IBearer> args)
+    private void OnBearerTokenChanged(object sender, IEventArgs<IBearer> args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
       Login.Instance.Bearer = args.Value.BearerToken;
@@ -1288,7 +1287,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (RemovePanoramaViewer)");
 
       Viewer viewer = _viewerList.GetViewer(panoramaViewer);
-      panoramaViewer.ImageChange -= OnImageChange;
+      panoramaViewer.ImageChange -= OnImageChanged;
 
       if (viewer != null)
       {
@@ -1307,8 +1306,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
       }
 
-      panoramaViewer.ImageChange -= OnImageChange;
-      panoramaViewer.ViewChange -= OnViewChange;
+      panoramaViewer.ImageChange -= OnImageChanged;
+      panoramaViewer.ViewChange -= OnViewChanged;
       panoramaViewer.FeatureClick -= OnFeatureClick;
       panoramaViewer.LayerVisibilityChange -= OnLayerVisibilityChanged;
     }
@@ -1410,7 +1409,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private async void OnImageChange(object sender, EventArgs args)
+    private async void OnImageChanged(object sender, EventArgs args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnImageChanged)");
 
@@ -1455,13 +1454,13 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       catch (Exception e)
       {
-        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChange): exception: {e}");
+        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChanged): exception: {e}");
       }
     }
 
-    private async void OnViewChange(object sender, IEventArgs<IOrientation> args)
+    private async void OnViewChanged(object sender, IEventArgs<IOrientation> args)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewChange)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewChanged)");
 
       if (sender is IPanoramaViewer panoramaViewer)
       {
@@ -1512,32 +1511,31 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       //GC: this is where map layer transparency and layer list toggle can be found
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
 
-      if (GlobeSpotterConfiguration.AddLayerWfs)
+      if (!GlobeSpotterConfiguration.AddLayerWfs || sender is not VectorLayer vectorLayer)
       {
-        if (sender is VectorLayer vectorLayer)
+        return;
+      }
+
+      switch (args.PropertyName)
+      {
+        case nameof(VectorLayer.GeoJson):
+          await UpdateVectorLayerOverlay(vectorLayer, sender);
+          break;
+      }
+      //GC: checks if the layer list visibilty is different from the overlay list visibilty
+      //fixed Pro crash bug because overlay was undefined
+      if (vectorLayer.Overlay != null)
+      {
+        if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
         {
-          switch (args.PropertyName)
-          {
-            case "GeoJson":
-              await UpdateVectorLayer(vectorLayer, sender, false);
-              break;
-          }
-          //GC: checks if the layer list visibilty is different from the overlay list visibilty
-          //fixed Pro crash bug because overlay was undefined
-          if (vectorLayer.Overlay != null)
-          {
-            if ((vectorLayer.IsVisible && !vectorLayer.Overlay.Visible) || (!vectorLayer.IsVisible && vectorLayer.Overlay.Visible))
-            {
-              await UpdateVectorLayer(vectorLayer, sender, true);
-            }
-          }
+          _panorama.ToggleOverlay(vectorLayer.Overlay);
         }
       }
     }
 
-    private async Task UpdateVectorLayer(VectorLayer vectorLayer, object sender, bool switcher)
+    private async Task UpdateVectorLayerOverlay(VectorLayer vectorLayer, object sender)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayer) switcher: {switcher}");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (UpdateVectorLayerOverlay)");
 
       bool changeVectorLayer = false;
 
@@ -1596,11 +1594,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           _vectorLayerInChange.Remove(vectorLayer);
         }
-      }
-      else if (switcher && vectorLayer.Overlay != null)
-      {
-        //GC: calls the toggle overlay function if the overlay visibility is different from the layer list visibility
-        _panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 
