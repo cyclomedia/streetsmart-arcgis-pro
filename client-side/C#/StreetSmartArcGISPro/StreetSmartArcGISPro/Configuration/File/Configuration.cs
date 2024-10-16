@@ -16,13 +16,11 @@
  * License along with this library.
  */
 
+using StreetSmartArcGISPro.Utilities;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-
-using StreetSmartArcGISPro.Utilities;
-
 using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
@@ -143,10 +141,10 @@ namespace StreetSmartArcGISPro.Configuration.File
       {
         if (_configuration == null)
         {
-          Load();
+          _configuration = Load();
         }
 
-        return _configuration ?? (_configuration = Create());
+        return _configuration ??= Create();
       }
     }
 
@@ -164,14 +162,22 @@ namespace StreetSmartArcGISPro.Configuration.File
       streamFile.Close();
     }
 
-    private static void Load()
+    private static Configuration Load()
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration) XmlConfiguration.Deserialize(streamFile);
-        streamFile.Close();
+        var streamFile = new FileStream(FileName, FileMode.Open);
+        try
+        {
+          return (Configuration)XmlConfiguration.Deserialize(streamFile);
+        }
+        finally
+        {
+          streamFile.Close();
+        }
       }
+
+      return null;
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

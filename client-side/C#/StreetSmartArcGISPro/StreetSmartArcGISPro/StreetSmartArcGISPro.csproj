@@ -321,9 +321,6 @@
     <PackageReference Include="Esri.ArcGISPro.Extensions">
       <Version>2.9.0.32739</Version>
     </PackageReference>
-    <PackageReference Include="FontAwesome.WPF">
-      <Version>4.7.0.9</Version>
-    </PackageReference>
     <PackageReference Include="Nancy">
       <Version>2.0.0</Version>
     </PackageReference>
