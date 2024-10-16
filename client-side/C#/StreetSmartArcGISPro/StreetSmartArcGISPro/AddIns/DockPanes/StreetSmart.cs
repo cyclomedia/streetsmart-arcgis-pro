@@ -477,7 +477,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (forceRestart || Api == null || await Api.GetApiReadyState())
       {
-        await Destroy();
+        await Destroy(false);
 
         if (reloadApi || Api == null)
         {
@@ -494,7 +494,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
 
       lock (_inRestartLockObject)
-      { 
+      {
         _inRestart = false;
       }
 
@@ -1083,6 +1083,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
 
             _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedOut;
+            _login.IsOAuth = false;
           }
         }
       }
@@ -1384,7 +1385,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       switch (args.PropertyName)
       {
         case "CycloramaViewerCoordinateSystem":
-            await RestartStreetSmart(false);
+          await RestartStreetSmart(false);
           break;
         case "OverlayDrawDistance":
           if (Api != null && await Api.GetApiReadyState())
