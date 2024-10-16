@@ -106,7 +106,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     private Task OnApplicationClosingEvent(CancelEventArgs args)
     {
       LogData.Instance.Save();
-      return Task.FromResult(0);
+      return Task.CompletedTask;
     }
 
     private void OnApplicationStartupEvent(EventArgs args)
