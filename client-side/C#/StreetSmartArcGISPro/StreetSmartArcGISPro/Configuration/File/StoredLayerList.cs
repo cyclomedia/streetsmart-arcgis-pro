@@ -16,7 +16,7 @@
  * License along with this library.
  */
 
-using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.ObjectModel;
@@ -61,7 +61,7 @@ namespace StreetSmartArcGISPro.Configuration.File
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StoredLayerList.cs) (Instance) error: {e}");
+            EventLog.Write(EventLogLevel.Error, $"Street Smart: (StoredLayerList.cs) (Instance) error: {e}");
           }
         }
 

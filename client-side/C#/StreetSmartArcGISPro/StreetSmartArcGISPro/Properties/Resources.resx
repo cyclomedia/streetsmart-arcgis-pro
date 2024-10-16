@@ -301,4 +301,10 @@
   <data name="OpenLocationNotSupportedInScene" xml:space="preserve">
     <value>Open Location is not supported in Scene</value>
   </data>
+  <data name="ConfigurationSentrySectionName" xml:space="preserve">
+    <value>Sentry</value>
+  </data>
+  <data name="ConfigurationUseSentry" xml:space="preserve">
+    <value>Use Sentry logging</value>
+  </data>
 </root>
