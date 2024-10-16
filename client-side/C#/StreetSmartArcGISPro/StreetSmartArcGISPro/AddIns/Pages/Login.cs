@@ -31,14 +31,8 @@ using static StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
-  internal class Login : Page, INotifyPropertyChanged
+  internal class Login : Page
   {
-    #region Events
-
-    public new event PropertyChangedEventHandler PropertyChanged;
-
-    #endregion
-
     #region Members
 
     private readonly FileLogin _login;
@@ -75,13 +69,12 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       {
         switch (args.PropertyName)
         {
-          case "Credentials":
+          case nameof(FileLogin.Credentials):
 
             EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (Credentials) {_login.Credentials}");
 
             break;
-
-          case "OAuthAuthenticationStatus":
+          case nameof(FileLogin.OAuthAuthenticationStatus):
 
             EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthAuthenticationStatus) {_login.OAuthAuthenticationStatus}");
 
@@ -101,7 +94,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
             NotifyPropertyChanged("IsOAuth");
 
             break;
-          case "OAuthUsername":
+          case nameof(FileLogin.OAuthUsername):
 
             EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (OAuthUsername) {_login.OAuthUsername}");
             NotifyPropertyChanged("Username");
@@ -265,11 +258,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     #endregion
 
     #region Functions
-
-    protected override void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 
     public void Save()
     {
