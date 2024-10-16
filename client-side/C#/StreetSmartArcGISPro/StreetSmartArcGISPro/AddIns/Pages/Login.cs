@@ -183,6 +183,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       {
         if (_login.Password != value)
         {
+          IsModified = true;
           _login.Password = value;
           NotifyPropertyChanged();
         }
