@@ -65,12 +65,14 @@ namespace StreetSmartArcGISPro.Logging
         if (LogData.Instance.LogCount >= LogData.Instance.LogLimit)
         {
           HandleRateLimitExceeded();
-          return;
         }
-
-        SentrySdk.CaptureMessage(entry, SentryLevel.Error);
-        IncrementLogCount();
-        return;
+        else
+        {
+          SentrySdk.CaptureMessage(entry, SentryLevel.Error);
+          IncrementLogCount();
+        }
+        SaveIfFlushRequested(flush);
+        
       }
     }
     private static void ResetCounterIfNeeded()
@@ -95,7 +97,13 @@ namespace StreetSmartArcGISPro.Logging
       LogData.Instance.LogCount++;
     }
 
-
+    private static void SaveIfFlushRequested(bool flush)
+    {
+      if (flush)
+      {
+        LogData.Instance.Save();
+      }
+    }
     private static double TimeElapsedSinceLastRestart(TimeUnit timeUnit) => timeUnit switch
     {
       TimeUnit.Minute => (DateTime.Now - LogData.Instance.LastResetTime).TotalMinutes,
