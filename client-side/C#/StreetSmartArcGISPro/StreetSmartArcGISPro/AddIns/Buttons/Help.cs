@@ -20,6 +20,7 @@ using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Dialogs;
 using Microsoft.Win32;
 using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Properties;
 using StreetSmartArcGISPro.Utilities;
 using System;
@@ -27,7 +28,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Resources;
-using EventLog = ArcGIS.Desktop.Framework.Utilities.EventLog;
+using EventLog = StreetSmartArcGISPro.Logging.EventLog;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
 {
@@ -117,14 +118,14 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
         else
         {
           string errorPdfTxt = res.GetString("HelpNoPdfViewerInstalledOnYourSystem", language.CultureInfo);
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Help.cs) (OnClick) {errorPdfTxt}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: (Help.cs) (OnClick) {errorPdfTxt}");
           MessageBox.Show(errorPdfTxt);
         }
       }
       catch (Exception ex)
       {
         string errorTxt = res.GetString("HelpErrorOpenHelpDocument", language.CultureInfo);
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Help.cs) (OnClick) {errorTxt}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (Help.cs) (OnClick) {errorTxt}");
         MessageBox.Show(ex.Message, errorTxt);
       }
     }

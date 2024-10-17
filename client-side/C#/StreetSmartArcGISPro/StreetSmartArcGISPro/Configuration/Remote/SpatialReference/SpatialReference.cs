@@ -18,8 +18,8 @@
 
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
+using StreetSmartArcGISPro.Logging;
 using System;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -172,7 +172,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
               }
               catch (Exception ex)
               {
-                EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (SpatialReference.cs) (ExistsInAreaAsync) {ex}");
+                EventLog.Write(EventLogLevel.Warning, $"Street Smart: (SpatialReference.cs) (ExistsInAreaAsync) {ex}");
               }
             }
           }
