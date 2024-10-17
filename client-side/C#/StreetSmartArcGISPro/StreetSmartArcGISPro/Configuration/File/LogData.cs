@@ -25,7 +25,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     [XmlElement("TimeUnit")]
     public TimeUnit TimeUnit { get; set; }
 
-    public static string SentryDsnUrl => "https://96100a2b9133a1f056bf8df35d72d201@o4508125690593280.ingest.de.sentry.io/4508125706387536"; // TODO: change to proper production key
+    public static string SentryDsnUrl => "https://d5f8d577e53cfbb3fee7e32ea08a2a69@o4507893926264832.ingest.de.sentry.io/4507893930786896"; // TODO: change to proper production key
 
     private static string LogDataFileName => Path.Combine(FileUtils.FileDir, "logdata.xml");
     private static LogData _logData;
@@ -88,7 +88,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       {
         LogCount = 0,
         LastResetTime = DateTime.Now,
-        UseSentryLogging = true,
+        UseSentryLogging = false,
         LogLimit = 20,
         TimeUnit = TimeUnit.Day
       };
