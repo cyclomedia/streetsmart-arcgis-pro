@@ -142,6 +142,7 @@
     <Compile Include="Configuration\File\Agreement.cs" />
     <Compile Include="Configuration\File\ConstantsRecordingLayer.cs" />
     <Compile Include="Configuration\File\ConstantsViewer.cs" />
+    <Compile Include="Configuration\File\LogData.cs" />
     <Compile Include="Configuration\File\Project.cs" />
     <Compile Include="Configuration\File\ProjectList.cs" />
     <Compile Include="Configuration\File\LanguageSettings.cs" />
