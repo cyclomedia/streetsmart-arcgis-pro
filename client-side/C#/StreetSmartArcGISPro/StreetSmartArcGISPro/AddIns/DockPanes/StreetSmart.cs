@@ -360,29 +360,26 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     {
       EventLog.Write(EventLog.EventType.Information, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync)");
 
-      if (!_inClose)
+      if (!_inClose && Api != null && await Api.GetApiReadyState())
       {
         _inClose = true;
 
-        if (Api != null && await Api.GetApiReadyState())
-        {
-          IList<IViewer> viewers = await Api.GetViewers();
+        IList<IViewer> viewers = await Api.GetViewers();
 
-          if (viewers.Any())
+        if (viewers.Any())
+        {
+          try
           {
-            try
-            {
-              await Api.CloseViewer(await viewers[0].GetId());
-            }
-            catch (StreetSmartCloseViewerException e)
-            {
-              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
-            }
+            await Api.CloseViewer(await viewers[0].GetId());
           }
-          else
+          catch (StreetSmartCloseViewerException e)
           {
-            _inClose = false;
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (StreetSmart.cs) (CloseViewersAsync): exception: {e}");
           }
+        }
+        else
+        {
+          _inClose = false;
         }
       }
     }
@@ -1321,7 +1318,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (proceed)
       {
-        if (_viewerList.Count == 0)
+        var viewers = await Api.GetViewers();
+
+        if (viewers.Count == 0)
         {
           _inClose = false;
           DoHide();
@@ -1329,7 +1328,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         }
         else if (_inClose)
         {
-          await Api.CloseViewer(await _viewerList.First().Key.GetId());
+          await Api.CloseViewer(await viewers[0].GetId());
         }
       }
     }
