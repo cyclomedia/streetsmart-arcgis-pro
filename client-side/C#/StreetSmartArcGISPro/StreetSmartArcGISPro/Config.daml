@@ -63,7 +63,7 @@
 						<disabledText />
 					</tooltip>
 				</button>
-				<button id="streetSmartArcGISPro_VisibilitySyncing" caption="Sync the visibility" className="AddIns.Buttons.VisibilitySyncing" loadOnClick="false" largeImage="Images\sync32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GV">
+				<button id="streetSmartArcGISPro_VisibilitySyncing" caption="Sync the visibility" className="AddIns.Buttons.VisibilitySyncing" loadOnClick="false" largeImage="Images\OverlaysSync.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GV">
 					<tooltip heading="Sync the visibility on project level">
 						Visibility syncing between MapView Layers and Cyclorama Overlays
 						<disabledText />
