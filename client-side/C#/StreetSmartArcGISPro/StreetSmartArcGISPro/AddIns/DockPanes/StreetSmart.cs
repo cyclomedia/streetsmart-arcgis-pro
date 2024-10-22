@@ -1614,6 +1614,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           _vectorLayerInChange.Remove(vectorLayer);
         }
       }
+      else if (vectorLayer.Overlay != null && vectorLayer.IsLayerVisible != vectorLayer.Overlay.Visible && ShouldSyncLayersVisibility())
+      {
+        vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
+        _panorama.ToggleOverlay(vectorLayer.Overlay);
+      }
     }
 
     private async void OnMapClosedEvent(MapClosedEventArgs args)
