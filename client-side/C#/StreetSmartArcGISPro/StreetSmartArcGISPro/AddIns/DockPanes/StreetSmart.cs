@@ -951,26 +951,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           {
             _storedLayerList.Update(layerNameAndUri, visible);
           }
-
-          //GC: trying to show layers created for the first time
-          var searchThisLayer = _mapView.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Where(l => l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-
-          //returns number of features created
-          var numIds = await QueuedTask.Run<List<long>>(() =>
-          {
-            var listOfMapMemberDictionaries = _mapView.Map.GetSelection();
-#if ARCGISPRO29
-            return listOfMapMemberDictionaries[searchThisLayer];
-#else
-            return (List<long>)listOfMapMemberDictionaries[searchThisLayer];
-#endif
-          });
-
-          //should reset the image if the first feature was created so it isn't invisible
-          if (numIds.Count > 0 && numIds[0] == 1)
-          {
-            await OpenImageAsync();
-          }
         }
       }
     }
