@@ -306,10 +306,4 @@ Type de produit:</value>
 	<data name="ConfigurationVisibilitySynced" xml:space="preserve">
     <value>Sync visibility</value>
   </data>
-  <data name="ConfigurationSentrySectionName" xml:space="preserve">
-    <value>Sentry</value>
-  </data>
-  <data name="ConfigurationUseSentry" xml:space="preserve">
-    <value>Use Sentry logging</value>
-  </data>
 </root>

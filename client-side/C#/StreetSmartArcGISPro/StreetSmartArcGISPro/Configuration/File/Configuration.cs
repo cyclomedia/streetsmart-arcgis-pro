@@ -47,8 +47,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     private bool _useDefaultConfigurationUrl;
     private string _configurationUrlLocation;
 
-    private static readonly string _sentryDsnUrl = "https://d5f8d577e53cfbb3fee7e32ea08a2a69@o4507893926264832.ingest.de.sentry.io/4507893930786896"; // TODO: change to proper production key
-
     #endregion
 
     #region Constructors
@@ -152,15 +150,6 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public string ProxyDomain { get; set; }
 
-    public bool UseSentryLogging { get; set; }
-
-    public string SentryDsnUrl
-    {
-      get
-      {
-        return _sentryDsnUrl;
-      }
-    }
 
     public static Configuration Instance
     {
@@ -176,7 +165,6 @@ namespace StreetSmartArcGISPro.Configuration.File
     }
 
     private static string FileName => Path.Combine(FileUtils.FileDir, "Configuration.xml");
-
 
     #endregion
 
@@ -221,8 +209,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         ProxyUseDefaultCredentials = true,
         ProxyUsername = string.Empty,
         ProxyPassword = string.Empty,
-        ProxyDomain = string.Empty,
-        UseSentryLogging = true
+        ProxyDomain = string.Empty
       };
 
       result.Save();
