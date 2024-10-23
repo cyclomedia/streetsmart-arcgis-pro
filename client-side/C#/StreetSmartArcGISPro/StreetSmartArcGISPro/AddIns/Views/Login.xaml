@@ -30,13 +30,18 @@
 -->
   <UserControl.Resources>
     <ResourceDictionary>
+      <converters:MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter x:Key="MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter"/>
+      <converters:BasicAuthFieldsVisibilityConverter x:Key="BasicAuthFieldsVisibilityConverter"/>
+      <converters:BasicAuthLoginStatusToGridRowForLoginButtonConverter x:Key="BasicAuthLoginStatusToGridRowForLoginButtonConverter"/>
+      <converters:BasicAuthButtonVisibilityConverter x:Key="BasicAuthButtonVisibilityConverter"/>
+      <converters:OAuthUsernameVisibilityConverter x:Key="OAuthUsernameVisibilityConverter"/>
       <converters:LoginStatus x:Key="LoginStatusConverter" />
       <converters:OAuthSignStatus x:Key="OAuthSignStatus" />
       <converters:SignInToVisibility x:Key="SignInToVisibility" />
       <converters:SignOutToVisibility x:Key="SignOutToVisibility" />
+      <converters:GridRowPositionOfUsernameBasedOnLoggingStatusConverter x:Key="GridRowPositionOfUsernameBasedOnLoggingStatusConverter" />
       <converters:BoolToVisibility x:Key="BoolToVisibility" />
       <converters:InverseBoolToVisibility x:Key="InverseBoolToVisibility" />
-      <converters:OAuthAuthenticationStatusToEnabled x:Key="OAuthAuthenticationStatusToEnabled" />
       <converters:SignInEnabled x:Key="SignInEnabled" />
       <converters:SignOutEnabled x:Key="SignOutEnabled" />
       <converters:InverseBoolean x:Key="InverseBoolean" />
@@ -47,43 +52,151 @@
     </ResourceDictionary>
   </UserControl.Resources>
   <Grid>
-    <StackPanel Grid.Row="0" Margin="5,10,5,0">
-      <StackPanel>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Grid.Row="0" Margin="5,10,5,-20" Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}">
+      <Grid>
+        <TextBlock FontWeight="Bold" Style="{DynamicResource H3TextBlock}" FontSize="14" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
+      </Grid>
+      <StackPanel Margin="5,5,5,0">
         <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-          </Grid.ColumnDefinitions>
-          <TextBlock Grid.Column="0" Style="{DynamicResource H3TextBlock}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginLogin"/>
-          <CheckBox Grid.Column="1" util:LocalizationProvider.ContentId="LoginOAuth" HorizontalAlignment="Right" Margin="5" IsEnabled="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthAuthenticationStatusToEnabled}}" IsChecked="{Binding IsOAuth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <TextBlock Grid.Row="0" HorizontalAlignment="Left" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,10,5,5" Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
+          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}}" FontWeight="SemiBold" Margin="0,5,0,15" util:LocalizationProvider.ContentId="LoginUsername"/>
+          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}}" FontWeight="SemiBold" Text=":" Margin="60,5,0,15"/>
+          <TextBlock Grid.Row="{Binding Credentials, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}}" HorizontalAlignment="Left" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" Text="{Binding Username}" Width="300" Margin="67,5,5,5"/>
+          <TextBlock Grid.Row="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Right" Margin="0,5,10,0"/>
+          <TextBox Grid.Row="1" Style="{DynamicResource H6TextBlock}" Padding="5" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
         </Grid>
       </StackPanel>
-      <StackPanel x:Name="LoginElementsGroup" Visibility="{Binding AreLoginElementsVisible, UpdateSourceTrigger=PropertyChanged}">
-        <DockPanel Margin="5,5,5,0">
-          <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginUsername" Width="100" Margin="0,5,5,0"/>
-          <TextBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding Username}" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" IsEnabled="{Binding IsOAuth, Converter={StaticResource InverseBoolean}}"/>
-        </DockPanel>
-        <DockPanel Margin="5,5,5,0">
-          <TextBlock FontSize="12" Foreground="{DynamicResource Esri_Gray155}" DockPanel.Dock="Left" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,5,5,0" Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}"/>
-          <PasswordBox Style="{DynamicResource H6TextBlock}" Padding="5" DockPanel.Dock="Right" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded" Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}"/>
-        </DockPanel>
-        <StackPanel Margin="5,5,5,0">
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto"/>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="50"/>
-              <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Right" util:LocalizationProvider.ContentId="LoginStatus" Width="100" Margin="0,5,5,0"/>
-            <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding Credentials, Converter={StaticResource LoginStatusConverter}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0" Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}"/>
-            <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthSignStatus}}" HorizontalAlignment="Stretch" Width="Auto" Margin="0,5,0,0" Visibility="{Binding IsOAuth, Converter={StaticResource BoolToVisibility}}"/>
-            <fa:ImageAwesome Grid.Column="2" Icon="Spinner" Spin="True" Height="18" Width="18" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SigningInProgressToVisibility}}" />
-            <Button Grid.Column="3" Margin="5,0,0,0" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginCheck" util:LocalizationProvider.TooltipId="LoginCheckText" Width="100" Click="OnCheckButtonClicked"  Visibility="{Binding IsOAuth, Converter={StaticResource InverseBoolToVisibility}}"/>
-            <Button Grid.Column="3" Margin="5,0,0,0" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginSignInOAuth" Width="100" Command="{Binding SignInCommand}" IsEnabled="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignInEnabled}}" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignInToVisibility}}" />
-            <Button Grid.Column="3" Margin="5,0,0,0" Style="{DynamicResource Esri_Button}" util:LocalizationProvider.ContentId="LoginSignOutOAuth" Width="100" Command="{Binding SignOutCommand}" IsEnabled="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignOutEnabled}}" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignOutToVisibility}}" />
-          </Grid>
-        </StackPanel>
+      <StackPanel Margin="5,5,5,0">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <TextBlock Grid.Row="0" HorizontalAlignment="Left" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource Esri_Gray155}" util:LocalizationProvider.ContentId="LoginPassword" Width="100" Margin="0,10,5,5"  Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
+          <PasswordBox Grid.Row="1" Style="{DynamicResource H6TextBlock}" Padding="5" HorizontalAlignment="Stretch" PasswordChar="*" FontSize="11" Foreground="{DynamicResource Esri_Gray155}" Margin="0,3,0,0" PasswordChanged="OnPasswordChanged" Loaded="OnPasswordLoaded"  Visibility="{Binding Credentials, Converter={StaticResource BasicAuthFieldsVisibilityConverter}}"/>
+          <Button Grid.Row="{Binding Credentials, Converter={StaticResource BasicAuthLoginStatusToGridRowForLoginButtonConverter}}"
+            Margin="0,20,0,10"
+            Style="{DynamicResource Esri_Button}"
+            util:LocalizationProvider.ContentId="LoginCheck"
+            util:LocalizationProvider.TooltipId="LoginCheckText"
+            Width="250"
+            Height="35"
+            Background="#005bbb"
+            Foreground="White"
+            Click="OnLoginButtonClicked">
+                <Button.Template>
+                  <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                        CornerRadius="20"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                      <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                    </Border>
+              </ControlTemplate>
+            </Button.Template>
+          </Button>
+          <Button Grid.Row="{Binding Credentials, Converter={StaticResource BasicAuthLoginStatusToGridRowForLoginButtonConverter}}"
+            Margin="0,20,0,10"
+            Style="{DynamicResource Esri_Button}"
+            util:LocalizationProvider.ContentId="LogoutCheck"
+            Width="250"
+            Height="35"
+            Background="#005bbb"
+            Foreground="White"
+            Click="OnLogoutButtonClicked"
+            Visibility="{Binding Credentials, Converter={StaticResource BasicAuthButtonVisibilityConverter}}">
+                <Button.Template>
+                  <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                        CornerRadius="20" 
+                         BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                  <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                </Border>
+              </ControlTemplate>
+            </Button.Template>
+          </Button>
+        </Grid>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="{Binding Credentials, Converter={StaticResource MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter}}">
+        <Separator Width="200"/>
+        <TextBlock Text="Or" HorizontalAlignment="Center" Margin="10,0"/>
+        <Separator Width="200"/>
+      </StackPanel>
+    </StackPanel>
+    <StackPanel Grid.Row="{Binding IsOAuth, Converter={StaticResource GridRowPositionOfUsernameBasedOnLoggingStatusConverter}, UpdateSourceTrigger=PropertyChanged}" Margin="5,10,5,0" VerticalAlignment="Top">
+      <StackPanel >
+        <Grid Visibility="{Binding IsOAuth, Converter={StaticResource BoolToVisibility}, UpdateSourceTrigger=PropertyChanged}">
+          <TextBlock FontWeight="SemiBold" Margin="5,15,0,15" util:LocalizationProvider.ContentId="LoginUsername" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameVisibilityConverter}}"/>
+          <TextBlock FontWeight="SemiBold" Text=":" Margin="65,15,0,15" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameVisibilityConverter}}"/>
+          <TextBlock Margin="80,15,0,15" Text="{Binding Username}" Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthUsernameVisibilityConverter}}"/>
+          <TextBlock Foreground="{DynamicResource Esri_Gray155}" TextAlignment="Center" util:LocalizationProvider.ContentId="{Binding OAuthAuthenticationStatus, Converter={StaticResource OAuthSignStatus}}" HorizontalAlignment="Right" Margin="0,15,10,15"/>
+        </Grid>
+        <Grid>
+          <Button Grid.Column="0"
+            Margin="5,-40,0,0"
+            Width="250"
+            Height="35"
+            Background="#005bbb"
+            Foreground="White"
+            Style="{DynamicResource Esri_Button}"
+            util:LocalizationProvider.ContentId="LoginSignInOAuth"
+            Command="{Binding SignInCommand}"
+            Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignInToVisibility}}">
+                <Button.Template>
+              <ControlTemplate TargetType="Button">
+                <Border Background="{TemplateBinding Background}"
+                    CornerRadius="20" 
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+                  <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                </Border>
+              </ControlTemplate>
+            </Button.Template>
+
+            <Button.IsEnabled>
+              <MultiBinding Converter="{StaticResource SignInEnabled}">
+                <Binding Path="OAuthAuthenticationStatus" />
+                <Binding Path="Credentials" />
+              </MultiBinding>
+            </Button.IsEnabled>
+          </Button>
+
+          <Button Grid.Column="0"
+             Margin="5,50,0,0"
+             Width="250"
+             Height="35"
+             Background="#005bbb"
+             Foreground="White"
+             Style="{DynamicResource Esri_Button}"
+             util:LocalizationProvider.ContentId="LoginSignOutOAuth"
+             Command="{Binding SignOutCommand}"
+             Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignOutToVisibility}}">
+            <Button.Template>
+              <ControlTemplate TargetType="Button">
+                <Border Background="{TemplateBinding Background}"
+                    CornerRadius="20" 
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+                  <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                </Border>
+              </ControlTemplate>
+            </Button.Template>
+          </Button>
+        </Grid>
       </StackPanel>
     </StackPanel>
   </Grid>
