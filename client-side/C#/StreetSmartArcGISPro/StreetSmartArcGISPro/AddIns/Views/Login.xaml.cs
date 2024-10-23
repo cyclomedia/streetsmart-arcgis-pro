@@ -1,5 +1,9 @@
-﻿using System.Windows;
+﻿using ArcGIS.Desktop.Framework;
+using StreetSmartArcGISPro.Configuration.File;
+using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Resources;
 
 namespace StreetSmartArcGISPro.AddIns.Views
 {
@@ -8,6 +12,8 @@ namespace StreetSmartArcGISPro.AddIns.Views
   /// </summary>
   public partial class Login
   {
+    ResourceManager resourceManager = Properties.Resources.ResourceManager;
+    LanguageSettings language = LanguageSettings.Instance;
     public Login()
     {
       InitializeComponent();
@@ -29,12 +35,35 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
     }
 
-    private void OnCheckButtonClicked(object sender, RoutedEventArgs e)
+    private void OnLoginButtonClicked(object sender, RoutedEventArgs e)
     {
       if (DataContext != null)
       {
-        ((dynamic)DataContext).Save();
+        var viewModel = (dynamic)DataContext;
+        viewModel.Save();
+        ShowNotification(viewModel.Credentials);
       }
+    }
+    private void OnLogoutButtonClicked(object sender, RoutedEventArgs e)
+    {
+      if (DataContext != null)
+      {
+        var temp = ((dynamic)DataContext).Password;
+        ((dynamic)DataContext).Password = String.Empty;
+        ((dynamic)DataContext).Save();
+        ((dynamic)DataContext).Password = temp;
+      }
+    }
+
+
+    public void ShowNotification(bool Credentials)
+    {
+      Notification notification = new Notification()
+      {
+        Title = resourceManager.GetString("LoginStatus", language.CultureInfo),
+        Message = resourceManager.GetString(Credentials ? "LoginSuccessfully" : "LoginFailed", language.CultureInfo)
+      };
+      FrameworkApplication.AddNotification(notification);
     }
   }
 }

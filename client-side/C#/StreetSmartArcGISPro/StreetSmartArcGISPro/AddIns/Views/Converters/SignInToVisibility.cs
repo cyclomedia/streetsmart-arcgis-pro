@@ -32,7 +32,7 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
     {
       var oAuthStatus = ((OAuthStatus)value);
 
-      return value != null && (oAuthStatus == OAuthStatus.SignedOut || oAuthStatus == OAuthStatus.SigningIn) ? Visibility.Visible : Visibility.Hidden;
+      return value != null && (oAuthStatus == OAuthStatus.SignedOut || oAuthStatus == OAuthStatus.SigningIn || oAuthStatus == OAuthStatus.None) ? Visibility.Visible : Visibility.Hidden;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

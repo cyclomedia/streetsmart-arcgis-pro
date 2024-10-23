@@ -236,7 +236,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
+        using var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
         _login = (Login)XmlLogin.Deserialize(streamFile);
         streamFile.Close();
         if (!_login.IsOAuth)

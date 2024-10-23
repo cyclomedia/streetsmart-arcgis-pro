@@ -64,7 +64,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.0.0.36056" />
-		<PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
 		<PackageReference Include="Sentry" Version="4.10.2" />
 		<PackageReference Include="StreetSmart.WPF" Version="24.7.1-rc8" />

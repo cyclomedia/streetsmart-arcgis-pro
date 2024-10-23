@@ -128,7 +128,7 @@
     <value>Attention!</value>
   </data>
   <data name="StreetSmartOnLoginFailedMessage" xml:space="preserve">
-    <value>You need to LogIn to StreetSmart in Settings->StreetSmart->Login</value>
+    <value>You need to LogIn to StreetSmart in Settings-&gt;StreetSmart-&gt;Login</value>
   </data>
   <data name="SystemSearch16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SystemSearch16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -224,22 +224,25 @@
     <value>Signed Out</value>
   </data>
   <data name="LoginCheck" xml:space="preserve">
-    <value>Check</value>
+    <value>Log in</value>
+  </data>
+	<data name="LogoutCheck" xml:space="preserve">
+    <value>Log out</value>
   </data>
   <data name="LoginCheckText" xml:space="preserve">
     <value>Check the username and password combination</value>
   </data>
   <data name="LoginFailed" xml:space="preserve">
-    <value>Login Failed</value>
+    <value>Login failed</value>
   </data>
   <data name="LoginLogin" xml:space="preserve">
-    <value>Login</value>
+    <value>Log in</value>
   </data>
   <data name="LoginPassword" xml:space="preserve">
     <value>Password</value>
   </data>
   <data name="LoginSuccessfully" xml:space="preserve">
-    <value>Login Successful</value>
+    <value>Login Successfully</value>
   </data>
   <data name="LoginUsername" xml:space="preserve">
     <value>Username</value>
@@ -248,10 +251,10 @@
     <value>Use Single Sign-on</value>
   </data>
   <data name="LoginSignInOAuth" xml:space="preserve">
-    <value>Sign In</value>
+    <value>Log in with SSO</value>
   </data>
   <data name="LoginSignOutOAuth" xml:space="preserve">
-    <value>Sign Out</value>
+    <value>Log out with SSO</value>
   </data>
   <data name="SettingsCoordinateSystems" xml:space="preserve">
     <value>Coordinate systems</value>
