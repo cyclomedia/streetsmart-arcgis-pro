@@ -188,6 +188,7 @@
       <DependentUpon>ImageIdSearch.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddIns\DockPanes\ImageIdSearch.cs" />
+    <Compile Include="Logging\EventLog.cs" />
     <Compile Include="Overlays\Measurement\MeasurementList.cs" />
     <Compile Include="Overlays\Measurement\Measurement.cs" />
     <Compile Include="Overlays\Measurement\MeasurementObservation.cs" />
@@ -323,6 +324,9 @@
     </PackageReference>
     <PackageReference Include="Nancy">
       <Version>2.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Sentry">
+      <Version>4.12.1</Version>
     </PackageReference>
     <PackageReference Include="StreetSmart.WPF">
       <Version>24.7.1-rc3</Version>
