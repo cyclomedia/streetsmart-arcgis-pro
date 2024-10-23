@@ -1230,6 +1230,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       if (vectorLayer != null)
       {
+        if (vectorLayer.Overlay != null)
+        {
+          vectorLayer.Overlay.Visible = overlayInfo.Visible;
+        }
+
         if (vectorLayer.VisibilityChangeStatus != VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate)
         {
           vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
