@@ -123,6 +123,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     protected StreetSmart()
     {
+      ProjectOpenedEvent.Subscribe(OnProjectOpened);
       _storedLayerList = StoredLayerList.Instance;
       ProjectClosedEvent.Subscribe(OnProjectClosed);
       _currentDispatcher = Dispatcher.CurrentDispatcher;
@@ -956,7 +957,12 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 #endregion
 
     #region Event handlers
+    private void OnProjectOpened(ProjectEventArgs args)
+    {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (OnProjectOpened)");
 
+      DoHide();
+    }
     private void OnProjectClosed(ProjectEventArgs args)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (OnProjectClosed)");
