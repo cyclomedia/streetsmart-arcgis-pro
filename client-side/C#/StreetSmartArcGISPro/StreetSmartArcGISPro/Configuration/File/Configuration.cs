@@ -135,22 +135,20 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public string ProxyDomain { get; set; }
 
-
     public static Configuration Instance
     {
       get
       {
         if (_configuration == null)
         {
-          Load();
+          _configuration = Load();
         }
 
-        return _configuration ?? (_configuration = Create());
+        return _configuration ??= Create();
       }
     }
 
     private static string FileName => Path.Combine(FileUtils.FileDir, "Configuration.xml");
-
 
     #endregion
 
@@ -164,14 +162,22 @@ namespace StreetSmartArcGISPro.Configuration.File
       streamFile.Close();
     }
 
-    private static void Load()
+    private static Configuration Load()
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration)XmlConfiguration.Deserialize(streamFile);
-        streamFile.Close();
+        var streamFile = new FileStream(FileName, FileMode.Open);
+        try
+        {
+          return (Configuration)XmlConfiguration.Deserialize(streamFile);
+        }
+        finally
+        {
+          streamFile.Close();
+        }
       }
+
+      return null;
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

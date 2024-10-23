@@ -96,13 +96,18 @@
       <DependentUpon>Configuration.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddIns\Views\Converters\AgreementAccepted.cs" />
+    <Compile Include="AddIns\Views\Converters\BasicAuthButtonVisibilityConverter.cs" />
+    <Compile Include="AddIns\Views\Converters\BasicAuthFieldsVisibilityConverter.cs" />
+    <Compile Include="AddIns\Views\Converters\BasicAuthLoginStatusToGridRowForLoginButtonConverter.cs" />
     <Compile Include="AddIns\Views\Converters\boolToVisibility.cs" />
     <Compile Include="AddIns\Views\Converters\ContainsSrItems.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToTime.cs" />
     <Compile Include="AddIns\Views\Converters\DateTimeToDate.cs" />
+    <Compile Include="AddIns\Views\Converters\GridRowPositionOfUsernameBasedOnLoggingStatusConverter.cs" />
     <Compile Include="AddIns\Views\Converters\ImageIdInput.cs" />
     <Compile Include="AddIns\Views\Converters\InverseBoolToVisibility.cs" />
     <Compile Include="AddIns\Views\Converters\IsNotNull.cs" />
+    <Compile Include="AddIns\Views\Converters\MarginOfSplittingPartBasedOnBasicAuthLoggingStatusConverter.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementObservationSelected.cs" />
     <Compile Include="AddIns\Views\Converters\MeasurementOpenClose.cs" />
     <Compile Include="AddIns\Views\Converters\ConfigurationService.cs" />
@@ -121,6 +126,7 @@
     <Compile Include="AddIns\Views\Converters\LoginStatus.cs" />
     <Compile Include="AddIns\Views\Converters\OAuthAuthenticationStatusToEnabled.cs" />
     <Compile Include="AddIns\Views\Converters\OAuthSignStatus.cs" />
+    <Compile Include="AddIns\Views\Converters\OAuthUsernameVisibilityConverter.cs" />
     <Compile Include="AddIns\Views\Converters\SignInEnabled.cs" />
     <Compile Include="AddIns\Views\Converters\SigningInProgressToVisibility.cs" />
     <Compile Include="AddIns\Views\Converters\SignInToVisibility.cs" />
@@ -316,9 +322,6 @@
   <ItemGroup>
     <PackageReference Include="Esri.ArcGISPro.Extensions">
       <Version>2.9.0.32739</Version>
-    </PackageReference>
-    <PackageReference Include="FontAwesome.WPF">
-      <Version>4.7.0.9</Version>
     </PackageReference>
     <PackageReference Include="Nancy">
       <Version>2.0.0</Version>
