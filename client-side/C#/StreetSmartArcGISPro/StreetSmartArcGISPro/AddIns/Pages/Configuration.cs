@@ -53,8 +53,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly string _proxyPassword;
     private readonly string _proxyDomain;
 
-    private readonly bool _useSentryLogging;
-
     #endregion
 
     #region Constructors
@@ -78,8 +76,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _proxyUsername = _configuration.ProxyUsername;
       _proxyPassword = _configuration.ProxyPassword;
       _proxyDomain = _configuration.ProxyDomain;
-
-      _useSentryLogging = _configuration.UseSentryLogging;
     }
 
     #endregion
@@ -263,20 +259,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       }
     }
 
-    public bool UseSentryLogging
-    {
-      get => _configuration.UseSentryLogging;
-      set
-      {
-        if (_configuration.UseSentryLogging != value)
-        {
-          IsModified = true;
-          _configuration.UseSentryLogging = value;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
     #endregion
 
     #region Overrides
@@ -303,8 +285,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _configuration.ProxyUsername = _proxyUsername;
       _configuration.ProxyPassword = _proxyPassword;
       _configuration.ProxyDomain = _proxyDomain;
-
-      _configuration.UseSentryLogging = _useSentryLogging;
 
       Save();
       return base.CancelAsync();

@@ -37,7 +37,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using Project = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
@@ -56,7 +55,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     #region Properties
 
-    public static IDisposable SentrySdkInit = FileConfiguration.Instance.UseSentryLogging ? EventLog.InitializeSentry(FileConfiguration.Instance.SentryDsnUrl) : null;
+    public static IDisposable SentrySdkInit = LogData.Instance.UseSentryLogging ? EventLog.InitializeSentry(LogData.SentryDsnUrl) : null;
 
     /// <summary>
     /// Retrieve the singleton instance to this module here
@@ -101,6 +100,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       MapClosedEvent.Subscribe(OnMapClosedDocument);
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
       ApplicationStartupEvent.Subscribe(OnApplicationStartupEvent);
+      ApplicationClosingEvent.Subscribe(OnApplicationClosingEvent);
+    }
+
+    private Task OnApplicationClosingEvent(CancelEventArgs args)
+    {
+      LogData.Instance.Save();
+      return Task.CompletedTask;
     }
 
     private void OnApplicationStartupEvent(EventArgs args)
@@ -459,18 +465,21 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (CurrentDomain_UnhandledException) {e.ExceptionObject}", true);
       Exception ex = e.ExceptionObject as Exception;
       HandleException("CurrentDomain_UnhandledException", ex);
     }
 
     private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (Current_DispatcherUnhandledException) {e.Exception}", true);
       HandleException("Current_DispatcherUnhandledException", e.Exception);
       //e.Handled = true;   // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
 
     private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
     {
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (TaskScheduler_UnobservedTaskException) {e.Exception}",true);
       HandleException("TaskScheduler_UnobservedTaskException", e.Exception);
       //e.SetObserved();  // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
