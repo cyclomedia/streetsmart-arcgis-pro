@@ -24,7 +24,6 @@ using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Events;
 using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using Nancy.Json;
@@ -34,6 +33,7 @@ using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmart.Common.Interfaces.SLD;
 using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
@@ -174,7 +174,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         catch (Exception e)
         {
-          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (InitializeEventsAsync) error: {e}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (InitializeEventsAsync) error: {e}");
         }
       });
 
@@ -184,7 +184,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync)");
       Map map = mapView?.Map;
       SpatialReference mapSpatRef = map?.SpatialReference;
 
@@ -240,7 +240,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                 }
                 catch (Exception ex)
                 {
-                  EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) {ex}");
+                  EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) {ex}");
                 }
               }
 
@@ -432,7 +432,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         GeoJson = featureCollection;
       }
 
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
       return featureCollection;
     }
 
@@ -793,7 +793,7 @@ namespace StreetSmartArcGISPro.VectorLayers
               }
               catch (Exception e)
               {
-                EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
               }
             }
           }
@@ -944,7 +944,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         catch (NullReferenceException e)
         {
-          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
         }
       });
     }
@@ -980,13 +980,13 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           if (!isExceptionAlreadyLogged)
           {
-            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
+            EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
             isExceptionAlreadyLogged = true;
           }
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
         }
       }
 
@@ -1040,7 +1040,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayer.cs) (OnMapSelectionChanged) error: {e}");
+            EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (OnMapSelectionChanged) error: {e}");
           }
         }
       }

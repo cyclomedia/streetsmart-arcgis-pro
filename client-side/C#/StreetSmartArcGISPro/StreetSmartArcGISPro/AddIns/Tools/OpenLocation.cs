@@ -18,11 +18,11 @@
 
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Remote.Recordings;
 using StreetSmartArcGISPro.CycloMediaLayers;
+using StreetSmartArcGISPro.Logging;
 using System;
 using System.Globalization;
 using System.IO;
@@ -175,7 +175,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
                 }
                 else
                 {
-                  EventLog.Write(EventLog.EventType.Warning, $"A feature is not a layer, should we cover this? Its: {feature.Key}");
+                  EventLog.Write(EventLogLevel.Warning, $"A feature is not a layer, should we cover this? Its: {feature.Key}");
                 }
               }
             }
@@ -190,7 +190,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
         if (streetSmart != null)
         {
-          EventLog.Write(EventLog.EventType.Information, $"Street Smart: (OpenLocation.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
+          EventLog.Write(EventLogLevel.Information, $"Street Smart: (OpenLocation.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
           streetSmart.MapView = activeView;
           streetSmart.LookAt = null;
           streetSmart.Replace = replace;
