@@ -1566,7 +1566,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       switch (args.PropertyName)
       {
-        case "GeoJson":
+        case nameof(VectorLayer.GeoJson):
           await UpdateVectorLayerOverlay(vectorLayer);
           break;
       }
