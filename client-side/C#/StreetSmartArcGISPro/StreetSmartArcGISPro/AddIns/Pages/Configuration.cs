@@ -44,6 +44,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly bool _useDefaultStreetSmartUrl;
     private readonly string _streetSmartLocation;
 
+    private readonly bool _isSyncOfVisibilityEnabled;
+
     private readonly bool _useProxyServer;
     private readonly string _proxyAddress;
     private readonly int _proxyPort;
@@ -69,6 +71,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       _useDefaultStreetSmartUrl = _configuration.UseDefaultStreetSmartUrl;
       _streetSmartLocation = _configuration.StreetSmartLocation;
+
+      _isSyncOfVisibilityEnabled = _configuration.IsSyncOfVisibilityEnabled;
 
       _useProxyServer = _configuration.UseProxyServer;
       _proxyAddress = _configuration.ProxyAddress;
@@ -127,6 +131,20 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         {
           IsModified = true;
           _configuration.UseDefaultStreetSmartUrl = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public bool IsSyncOfVisibilityEnabled
+    {
+      get => _configuration.IsSyncOfVisibilityEnabled;
+      set
+      {
+        if (_configuration.IsSyncOfVisibilityEnabled != value)
+        {
+          IsModified = true;
+          _configuration.IsSyncOfVisibilityEnabled = value;
           NotifyPropertyChanged();
         }
       }
@@ -278,6 +296,9 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
       _configuration.UseDefaultStreetSmartUrl = _useDefaultStreetSmartUrl;
       _configuration.StreetSmartLocation = _streetSmartLocation;
+
+
+      _configuration.IsSyncOfVisibilityEnabled = _isSyncOfVisibilityEnabled;
 
       _configuration.UseProxyServer = _useProxyServer;
       _configuration.ProxyAddress = _proxyAddress;

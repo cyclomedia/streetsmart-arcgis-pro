@@ -532,5 +532,27 @@ namespace StreetSmartArcGISPro.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+    /// <summary>
+    ///   Looks up a localized string similar to Configuration url.
+    /// </summary>
+    internal static string ConfigurationVisibility
+    {
+      get
+      {
+        return ResourceManager.GetString("ConfigurationVisibility", resourceCulture);
+      }
     }
+
+    /// <summary>
+    ///   Looks up a localized string similar to Configuration url.
+    /// </summary>
+    internal static string ConfigurationVisibilitySynced
+    {
+      get
+      {
+        return ResourceManager.GetString("ConfigurationVisibilitySynced", resourceCulture);
+      }
+    }
+  }
 }
