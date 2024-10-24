@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
@@ -887,11 +887,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
 
 
-    private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer)
+    private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer, bool forceUpdateGeoJson = false)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
 
-      await vectorLayer.GenerateJsonAsync(_mapView);
+      await vectorLayer.GenerateJsonAsync(_mapView, forceUpdateGeoJson);
     }
 
     private async Task AddOrUpdateVectorLayerOverlayAsync(VectorLayer vectorLayer)
@@ -1251,7 +1251,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             await QueuedTask.Run(() => vectorLayer.Layer.SetVisibility(overlayInfo.Visible));
           }
 
-          await UpdateVectorLayerAsync(vectorLayer);
+          await UpdateVectorLayerAsync(vectorLayer, true);
         }
 
         vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.Updated;
@@ -1611,11 +1611,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           _vectorLayerInChange.Remove(vectorLayer);
         }
-      }
-      else if (vectorLayer.Overlay != null && vectorLayer.IsLayerVisible != vectorLayer.Overlay.Visible && ShouldSyncLayersVisibility())
-      {
-        vectorLayer.VisibilityChangeStatus = VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate;
-        _panorama.ToggleOverlay(vectorLayer.Overlay);
       }
     }
 

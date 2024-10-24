@@ -182,7 +182,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       return true;
     }
 
-    public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView)
+    public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView, bool forceUpdateGeoJson = false)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync)");
       Map map = mapView?.Map;
@@ -198,7 +198,7 @@ namespace StreetSmartArcGISPro.VectorLayers
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
-      GeoJsonChanged = false;
+      GeoJsonChanged = forceUpdateGeoJson;
       double distanceFactor = (cyclSpatRef?.IsGeographic ?? true) ? factor : 1 / factor;
 
       if (Layer.Map == map)
