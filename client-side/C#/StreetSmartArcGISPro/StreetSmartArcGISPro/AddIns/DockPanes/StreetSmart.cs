@@ -113,9 +113,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private SpatialReference _lastSpatialReference;
     private VectorLayerList _vectorLayerList;
 
-    //GC: global variable that adds the panorama viewer to 'this' value
-    private IPanoramaViewer _panorama;
-
     #endregion
 
     #region Constructor
@@ -913,7 +910,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         string layerName = vectorLayer.Name;
         string layerNameAndUri = vectorLayer.NameAndUri;
         bool visible = vectorLayer.DesiredOverlayVisibility;
-        double transparency = vectorLayer.Layer.Transparency;
 
         IFeatureCollection geoJson = vectorLayer.GeoJson;
         IStyledLayerDescriptor sld = vectorLayer.Sld;
@@ -1138,7 +1134,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomIn, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.ZoomOut, false);
         panoramaViewer.ToggleButtonEnabled(PanoramaViewerButtons.Measure, GlobeSpotterConfiguration.MeasurePermissions);
-        _panorama = panoramaViewer;
 
         Setting settings = ProjectList.Instance.GetSettings(_mapView);
         Api.SetOverlayDrawDistance(settings.OverlayDrawDistance);
@@ -1562,7 +1557,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnVectorLayerPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      //GC: this is where map layer transparency and layer list toggle can be found
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnVectorLayerPropertyChanged)");
 
       if (!GlobeSpotterConfiguration.AddLayerWfs || sender is not VectorLayer vectorLayer)
