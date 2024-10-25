@@ -1369,12 +1369,17 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         case "Save":
           if (_configurationPropertyChanged.Count >= 1)
           {
-            bool restart = false;
+            bool restartApi = false;
+            bool reloadApi = false;
 
             foreach (string configurationProperty in _configurationPropertyChanged)
             {
               switch (configurationProperty)
               {
+                case "UseDefaultConfigurationUrl":
+                case "ConfigurationUrlLocation":
+                  restartApi = true;
+                  break;
                 case "UseDefaultStreetSmartUrl":
                 case "StreetSmartLocation":
                 case "UseProxyServer":
@@ -1385,12 +1390,18 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
                 case "ProxyUsername":
                 case "ProxyPassword":
                 case "ProxyDomain":
-                  restart = true;
+                  restartApi = true;
+                  reloadApi = true;
+                  break;
+                case "IsSyncOfVisibilityEnabled":
                   break;
               }
             }
 
-            await RestartStreetSmart(restart);
+            if (restartApi)
+            {
+              await RestartStreetSmart(reloadApi);
+            }
             _configurationPropertyChanged.Clear();
           }
 
