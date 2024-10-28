@@ -115,23 +115,25 @@ namespace StreetSmartArcGISPro.Utilities
           : recordingSpatialReference.SRSName
         : spatialReference.SRSName;
 
-      if (spatialReference?.ArcGisSpatialReference == null)
+      if ((spatialReference?.ArcGisSpatialReference) != null)
       {
-        var spatialReferences = Configuration.Remote.SpatialReference.SpatialReferenceDictionary.Instance;
-        spatialReference = spatialReferences.GetItem(epsgCode) ?? spatialReferences.FirstOrDefault(spatialReferenceComp => spatialReferenceComp.ArcGisSpatialReference != null);
-        if (spatialReference != null)
-        {
-          epsgCode = spatialReference.SRSName;
-
-          if (settings != null)
-          {
-            settings.CycloramaViewerCoordinateSystem = spatialReference;
-            projectList.Save();
-          }
-        }
+        return epsgCode;
       }
 
-      return epsgCode;
+      var spatialReferences = Configuration.Remote.SpatialReference.SpatialReferenceDictionary.Instance;
+      spatialReference = spatialReferences.GetItem(epsgCode) ?? spatialReferences.FirstOrDefault(spatialReferenceComp => spatialReferenceComp.ArcGisSpatialReference != null);
+      if (spatialReference == null)
+      {
+        return epsgCode;
+      }
+
+      if (settings != null)
+      {
+        settings.CycloramaViewerCoordinateSystem = spatialReference;
+        projectList.Save();
+      }
+
+      return spatialReference.SRSName;
     }
   }
 }
