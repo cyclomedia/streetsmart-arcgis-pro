@@ -45,11 +45,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ColorConverter = StreetSmartArcGISPro.Utilities.ColorConverter;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Unit = ArcGIS.Core.Geometry.Unit;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -427,7 +427,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             await Task.WhenAll(featureTasks);
           }
         });
-      
+
         GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
         GeoJson = featureCollection;
       }
@@ -446,7 +446,7 @@ namespace StreetSmartArcGISPro.VectorLayers
     private bool ShouldSyncLayersVisibility()
     {
       bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
-      var result = syncLayerVisibility ?? Configuration.File.Configuration.Instance.IsSyncOfVisibilityEnabled;
+      var result = syncLayerVisibility ?? FileConfiguration.Instance.IsSyncOfVisibilityEnabled;
       return result;
     }
 
@@ -616,9 +616,14 @@ namespace StreetSmartArcGISPro.VectorLayers
 
         //GC: added catch statements that turns the s and v values to percentages because it was causing incorrect overlay colors
         if (s > 1)
+        {
           s = s / 100;
+        }
+
         if (v > 1)
+        {
           v = v / 100;
+        }
 
         Hsv data = new Hsv(h, s, v);
         Rgb value = ColorConverter.HsvToRgb(data);
@@ -640,7 +645,10 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public async Task<double> GetOffsetZAsync()
     {
-      if (Layer == null) return 0.0;
+      if (Layer == null)
+      {
+        return 0.0;
+      }
 
       return await QueuedTask.Run(() =>
       {
@@ -951,7 +959,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       bool isExceptionAlreadyLogged = false;
       Dictionary<string, string> properties = [];
       Row row = rowCursor.Current;
-
       if (row is not Feature feature)
       {
         return properties;

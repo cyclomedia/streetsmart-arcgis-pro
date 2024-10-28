@@ -45,7 +45,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// <summary>
     /// Enable/disable of syncing visibility on project level between ArcGIS Pro map layers and cyclorama overlays
     /// </summary>
-    [XmlElement(IsNullable = true,ElementName = "SyncLayerVisibility")]
+    [XmlElement(IsNullable = true, ElementName = "SyncLayerVisibility")]
     public bool? SyncLayerVisibility
     {
       get
@@ -54,12 +54,12 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
       set
       {
-        if(_syncLayerVisibility != value)
-        { 
+        if (_syncLayerVisibility != value)
+        {
           _syncLayerVisibility = value;
           OnPropertyChanged();
         }
-      } 
+      }
     }
     /// <summary>
     /// Name of the map

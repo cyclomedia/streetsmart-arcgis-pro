@@ -482,9 +482,13 @@ namespace StreetSmartArcGISPro.VectorLayers
         await FrameworkApplication.SetCurrentToolAsync("esri_mapping_exploreTool");
 
         if (args.IncomingTemplate != null)
+        {
           await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
+        }
         else
+        {
           EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
+        }
       }
 
       if (args.IncomingTemplate != null && args.IncomingTemplate.IsActive != false)
@@ -695,7 +699,9 @@ namespace StreetSmartArcGISPro.VectorLayers
       {
         MapView mapView = GetMapViewFromLayer(layer) ?? MapView.Active;
         if (mapView != null)
+        {
           await AddLayerAsync(layer, mapView);
+        }
       }
     }
 

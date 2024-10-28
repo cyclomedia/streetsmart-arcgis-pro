@@ -154,10 +154,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       get
       {
-        if (_configuration == null)
-        {
-          _configuration = Load();
-        }
+        _configuration ??= Load();
 
         return _configuration ??= Create();
       }
@@ -172,7 +169,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     public void Save()
     {
       OnPropertyChanged();
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
+      using FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
       XmlConfiguration.Serialize(streamFile, this);
       streamFile.Close();
     }
@@ -181,7 +178,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.Open);
+        using var streamFile = new FileStream(FileName, FileMode.Open);
         try
         {
           return (Configuration)XmlConfiguration.Deserialize(streamFile);

@@ -101,6 +101,7 @@ namespace StreetSmartArcGISPro.Overlays
         return _mapView?.Camera != null && Math.Floor(_mapView.Camera.Scale) <= ConstantsRecordingLayer.Instance.MinimumScale;
       }
     }
+
     #endregion
 
     #region Functions
@@ -179,9 +180,7 @@ namespace StreetSmartArcGISPro.Overlays
     {
       await QueuedTask.Run(() =>
       {
-        StreetSmartModule streetSmart = StreetSmartModule.Current;
-
-        if ((streetSmart.InsideScale(_mapView) || IsCameraInsideScaleWithRecordingLayerDisabled) && !_mapPoint.IsEmpty && Color != null)
+        if ((StreetSmartModule.Current.InsideScale(_mapView) || IsCameraInsideScaleWithRecordingLayerDisabled) && !_mapPoint.IsEmpty && Color != null)
         {
           var thisColor = (SystCol)Color;
           Map map = _mapView.Map;

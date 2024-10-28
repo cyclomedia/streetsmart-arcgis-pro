@@ -343,7 +343,4 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>powershell -File "$(ProjectDir)ReplaceConfigDate.ps1" $(ProjectDir)</PreBuildEvent>
-  </PropertyGroup>
 </Project>
