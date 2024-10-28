@@ -631,6 +631,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
 
+        if (string.IsNullOrEmpty(toOpen))
+        {
+          continue;
+        }
+
         try
         {
           EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OpenImageAsync) Open image: {toOpen}");
@@ -922,7 +927,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
+            EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync): error: {e}");
             return;
           }
         }
