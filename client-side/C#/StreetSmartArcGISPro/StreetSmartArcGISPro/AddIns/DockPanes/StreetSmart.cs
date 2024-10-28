@@ -876,8 +876,6 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Finished");
     }
 
-
-
     private async Task UpdateVectorLayerAsync(VectorLayer vectorLayer, bool forceUpdateGeoJson = false)
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (UpdateVectorLayerAsync (VectorLayer))");
@@ -932,7 +930,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
 
-      if (overlay == null)
+      if (vectorLayer.Overlay == null)
       {
         overlay = await Api.AddOverlay(overlay);
       }
@@ -944,9 +942,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
       vectorLayer.Overlay = overlay;
 
-      //GC: trying to show layers created for the first time
+      StoredLayer layer = _storedLayerList.GetLayer(layerNameAndUri);
 
-      //returns number of features created
+      if (layer == null || ShouldSyncLayersVisibility())
       {
         _storedLayerList.Update(layerNameAndUri, visible);
       }
