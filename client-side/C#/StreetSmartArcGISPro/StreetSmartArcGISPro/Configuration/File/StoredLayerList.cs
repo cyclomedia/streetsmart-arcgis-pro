@@ -53,7 +53,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       get
       {
-        if (_storedLayerList == null || _storedLayerList.Count == 0)
+        if (_storedLayerList == null)
         {
           try
           {

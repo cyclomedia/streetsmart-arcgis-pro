@@ -28,6 +28,7 @@
 			<groups>
 				<group id="streetSmartArcGISPro_layerGroup" caption="Calque" appearsOnAddInTab="false" keytip="GL">
 					<button refID="streetSmartArcGISPro_recordingLayerButton" size="large" />
+					<button refID="streetSmartArcGISPro_VisibilitySyncing" size="large" />
 				</group>
 				<group id="streetSmartArcGISPro_inquiryGroup" caption="Requête" appearsOnAddInTab="false" keytip="GI">
 					<button refID="streetSmartArcGISPro_ImageIdSearchButton" size="large" />
@@ -59,6 +60,12 @@
 				<button id="streetSmartArcGISPro_ImageIdSearchButton" caption="Recherche d'ImageId" className="AddIns.Buttons.ImageIdSearch" loadOnClick="false" largeImage="Images\ImageIdSearch32.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GIS">
 					<tooltip heading="Recherche d'ImageId">
 						Rechercher l'imageId
+						<disabledText />
+					</tooltip>
+				</button>
+				<button id="streetSmartArcGISPro_VisibilitySyncing" caption="Synchroniser la visibilité" className="AddIns.Buttons.VisibilitySyncing" loadOnClick="false" largeImage="Images\OverlaysSync.png" condition="streetSmartArcGISPro_recordingsReadyCondition" keytip="GV">
+					<tooltip heading="Synchroniser la visibilité au niveau du projet">
+						Synchronisation de la visibilité entre les couches de MapView et les superpositions de Cyclorama
 						<disabledText />
 					</tooltip>
 				</button>
