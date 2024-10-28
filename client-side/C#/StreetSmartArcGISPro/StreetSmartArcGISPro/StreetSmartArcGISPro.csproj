@@ -296,6 +296,7 @@
     </Content>
     <AddInContent Include="Images\ImageIdSearch32.png" />
     <AddInContent Include="Images\MeasurementDetail32.png" />
+	<AddInContent Include="Images\OverlaysSync.png" />
     <Content Include="ReleaseNotes.txt" />
     <EmbeddedResource Include="Resources\Languages.xml" />
     <EmbeddedResource Include="Images\UserTrash16.png" />
@@ -330,7 +331,7 @@
       <Version>4.12.1</Version>
     </PackageReference>
     <PackageReference Include="StreetSmart.WPF">
-      <Version>24.7.1-rc3</Version>
+      <Version>24.7.1-rc8</Version>
     </PackageReference>
     <PackageReference Include="System.IdentityModel.Tokens.Jwt">
       <Version>5.7.0</Version>
