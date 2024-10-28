@@ -679,7 +679,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                 Multipoint multipoint => multipoint.Points.Count >= 1 ? multipoint.Points[0] : null,
                 _ => null
               };
-
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
               if (spatialReference.ZUnit == null || srs == null)

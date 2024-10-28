@@ -150,15 +150,11 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public string ProxyDomain { get; set; }
 
-
     public static Configuration Instance
     {
       get
       {
-        if (_configuration == null)
-        {
-          Load();
-        }
+        _configuration ??= Load();
 
         return _configuration ??= Create();
       }
@@ -173,19 +169,27 @@ namespace StreetSmartArcGISPro.Configuration.File
     public void Save()
     {
       OnPropertyChanged();
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
+      using FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
       XmlConfiguration.Serialize(streamFile, this);
       streamFile.Close();
     }
 
-    private static void Load()
+    private static Configuration Load()
     {
       if (SystemIOFile.Exists(FileName))
       {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration)XmlConfiguration.Deserialize(streamFile);
-        streamFile.Close();
+        using var streamFile = new FileStream(FileName, FileMode.Open);
+        try
+        {
+          return (Configuration)XmlConfiguration.Deserialize(streamFile);
+        }
+        finally
+        {
+          streamFile.Close();
+        }
       }
+
+      return null;
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

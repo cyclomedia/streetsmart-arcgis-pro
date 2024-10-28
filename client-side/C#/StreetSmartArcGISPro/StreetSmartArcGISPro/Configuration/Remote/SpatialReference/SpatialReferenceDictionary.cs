@@ -45,7 +45,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
         {
           foreach (var item in value)
           {
-            this.Add(item);
+            Add(item);
           }
         }
       }
@@ -80,9 +80,23 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
 
     #region Functions
 
+#if ARCGISPRO29
+    public bool TryGetValue(string key, out SpatialReference value)
+    {
+      if (Contains(key))
+      {
+        value = this[key];
+        return true;
+      }
+
+      value = null;
+      return false;
+    }
+#endif
+
     public SpatialReference GetItem(string srsName)
     {
-      return this.TryGetValue(srsName, out var result) ? result : null;
+      return TryGetValue(srsName, out var result) ? result : null;
     }
 
     public SpatialReference GetCompatibleSrsNameItem(string srsName)

@@ -55,8 +55,6 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     private readonly string _proxyPassword;
     private readonly string _proxyDomain;
 
-    private readonly bool _useSentryLogging;
-
     #endregion
 
     #region Constructors

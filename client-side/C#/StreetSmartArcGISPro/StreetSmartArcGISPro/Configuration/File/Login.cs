@@ -226,7 +226,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
+      using FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
       XmlLogin.Serialize(streamFile, this);
       streamFile.Close();
       Check();
@@ -236,11 +236,13 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       if (SystemIOFile.Exists(FileName))
       {
-        using var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
+        using var streamFile = new FileStream(FileName, FileMode.Open);
         _login = (Login)XmlLogin.Deserialize(streamFile);
         streamFile.Close();
         if (!_login.IsOAuth)
+        {
           _login.Check();
+        }
       }
 
       return _login;
