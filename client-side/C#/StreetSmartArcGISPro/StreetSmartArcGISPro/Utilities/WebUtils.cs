@@ -32,7 +32,7 @@ namespace StreetSmartArcGISPro.Utilities
         AsyncCallback asyncCallback,
         TypeDownloadConfig typeDownloadConfig,
         Configuration.File.Configuration fileConfiguration,
-        Configuration.File.Login login,
+        Login login,
         Configuration.Resource.ApiKey apiKey,
         bool useAuthorisation = true
         )
@@ -103,7 +103,7 @@ namespace StreetSmartArcGISPro.Utilities
             string postItem,
             TypeDownloadConfig typeDownloadConfig,
             Configuration.File.Configuration fileConfiguration,
-            Configuration.File.Login login,
+            Login login,
             Configuration.Resource.ApiKey apiKey,
             bool useAuthorisation = true)
     {
@@ -204,7 +204,7 @@ namespace StreetSmartArcGISPro.Utilities
         string webRequest,
         int length,
         Configuration.File.Configuration fileConfiguration,
-        Configuration.File.Login login,
+        Login login,
         Configuration.Resource.ApiKey apiKey,
         bool useAuthorization = true
         )

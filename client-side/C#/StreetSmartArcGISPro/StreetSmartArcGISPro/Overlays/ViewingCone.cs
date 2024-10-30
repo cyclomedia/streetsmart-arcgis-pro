@@ -106,7 +106,7 @@ namespace StreetSmartArcGISPro.Overlays
 
     #region Functions
 
-    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, Color color, MapView mapView)
+    protected async Task InitializeAsync(ICoordinate coordinate, IOrientation orientation, SystCol color, MapView mapView)
     {
       Coordinate = coordinate;
       _orientation = orientation;

@@ -289,7 +289,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
       });
     }
 
-    private async Task RemoveLayersAsync(ILayerContainerEdit layerContainer, IEnumerable<ArcGIS.Desktop.Mapping.Layer> layers)
+    private async Task RemoveLayersAsync(ILayerContainerEdit layerContainer, IEnumerable<Layer> layers)
     {
       await QueuedTask.Run(() =>
       {

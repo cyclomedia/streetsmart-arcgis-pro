@@ -122,6 +122,9 @@ namespace StreetSmartArcGISPro.VectorLayers
     public async Task DetectVectorLayersAsync(MapView mapView)
     {
       await DetectVectorLayersAsync(true, mapView);
+      AddEvents();
+      MapViewInitializedEvent.Subscribe(OnMapViewInitialized);
+      MapClosedEvent.Subscribe(OnMapClosed);
     }
 
     private async Task DetectVectorLayersAsync(bool initEvents, MapView initMapView = null)
@@ -135,19 +138,11 @@ namespace StreetSmartArcGISPro.VectorLayers
         var addLayerTasks = layers.Select(layer => AddLayerAsync(layer, mapView));
         await Task.WhenAll(addLayerTasks);
       }
-
-      if (initEvents)
-      {
-        AddEvents();
-        MapViewInitializedEvent.Subscribe(OnMapViewInitialized);
-        MapClosedEvent.Subscribe(OnMapClosed);
-      }
     }
 
     private async Task AddLayerAsync(Layer layer, MapView mapView)
     {
-      ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
-      CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetOrAddCycloMediaGroupLayer(mapView);
+      CycloMediaGroupLayer cycloGrouplayer = ModuleStreetSmart.Current.GetOrAddCycloMediaGroupLayer(mapView);
 
       if (!TryGetValue(mapView, out List<VectorLayer> layerList))
       {
@@ -170,20 +165,22 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private void AddEvents()
     {
-      if (!_eventsInitialized)
+      if (_eventsInitialized)
       {
-        _eventsInitialized = true;
-        LayersAddedEvent.Subscribe(OnLayersAdded);
-        LayersMovedEvent.Subscribe(OnLayersMoved);
-        LayersRemovedEvent.Subscribe(OnLayersRemoved);
-        MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertiesChanged);
-        TOCSelectionChangedEvent.Subscribe(OnTocSelectionChanged);
-        DrawStartedEvent.Subscribe(OnDrawStarted);
-        DrawCompleteEvent.Subscribe(OnDrawCompleted);
-        ActiveTemplateChangedEvent.Subscribe(OnActiveTemplateChangedEvent);
-        ActiveToolChangedEvent.Subscribe(OnActiveToolChangedEvent);
-        EditCompletedEvent.Subscribe(OnEditCompleted);
+        return;
       }
+
+      _eventsInitialized = true;
+      LayersAddedEvent.Subscribe(OnLayersAdded);
+      LayersMovedEvent.Subscribe(OnLayersMoved);
+      LayersRemovedEvent.Subscribe(OnLayersRemoved);
+      MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertiesChanged);
+      TOCSelectionChangedEvent.Subscribe(OnTocSelectionChanged);
+      DrawStartedEvent.Subscribe(OnDrawStarted);
+      DrawCompleteEvent.Subscribe(OnDrawCompleted);
+      ActiveTemplateChangedEvent.Subscribe(OnActiveTemplateChangedEvent);
+      ActiveToolChangedEvent.Subscribe(OnActiveToolChangedEvent);
+      EditCompletedEvent.Subscribe(OnEditCompleted);
     }
 
     private async Task StartMeasurementSketchAsync(VectorLayer vectorLayer, MapView mapView)
@@ -199,10 +196,9 @@ namespace StreetSmartArcGISPro.VectorLayers
       Layer layer = editingFeatureTemplate?.Layer;
       VectorLayer vectorLayer = GetLayer(layer, mapView);
 
-      var window = FrameworkApplication.ActiveWindow;
-      //GC: Added an additional requirement for measurement tool to activate
-      if (vectorLayer != null && (((PlugIn)window).Caption == "Map" || ((PlugIn)window).Caption == "Carte"
-        || ((PlugIn)window).Caption == "Create Features" || ((PlugIn)window).Caption == "Créer des entités"))
+      var window = FrameworkApplication.ActiveWindow as PlugIn;
+      if (vectorLayer != null && (window.Caption == "Map" || window.Caption == "Carte"
+        || window.Caption == "Create Features" || window.Caption == "Créer des entités"))
       {
         await StartMeasurementSketchAsync(vectorLayer, mapView);
       }
@@ -224,98 +220,102 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           break;
         case GeometryType.Polyline:
-          if (!_updateHeight)
+          if (_updateHeight)
           {
-            _updateHeight = true;
-            await UpdateHeightAsync(mapView);
-            Polyline polyline = geometry as Polyline;
-            List<MapPoint> mapLinePoints = [];
-            bool changesLine = false;
-
-            if (polyline != null)
-            {
-              foreach (MapPoint point in polyline.Points)
-              {
-                if (Math.Abs(point.Z) < e)
-                {
-                  changesLine = true;
-                  MapPoint srcLinePoint = await AddHeightToMapPointAsync(point, mapView);
-                  mapLinePoints.Add(MapPointBuilderEx.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
-                }
-                else
-                {
-                  mapLinePoints.Add(point);
-                }
-              }
-
-              if (changesLine)
-              {
-                await QueuedTask.Run(() =>
-                {
-#if ARCGISPRO29
-                  polyline = PolylineBuilder.CreatePolyline(mapLinePoints, polyline.SpatialReference);
-#else
-                  polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
-#endif
-                });
-
-                await mapView.SetCurrentSketchAsync(polyline);
-              }
-            }
-
-            _updateHeight = false;
+            break;
           }
 
+
+          await UpdateHeightAsync(mapView);
+          if (geometry is not Polyline polyline)
+          {
+            break;
+          }
+
+          _updateHeight = true;
+          bool changesLine = false;
+          List<MapPoint> mapLinePoints = [];
+          foreach (MapPoint point in polyline.Points)
+          {
+            if (Math.Abs(point.Z) < e)
+            {
+              changesLine = true;
+              MapPoint srcLinePoint = await AddHeightToMapPointAsync(point, mapView);
+              mapLinePoints.Add(MapPointBuilderEx.CreateMapPoint(srcLinePoint, polyline.SpatialReference));
+            }
+            else
+            {
+              mapLinePoints.Add(point);
+            }
+          }
+
+          if (changesLine)
+          {
+            await QueuedTask.Run(() =>
+            {
+#if ARCGISPRO29
+              polyline = PolylineBuilder.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#else
+              polyline = PolylineBuilderEx.CreatePolyline(mapLinePoints, polyline.SpatialReference);
+#endif
+            });
+
+            await mapView.SetCurrentSketchAsync(polyline);
+          }
+
+          _updateHeight = false;
           break;
         case GeometryType.Polygon:
-          if (!_updateHeight)
+          if (_updateHeight)
           {
-            _updateHeight = true;
-            await UpdateHeightAsync(mapView);
-            Polygon polygon = geometry as Polygon;
-            List<MapPoint> mapPolygonPoints = [];
-            bool changesPolygon = false;
+            break;
+          }
 
-            if (polygon != null)
+
+          await UpdateHeightAsync(mapView);
+          if (geometry is not Polygon polygon)
+          {
+            break;
+          }
+
+          _updateHeight = true;
+          List<MapPoint> mapPolygonPoints = [];
+          bool changesPolygon = false;
+          for (int j = 0; j < polygon.Points.Count; j++)
+          {
+            MapPoint mapPoint = polygon.Points[j];
+
+            if (Math.Abs(mapPoint.Z) < e && j <= polygon.Points.Count - 2)
             {
-              for (int j = 0; j < polygon.Points.Count; j++)
-              {
-                MapPoint mapPoint = polygon.Points[j];
+              changesPolygon = true;
+              MapPoint srcPolygonPoint = await AddHeightToMapPointAsync(mapPoint, mapView);
+              mapPolygonPoints.Add(srcPolygonPoint);
+            }
+            else if (changesPolygon && j == polygon.Points.Count - 1)
+            {
+              mapPolygonPoints.Add(mapPolygonPoints[0]);
+            }
+            else
+            {
+              mapPolygonPoints.Add(mapPoint);
+            }
+          }
 
-                if (Math.Abs(mapPoint.Z) < e && j <= polygon.Points.Count - 2)
-                {
-                  changesPolygon = true;
-                  MapPoint srcPolygonPoint = await AddHeightToMapPointAsync(mapPoint, mapView);
-                  mapPolygonPoints.Add(srcPolygonPoint);
-                }
-                else if (changesPolygon && j == polygon.Points.Count - 1)
-                {
-                  mapPolygonPoints.Add(mapPolygonPoints[0]);
-                }
-                else
-                {
-                  mapPolygonPoints.Add(mapPoint);
-                }
-              }
-
-              if (changesPolygon)
-              {
-                await QueuedTask.Run(() =>
-                {
+          if (changesPolygon)
+          {
+            await QueuedTask.Run(() =>
+            {
 #if ARCGISPRO29
-                  polygon = PolygonBuilder.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
+              polygon = PolygonBuilder.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
 #else
                   polygon = PolygonBuilderEx.CreatePolygon(mapPolygonPoints, polygon.SpatialReference);
 #endif
-                });
+            });
 
-                await mapView.SetCurrentSketchAsync(polygon);
-              }
-            }
-
-            _updateHeight = false;
+            await mapView.SetCurrentSketchAsync(polygon);
           }
 
+          _updateHeight = false;
           break;
       }
     }
@@ -565,57 +565,58 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       MapView mapView = args.MapView;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
-      EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
-      Layer layer = editingFeatureTemplate?.Layer;
-      VectorLayer thisVectorLayer = GetLayer(layer, mapView) ?? LastSelectedLayer;
-
-      if (geometry != null && thisVectorLayer != null)
+      if (geometry == null)
       {
-        switch (EditTool)
-        {
-          case EditTools.ModifyFeatureImpl:
-            if (_measurementList.Count == 1)
+        SketchFinished();
+      }
+
+      Layer layer = EditingTemplate.Current?.Layer;
+      VectorLayer thisVectorLayer = GetLayer(layer, mapView) ?? LastSelectedLayer;
+      if (thisVectorLayer == null)
+      {
+        SketchFinished();
+      }
+
+      switch (EditTool)
+      {
+        case EditTools.ModifyFeatureImpl:
+          if (_measurementList.Count == 1)
+          {
+            KeyValuePair<string, Measurement> firstElement = _measurementList.ElementAt(0);
+            Measurement measurement = firstElement.Value;
+            measurement.SetSketch();
+            VectorLayer vectorLayer = measurement.VectorLayer;
+
+            if (geometry.PointCount == 0)
             {
-              KeyValuePair<string, Measurement> firstElement = _measurementList.ElementAt(0);
-              Measurement measurement = firstElement.Value;
-              measurement.SetSketch();
-              VectorLayer vectorLayer = measurement.VectorLayer;
-
-              if (geometry.PointCount == 0)
-              {
-                await StartMeasurementSketchAsync(vectorLayer, mapView);
-              }
-              else if (geometry.HasZ)
-              {
-                await AddHeightToMeasurementAsync(geometry, mapView);
-              }
-
-              await _measurementList.SketchModifiedAsync(mapView, thisVectorLayer);
+              await StartMeasurementSketchAsync(vectorLayer, mapView);
             }
-
-            break;
-          case EditTools.SketchLineTool:
-          case EditTools.SketchPolygonTool:
-          case EditTools.Verticles:
-            if (geometry.HasZ)
+            else if (geometry.HasZ)
             {
               await AddHeightToMeasurementAsync(geometry, mapView);
             }
 
             await _measurementList.SketchModifiedAsync(mapView, thisVectorLayer);
-            break;
-          case EditTools.SketchPointTool:
-            if (geometry.HasZ)
-            {
-              await AddHeightToMeasurementAsync(geometry, mapView);
-            }
+          }
 
-            break;
-        }
-      }
-      else
-      {
-        SketchFinished();
+          break;
+        case EditTools.SketchLineTool:
+        case EditTools.SketchPolygonTool:
+        case EditTools.Verticles:
+          if (geometry.HasZ)
+          {
+            await AddHeightToMeasurementAsync(geometry, mapView);
+          }
+
+          await _measurementList.SketchModifiedAsync(mapView, thisVectorLayer);
+          break;
+        case EditTools.SketchPointTool:
+          if (geometry.HasZ)
+          {
+            await AddHeightToMeasurementAsync(geometry, mapView);
+          }
+
+          break;
       }
     }
 
