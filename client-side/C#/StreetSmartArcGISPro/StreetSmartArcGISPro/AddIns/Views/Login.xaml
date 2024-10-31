@@ -46,6 +46,13 @@
       <converters:SignOutEnabled x:Key="SignOutEnabled" />
       <converters:InverseBoolean x:Key="InverseBoolean" />
       <converters:SigningInProgressToVisibility x:Key="SigningInProgressToVisibility" />
+      <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#0066CC"/>
+      <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
+      <SolidColorBrush x:Key="Button.Pressed.Background" Color="#0066CC"/>
+      <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
+      <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+      <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
+      <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
       </ResourceDictionary.MergedDictionaries>
@@ -95,13 +102,36 @@
             Click="OnLoginButtonClicked">
                 <Button.Template>
                   <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
+                    <Border Background="{TemplateBinding Background}" x:Name="Border"
                         CornerRadius="20"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}">
                       <ContentPresenter HorizontalAlignment="Center"
                                       VerticalAlignment="Center"/>
                     </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="Button.IsDefaulted" Value="true">
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                  </Trigger>
+                  <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Button.Cursor" Value="Hand"/>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.MouseOver.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.MouseOver.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsPressed" Value="true">
+                    <Setter Property="Button.Effect">
+                      <Setter.Value>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="5"/>
+                      </Setter.Value>
+                    </Setter>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Pressed.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Pressed.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Disabled.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Disabled.Border}"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
               </ControlTemplate>
             </Button.Template>
           </Button>
@@ -117,13 +147,36 @@
             Visibility="{Binding Credentials, Converter={StaticResource BasicAuthButtonVisibilityConverter}}">
                 <Button.Template>
                   <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
+                    <Border Background="{TemplateBinding Background}" x:Name="Border"
                         CornerRadius="20" 
-                         BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}">
-                  <ContentPresenter HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
+                      <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
                 </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="Button.IsDefaulted" Value="true">
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                  </Trigger>
+                  <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Button.Cursor" Value="Hand"/>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.MouseOver.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.MouseOver.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsPressed" Value="true">
+                    <Setter Property="Button.Effect">
+                      <Setter.Value>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="5"/>
+                      </Setter.Value>
+                    </Setter>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Pressed.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Pressed.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Disabled.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Disabled.Border}"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
               </ControlTemplate>
             </Button.Template>
           </Button>
@@ -154,15 +207,38 @@
             util:LocalizationProvider.ContentId="LoginSignInOAuth"
             Command="{Binding SignInCommand}"
             Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignInToVisibility}}">
-                <Button.Template>
+            <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}"
+                <Border Background="{TemplateBinding Background}" x:Name="Border"
                     CornerRadius="20" 
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}">
                   <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
                 </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="Button.IsDefaulted" Value="true">
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                  </Trigger>
+                  <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Button.Cursor" Value="Hand"/>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.MouseOver.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.MouseOver.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsPressed" Value="true">
+                    <Setter Property="Button.Effect">
+                      <Setter.Value>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="5"/>
+                      </Setter.Value>
+                    </Setter>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Pressed.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Pressed.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Disabled.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Disabled.Border}"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
               </ControlTemplate>
             </Button.Template>
 
@@ -186,13 +262,36 @@
              Visibility="{Binding OAuthAuthenticationStatus, Converter={StaticResource SignOutToVisibility}}">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border Background="{TemplateBinding Background}"
+                <Border Background="{TemplateBinding Background}" x:Name="Border"
                     CornerRadius="20" 
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}">
                   <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
                 </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="Button.IsDefaulted" Value="true">
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                  </Trigger>
+                  <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Button.Cursor" Value="Hand"/>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.MouseOver.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.MouseOver.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsPressed" Value="true">
+                    <Setter Property="Button.Effect">
+                      <Setter.Value>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="5"/>
+                      </Setter.Value>
+                    </Setter>
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Pressed.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Pressed.Border}"/>
+                  </Trigger>
+                  <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Background" TargetName="Border" Value="{StaticResource Button.Disabled.Background}"/>
+                    <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource Button.Disabled.Border}"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
               </ControlTemplate>
             </Button.Template>
           </Button>
