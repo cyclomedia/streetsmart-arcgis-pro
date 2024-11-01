@@ -143,6 +143,8 @@ namespace StreetSmartArcGISPro.Configuration.Resource
 
       if (entryAssembly == null)
       {
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (APIKey.cs) (GetVersion) Cannot read entry assembly.");
+
         return SupportedArcGisProVersion.Unknown;
       }
 
