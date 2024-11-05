@@ -150,6 +150,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         Add(mapView, layerList);
       }
 
+      CycloMediaGroupLayer cycloGrouplayer = ModuleStreetSmart.Current.GetOrAddCycloMediaGroupLayer(mapView);
       if (layer is not FeatureLayer featureLayer || cycloGrouplayer == null || cycloGrouplayer.IsKnownName(featureLayer?.Name) || layerList.Any(vecLayer => vecLayer.Layer == layer))
       {
         return;
@@ -406,6 +407,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     protected async void OnActiveToolChangedEvent(ToolEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnActiveToolChangedEvent)})");
+
       if (_currentToolId != args.CurrentID)
       {
         _currentToolId = args.CurrentID;
@@ -474,6 +477,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     //GC: Added an additional function that fires every time a new template is selected to edit new features on the add-on
     protected async void OnActiveTemplateChangedEvent(ActiveTemplateChangedEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnActiveTemplateChangedEvent)})");
+
       //GC: Checks if the editing tool was turned off before changing templates
       var active = FrameworkApplication.ActiveTool;
       if (active == null)
@@ -487,7 +492,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         else
         {
-          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayerList)}.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
         }
       }
 
@@ -541,6 +546,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     protected async void OnDrawStarted(MapViewEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnDrawStarted)})");
+
       MapView mapView = args.MapView;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
 
@@ -563,6 +570,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     protected async void OnDrawCompleted(MapViewEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnDrawCompleted)})");
+
       MapView mapView = args.MapView;
       Geometry geometry = await mapView.GetCurrentSketchAsync();
       if (geometry == null)
@@ -622,6 +631,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     protected Task OnEditCompleted(EditCompletedEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnEditCompleted)})");
+
       Measurement measurement = _measurementList?.Sketch;
       VectorLayer vectorLayer = measurement?.VectorLayer;
       FeatureLayer measurementLayer = vectorLayer?.Layer;

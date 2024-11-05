@@ -694,9 +694,20 @@ namespace StreetSmartArcGISPro.VectorLayers
           ShowModalMessageAfterFailure = false
         };
 
-        geometry = await ToRealSpatialReference(geometry, measurement);
-        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
+        //geometry = await ToRealSpatialReference(geometry, measurement);
+        //EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
 
+#if ARCGISPRO29
+        if (EditingTemplate.Current?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
+#else
+          if (EditingTemplate.Current?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
+#endif
+        {
+          editOperation.Create(Layer, geometry);
+          await editOperation.ExecuteAsync();
+        }
+        else
+        {
         double measurementX = 0;
         double measurementY = 0;
         double measurementZ = 0;
@@ -708,7 +719,6 @@ namespace StreetSmartArcGISPro.VectorLayers
           var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
           try
           {
-
             measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
             measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
             measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
@@ -732,24 +742,22 @@ namespace StreetSmartArcGISPro.VectorLayers
                 measurementZ =
                   serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
               }
+                catch (Exception)
+                {
+                  try
+                  {
+                    measurementX = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                    measurementY = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                    measurementZ = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                  }
               catch (Exception e)
               {
                 EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
               }
             }
           }
+            }
 
-#if ARCGISPRO29
-          if (editingFeatureTemplate?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
-#else
-          if (editingFeatureTemplate?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
-#endif
-          {
-            editOperation.Create(Layer, geometry);
-            await editOperation.ExecuteAsync();
-          }
-          else
-          {
             Dictionary<string, object> toAddFields = [];
 
             foreach (var value in definition.DefaultValues)
@@ -785,12 +793,19 @@ namespace StreetSmartArcGISPro.VectorLayers
       });
     }
 
+    /// <summary>
+    /// Do we really need this, what does this do?
+    /// 99.99% obsolete
+    /// </summary>
     public async Task<Geometry> ToRealSpatialReference(Geometry geometry, Measurement measurement)
     {
-      await QueuedTask.Run(async () =>
+      if (geometry == null)
       {
-        if (geometry != null)
-        {
+        return null; 
+      }
+
+      return await QueuedTask.Run<Geometry>(async () =>
+      {
           SpatialReference spatialReference = Layer?.GetSpatialReference();
           GeometryType geometryType = geometry.GeometryType;
           var points = await measurement.ToPointCollectionAsync(geometry);
@@ -799,30 +814,27 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             case GeometryType.Polygon:
 #if ARCGISPRO29
-              geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+              return PolygonBuilder.CreatePolygon(points, spatialReference);
 #else
-              geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+              return PolygonBuilderEx.CreatePolygon(points, spatialReference);
 #endif
-              break;
             case GeometryType.Polyline:
 #if ARCGISPRO29
-              geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+              return PolylineBuilder.CreatePolyline(points, spatialReference);
 #else
-              geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+              return PolylineBuilderEx.CreatePolyline(points, spatialReference);
 #endif
-              break;
             case GeometryType.Point:
               if (points.Count >= 1)
               {
-                geometry = MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
+                return MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
               }
 
-              break;
+            return null;
+          default:
+              return null;
           }
-        }
       });
-
-      return geometry;
     }
 
     public async Task UpdateFeatureAsync(long uid, Geometry geometry, Measurement measurement)

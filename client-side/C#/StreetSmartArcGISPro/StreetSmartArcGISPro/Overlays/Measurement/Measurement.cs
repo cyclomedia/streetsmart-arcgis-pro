@@ -387,8 +387,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         UpdateMeasurement = true;
         Geometry geometry = mapView == null ? inGeometry : await mapView.GetCurrentSketchAsync();
         List<MapPoint> ptColl = await ToPointCollectionAsync(geometry);
-        IFeatureCollection featureCollection =
-          GeoJsonFactory.CloneFeatureCollection(_measurementList.FeatureCollection);
+        IFeatureCollection featureCollection = GeoJsonFactory.CloneFeatureCollection(_measurementList.FeatureCollection);
         IFeature feature = featureCollection?.Features?.Count >= 1 ? featureCollection.Features[0] : null;
 
         if (feature != null)
