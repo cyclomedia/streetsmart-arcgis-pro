@@ -16,7 +16,7 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
       return Visibility.Hidden;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
       throw new NotImplementedException();
     }
