@@ -172,7 +172,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
               }
               catch (Exception ex)
               {
-                EventLog.Write(EventLogLevel.Warning, $"Street Smart: (SpatialReference.cs) (ExistsInAreaAsync) {ex}");
+                EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(SpatialReference)}.cs) (ExistsInAreaAsync) {ex}");
               }
             }
           }

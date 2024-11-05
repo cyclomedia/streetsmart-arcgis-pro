@@ -189,30 +189,28 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               string epsgCode = CoordSystemUtils.CheckCycloramaSpatialReferenceMapView(MapView.Active);
               SrsUnit srsUnit = GetSrsUnit(epsgCode);
 
-              bool isMeasurementNotAllowed = (srsUnit == SrsUnit.Degree || srsUnit == SrsUnit.Unknown || srsUnit == SrsUnit.Error);
-              if (!isMeasurementNotAllowed)
-              {
-                await Api.StartMeasurementMode(panoramaViewer, options);
-              }
-            }
-            catch (Exception ex)
-            {
-              EventLog.Write(EventLogLevel.Error, $"Street Smart: (MeasurementList.cs) (CreateMeasurement) {ex.Message}");
-            }
-          }
+        bool isMeasurementNotAllowed = (srsUnit == SrsUnit.Degree || srsUnit == SrsUnit.Unknown || srsUnit == SrsUnit.Error);
+        if (!isMeasurementNotAllowed)
+        {
+          await Api.StartMeasurementMode(panoramaViewer, options);
         }
       }
+      catch (Exception ex)
+      {
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(MeasurementList)}.cs) (CreateMeasurement) {ex.Message}");
+      }
     }
-    public static SrsUnit GetSrsUnit(string srsString)
+
+    public static SrsUnit GetSrsUnit(string epsgCode)
     {
       try
       {
-        if (!srsString.StartsWith("EPSG:", StringComparison.OrdinalIgnoreCase))
+        if (!epsgCode.StartsWith("EPSG:", StringComparison.OrdinalIgnoreCase))
         {
           return SrsUnit.Error;
         }
 
-        string srsCodeString = srsString.Substring(5);
+        string srsCodeString = epsgCode.Substring(5);
 
         if (!int.TryParse(srsCodeString, out int srsCode))
         {
@@ -273,22 +271,25 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       if (GlobeSpotterConfiguration.MeasurePermissions)
       {
-        Measurement measurement = Sketch;
-        Geometry geometry = await mapView.GetCurrentSketchAsync();
+        return;
+      }
 
-        if (geometry != null)
-        {
-          if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
-          {
-            _drawingSketch = true;
-            measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
-          }
+      Geometry geometry = await mapView.GetCurrentSketchAsync();
+      if (geometry == null)
+      {
+        return;
+      }
 
-          if (measurement != null)
-          {
-            await measurement.UpdateMeasurementPointsAsync(mapView, null);
-          }
-        }
+      Measurement measurement = Sketch;
+      if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
+      {
+        _drawingSketch = true;
+        measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
+      }
+
+      if (measurement != null)
+      {
+        await measurement.UpdateMeasurementPointsAsync(mapView, null);
       }
     }
 

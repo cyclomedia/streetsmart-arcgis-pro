@@ -190,7 +190,7 @@ namespace StreetSmartArcGISPro.AddIns.Tools
 
         if (streetSmart != null)
         {
-          EventLog.Write(EventLogLevel.Information, $"Street Smart: (OpenLocation.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
+          EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(OpenLocation)}.cs) (OnSketchCompleteAsync) Open Street Smart location: {location}");
           streetSmart.MapView = activeView;
           streetSmart.LookAt = null;
           streetSmart.Replace = replace;

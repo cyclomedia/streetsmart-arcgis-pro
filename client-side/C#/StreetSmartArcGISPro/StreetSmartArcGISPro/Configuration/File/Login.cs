@@ -383,7 +383,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       if (_isOAuth)
       {
         _login.Bearer = bearerToken;
-        _login.OAuthAuthenticationStatus = Login.OAuthStatus.SignedIn;
+        _login.OAuthAuthenticationStatus = OAuthStatus.SignedIn;
 
         ExtractOAuthUsername();
       }

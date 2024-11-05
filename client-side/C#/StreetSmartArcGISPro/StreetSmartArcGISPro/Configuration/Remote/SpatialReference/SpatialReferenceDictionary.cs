@@ -68,7 +68,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Instance) error: {e}");
+            EventLog.Write(EventLog.EventType.Error, $"Street Smart: ({nameof(SpatialReferenceList)}.cs) (Instance) error: {e}");
           }
         }
 
@@ -138,7 +138,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
         }
         catch (Exception e)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Load) error: {e}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: ({nameof(SpatialReferenceList)}.cs) (Load) error: {e}");
         }
         finally
         {

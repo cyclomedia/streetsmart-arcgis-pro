@@ -61,7 +61,7 @@ namespace StreetSmartArcGISPro.Configuration.File
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLogLevel.Error, $"Street Smart: (StoredLayerList.cs) (Instance) error: {e}");
+            EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(StoredLayerList)}.cs) (Instance) error: {e}");
           }
         }
 

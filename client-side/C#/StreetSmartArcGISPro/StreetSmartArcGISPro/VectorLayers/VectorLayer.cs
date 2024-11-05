@@ -27,6 +27,7 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using Nancy.Json;
+using Newtonsoft.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -45,6 +46,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ColorConverter = StreetSmartArcGISPro.Utilities.ColorConverter;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
@@ -54,6 +56,17 @@ namespace StreetSmartArcGISPro.VectorLayers
 {
   public class VectorLayer : INotifyPropertyChanged
   {
+    #region Enums
+
+    public enum VectorLayerVisibilityChangeStatus
+    {
+      Undefined,
+      InUpdate,
+      Updated
+    }
+
+    #endregion
+
     #region Events
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -65,6 +78,8 @@ namespace StreetSmartArcGISPro.VectorLayers
     private readonly ViewerList _viewerList;
     private readonly MeasurementList _measurementList;
     private readonly VectorLayerList _vectorLayerList;
+    private readonly FileConfiguration _configuration;
+    private readonly StoredLayerList _storedLayerList;
 
     private SubscriptionToken _rowChanged;
     private SubscriptionToken _rowDeleted;
@@ -87,6 +102,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       Overlay = null;
       _selection = null;
       _updateMeasurements = false;
+      _configuration = FileConfiguration.Instance;
+      _storedLayerList = StoredLayerList.Instance;
 
       StreetSmartModule streetSmart = StreetSmartModule.Current;
       _viewerList = streetSmart.ViewerList;
@@ -102,8 +119,11 @@ namespace StreetSmartArcGISPro.VectorLayers
       get => _geoJson;
       private set
       {
-        _geoJson = value;
-        NotifyPropertyChanged();
+        if (_geoJson == null || !_geoJson.Equals(value))
+        {
+          _geoJson = value;
+          NotifyPropertyChanged();
+        }
       }
     }
 
@@ -119,22 +139,18 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
 
-    public bool IsVisible => Layer != null && Layer.IsVisible;
+    private bool IsLayerVisible => Layer != null && Layer.IsVisible;
+
+    public VectorLayerVisibilityChangeStatus VisibilityChangeStatus { get; internal set; }
+
+    public bool DesiredOverlayVisibility => CalculateOverlayVisibility();
+
     //GC: Adding global counter variable to make sure that object infos are not being overwritten
     public static int Counter = 0;
 
     #endregion
 
     #region Functions
-
-    public async Task GeoJsonToOld()
-    {
-      await QueuedTask.Run(() =>
-      {
-        SpatialReference layerSpatRef = Layer?.GetSpatialReference();
-        GeoJson = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
-      });
-    }
 
     public async Task<bool> InitializeEventsAsync()
     {
@@ -161,7 +177,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         catch (Exception e)
         {
-          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (InitializeEventsAsync) error: {e}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(InitializeEventsAsync)}) error: {e}");
         }
       });
 
@@ -169,337 +185,296 @@ namespace StreetSmartArcGISPro.VectorLayers
       return true;
     }
 
-    public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView)
+    public async Task<IFeatureCollection> GenerateJsonAsync(MapView mapView, bool forceUpdateGeoJson = false)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GenerateJsonAsync)})");
       Map map = mapView?.Map;
-      SpatialReference mapSpatRef = map?.SpatialReference;
-
       Setting settings = ProjectList.Instance.GetSettings(mapView);
       MySpatialReference myCyclSpatRef = settings?.CycloramaViewerCoordinateSystem;
-
-      SpatialReference cyclSpatRef = myCyclSpatRef == null
-        ? mapSpatRef
-        : (myCyclSpatRef.ArcGisSpatialReference ?? await myCyclSpatRef.CreateArcGisSpatialReferenceAsync());
-
+      SpatialReference cyclSpatRef = myCyclSpatRef == null ? map?.SpatialReference : (myCyclSpatRef.ArcGisSpatialReference ?? await myCyclSpatRef.CreateArcGisSpatialReferenceAsync());
       Unit unit = cyclSpatRef?.Unit;
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
-      GeoJsonChanged = false;
+      GeoJsonChanged = forceUpdateGeoJson;
       double distanceFactor = (cyclSpatRef?.IsGeographic ?? true) ? factor : 1 / factor;
 
-      if (Layer.Map == map)
+      if (Layer.Map != map)
       {
-        await QueuedTask.Run(async () =>
+        EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GenerateJsonAsync)}) Generated geoJson finished with null");
+        return null;
+      }
+
+      await QueuedTask.Run(async () =>
+      {
+        SpatialReference layerSpatRef = Layer?.GetSpatialReference();
+        IList<IList<Segment>> geometries = [];
+        var viewerTasks = _viewerList.Viewers.Select(viewer => Task.Run(() =>
         {
-          SpatialReference layerSpatRef = Layer?.GetSpatialReference();
-          IList<IList<Segment>> geometries = [];
-          ICollection<Viewer> viewers = _viewerList.Viewers;
-
-          var viewerTasks = viewers.Select(viewer => Task.Run(() =>
+          ICoordinate coordinate = viewer.Coordinate;
+          if (coordinate == null)
           {
-            double distance = settings?.OverlayDrawDistance ?? 0.0;
-            ICoordinate coordinate = viewer.Coordinate;
+            return;
+          }
 
-            if (coordinate != null)
+          double distance = (settings?.OverlayDrawDistance ?? 0.0) * distanceFactor;
+          double x = coordinate.X ?? 0.0;
+          double y = coordinate.Y ?? 0.0;
+          double xMin = x - distance;
+          double xMax = x + distance;
+          double yMin = y - distance;
+          double yMax = y + distance;
+
+          Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, yMin, xMax, yMax, cyclSpatRef);
+          Envelope copyEnvelope = envelope;
+
+          if (layerSpatRef != null && layerSpatRef.Wkid != 0 && cyclSpatRef?.Wkid != 0)
+          {
+            try
             {
-              distance = distance * distanceFactor;
-
-              double x = coordinate.X ?? 0.0;
-              double y = coordinate.Y ?? 0.0;
-              double xMin = x - distance;
-              double xMax = x + distance;
-              double yMin = y - distance;
-              double yMax = y + distance;
-
-              Envelope envelope = EnvelopeBuilderEx.CreateEnvelope(xMin, yMin, xMax, yMax, cyclSpatRef);
-              Envelope copyEnvelope = envelope;
-
-              if (layerSpatRef?.Wkid != 0 && cyclSpatRef?.Wkid != 0)
-              {
-                try
-                {
-                  if (layerSpatRef != null)
-                  {
-                    ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
-                    copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
-                  }
-                }
-                catch (Exception ex)
-                {
-                  EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) {ex}");
-                }
-              }
-
-              Polygon copyPolygon = PolygonBuilderEx.CreatePolygon(copyEnvelope, layerSpatRef);
-              ReadOnlyPartCollection polygonParts = copyPolygon.Parts;
-
-              using (IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator())
-              {
-                IList<Segment> segments = [];
-                //this is where the pop-up keeps minimizing
-                while (polygonSegments.MoveNext())
-                {
-                  ReadOnlySegmentCollection polygonSegment = polygonSegments.Current;
-
-                  if (polygonSegment != null)
-                  {
-                    foreach (Segment segment in polygonSegment)
-                    {
-                      segments.Add(segment);
-                    }
-                  }
-                }
-
-                geometries.Add(segments);
-              }
+              ProjectionTransformation projection = ProjectionTransformation.Create(cyclSpatRef, layerSpatRef);
+              copyEnvelope = GeometryEngine.Instance.ProjectEx(envelope, projection) as Envelope;
             }
-          })).ToArray();
-          await Task.WhenAll(viewerTasks);
-
-          featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
-          List<long> objectIds = [];
-
-          var featureTasks = geometries.Select(async geom =>
-          {
-#if ARCGISPRO29
-            Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
-#else
-            Polygon polygon = PolygonBuilderEx.CreatePolygon(geom, layerSpatRef);
-#endif
-            //this is where the new pop-up attributes are made
-            using (FeatureClass featureClass = Layer?.GetFeatureClass())
+            catch (Exception ex)
             {
-              SpatialQueryFilter spatialFilter = new SpatialQueryFilter
-              {
-                FilterGeometry = polygon,
-                SpatialRelationship = SpatialRelationship.Intersects,
-                SubFields = "*"
-              };
+              EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GenerateJsonAsync)}) {ex}");
+            }
+          }
 
-              using (RowCursor existsResult = featureClass?.Search(spatialFilter, false))
-              {
-                while (existsResult?.MoveNext() ?? false)
+          Polygon copyPolygon = PolygonBuilderEx.CreatePolygon(copyEnvelope, layerSpatRef);
+          IList<Segment> segments = [];
+          foreach (var polygonSegment in copyPolygon.Parts)
+          {
+            if (polygonSegment == null)
+            {
+              continue;
+            }
+
+            foreach (Segment segment in polygonSegment)
+            {
+              segments.Add(segment);
+            }
+          }
+          geometries.Add(segments);
+        })).ToArray();
+        await Task.WhenAll(viewerTasks);
+
+        featureCollection = GeoJsonFactory.CreateFeatureCollection(layerSpatRef?.Wkid ?? 0);
+
+        if (!DesiredOverlayVisibility)
+        {
+          return;
+        }
+
+        HashSet<long> objectIds = [];
+        var featureTasks = geometries.Select(async geom =>
+        {
+#if ARCGISPRO29
+          Polygon polygon = PolygonBuilder.CreatePolygon(geom, layerSpatRef);
+#else
+          Polygon polygon = PolygonBuilderEx.CreatePolygon(geom, layerSpatRef);
+#endif
+          //this is where the new pop-up attributes are made
+          using FeatureClass featureClass = Layer?.GetFeatureClass();
+          SpatialQueryFilter spatialFilter = new SpatialQueryFilter
+          {
+            FilterGeometry = polygon,
+            SpatialRelationship = SpatialRelationship.Intersects,
+            SubFields = "*"
+          };
+
+          using RowCursor existsResult = featureClass?.Search(spatialFilter, false);
+          while (existsResult?.MoveNext() ?? false)
+          {
+            var fieldValues = GetPropertiesFromRow(existsResult);
+
+            Row row = existsResult.Current;
+            Feature feature = row as Feature;
+            Geometry geometry = feature?.GetShape();
+            long objectId = feature.GetObjectID();
+
+            if (objectIds.Contains(objectId))
+            {
+              continue;
+            }
+
+            objectIds.Add(objectId);
+            GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
+            Geometry copyGeometry = geometry;
+
+            if (geometry != null && layerSpatRef.Wkid != 0 && cyclSpatRef != null)
+            {
+              ProjectionTransformation projection = ProjectionTransformation.Create(layerSpatRef, cyclSpatRef);
+              copyGeometry = GeometryEngine.Instance.ProjectEx(geometry, projection);
+            }
+
+            if (copyGeometry == null)
+            {
+            }
+
+            switch (copyGeometry)
+            {
+              case MapPoint point:
+                ICoordinate coordinate = await GeoJsonCoordAsync(point);
+                var featurePoint = GeoJsonFactory.CreatePointFeature(coordinate);
+                AddFieldValueToFeature(featurePoint, fieldValues);
+                featureCollection.Features.Add(featurePoint);
+
+                break;
+              case Polygon polygonGeoJson:
+                ReadOnlyPartCollection polygonParts = polygonGeoJson.Parts;
+                IList<IList<ICoordinate>> polygonCoordinates = [];
+                foreach (ReadOnlySegmentCollection segments in polygonParts)
                 {
-                  var fieldValues = GetPropertiesFromRow(existsResult);
-
-                  Row row = existsResult.Current;
-                  Feature feature = row as Feature;
-                  Geometry geometry = feature?.GetShape();
-                  long objectId = feature.GetObjectID();
-
-                  if (!objectIds.Contains(objectId))
+                  if (segments == null)
                   {
-                    objectIds.Add(objectId);
-                    GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
-                    Geometry copyGeometry = geometry;
+                    continue;
+                  }
 
-                    if (geometry != null && layerSpatRef.Wkid != 0 && cyclSpatRef != null)
+                  IList<ICoordinate> coordinates = [];
+                  for (int i = 0; i < segments.Count; i++)
+                  {
+                    if (segments[i].SegmentType == SegmentType.Line)
                     {
-                      ProjectionTransformation projection = ProjectionTransformation.Create(layerSpatRef, cyclSpatRef);
-                      copyGeometry = GeometryEngine.Instance.ProjectEx(geometry, projection);
-                    }
+                      MapPoint polygonPoint = segments[i].StartPoint;
+                      coordinates.Add(await GeoJsonCoordAsync(polygonPoint));
 
-                    if (copyGeometry != null)
-                    {
-                      switch (geometryType)
+                      if (i == segments.Count - 1)
                       {
-                        case GeometryType.Point:
-                          if (copyGeometry is MapPoint point)
-                          {
-                            ICoordinate coordinate = await GeoJsonCoordAsync(point);
-                            var featurePoint = GeoJsonFactory.CreatePointFeature(coordinate);
-                            AddFieldValueToFeature(featurePoint, fieldValues);
-                            featureCollection.Features.Add(featurePoint);
-                          }
-
-                          break;
-                        case GeometryType.Polygon:
-                          if (copyGeometry is Polygon polygonGeoJson)
-                          {
-                            ReadOnlyPartCollection polygonParts = polygonGeoJson.Parts;
-                            IList<IList<ICoordinate>> polygonCoordinates = [];
-
-                            using (IEnumerator<ReadOnlySegmentCollection> polygonSegments = polygonParts.GetEnumerator())
-                            {
-                              while (polygonSegments.MoveNext())
-                              {
-                                ReadOnlySegmentCollection segments = polygonSegments.Current;
-                                IList<ICoordinate> coordinates = [];
-
-                                if (segments != null)
-                                {
-                                  for (int i = 0; i < segments.Count; i++)
-                                  {
-                                    if (segments[i].SegmentType == SegmentType.Line)
-                                    {
-                                      MapPoint polygonPoint = segments[i].StartPoint;
-                                      coordinates.Add(await GeoJsonCoordAsync(polygonPoint));
-
-                                      if (i == segments.Count - 1)
-                                      {
-                                        polygonPoint = segments[i].EndPoint;
-                                        coordinates.Add(await GeoJsonCoordAsync(polygonPoint));
-                                      }
-                                    }
-                                  }
-                                }
-
-                                polygonCoordinates.Add(coordinates);
-                              }
-                            }
-
-                            var featurePolygon = GeoJsonFactory.CreatePolygonFeature(polygonCoordinates);
-                            AddFieldValueToFeature(featurePolygon, fieldValues);
-                            featureCollection.Features.Add(featurePolygon);
-                          }
-
-                          break;
-                        case GeometryType.Polyline:
-                          if (copyGeometry is Polyline polyLineGeoJson)
-                          {
-                            ReadOnlyPartCollection polyLineParts = polyLineGeoJson.Parts;
-
-                            using (IEnumerator<ReadOnlySegmentCollection> polyLineSegments = polyLineParts.GetEnumerator())
-                            {
-                              while (polyLineSegments.MoveNext())
-                              {
-                                ReadOnlySegmentCollection segments = polyLineSegments.Current;
-                                IList<ICoordinate> coordinates = [];
-
-                                if (segments != null)
-                                {
-                                  for (int i = 0; i < segments.Count; i++)
-                                  {
-                                    if (segments[i].SegmentType == SegmentType.Line)
-                                    {
-                                      MapPoint linePoint = segments[i].StartPoint;
-                                      coordinates.Add(await GeoJsonCoordAsync(linePoint));
-
-                                      if (i == segments.Count - 1)
-                                      {
-                                        linePoint = segments[i].EndPoint;
-                                        coordinates.Add(await GeoJsonCoordAsync(linePoint));
-                                      }
-                                    }
-                                  }
-                                }
-
-                                var featureLine = GeoJsonFactory.CreateLineFeature(coordinates);
-                                AddFieldValueToFeature(featureLine, fieldValues);
-                                featureCollection.Features.Add(featureLine);
-
-                              }
-                            }
-                          }
-
-                          break;
-                        case GeometryType.Envelope:
-                        case GeometryType.Multipatch:
-                        case GeometryType.Multipoint:
-                        case GeometryType.Unknown:
-                          break;
+                        polygonPoint = segments[i].EndPoint;
+                        coordinates.Add(await GeoJsonCoordAsync(polygonPoint));
                       }
                     }
                   }
-                  //this is where the point is made
-                  GeoJsonChanged = await CreateSld(featureCollection) || GeoJsonChanged;
+
+                  polygonCoordinates.Add(coordinates);
                 }
-              }
+
+                var featurePolygon = GeoJsonFactory.CreatePolygonFeature(polygonCoordinates);
+                AddFieldValueToFeature(featurePolygon, fieldValues);
+                featureCollection.Features.Add(featurePolygon);
+
+                break;
+              case Polyline polyLineGeoJson:
+                foreach (var segments in polyLineGeoJson.Parts)
+                {
+                  if (segments == null)
+                  {
+                    continue;
+                  }
+
+                  IList<ICoordinate> coordinates = [];
+                  for (int i = 0; i < segments.Count; i++)
+                  {
+                    if (segments[i].SegmentType == SegmentType.Line)
+                    {
+                      MapPoint linePoint = segments[i].StartPoint;
+                      coordinates.Add(await GeoJsonCoordAsync(linePoint));
+
+                      if (i == segments.Count - 1)
+                      {
+                        linePoint = segments[i].EndPoint;
+                        coordinates.Add(await GeoJsonCoordAsync(linePoint));
+                      }
+                    }
+                  }
+
+                  var featureLine = GeoJsonFactory.CreateLineFeature(coordinates);
+                  AddFieldValueToFeature(featureLine, fieldValues);
+                  featureCollection.Features.Add(featureLine);
+                }
+
+                break;
+              default:
+                EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GenerateJsonAsync)}) {copyGeometry.GetType().Name} geometry not handled.");
+                break;
             }
-          }).ToArray();
-          await Task.WhenAll(featureTasks);
-        });
 
-        GeoJsonChanged = (featureCollection != null && !featureCollection.Equals(GeoJson)) || GeoJsonChanged;
-        GeoJson = featureCollection;
-      }
+            //this is where the point is made
+            var newSld = await CreateSld(Layer);
+            GeoJsonChanged = GeoJsonChanged || !(newSld.GetSerializedSld()?.Equals(Sld?.GetSerializedSld()) ?? false);
+            Sld = newSld;
+          }
+        }).ToArray();
+        await Task.WhenAll(featureTasks);
+      });
 
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (VectorLayer.cs) (GenerateJsonAsync) Generated geoJson finished");
+      GeoJsonChanged = GeoJsonChanged || (featureCollection != null && !featureCollection.Equals(GeoJson));
+      GeoJson = featureCollection;
+
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GenerateJsonAsync)}) Generated geoJson finished");
       return featureCollection;
     }
+
+    private bool CalculateOverlayVisibility()
+    {
+      return ShouldSyncLayersVisibility()
+          ? IsLayerVisible
+          : StoredLayerList.Instance.GetVisibility(NameAndUri);
+    }
+
+    private bool ShouldSyncLayersVisibility()
+    {
+      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
+      var result = syncLayerVisibility ?? FileConfiguration.Instance.IsSyncOfVisibilityEnabled;
+      return result;
+    }
+
     //fix missing line feature bug with this new method
-    private void AddFieldValueToFeature(IFeature feature, Dictionary<string, string> fieldValues)
+    private static void AddFieldValueToFeature(IFeature feature, Dictionary<string, string> fieldValues)
     {
       foreach (var fieldValue in fieldValues)
       {
         if (!feature.Properties.ContainsKey(fieldValue.Key))
         {
           //GC: made to fix apostrophe error for symbology
-          if (fieldValue.Value.Contains("'"))
-          {
-            feature.Properties.Add(fieldValue.Key, fieldValue.Value.Replace("'", ""));
-          }
-          else
-          {
-            feature.Properties.Add(fieldValue.Key, fieldValue.Value);
-          }
+          feature.Properties.Add(fieldValue.Key, fieldValue.Value.Replace("'", ""));
         }
       }
     }
 
-    private async Task<bool> CreateSld(IFeatureCollection featureCollection)
+    private static async Task<IStyledLayerDescriptor> CreateSld(FeatureLayer featureLayer)
     {
       return await QueuedTask.Run(() =>
       {
-        string oldSld = Sld?.GetSerializedSld();
-
-        if (featureCollection.Features.Count >= 1)
+        var sld = SLDFactory.CreateEmptyStyle();
+        CIMRenderer renderer = featureLayer?.GetRenderer();
+        CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
+        CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
+        if (uniqueValueRendererRenderer?.Groups != null)
         {
-          Sld = SLDFactory.CreateEmptyStyle();
-
-          CIMRenderer renderer = Layer?.GetRenderer();
-          CIMSimpleRenderer simpleRenderer = renderer as CIMSimpleRenderer;
-          CIMUniqueValueRenderer uniqueValueRendererRenderer = renderer as CIMUniqueValueRenderer;
-          CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
-
-          if (uniqueValueRendererRenderer?.Groups != null)
+          var fields = uniqueValueRendererRenderer.Fields;
+          foreach (var group in uniqueValueRendererRenderer.Groups)
           {
-            var fields = uniqueValueRendererRenderer.Fields;
-
-            foreach (var group in uniqueValueRendererRenderer.Groups)
+            foreach (var uniqueClass in group.Classes)
             {
-              foreach (var uniqueClass in group.Classes)
+              foreach (var uniqueValue in uniqueClass.Values)
               {
-                IFilter filter = null;
-
-                foreach (var uniqueValue in uniqueClass.Values)
+                for (int i = 0; i < fields.Length; i++)
                 {
-                  for (int i = 0; i < fields.Length; i++)
-                  {
-                    string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
-                    //GC: made to fix apostrophe error for symbology
-                    if (value.Contains("'"))
-                    {
-                      value = value.Replace("'", "");
-                    }
-                    filter = SLDFactory.CreateEqualIsFilter(fields[i], value);
-
-                    CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                    ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-                    IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                    SLDFactory.AddRuleToStyle(Sld, rule);
-                  }
+                  string value = uniqueValue.FieldValues.Length >= i ? uniqueValue.FieldValues[i] : string.Empty;
+                  var filter = SLDFactory.CreateEqualIsFilter(fields[i], value.Replace("'", ""));
+                  CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
+                  ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
+                  IRule rule = SLDFactory.CreateRule(symbolizer, filter);
+                  SLDFactory.AddRuleToStyle(sld, rule);
                 }
-                /*CIMSymbolReference uniqueSymbolRef = uniqueClass.Symbol;
-                ISymbolizer symbolizer = CreateSymbolizer(uniqueSymbolRef);
-                IRule rule = SLDFactory.CreateRule(symbolizer, filter);
-                SLDFactory.AddRuleToStyle(Sld, rule);*/
               }
             }
           }
-          else
-          {
-            ISymbolizer symbolizer = CreateSymbolizer(symbolRef);
-            IRule rule = SLDFactory.CreateRule(symbolizer);
-            SLDFactory.AddRuleToStyle(Sld, rule);
-          }
         }
-        return !(oldSld?.Equals(Sld?.GetSerializedSld()) ?? false);
+        else
+        {
+          CIMSymbolReference symbolRef = simpleRenderer?.Symbol ?? uniqueValueRendererRenderer?.DefaultSymbol;
+          ISymbolizer symbolizer = CreateSymbolizer(symbolRef);
+          IRule rule = SLDFactory.CreateRule(symbolizer);
+          SLDFactory.AddRuleToStyle(sld, rule);
+        }
+
+        return sld;
       });
     }
 
-    private ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef)
+    private static ISymbolizer CreateSymbolizer(CIMSymbolReference symbolRef)
     {
       double strokeWidth = 1.0;
       double strokeOpacity = 1.0;
@@ -549,7 +524,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
             string[] parts = url.Split(';');
             string base64 = parts.Length >= 2 ? parts[1] : string.Empty;
-            base64 = base64.Replace("base64,", string.Empty);
+            base64 = base64.Replace("base64,", string.Empty).Replace('\n', ' ');
             return SLDFactory.CreateImageSymbol(size, base64);
           }
         }
@@ -570,45 +545,44 @@ namespace StreetSmartArcGISPro.VectorLayers
       return null;
     }
 
-    private Color CimColorToWinColor(CIMColor cimColor)
+    private static Color CimColorToWinColor(CIMColor cimColor)
     {
-      int red, green, blue, alpha;
-
+      double[] colorValues = cimColor?.Values;
+      int alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
       if (cimColor is CIMHSVColor)
       {
-        double[] colorValues = cimColor?.Values;
         double h = colorValues != null && colorValues.Length >= 1 ? colorValues[0] : 0.0;
         double s = colorValues != null && colorValues.Length >= 2 ? colorValues[1] : 0.0;
         double v = colorValues != null && colorValues.Length >= 3 ? colorValues[2] : 0.0;
-        alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
 
-        //GC: added catch statements that turns the s and v values to percentages because it was causing incorrect overlay colors
         if (s > 1)
-          s = s / 100;
+        {
+          s /= 100;
+        }
+
         if (v > 1)
-          v = v / 100;
+        {
+          v /= 100;
+        }
 
         Hsv data = new Hsv(h, s, v);
         Rgb value = ColorConverter.HsvToRgb(data);
-        red = value.R;
-        green = value.G;
-        blue = value.B;
+        return Color.FromArgb(alpha, value.R, value.G, value.B);
       }
-      else
-      {
-        double[] colorValues = cimColor?.Values;
-        red = colorValues != null && colorValues.Length >= 1 ? (int)colorValues[0] : 255;
-        green = colorValues != null && colorValues.Length >= 2 ? (int)colorValues[1] : 255;
-        blue = colorValues != null && colorValues.Length >= 3 ? (int)colorValues[2] : 255;
-        alpha = colorValues != null && colorValues.Length >= 4 ? (int)colorValues[3] : 255;
-      }
+
+      int red = colorValues != null && colorValues.Length >= 1 ? (int)colorValues[0] : 255;
+      int green = colorValues != null && colorValues.Length >= 2 ? (int)colorValues[1] : 255;
+      int blue = colorValues != null && colorValues.Length >= 3 ? (int)colorValues[2] : 255;
 
       return Color.FromArgb(alpha, red, green, blue);
     }
 
     public async Task<double> GetOffsetZAsync()
     {
-      if (Layer == null) return 0.0;
+      if (Layer == null)
+      {
+        return 0.0;
+      }
 
       return await QueuedTask.Run(() =>
       {
@@ -721,62 +695,70 @@ namespace StreetSmartArcGISPro.VectorLayers
           ShowModalMessageAfterFailure = false
         };
 
-        geometry = await ToRealSpatialReference(geometry, measurement);
-        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
+        geometry = await ToRealSpatialReference(geometry, measurement); // this could be removed
+        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;  // this could be removed
 
-        double measurementX = 0;
-        double measurementY = 0;
-        double measurementZ = 0;
-
-        var serializer = new JavaScriptSerializer();
-
-        if (measurement.Count >= 1)
+#if ARCGISPRO29
+        if (EditingTemplate.Current?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
+#else
+        if (EditingTemplate.Current?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
+#endif
         {
-          var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
+          editOperation.Create(Layer, geometry);
+          await editOperation.ExecuteAsync();
+        }
+        else
+        {
+          double measurementX = 0;
+          double measurementY = 0;
+          double measurementZ = 0;
 
-          try
+          var serializer = new JavaScriptSerializer();
+
+          if (measurement.Count >= 1)
           {
-            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
-            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
-            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
-          }
-          catch (Exception)
-          {
+            var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
             try
             {
-              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
-              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
-              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
+              measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
+              measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
+              measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
             }
             catch (Exception)
             {
               try
               {
-                measurementX =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
-                measurementY =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
-                measurementZ =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
+                measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
+                measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
               }
-              catch (Exception e)
+              catch (Exception)
               {
-                EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                try
+                {
+                  measurementX =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                  measurementY =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                  measurementZ =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                }
+                catch (Exception)
+                {
+                  try
+                  {
+                    measurementX = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                    measurementY = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                    measurementZ = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                  }
+                  catch (Exception e)
+                  {
+                    EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(AddFeatureAsync)}) error: {e}");
+                  }
+                }
               }
             }
-          }
 
-#if ARCGISPRO29
-          if (!(editingFeatureTemplate?.GetDefinition() is CIMBasicFeatureTemplate definition) || definition.DefaultValues == null)
-#else
-          if (editingFeatureTemplate?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
-#endif
-          {
-            editOperation.Create(Layer, geometry);
-            await editOperation.ExecuteAsync();
-          }
-          else
-          {
             Dictionary<string, object> toAddFields = [];
 
             foreach (var value in definition.DefaultValues)
@@ -812,44 +794,48 @@ namespace StreetSmartArcGISPro.VectorLayers
       });
     }
 
+    /// <summary>
+    /// Do we really need this, what does this do?
+    /// 99.99% obsolete
+    /// </summary>
     public async Task<Geometry> ToRealSpatialReference(Geometry geometry, Measurement measurement)
     {
-      await QueuedTask.Run(async () =>
+      if (geometry == null)
       {
-        if (geometry != null)
+        return null;
+      }
+
+      return await QueuedTask.Run<Geometry>(async () =>
+      {
+        SpatialReference spatialReference = Layer?.GetSpatialReference();
+        GeometryType geometryType = geometry.GeometryType;
+        var points = await measurement.ToPointCollectionAsync(geometry);
+
+        switch (geometryType)
         {
-          SpatialReference spatialReference = Layer?.GetSpatialReference();
-          GeometryType geometryType = geometry.GeometryType;
-          var points = await measurement.ToPointCollectionAsync(geometry);
-
-          switch (geometryType)
-          {
-            case GeometryType.Polygon:
+          case GeometryType.Polygon:
 #if ARCGISPRO29
-              geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+            return PolygonBuilder.CreatePolygon(points, spatialReference);
 #else
-              geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+              return PolygonBuilderEx.CreatePolygon(points, spatialReference);
 #endif
-              break;
-            case GeometryType.Polyline:
+          case GeometryType.Polyline:
 #if ARCGISPRO29
-              geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+            return PolylineBuilder.CreatePolyline(points, spatialReference);
 #else
-              geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+              return PolylineBuilderEx.CreatePolyline(points, spatialReference);
 #endif
-              break;
-            case GeometryType.Point:
-              if (points.Count >= 1)
-              {
-                geometry = MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
-              }
+          case GeometryType.Point:
+            if (points.Count >= 1)
+            {
+              return MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
+            }
 
-              break;
-          }
+            return null;
+          default:
+            return null;
         }
       });
-
-      return geometry;
     }
 
     public async Task UpdateFeatureAsync(long uid, Geometry geometry, Measurement measurement)
@@ -880,7 +866,6 @@ namespace StreetSmartArcGISPro.VectorLayers
       }
 
       _vectorLayerList.LastSelectedLayer = this;
-
       await QueuedTask.Run(async () =>
       {
         try
@@ -897,7 +882,6 @@ namespace StreetSmartArcGISPro.VectorLayers
             {
               Dictionary<string, string> properties = GetPropertiesFromRow(rowCursor);
               IJson json = JsonFactory.Create(properties);
-
               foreach (IViewer viewer in viewers)
               {
                 if (viewer is IPanoramaViewer panoramaViewer && Overlay != null && Counter == 0 && await viewer.GetId() == _clickedViewerId)
@@ -905,14 +889,13 @@ namespace StreetSmartArcGISPro.VectorLayers
                   panoramaViewer.SetSelectedFeatureByProperties(json, Overlay.Id);
                   ++Counter;
                 }
-
               }
             }
           }
         }
         catch (NullReferenceException e)
         {
-          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(ReloadSelectionAsync)}) error: {e}");
         }
       });
     }
@@ -922,14 +905,12 @@ namespace StreetSmartArcGISPro.VectorLayers
       bool isExceptionAlreadyLogged = false;
       Dictionary<string, string> properties = [];
       Row row = rowCursor.Current;
-
       if (row is not Feature feature)
       {
         return properties;
       }
 
       IReadOnlyList<Field> fields = feature?.GetFields();
-
       if (fields == null || fields.Count == 0)
       {
         return properties;
@@ -948,13 +929,13 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           if (!isExceptionAlreadyLogged)
           {
-            EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {e}");
+            EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GetPropertiesFromRow)}) {e}");
             isExceptionAlreadyLogged = true;
           }
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(GetPropertiesFromRow)}) {ex}");
         }
       }
 
@@ -1008,7 +989,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (OnMapSelectionChanged) error: {e}");
+            EventLog.Write(EventLogLevel.Warning, $"Street Smart: ({nameof(VectorLayer)}.cs) ({nameof(OnMapSelectionChanged)}) error: {e}");
           }
         }
       }

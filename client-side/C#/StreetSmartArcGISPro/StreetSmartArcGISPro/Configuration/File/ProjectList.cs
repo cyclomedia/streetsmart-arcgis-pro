@@ -88,7 +88,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
       catch (Exception ex)
       {
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Save) error: {ex}");
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: ({nameof(ProjectList)}.cs) (Save) error: {ex}");
       }
     }
 
@@ -109,7 +109,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Load) error: {ex}");
+          EventLog.Write(EventLog.EventType.Error, $"Street Smart: ({nameof(ProjectList)}.cs) (Load) error: {ex}");
           _projectList = [];
         }
       }

@@ -35,7 +35,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
       }
       catch (System.Exception e)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmartApi.cs) (Constructor) error: {e}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(StreetSmartApi)}.cs) (Constructor) error: {e}");
         return;
       }
     }

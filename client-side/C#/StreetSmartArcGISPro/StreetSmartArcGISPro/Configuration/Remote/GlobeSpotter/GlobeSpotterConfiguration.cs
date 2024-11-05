@@ -155,7 +155,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
       }
       catch (Exception e)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (GlobeSpotter.cs) (Instance) error: {e}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(GlobeSpotter)}.cs) (Instance) error: {e}");
       }
 
       return _globeSpotterConfiguration;

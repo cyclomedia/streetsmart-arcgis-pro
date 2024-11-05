@@ -143,7 +143,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       }
       catch (System.Exception ex)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (Urls.cs) (FetchConfigIdFromUserInfoConfiguration) error: {ex}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(Urls)}.cs) (FetchConfigIdFromUserInfoConfiguration) error: {ex}");
       }
       return configId;
     }
@@ -194,7 +194,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
       }
       catch (System.Exception ex)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (Urls.cs) (FetchConfigurationByConfigId) error: {ex}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(Urls)}.cs) (FetchConfigurationByConfigId) error: {ex}");
       }
       return globeSpotterConfig;
     }

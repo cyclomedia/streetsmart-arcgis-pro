@@ -396,7 +396,7 @@ namespace StreetSmartArcGISPro.VectorLayers
             (EditTool == EditTools.Verticles || EditTool == EditTools.ModifyFeatureImpl))
         {
           _measurementList.Api.StopMeasurementMode();
-        }
+    }
       }
     }
 
@@ -636,22 +636,30 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private void OnTocSelectionChanged(MapViewEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnTocSelectionChanged)})");
+
       LayerUpdated?.Invoke();
     }
 
     private void OnMapMemberPropertiesChanged(MapMemberPropertiesChangedEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnMapMemberPropertiesChanged)})");
+
       LayerUpdated?.Invoke();
     }
 
     private async void OnMapViewInitialized(MapViewEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnMapViewInitialized)})");
+
       await DetectVectorLayersAsync(false, args.MapView);
       AddEvents();
     }
 
     private async void OnMapViewChangedEvent(ActiveMapViewChangedEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnMapViewChangedEvent)})");
+
       if (args.IncomingView != null)
       {
         await DetectVectorLayersAsync(args.IncomingView);
@@ -660,6 +668,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async void OnMapClosed(MapClosedEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnMapClosed)})");
+
       if (_eventsInitialized)
       {
         _eventsInitialized = false;
@@ -691,6 +701,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async void OnLayersAdded(LayerEventsArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnLayersAdded)})");
+
       foreach (Layer layer in args.Layers)
       {
         MapView mapView = GetMapViewFromLayer(layer) ?? MapView.Active;
@@ -701,11 +713,15 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private void OnLayersMoved(LayerEventsArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnLayersMoved)})");
+
       LayerUpdated?.Invoke();
     }
 
     private async void OnLayersRemoved(LayerEventsArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(VectorLayerList)}.cs) ({nameof(OnLayersRemoved)})");
+
       foreach (Layer layer in args.Layers)
       {
         if (layer is FeatureLayer featureLayer)

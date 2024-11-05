@@ -83,7 +83,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
         }
         catch (Exception e)
         {
-          EventLog.Write(EventLogLevel.Error, $"Street Smart: (FeatureCollection.cs) (Load) error: {e}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(FeatureCollection)}.cs) (Load) error: {e}");
         }
       }
 
@@ -104,13 +104,13 @@ namespace StreetSmartArcGISPro.Configuration.Remote.Recordings
           {
             featuresStream.Position = 0;
             features = (FeatureCollection)XmlFeatureCollection.Deserialize(featuresStream);
-            EventLog.Write(EventLogLevel.Information, $"Street Smart: (FeatureCollection.cs) (Load (ImageId)) Loaded features: {features?.NumberOfFeatures ?? 0}");
+            EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(FeatureCollection)}.cs) (Load (ImageId)) Loaded features: {features?.NumberOfFeatures ?? 0}");
             featuresStream.Close();
           }
         }
         catch (Exception e)
         {
-          EventLog.Write(EventLogLevel.Error, $"Street Smart: (FeatureCollection.cs) (Load) error: {e}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: ({nameof(FeatureCollection)}.cs) (Load) error: {e}");
         }
       }
 
