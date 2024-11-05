@@ -27,6 +27,7 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using Nancy.Json;
+using Newtonsoft.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -694,8 +695,8 @@ namespace StreetSmartArcGISPro.VectorLayers
           ShowModalMessageAfterFailure = false
         };
 
-        //geometry = await ToRealSpatialReference(geometry, measurement);
-        //EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
+        geometry = await ToRealSpatialReference(geometry, measurement); // this could be removed
+        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;  // this could be removed
 
 #if ARCGISPRO29
         if (EditingTemplate.Current?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
