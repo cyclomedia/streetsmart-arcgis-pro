@@ -142,8 +142,6 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task AddLayerAsync(Layer layer, MapView mapView)
     {
-      CycloMediaGroupLayer cycloGrouplayer = ModuleStreetSmart.Current.GetOrAddCycloMediaGroupLayer(mapView);
-
       if (!TryGetValue(mapView, out List<VectorLayer> layerList))
       {
         layerList = [];
