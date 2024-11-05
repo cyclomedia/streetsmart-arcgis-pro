@@ -318,6 +318,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(MeasurementList)}.cs) ({nameof(OnMeasurementStarted)})");
 
+      FeatureCollection = args.Value;
+
       if (MeasurementStarted == false)
       {
         MeasurementStarted = true;

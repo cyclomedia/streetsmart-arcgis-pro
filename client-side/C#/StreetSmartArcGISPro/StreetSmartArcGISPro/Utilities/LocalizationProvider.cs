@@ -53,7 +53,7 @@ namespace StreetSmartArcGISPro.Utilities
           if (obj.GetValue(TooltipIdProperty) is string key)
           {
             string resourceValue = res.GetString(key, _languageSettings.CultureInfo);
-            control.SetValue(FrameworkElement.ToolTipProperty, resourceValue);
+            control.SetValue(ContentControl.ToolTipProperty, resourceValue);
           }
         }
       }
@@ -153,7 +153,7 @@ namespace StreetSmartArcGISPro.Utilities
 
         if (resourceValue != null)
         {
-          control.SetValue(FrameworkElement.ToolTipProperty, resourceValue);
+          control.SetValue(ContentControl.ToolTipProperty, resourceValue);
 
           if (!_toolTipObjects.Contains(obj))
           {
