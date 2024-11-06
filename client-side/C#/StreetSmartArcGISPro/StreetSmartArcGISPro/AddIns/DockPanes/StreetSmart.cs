@@ -411,7 +411,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private void Restart()
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (Initialize): {_configuration.StreetSmartLocation}");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(StreetSmart)}.cs) ({nameof(Restart)}): {_configuration.StreetSmartLocation}");
 
       if (_login.Credentials)
       {
@@ -891,7 +891,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async Task AddOrUpdateVectorLayerOverlayAsync(VectorLayer vectorLayer)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (AddVectorLayerAsync)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart:  ({nameof(StreetSmart)}.cs) ({nameof(AddOrUpdateVectorLayerOverlayAsync)})");
 
       if (vectorLayer.Layer.Map != _mapView.Map)
       {
@@ -902,7 +902,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
       string srsName = cyclSpatRel?.SRSName;
 
-      if (vectorLayer.Overlay != null || string.IsNullOrEmpty(srsName))
+      if (string.IsNullOrEmpty(srsName))
       {
         return;
       }
@@ -965,7 +965,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async Task RemoveVectorLayerOverlayAsync(VectorLayer vectorLayer)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (RemoveVectorLayerAsync)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart:  ({nameof(StreetSmart)}.cs) ({nameof(RemoveVectorLayerOverlayAsync)})");
 
       IOverlay overlay = vectorLayer?.Overlay;
 
@@ -994,7 +994,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnApiReady(object sender, EventArgs args)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ApiReady)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(StreetSmart)}.cs) ({nameof(OnApiReady)})");
 
       await InitApi();
     }

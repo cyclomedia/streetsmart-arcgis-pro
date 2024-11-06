@@ -257,24 +257,27 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async Task SketchModifiedAsync(MapView mapView, VectorLayer vectorLayer)
     {
-      if (GlobeSpotterConfiguration.MeasurePermissions)
+      if (!GlobeSpotterConfiguration.MeasurePermissions)
       {
-        Measurement measurement = Sketch;
-        Geometry geometry = await mapView.GetCurrentSketchAsync();
+        return;
+      }
 
-        if (geometry != null)
-        {
-          if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
-          {
-            _drawingSketch = true;
-            measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
-          }
+      Geometry geometry = await mapView.GetCurrentSketchAsync();
+      if (geometry == null)
+      {
+        return;
+      }
 
-          if (measurement != null)
-          {
-            await measurement.UpdateMeasurementPointsAsync(mapView, null);
-          }
-        }
+      Measurement measurement = Sketch;
+      if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
+      {
+        _drawingSketch = true;
+        measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
+      }
+
+      if (measurement != null)
+      {
+        await measurement.UpdateMeasurementPointsAsync(mapView, null);
       }
     }
 
@@ -313,7 +316,10 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public void OnMeasurementStarted(object sender, IEventArgs<IFeatureCollection> args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(MeasurementList)}.cs) ({nameof(OnMeasurementStarted)})");
+
       FeatureCollection = args.Value;
+
       if (MeasurementStarted == false)
       {
         MeasurementStarted = true;
@@ -322,13 +328,15 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementSaved(object sender, IEventArgs<IFeatureCollection> args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(MeasurementList)}.cs) ({nameof(OnMeasurementSaved)})");
+
       FeatureCollection = args.Value;
+
       IStreetSmartAPI api = sender as IStreetSmartAPI;
 
       foreach (IFeature feature in FeatureCollection.Features)
       {
-        IGeometry geometry = feature.Geometry;
-        StreetSmartGeometryType geometryType = geometry.Type;
+        StreetSmartGeometryType geometryType = feature.Geometry.Type;
         Measurement measurement;
 
         if (feature.Properties is IMeasurementProperties properties)
@@ -418,6 +426,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementStopped(object sender, IEventArgs<IFeatureCollection> args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(MeasurementList)}.cs) ({nameof(OnMeasurementStopped)})");
+
       if (sender is not IStreetSmartAPI api)
       {
         return;
@@ -501,6 +511,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
     public async void OnMeasurementChanged(object sender, IEventArgs<IFeatureCollection> args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: ({nameof(MeasurementList)}.cs) ({nameof(OnMeasurementChanged)})");
+
       if (sender is not IStreetSmartAPI api)
       {
         return;
@@ -764,8 +776,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             var geometry = await MapView.Active.GetCurrentSketchAsync();
             if (geometry != null)
             {
-              if (geometry.GeometryType == ArcGISGeometryType.Polygon ||
-                  geometry.GeometryType == ArcGISGeometryType.Polyline)
+              if (geometry.GeometryType is ArcGISGeometryType.Polygon or ArcGISGeometryType.Polyline)
               {
                 await MapView.Active.ClearSketchAsync();
               }

@@ -27,6 +27,7 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using Nancy.Json;
+using Newtonsoft.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
@@ -694,62 +695,70 @@ namespace StreetSmartArcGISPro.VectorLayers
           ShowModalMessageAfterFailure = false
         };
 
-        geometry = await ToRealSpatialReference(geometry, measurement);
-        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;
+        geometry = await ToRealSpatialReference(geometry, measurement); // this could be removed
+        EditingTemplate editingFeatureTemplate = EditingTemplate.Current;  // this could be removed
 
-        double measurementX = 0;
-        double measurementY = 0;
-        double measurementZ = 0;
-
-        var serializer = new JavaScriptSerializer();
-
-        if (measurement.Count >= 1)
+#if ARCGISPRO29
+        if (EditingTemplate.Current?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
+#else
+          if (EditingTemplate.Current?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
+#endif
         {
-          var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
-          try
-          {
+          editOperation.Create(Layer, geometry);
+          await editOperation.ExecuteAsync();
+        }
+        else
+        {
+          double measurementX = 0;
+          double measurementY = 0;
+          double measurementZ = 0;
 
-            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
-            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
-            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
-          }
-          catch (Exception)
+          var serializer = new JavaScriptSerializer();
+
+          if (measurement.Count >= 1)
           {
+            var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
             try
             {
-              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
-              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
-              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
+              measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
+              measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
+              measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
             }
             catch (Exception)
             {
               try
               {
-                measurementX =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
-                measurementY =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
-                measurementZ =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
+                measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
+                measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
               }
-              catch (Exception e)
+              catch (Exception)
               {
-                EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                try
+                {
+                  measurementX =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                  measurementY =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                  measurementZ =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                }
+                catch (Exception)
+                {
+                  try
+                  {
+                    measurementX = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                    measurementY = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                    measurementZ = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                  }
+                  catch (Exception e)
+                  {
+                    EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                  }
+                }
               }
             }
-          }
 
-#if ARCGISPRO29
-          if (editingFeatureTemplate?.GetDefinition() is not CIMBasicFeatureTemplate definition || definition.DefaultValues == null)
-#else
-          if (editingFeatureTemplate?.GetDefinition() is not CIMRowTemplate definition || definition.DefaultValues == null)
-#endif
-          {
-            editOperation.Create(Layer, geometry);
-            await editOperation.ExecuteAsync();
-          }
-          else
-          {
             Dictionary<string, object> toAddFields = [];
 
             foreach (var value in definition.DefaultValues)
@@ -785,44 +794,48 @@ namespace StreetSmartArcGISPro.VectorLayers
       });
     }
 
+    /// <summary>
+    /// Do we really need this, what does this do?
+    /// 99.99% obsolete
+    /// </summary>
     public async Task<Geometry> ToRealSpatialReference(Geometry geometry, Measurement measurement)
     {
-      await QueuedTask.Run(async () =>
+      if (geometry == null)
       {
-        if (geometry != null)
+        return null;
+      }
+
+      return await QueuedTask.Run<Geometry>(async () =>
+      {
+        SpatialReference spatialReference = Layer?.GetSpatialReference();
+        GeometryType geometryType = geometry.GeometryType;
+        var points = await measurement.ToPointCollectionAsync(geometry);
+
+        switch (geometryType)
         {
-          SpatialReference spatialReference = Layer?.GetSpatialReference();
-          GeometryType geometryType = geometry.GeometryType;
-          var points = await measurement.ToPointCollectionAsync(geometry);
-
-          switch (geometryType)
-          {
-            case GeometryType.Polygon:
+          case GeometryType.Polygon:
 #if ARCGISPRO29
-              geometry = PolygonBuilder.CreatePolygon(points, spatialReference);
+            return PolygonBuilder.CreatePolygon(points, spatialReference);
 #else
-              geometry = PolygonBuilderEx.CreatePolygon(points, spatialReference);
+              return PolygonBuilderEx.CreatePolygon(points, spatialReference);
 #endif
-              break;
-            case GeometryType.Polyline:
+          case GeometryType.Polyline:
 #if ARCGISPRO29
-              geometry = PolylineBuilder.CreatePolyline(points, spatialReference);
+            return PolylineBuilder.CreatePolyline(points, spatialReference);
 #else
-              geometry = PolylineBuilderEx.CreatePolyline(points, spatialReference);
+              return PolylineBuilderEx.CreatePolyline(points, spatialReference);
 #endif
-              break;
-            case GeometryType.Point:
-              if (points.Count >= 1)
-              {
-                geometry = MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
-              }
+          case GeometryType.Point:
+            if (points.Count >= 1)
+            {
+              return MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
+            }
 
-              break;
-          }
+            return null;
+          default:
+            return null;
         }
       });
-
-      return geometry;
     }
 
     public async Task UpdateFeatureAsync(long uid, Geometry geometry, Measurement measurement)
