@@ -44,6 +44,7 @@ namespace StreetSmartArcGISPro.AddIns.Views
         ShowNotification(viewModel.Credentials);
       }
     }
+
     private void OnLogoutButtonClicked(object sender, RoutedEventArgs e)
     {
       if (DataContext != null)
@@ -54,7 +55,6 @@ namespace StreetSmartArcGISPro.AddIns.Views
         ((dynamic)DataContext).Password = temp;
       }
     }
-
 
     public void ShowNotification(bool Credentials)
     {
