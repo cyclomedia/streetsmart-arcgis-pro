@@ -709,40 +709,40 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         else
         {
-        double measurementX = 0;
-        double measurementY = 0;
-        double measurementZ = 0;
+          double measurementX = 0;
+          double measurementY = 0;
+          double measurementZ = 0;
 
-        var serializer = new JavaScriptSerializer();
+          var serializer = new JavaScriptSerializer();
 
-        if (measurement.Count >= 1)
-        {
-          var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
-          try
+          if (measurement.Count >= 1)
           {
-            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
-            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
-            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
-          }
-          catch (Exception)
-          {
+            var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
             try
             {
-              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
-              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
-              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
+              measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
+              measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
+              measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
             }
             catch (Exception)
             {
               try
               {
-                measurementX =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
-                measurementY =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
-                measurementZ =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
+                measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
+                measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
               }
+              catch (Exception)
+              {
+                try
+                {
+                  measurementX =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
+                  measurementY =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
+                  measurementZ =
+                    serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                }
                 catch (Exception)
                 {
                   try
@@ -751,12 +751,12 @@ namespace StreetSmartArcGISPro.VectorLayers
                     measurementY = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
                     measurementZ = JsonConvert.DeserializeObject<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
                   }
-              catch (Exception e)
-              {
-                EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                  catch (Exception e)
+                  {
+                    EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                  }
+                }
               }
-            }
-          }
             }
 
             Dictionary<string, object> toAddFields = [];
@@ -802,39 +802,39 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       if (geometry == null)
       {
-        return null; 
+        return null;
       }
 
       return await QueuedTask.Run<Geometry>(async () =>
       {
-          SpatialReference spatialReference = Layer?.GetSpatialReference();
-          GeometryType geometryType = geometry.GeometryType;
-          var points = await measurement.ToPointCollectionAsync(geometry);
+        SpatialReference spatialReference = Layer?.GetSpatialReference();
+        GeometryType geometryType = geometry.GeometryType;
+        var points = await measurement.ToPointCollectionAsync(geometry);
 
-          switch (geometryType)
-          {
-            case GeometryType.Polygon:
+        switch (geometryType)
+        {
+          case GeometryType.Polygon:
 #if ARCGISPRO29
-              return PolygonBuilder.CreatePolygon(points, spatialReference);
+            return PolygonBuilder.CreatePolygon(points, spatialReference);
 #else
               return PolygonBuilderEx.CreatePolygon(points, spatialReference);
 #endif
-            case GeometryType.Polyline:
+          case GeometryType.Polyline:
 #if ARCGISPRO29
-              return PolylineBuilder.CreatePolyline(points, spatialReference);
+            return PolylineBuilder.CreatePolyline(points, spatialReference);
 #else
               return PolylineBuilderEx.CreatePolyline(points, spatialReference);
 #endif
-            case GeometryType.Point:
-              if (points.Count >= 1)
-              {
-                return MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
-              }
+          case GeometryType.Point:
+            if (points.Count >= 1)
+            {
+              return MapPointBuilderEx.CreateMapPoint(points[0], spatialReference);
+            }
 
             return null;
           default:
-              return null;
-          }
+            return null;
+        }
       });
     }
 

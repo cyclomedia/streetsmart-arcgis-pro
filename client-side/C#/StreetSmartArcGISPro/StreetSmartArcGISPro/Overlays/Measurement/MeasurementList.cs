@@ -264,22 +264,22 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
       Geometry geometry = await mapView.GetCurrentSketchAsync();
       if (geometry == null)
-        {
+      {
         return;
       }
 
       Measurement measurement = Sketch;
-          if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
-          {
-            _drawingSketch = true;
-            measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
-          }
+      if (!_drawingSketch && !geometry.IsEmpty || measurement == null)
+      {
+        _drawingSketch = true;
+        measurement = await StartMeasurement(geometry, measurement, true, vectorLayer);
+      }
 
-          if (measurement != null)
-          {
-            await measurement.UpdateMeasurementPointsAsync(mapView, null);
-          }
-        }
+      if (measurement != null)
+      {
+        await measurement.UpdateMeasurementPointsAsync(mapView, null);
+      }
+    }
 
     public async Task<Measurement> StartMeasurement(Geometry geometry, Measurement measurement, bool sketch, VectorLayer vectorLayer)
     {
