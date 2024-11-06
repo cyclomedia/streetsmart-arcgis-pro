@@ -57,7 +57,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
     {
       _currentArcGisProVersion = GetArcGisProVersion();
 
-      XmlApiKey = new XmlSerializer(typeof (ApiKey));
+      XmlApiKey = new XmlSerializer(typeof(ApiKey));
     }
 
     #endregion
@@ -181,7 +181,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
 
       if (manualStream != null)
       {
-        _apiKey = (ApiKey) XmlApiKey.Deserialize(manualStream);
+        _apiKey = (ApiKey)XmlApiKey.Deserialize(manualStream);
         manualStream.Close();
       }
     }
