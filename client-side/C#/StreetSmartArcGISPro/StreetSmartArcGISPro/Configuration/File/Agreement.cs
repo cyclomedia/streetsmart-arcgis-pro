@@ -50,7 +50,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     public int? AcceptedAgreementVersion { get; set; }
 
     [XmlIgnore]
-    public readonly DateTime AcceptedAgreementVersionDate = new DateTime(2024, 11, 7, 16, 41, 00, DateTimeKind.Utc);
+    public readonly DateTime LatestAgreementVersionDate = new DateTime(2024, 11, 7, 16, 41, 00, DateTimeKind.Utc);
 
     [XmlIgnore]
     public const int LatestAgreementVersion = 3;
@@ -61,7 +61,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     /// </summary>
     public bool Value
     {
-      get => AcceptedDate != null && AcceptedDate >= AcceptedAgreementVersionDate && AcceptedAgreementVersion != null && AcceptedAgreementVersion >= LatestAgreementVersion;
+      get => AcceptedDate != null && AcceptedDate >= LatestAgreementVersionDate && AcceptedAgreementVersion != null && AcceptedAgreementVersion >= LatestAgreementVersion;
       set
       {
         if (value)
