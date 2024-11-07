@@ -18,7 +18,6 @@
 
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
-
 using StreetSmartArcGISPro.Configuration.File;
 
 namespace StreetSmartArcGISPro.AddIns.Buttons
