@@ -63,6 +63,11 @@ namespace StreetSmartArcGISPro.Configuration.Remote.SpatialReference
             _spatialReferences = new SpatialReferenceDictionary();
             foreach (var item in spatialReferences)
             {
+              if (_spatialReferences.Contains(item.SRSName))
+              {
+                EventLog.Write(EventLog.EventType.Error, $"Street Smart: (SpatialReferenceList.cs) (Instance) An item with the same key has already been added. Key: {item.SRSName}");
+                continue; 
+              }
               _spatialReferences.Add(item);
             }
           }
