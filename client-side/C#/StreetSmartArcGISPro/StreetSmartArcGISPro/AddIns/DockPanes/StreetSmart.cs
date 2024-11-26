@@ -893,7 +893,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async Task AddOrUpdateVectorLayerOverlayAsync(VectorLayer vectorLayer)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (AddVectorLayerAsync)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart:  (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync)");
 
       if (vectorLayer.Layer.Map != _mapView.Map)
       {
@@ -928,7 +928,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
             }
             catch (Exception e)
             {
-              EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (AddVectorLayerAsync): error: {e}");
+              EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync): error: {e}");
               return;
             }
           }
@@ -1208,7 +1208,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       else if (cyclViewer is IObliqueViewer obliqueViewer)
       {
-        EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) toggle oblique");
+        EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) Toggle oblique");
         obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomIn, false);
         obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomOut, false);
       }
@@ -1222,7 +1222,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private async void OnOverlayVisibilityChanged(object sender, IEventArgs<ILayerInfo> args)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnLayerVisibilityChanged)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnOverlayVisibilityChanged)");
 
       ILayerInfo overlayInfo = args.Value;
       VectorLayer vectorLayer = _vectorLayerList.GetLayer(overlayInfo.LayerId, MapView);
@@ -1327,7 +1327,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
     private void OnBearerTokenChanged(object sender, IEventArgs<IBearer> args)
     {
-      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (BearerTokenChanged)");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnBearerTokenChanged)");
       Login.Instance.Bearer = args.Value.BearerToken;
     }
 
@@ -1514,7 +1514,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       catch (Exception e)
       {
-        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChanged): exception: {e}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmart.cs) (OnImageChanged): exception: {e}");
       }
     }
 
