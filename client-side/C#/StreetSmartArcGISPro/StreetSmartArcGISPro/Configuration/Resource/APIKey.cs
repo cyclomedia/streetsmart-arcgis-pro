@@ -143,7 +143,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
 
       if (entryAssembly == null)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (APIKey.cs) (GetVersion) Cannot read entry assembly.");
+        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (APIKey.cs) (GetVersion) Cannot read entry assembly.");
 
         return SupportedArcGisProVersion.Unknown;
       }
@@ -157,7 +157,7 @@ namespace StreetSmartArcGISPro.Configuration.Resource
       }
       catch (Exception ex)
       {
-        EventLog.Write(EventLogLevel.Error, $"Street Smart: (APIKey.cs) (GetVersion) Error in version reading from entry assembly. Exception: {ex}.");
+        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (APIKey.cs) (GetVersion) Error in version reading from entry assembly. Exception: {ex}.");
 
         return SupportedArcGisProVersion.Unknown;
       }

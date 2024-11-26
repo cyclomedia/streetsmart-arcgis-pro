@@ -753,7 +753,7 @@ namespace StreetSmartArcGISPro.VectorLayers
                   }
                   catch (Exception e)
                   {
-                    EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                    EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
                   }
                 }
               }
@@ -895,7 +895,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         catch (NullReferenceException e)
         {
-          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (ReloadSelectionAsync) error: {e}");
         }
       });
     }
@@ -935,7 +935,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (GetPropertiesFromRow) {ex}");
         }
       }
 
@@ -989,7 +989,7 @@ namespace StreetSmartArcGISPro.VectorLayers
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayer.cs) (OnMapSelectionChanged) error: {e}");
+            EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (OnMapSelectionChanged) error: {e}");
           }
         }
       }

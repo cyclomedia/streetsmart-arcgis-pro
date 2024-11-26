@@ -118,7 +118,7 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
         else
         {
           string errorPdfTxt = res.GetString("HelpNoPdfViewerInstalledOnYourSystem", language.CultureInfo);
-          EventLog.Write(EventLogLevel.Error, $"Street Smart: (Help.cs) (OnClick) {errorPdfTxt}");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (Help.cs) (OnClick) {errorPdfTxt}");
           MessageBox.Show(errorPdfTxt);
         }
       }

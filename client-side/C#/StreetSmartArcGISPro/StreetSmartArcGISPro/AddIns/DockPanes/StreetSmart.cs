@@ -928,7 +928,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
           catch (Exception e)
           {
-            EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync): error: {e}");
+            EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync): error: {e}");
             return;
           }
         }
@@ -1215,7 +1215,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       else if (cyclViewer is IObliqueViewer obliqueViewer)
       {
-        EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewerAdded) toggle oblique");
+        EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnViewerAdded) Toggle oblique");
         obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomIn, false);
         obliqueViewer.ToggleButtonEnabled(ObliqueViewerButtons.ZoomOut, false);
       }
@@ -1527,7 +1527,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
       catch (Exception e)
       {
-        EventLog.Write(EventLogLevel.Warning, $"Street Smart: (StreetSmart.cs) (OnImageChanged): exception: {e}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmart.cs) (OnImageChanged): exception: {e}");
       }
     }
 
