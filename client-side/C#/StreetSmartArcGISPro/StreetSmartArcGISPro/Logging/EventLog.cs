@@ -75,10 +75,11 @@ namespace StreetSmartArcGISPro.Logging
           SentrySdk.CaptureMessage(entry, SentryLevel.Error);
           IncrementLogCount();
         }
+        
         SaveIfFlushRequested(flush);
-
       }
     }
+    
     private static string AddDataToLogMessage(string logEntry)
     {
       var logMessageBuilder = new StringBuilder(logEntry);
