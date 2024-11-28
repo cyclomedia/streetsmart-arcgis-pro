@@ -139,7 +139,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     public string NameAndUri => Layer?.Name + "___" + Layer?.URI ?? string.Empty;
 
-    private bool IsLayerVisible => Layer != null && Layer.IsVisible;
+    public bool IsLayerVisible => Layer != null && Layer.IsVisible;
 
     public VectorLayerVisibilityChangeStatus VisibilityChangeStatus { get; internal set; }
 
