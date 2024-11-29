@@ -1,7 +1,10 @@
-﻿using Sentry;
+﻿using ArcGIS.Desktop.Mapping;
+using Sentry;
 using StreetSmartArcGISPro.Configuration.File;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using static ArcGIS.Desktop.Framework.Utilities.EventLog;
 
 namespace StreetSmartArcGISPro.Logging
@@ -68,13 +71,108 @@ namespace StreetSmartArcGISPro.Logging
         }
         else
         {
+          entry = AddDataToLogMessage(entry);
           SentrySdk.CaptureMessage(entry, SentryLevel.Error);
           IncrementLogCount();
         }
-        SaveIfFlushRequested(flush);
         
+        SaveIfFlushRequested(flush);
       }
     }
+    
+    private static string AddDataToLogMessage(string logEntry)
+    {
+      var logMessageBuilder = new StringBuilder(logEntry);
+
+      AddProjectDetails(logMessageBuilder);
+      AddCoordinateSystems(logMessageBuilder);
+      AddVectorLayerDetails(logMessageBuilder);
+      AddViewerDetails(logMessageBuilder);
+
+      return logMessageBuilder.ToString();
+    }
+
+    private static void AddProjectDetails(StringBuilder logMessageBuilder)
+    {
+      var projectName = ArcGIS.Desktop.Core.Project.Current?.Name;
+      if (string.IsNullOrEmpty(projectName))
+      {
+        logMessageBuilder.AppendLine("\nThe project name is not specified or does not exist.");
+      }
+      else
+      {
+        logMessageBuilder.AppendLine($"\nProject name: {projectName}");
+      }
+    }
+
+    private static void AddCoordinateSystems(StringBuilder logMessageBuilder)
+    {
+      var projectSettings = ProjectList.Instance?.GetSettings(MapView.Active);
+      if (projectSettings == null)
+      {
+        logMessageBuilder.AppendLine("\nProject settings could not be retrieved.");
+        return;
+      }
+
+      if (projectSettings.CycloramaViewerCoordinateSystem != null)
+      {
+        logMessageBuilder.AppendLine($"\nCoordinate system for the cyclorama viewer: {projectSettings.CycloramaViewerCoordinateSystem}");
+      }
+
+      if (projectSettings.RecordingLayerCoordinateSystem != null)
+      {
+        logMessageBuilder.AppendLine($"\nCoordinate system for the recording layer: {projectSettings.RecordingLayerCoordinateSystem}");
+      }
+    }
+
+    private static void AddVectorLayerDetails(StringBuilder logMessageBuilder)
+    {
+      var vectorLayers = StreetSmartArcGISPro.AddIns.Modules.StreetSmart.Current?
+          .GetVectorLayerListAsync(MapView.Active)?
+          .Result
+          .FirstOrDefault()
+          .Value;
+
+      if (vectorLayers == null || !vectorLayers.Any())
+      {
+        logMessageBuilder.AppendLine("\nNo vector layers found in the map.");
+        return;
+      }
+
+      int totalLayers = vectorLayers.Count;
+      int visibleOnMapCount = vectorLayers.Count(layer => layer.IsLayerVisible);
+      int visibleInCycloramaCount = vectorLayers.Count(layer => layer.Overlay.Visible);
+
+      logMessageBuilder.AppendLine($"\nTotal Layers: {totalLayers}");
+      logMessageBuilder.AppendLine($" Visible on Map: {visibleOnMapCount}");
+      logMessageBuilder.AppendLine($" Visible in Cyclorama Viewer: {visibleInCycloramaCount}");
+
+      foreach (var layer in vectorLayers)
+      {
+        logMessageBuilder.AppendLine($"\nFeature Name: {layer.Name}");
+        logMessageBuilder.AppendLine($" Type: {layer.Layer.ShapeType}");
+        logMessageBuilder.AppendLine($" Layer Visibility: {layer.IsLayerVisible}");
+        logMessageBuilder.AppendLine($" Overlay Visibility: {layer.Overlay.Visible}");
+      }
+    }
+
+    private static void AddViewerDetails(StringBuilder logMessageBuilder)
+    {
+      var viewerList = StreetSmartArcGISPro.AddIns.Modules.StreetSmart.Current.ViewerList;
+
+      if (viewerList == null || !viewerList.Any())
+      {
+        logMessageBuilder.AppendLine("\nNo viewers opened");
+        return;
+      }
+
+      logMessageBuilder.AppendLine($"\nViewers count: {viewerList.Count}\n");
+      foreach (var viewer in viewerList)
+      {
+        logMessageBuilder.AppendLine($"Viewer type: {viewer.Key}");
+      }
+    }
+
     private static void ResetCounterIfNeeded()
     {
       LogData.Instance.LogCount = 0;
