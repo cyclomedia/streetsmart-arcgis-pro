@@ -16,13 +16,11 @@
  * License along with this library.
  */
 
+using StreetSmartArcGISPro.Utilities;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-
-using StreetSmartArcGISPro.Utilities;
-
 using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
@@ -43,6 +41,8 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private bool _useDefaultStreetSmartUrl;
     private string _streetSmartLocation;
+
+    private bool _isSyncOfVisibilityEnabled = true;
 
     private bool _useDefaultConfigurationUrl;
     private string _configurationUrlLocation;
@@ -105,6 +105,19 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
     }
 
+    public bool IsSyncOfVisibilityEnabled
+    {
+      get => _isSyncOfVisibilityEnabled;
+      set
+      {
+        if (_isSyncOfVisibilityEnabled != value)
+        {
+          _isSyncOfVisibilityEnabled = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
     public string StreetSmartLocation
     {
       get => _streetSmartLocation;
@@ -137,6 +150,7 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public string ProxyDomain { get; set; }
 
+
     public static Configuration Instance
     {
       get
@@ -146,7 +160,7 @@ namespace StreetSmartArcGISPro.Configuration.File
           Load();
         }
 
-        return _configuration ?? (_configuration = Create());
+        return _configuration ??= Create();
       }
     }
 
@@ -169,7 +183,7 @@ namespace StreetSmartArcGISPro.Configuration.File
       if (SystemIOFile.Exists(FileName))
       {
         var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration) XmlConfiguration.Deserialize(streamFile);
+        _configuration = (Configuration)XmlConfiguration.Deserialize(streamFile);
         streamFile.Close();
       }
     }
@@ -186,6 +200,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         _useDefaultConfigurationUrl = true,
         _configurationUrlLocation = string.Empty,
         _useDefaultStreetSmartUrl = true,
+        _isSyncOfVisibilityEnabled = true,
         _streetSmartLocation = string.Empty,
         UseProxyServer = false,
         ProxyAddress = string.Empty,

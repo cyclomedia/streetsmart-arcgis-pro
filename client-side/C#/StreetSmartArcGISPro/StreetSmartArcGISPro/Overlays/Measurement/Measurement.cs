@@ -321,7 +321,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       if (geometry != null)
       {
         double zScale = 1.0;
-        double modScale = 1.0;
         var srs = geometry.SpatialReference;
         var geoPointCount = geometry.PointCount;
         ArcGISGeometryType geometryType = geometry.GeometryType;
@@ -330,19 +329,14 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         {
           var spatialReference = VectorLayer?.Layer?.GetSpatialReference();
           double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
-          /*if (srs?.ZUnit != spatialReference?.ZUnit)
-          {
-            conversionFactor = srs.ZUnit.ConversionFactor;
-          }*/
           zScale = 1 / conversionFactor;
           double modifierFactor = spatialReference?.Unit?.ConversionFactor ?? 1.0;
           //GC: adding if statement for features missing z reference since it gets put underground
           if (spatialReference?.ZUnit == null && (((Count >= 2 || geoPointCount >= 2) && geometryType == ArcGISGeometryType.Polyline)
-          || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon))
+          || geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon || geometryType == ArcGISGeometryType.Multipoint))
           {
             zScale = 1 / modifierFactor;
           }
-          //modScale = 1 / modifierFactor;
         });
 
         result = [];
@@ -360,28 +354,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             }
 
             break;
+          case ArcGISGeometryType.Multipoint:
           case ArcGISGeometryType.Polygon:
           case ArcGISGeometryType.Polyline:
 
             if (geometry is Multipart multipart)
             {
               ReadOnlyPointCollection points = multipart.Points;
-
-              using (IEnumerator<MapPoint> enumPoints = points.GetEnumerator())
+              foreach (var point in points)
               {
-                while (enumPoints.MoveNext())
-                {
-                  MapPoint mapPointPart = enumPoints.Current;
-                  /*if(geometryType == ArcGISGeometryType.Polyline && mapPointPart == points.First() && points.Count == 1)
-                  {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }
-                  else
-                  {
-                    result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                  }*/
-                  result.Add(await AddZOffsetAsync(mapPointPart, zScale));
-                }
+                result.Add(await AddZOffsetAsync(point, zScale));
               }
             }
             break;
@@ -394,9 +376,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
     private async Task<MapPoint> AddZOffsetAsync(MapPoint mapPoint, double zScale)
     {
       return await QueuedTask.Run(async () => mapPoint.HasZ
-        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y,
-          (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0),
-          mapPoint.SpatialReference)
+        ? MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, (mapPoint.Z * zScale) + (VectorLayer != null ? await VectorLayer.GetOffsetZAsync() : 0), mapPoint.SpatialReference)
         : MapPointBuilderEx.CreateMapPoint(mapPoint.X, mapPoint.Y, mapPoint.SpatialReference));
     }
 
@@ -690,9 +670,16 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 #endif
               }
             }
-            else if (geometry is MapPoint mapPoint)
+            else if (geometry is MapPoint or Multipoint)
             {
-              MapPoint point = Count >= 1 ? this.ElementAt(0).Value.Point : mapPoint;
+              // Note: If future support for the Multipoint type of FeatureCollection is needed, this section should be modified to handle Multipoint geometry accordingly.
+              MapPoint point = (Count >= 1 ? this.ElementAt(0).Value.Point : null) ?? geometry switch
+              {
+                MapPoint mapPoint => mapPoint,
+                Multipoint multipoint => multipoint.Points.Count >= 1 ? multipoint.Points[0] : null,
+                _ => null
+              };
+
               double conversionFactor = spatialReference?.ZUnit?.ConversionFactor ?? 1.0;
               double z = conversionFactor * (point?.Z ?? 0);
               if (spatialReference.ZUnit == null || srs == null)

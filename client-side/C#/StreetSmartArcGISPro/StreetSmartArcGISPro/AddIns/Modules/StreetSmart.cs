@@ -26,6 +26,7 @@ using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.CycloMediaLayers;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
@@ -55,6 +56,8 @@ namespace StreetSmartArcGISPro.AddIns.Modules
     #endregion
 
     #region Properties
+
+    public static IDisposable SentrySdkInit = LogData.Instance.UseSentryLogging ? EventLog.InitializeSentry(LogData.SentryDsnUrl) : null;
 
     /// <summary>
     /// Retrieve the singleton instance to this module here
@@ -102,6 +105,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
       ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
       CycloMediaGroupLayer.CollectionChanged += OnGroupLayerCollectionChanged;
       ApplicationStartupEvent.Subscribe(OnApplicationStartupEvent);
+      ApplicationClosingEvent.Subscribe(OnApplicationClosingEvent);
+    }
+
+    private Task OnApplicationClosingEvent(CancelEventArgs args)
+    {
+      LogData.Instance.Save();
+      return Task.CompletedTask;
     }
 
     private void OnApplicationStartupEvent(EventArgs args)
@@ -158,9 +168,9 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         return null;
       }
 
-      if (CycloMediaGroupLayer.ContainsKey(mapView))
+      if (CycloMediaGroupLayer.TryGetValue(mapView, out var groupLayer))
       {
-        return CycloMediaGroupLayer[mapView];
+        return groupLayer;
       }
 
       var result = new CycloMediaGroupLayer(mapView);
@@ -383,13 +393,13 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private async void OnLoginPropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) ({args.PropertyName})");
 
       if (args.PropertyName == "Credentials")
       {
         Login login = Login.Instance;
 
-        EventLog.Write(EventLog.EventType.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) (Credentials) {login.Credentials}");
+        EventLog.Write(EventLogLevel.Information, $"Street Smart: (Modules.StreetSmart.cs) (OnLoginPropertyChanged) (Credentials) {login.Credentials}");
 
         foreach (CycloMediaGroupLayer cycloMediaGroupLayer in CycloMediaGroupLayer.Values)
         {
@@ -481,25 +491,28 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (CurrentDomain_UnhandledException) {e.ExceptionObject}", true);
       Exception ex = e.ExceptionObject as Exception;
       HandleException("CurrentDomain_UnhandledException", ex);
     }
 
     private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (Current_DispatcherUnhandledException) {e.Exception}", true);
       HandleException("Current_DispatcherUnhandledException", e.Exception);
       //e.Handled = true;   // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
 
     private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
     {
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (TaskScheduler_UnobservedTaskException) {e.Exception}",true);
       HandleException("TaskScheduler_UnobservedTaskException", e.Exception);
       //e.SetObserved();  // This can prevent application from crashing, but do we want to keep application running in unhandled state?
     }
 
     private void HandleException(string exceptionSource, Exception ex)
     {
-      EventLog.Write(EventLog.EventType.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
+      EventLog.Write(EventLogLevel.Error, $"Street Smart: (Modules.StreetSmart.cs) (HandleException) ({exceptionSource}) unhandled exception: {ex}");
     }
 
     #endregion

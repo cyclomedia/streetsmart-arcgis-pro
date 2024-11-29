@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using ArcGIS.Desktop.Mapping;
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-using ArcGIS.Desktop.Mapping;
-
-using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
-
 namespace StreetSmartArcGISPro.Utilities
 {
-  class AvailableCoordSystems : INotifyPropertyChanged
+  public class AvailableCoordSystems : INotifyPropertyChanged
   {
     #region events
 
@@ -19,7 +17,7 @@ namespace StreetSmartArcGISPro.Utilities
 
     #region members
 
-    private Dictionary<MapView, List<SpatialReference>> _existsInAreaSpatialReferences;
+    private readonly Dictionary<MapView, List<SpatialReference>> _existsInAreaSpatialReferences = [];
     private static AvailableCoordSystems _instance;
 
     #endregion
@@ -30,37 +28,23 @@ namespace StreetSmartArcGISPro.Utilities
     {
       get
       {
-        List<SpatialReference> result = null;
-
-        if (MapView.Active != null && (_existsInAreaSpatialReferences?.ContainsKey(MapView.Active) ?? false))
+        if (MapView.Active != null && _existsInAreaSpatialReferences.TryGetValue(MapView.Active, out var r))
         {
-          result = _existsInAreaSpatialReferences[MapView.Active];
+          return r;
         }
 
-        return result;
+        return null;
       }
       set
       {
         if (MapView.Active != null && value != null)
         {
-          if (_existsInAreaSpatialReferences?.ContainsKey(MapView.Active) ?? false)
-          {
-            _existsInAreaSpatialReferences[MapView.Active] = value;
-          }
-          else
-          {
-            if (_existsInAreaSpatialReferences == null)
-            {
-              _existsInAreaSpatialReferences = [];
-            }
-
-            _existsInAreaSpatialReferences.Add(MapView.Active, value);
-          }
+          _existsInAreaSpatialReferences[MapView.Active] = value;
         }
       }
     }
 
-    public static AvailableCoordSystems Instance => _instance ?? (_instance = new AvailableCoordSystems());
+    public static AvailableCoordSystems Instance => _instance ??= new AvailableCoordSystems();
 
     #endregion
 
@@ -70,7 +54,7 @@ namespace StreetSmartArcGISPro.Utilities
     {
       ExistInAreaSpatialReferences = [];
       var existsInAreaSpatialReferences = new List<SpatialReference>();
-      SpatialReferenceList spatialReferenceList = SpatialReferenceList.Instance;
+      SpatialReferenceDictionary spatialReferenceList = SpatialReferenceDictionary.Instance;
 
       foreach (var spatialReference in spatialReferenceList)
       {
@@ -92,7 +76,7 @@ namespace StreetSmartArcGISPro.Utilities
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-    
+
     #endregion
   }
 }

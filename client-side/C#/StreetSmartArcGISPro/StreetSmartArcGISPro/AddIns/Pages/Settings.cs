@@ -16,23 +16,20 @@
  * License along with this library.
  */
 
+using ArcGIS.Desktop.Framework.Contracts;
+using ArcGIS.Desktop.Mapping;
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
+using StreetSmartArcGISPro.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-
-using ArcGIS.Desktop.Framework.Contracts;
-using ArcGIS.Desktop.Mapping;
-
-using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
-using StreetSmartArcGISPro.Utilities;
-
-using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 using FileProjectList = StreetSmartArcGISPro.Configuration.File.ProjectList;
+using FileSettings = StreetSmartArcGISPro.Configuration.File.Setting;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
 {
-  internal class Settings: Page, INotifyPropertyChanged
+  internal class Settings : Page, INotifyPropertyChanged
   {
     #region Events
 
@@ -48,7 +45,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     private readonly SpatialReference _recordingLayerCoordinateSystem;
     private readonly SpatialReference _cycloramaViewerCoordinateSystem;
-
+    private readonly bool? _syncLayerVisibility;
     private readonly int _overlayDrawDistance;
 
     #endregion
@@ -68,6 +65,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _cycloramaViewerCoordinateSystem = _settings.CycloramaViewerCoordinateSystem;
 
       _overlayDrawDistance = _settings.OverlayDrawDistance;
+      _syncLayerVisibility = _settings.SyncLayerVisibility;
     }
 
     ~Settings()
@@ -111,6 +109,23 @@ namespace StreetSmartArcGISPro.AddIns.Pages
         {
           IsModified = true;
           _settings.RecordingLayerCoordinateSystem = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Sync layer visibility
+    /// </summary>
+    public bool? SyncLayerVisibility
+    {
+      get => _settings.SyncLayerVisibility;
+      set
+      {
+        if (_settings.SyncLayerVisibility != value)
+        {
+          IsModified = true;
+          _settings.SyncLayerVisibility = value;
           NotifyPropertyChanged();
         }
       }

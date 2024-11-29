@@ -19,7 +19,6 @@
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
@@ -27,6 +26,7 @@ using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
 using StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
 using System;
@@ -35,7 +35,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArcGISGeometryType = ArcGIS.Core.Geometry.GeometryType;
-using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using StreetSmartGeometryType = StreetSmart.Common.Interfaces.GeoJson.GeometryType;
 
@@ -134,7 +133,9 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
 
         switch (geometryType)
         {
+          // Note: If future support for the Multipoint type of FeatureCollection is needed, this section should be modified to handle Multipoint geometry accordingly.
           case ArcGISGeometryType.Point:
+          case ArcGISGeometryType.Multipoint:
             if (GlobeSpotterConfiguration.MeasurePoint)
             {
               measurementGeometryType = MeasurementGeometryType.Point;
@@ -196,7 +197,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
             }
             catch (Exception ex)
             {
-              EventLog.Write(EventLog.EventType.Error, $"Street Smart: (MeasurementList.cs) (CreateMeasurement) {ex.Message}");
+              EventLog.Write(EventLogLevel.Error, $"Street Smart: (MeasurementList.cs) (CreateMeasurement) {ex.Message}");
             }
           }
         }
@@ -299,7 +300,7 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
         ArcGISGeometryType geometryType = geometry?.GeometryType ?? ArcGISGeometryType.Unknown;
 
         if (geometryType == ArcGISGeometryType.Point || geometryType == ArcGISGeometryType.Polygon ||
-            geometryType == ArcGISGeometryType.Polyline)
+            geometryType == ArcGISGeometryType.Polyline || geometryType == ArcGISGeometryType.Multipoint)
         {
           if (measurement?.IsGeometryType(geometryType) ?? false)
           {
@@ -720,7 +721,6 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
                     measurement.MeasurementId = properties.Id;
                     int polySrcCount = polySrc[0].Count;
                     int pylyDstCount = polyDst[0].Count;
-                    int j = 0;
 
                     for (int i = 0; i < Math.Max(pylyDstCount, polySrcCount); i++)
                     {

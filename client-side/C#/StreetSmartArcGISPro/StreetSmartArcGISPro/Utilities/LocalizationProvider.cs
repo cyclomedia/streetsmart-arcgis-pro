@@ -1,5 +1,5 @@
-﻿using ArcGIS.Desktop.Framework.Utilities;
-using StreetSmartArcGISPro.Configuration.File;
+﻿using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Properties;
 using System;
 using System.Collections.Generic;
@@ -96,7 +96,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
         }
 
         if (resourceValue != null)
@@ -119,7 +119,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: (LocalizationProvider.cs) (OnContentIdChanged) error: {ex}");
         }
 
         if (resourceValue != null)
@@ -148,7 +148,7 @@ namespace StreetSmartArcGISPro.Utilities
         }
         catch (Exception ex)
         {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (LocalizationProvider.cs) (OnTooltipChanged) error: {ex}");
+          EventLog.Write(EventLogLevel.Error, $"Street Smart: (LocalizationProvider.cs) (OnTooltipChanged) error: {ex}");
         }
 
         if (resourceValue != null)

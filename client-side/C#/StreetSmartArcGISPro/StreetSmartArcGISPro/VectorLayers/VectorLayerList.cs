@@ -24,10 +24,10 @@ using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Events;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Framework.Utilities;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
 using StreetSmartArcGISPro.CycloMediaLayers;
+using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays.Measurement;
 using StreetSmartArcGISPro.Utilities;
 using System;
@@ -132,10 +132,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
       if (layers != null)
       {
-        foreach (var layer in layers)
-        {
-          await AddLayerAsync(layer, mapView);
-        }
+        var addLayerTasks = layers.Select(layer => AddLayerAsync(layer, mapView));
+        await Task.WhenAll(addLayerTasks);
       }
 
       if (initEvents)
@@ -148,34 +146,25 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private async Task AddLayerAsync(Layer layer, MapView mapView)
     {
-      FeatureLayer featureLayer = layer as FeatureLayer;
       ModuleStreetSmart streetSmart = ModuleStreetSmart.Current;
       CycloMediaGroupLayer cycloGrouplayer = streetSmart.GetOrAddCycloMediaGroupLayer(mapView);
-      List<VectorLayer> layerList;
 
-      if (ContainsKey(mapView))
-      {
-        layerList = this[mapView];
-      }
-      else
+      if (!TryGetValue(mapView, out List<VectorLayer> layerList))
       {
         layerList = [];
         Add(mapView, layerList);
       }
 
-      if (featureLayer != null && cycloGrouplayer != null && !cycloGrouplayer.IsKnownName(featureLayer.Name))
+      if (layer is not FeatureLayer featureLayer || cycloGrouplayer == null || cycloGrouplayer.IsKnownName(featureLayer?.Name) || layerList.Any(vecLayer => vecLayer.Layer == layer))
       {
-        if (!layerList.Any(vecLayer => vecLayer.Layer == layer))
-        {
-          var vectorLayer = new VectorLayer(featureLayer, this);
-          bool initialized = await vectorLayer.InitializeEventsAsync();
+        return;
+      }
 
-          if (initialized)
-          {
-            layerList.Add(vectorLayer);
-            LayerAdded?.Invoke(vectorLayer);
-          }
-        }
+      var vectorLayer = new VectorLayer(featureLayer, this);
+      if (await vectorLayer.InitializeEventsAsync())
+      {
+        layerList.Add(vectorLayer);
+        LayerAdded?.Invoke(vectorLayer);
       }
     }
 
@@ -495,7 +484,7 @@ namespace StreetSmartArcGISPro.VectorLayers
         if (args.IncomingTemplate != null)
           await FrameworkApplication.SetCurrentToolAsync(args.IncomingTemplate.DefaultToolID);
         else
-          EventLog.Write(EventLog.EventType.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
+          EventLog.Write(EventLogLevel.Warning, $"Street Smart: (VectorLayerList.cs) (OnActiveTemplateChangedEvent) IncomingTemplate is null.");
       }
 
       if (args.IncomingTemplate != null && args.IncomingTemplate.IsActive != false)

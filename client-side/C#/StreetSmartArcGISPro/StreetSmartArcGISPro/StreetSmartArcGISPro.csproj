@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows</TargetFramework>
@@ -39,6 +39,7 @@
 		<Content Include="Images\OpenLocation32.png" />
 		<Content Include="Images\ImageIdSearch32.png" />
 		<Content Include="Images\MeasurementDetail32.png" />
+		<Content Include="Images\OverlaysSync.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="..\..\Doc\LGPL-3.0.txt" Link="LGPL-3.0.txt" />
@@ -63,9 +64,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Esri.ArcGISPro.Extensions30" Version="3.0.0.36056" />
-		<PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
 		<PackageReference Include="Nancy" Version="2.0.0" />
-		<PackageReference Include="StreetSmart.WPF" Version="24.7.1-rc3" />
+		<PackageReference Include="Sentry" Version="4.10.2" />
+		<PackageReference Include="StreetSmart.WPF" Version="24.12.0.4" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
 		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
 	</ItemGroup>

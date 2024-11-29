@@ -17,16 +17,16 @@
  */
 
 using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Utilities;
 using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Configuration.Remote.SpatialReference;
 using StreetSmartArcGISPro.Configuration.Resource;
+using StreetSmartArcGISPro.Logging;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
 using static StreetSmartArcGISPro.Utilities.WebUtils;
-using mySpatialReferenceList = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReferenceList;
 
 namespace StreetSmartArcGISPro.Configuration.Remote
 {
@@ -51,7 +51,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     #region Properties
 
-    public static Web Instance => _web ?? (_web = new Web());
+    public static Web Instance => _web ??= new Web();
 
     #endregion
 
@@ -83,19 +83,18 @@ namespace StreetSmartArcGISPro.Configuration.Remote
 
     public Stream GetByBbox(Envelope envelope, string wfsRequest)
     {
-      string epsgCode = $"EPSG:{envelope.SpatialReference.Wkid}";
-      epsgCode = mySpatialReferenceList.Instance.ToKnownSrsName(epsgCode);
+      var epsgCode = SpatialReferenceDictionary.Instance.ToKnownSrsName($"EPSG:{envelope.SpatialReference.Wkid}");
       string dateString = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:00-00:00");
       string recordingItem = string.Format(_ci, wfsRequest, epsgCode, envelope.XMin, envelope.YMin, envelope.XMax,
         envelope.YMax, dateString);
-      EventLog.Write(EventLog.EventType.Information,
+      EventLog.Write(EventLogLevel.Information,
         $"Street Smart: (Web) Get recordings by BBOX, EPSG Code: {epsgCode}, BBOX: {envelope.XMin}, {envelope.YMin}, {envelope.XMax}, {envelope.YMax}, date:{dateString}");
       return PostRequest(RecordingServiceUrl, GetStreamCallback, recordingItem, TypeDownloadConfig.XML, Configuration, _login, _apiKey) as Stream;
     }
 
-    public Stream GetByImageId(string imageId, string epsgCode)
+    public Stream GetByImageId(string imageId, string srsName)
     {
-      epsgCode = mySpatialReferenceList.Instance.ToKnownSrsName(epsgCode);
+      var epsgCode = SpatialReferenceDictionary.Instance.ToKnownSrsName(srsName);
       string imageIdUrl = ImageIdUrl(imageId, epsgCode);
       return GetRequest(imageIdUrl, GetStreamCallback, TypeDownloadConfig.XML, Configuration, _login, _apiKey) as Stream;
     }

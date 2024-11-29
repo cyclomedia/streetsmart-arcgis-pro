@@ -16,7 +16,7 @@
  * License along with this library.
  */
 
-using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Logging;
 using System;
 using System.IO;
 using System.Net;
@@ -155,7 +155,7 @@ namespace StreetSmartArcGISPro.Configuration.Remote.GlobeSpotter
       }
       catch (Exception e)
       {
-        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (GlobeSpotter.cs) (Instance) error: {e}");
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (GlobeSpotter.cs) (Instance) error: {e}");
       }
 
       return _globeSpotterConfiguration;
