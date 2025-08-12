@@ -1,41 +1,46 @@
 ﻿/*
- * Street Smart integration in ArcGIS Pro
- * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
- * 
+ * Street Smart .NET integration
+ * Copyright (c) 2016 - 2021, CycloMedia, All rights reserved.
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3.0 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
 
-using System.Windows.Media.Imaging;
-
-using DrawingImage = Aspose.Drawing.Image;
-using DrawingBitmap = Aspose.Drawing.Bitmap;
+using SysColor = System.Drawing.Color;
+using AspColor = Aspose.Drawing.Color;
 
 namespace StreetSmartArcGISPro.Utilities
 {
-  static class ImageExtensions
+  internal static class AspDrawToSysDraw
   {
-    public static BitmapSource ToBitmapSource(this DrawingImage source)
+    public static SysColor ToSysColor(this AspColor color)
     {
-      DrawingBitmap bitmap = new DrawingBitmap(source);
-      var bitSrc = bitmap.ToBitmapSource();
-      bitmap.Dispose();
-      return bitSrc;
+      return SysColor.FromArgb(
+        color.A,
+        color.R,
+        color.G,
+        color.B
+      );
     }
 
-    public static BitmapSource ToBitmapSource(this DrawingBitmap source)
+    public static AspColor ToAspColor(this SysColor color)
     {
-      return WpfInterop.ToBitmapSourceFast(source);
+      return AspColor.FromArgb(
+        color.A,
+        color.R,
+        color.G,
+        color.B
+      );
     }
   }
 }

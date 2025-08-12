@@ -766,36 +766,42 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
 
-          try
+          if (serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson) != null)
           {
             measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
             measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
             measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
           }
-          catch (Exception)
+          else if (serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson) != null)
           {
-            try
+            var x = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson);
+
+            if (x[0].ContainsKey("x") && x[0].ContainsKey("y") && x[0].ContainsKey("z"))
             {
-              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
-              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
-              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
+              measurementX = x[0]["x"];
+              measurementY = x[0]["y"];
+              measurementZ = x[0]["z"];
             }
-            catch (Exception)
+            else if (serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson) != null)
             {
-              try
+              var y = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson);
+
+              if (y.Count >= 1 && y[0].Count >= 1 && y[0][0].ContainsKey("x") &&
+                  y[0][0].ContainsKey("y") && y[0][0].ContainsKey("z"))
               {
-                measurementX =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
-                measurementY =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
-                measurementZ =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                measurementX = y[0][0]["x"];
+                measurementY = y[0][0]["y"];
+                measurementZ = y[0][0]["z"];
               }
-              catch (Exception e)
+              else
               {
-                EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync)");
               }
             }
+          }
+          else
+          {
+            EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync)");
           }
 
 #if ARCGISPRO29

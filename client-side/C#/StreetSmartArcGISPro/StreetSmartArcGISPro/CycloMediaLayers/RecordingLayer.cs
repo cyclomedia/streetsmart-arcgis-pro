@@ -26,7 +26,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using Color = System.Drawing.Color;
+
+using Color = Aspose.Drawing.Color;
 using Envelope = ArcGIS.Core.Geometry.Envelope;
 
 namespace StreetSmartArcGISPro.CycloMediaLayers
