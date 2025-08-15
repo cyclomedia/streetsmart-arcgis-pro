@@ -445,7 +445,7 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private bool ShouldSyncLayersVisibility()
     {
-      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
+      bool? syncLayerVisibility = MapView.Active != null ? ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility : null;
       var result = syncLayerVisibility ?? Configuration.File.Configuration.Instance.IsSyncOfVisibilityEnabled;
       return result;
     }
