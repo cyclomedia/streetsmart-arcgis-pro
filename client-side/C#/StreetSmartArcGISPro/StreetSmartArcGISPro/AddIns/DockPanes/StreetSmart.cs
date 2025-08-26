@@ -31,7 +31,6 @@ using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.DomElement;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
-using StreetSmart.Common.Interfaces.SLD;
 using StreetSmart.WPF;
 using StreetSmartArcGISPro.AddIns.Views;
 using StreetSmartArcGISPro.Configuration.File;
@@ -41,6 +40,7 @@ using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
+using StreetSmartArcGISPro.SLD;
 using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
 using System;
@@ -934,7 +934,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
 
-        IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
+        string serXSerializedSld = sld?.GetSerializedSld();
+        IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, serXSerializedSld, visible);
 
         if (vectorLayer.Overlay == null)
         {

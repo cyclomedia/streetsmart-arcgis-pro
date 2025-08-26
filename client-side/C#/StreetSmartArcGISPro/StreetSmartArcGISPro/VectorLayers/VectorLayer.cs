@@ -26,12 +26,12 @@ using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using Aspose.Drawing;
 using Nancy.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
-using StreetSmart.Common.Interfaces.SLD;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
@@ -40,16 +40,18 @@ using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using StreetSmartArcGISPro.SLD;
+
 using ColorConverter = StreetSmartArcGISPro.Utilities.ColorConverter;
 using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Unit = ArcGIS.Core.Geometry.Unit;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using SLDFactory = StreetSmartArcGISPro.SLD.SLDFactory;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
