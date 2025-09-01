@@ -42,6 +42,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StreetSmartArcGISPro.SLD;
 
@@ -770,9 +771,10 @@ namespace StreetSmartArcGISPro.VectorLayers
 
           if (serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson) != null)
           {
-            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
-            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
-            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
+            MeasurementObject json = JsonSerializer.Deserialize<MeasurementObject>(measurementGeoJson);
+            measurementX = json.x;
+            measurementY = json.y;
+            measurementZ = json.z;
           }
           else if (serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson) != null)
           {
