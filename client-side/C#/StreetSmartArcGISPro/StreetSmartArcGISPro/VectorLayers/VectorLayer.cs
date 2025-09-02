@@ -780,22 +780,23 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             var x = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson);
 
-            if (x[0].ContainsKey("x") && x[0].ContainsKey("y") && x[0].ContainsKey("z"))
+            if(x.Count >= 1 && x[0] != null)
             {
-              measurementX = x[0]["x"];
-              measurementY = x[0]["y"];
-              measurementZ = x[0]["z"];
+              List<MeasurementObject> json = JsonSerializer.Deserialize<List<MeasurementObject>>(measurementGeoJson);
+              measurementX = json[0].x;
+              measurementY = json[0].y;
+              measurementZ = json[0].z;
             }
             else if (serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson) != null)
             {
               var y = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson);
 
-              if (y.Count >= 1 && y[0].Count >= 1 && y[0][0].ContainsKey("x") &&
-                  y[0][0].ContainsKey("y") && y[0][0].ContainsKey("z"))
+              if (y.Count >= 1 && y[0].Count >= 1 && y[0][0] != null)
               {
-                measurementX = y[0][0]["x"];
-                measurementY = y[0][0]["y"];
-                measurementZ = y[0][0]["z"];
+                List<List<MeasurementObject>> json = JsonSerializer.Deserialize<List<List<MeasurementObject>>>(measurementGeoJson);
+                measurementX = json[0][0].x;
+                measurementY = json[0][0].y;
+                measurementZ = json[0][0].z;
               }
               else
               {
