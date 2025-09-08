@@ -26,6 +26,10 @@
  */
 -->
   <Grid>
-    <ContentControl x:Name="StreetSmartApi"/>
+    <ContentControl
+      x:Name="StreetSmartApi"
+      MouseEnter="StreetSmartApi_MouseEnter"
+      MouseLeave="StreetSmartApi_MouseLeave"
+      />
   </Grid>
 </UserControl>

@@ -531,7 +531,12 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
               }
 
               _measurementList.FromMap = true;
-              _api.SetActiveMeasurement(featureCollection);
+
+              if (!_measurementList.InsideViewer)
+              {
+                _api.SetActiveMeasurement(featureCollection);
+              }
+
               DoChange = false;
             }
           }

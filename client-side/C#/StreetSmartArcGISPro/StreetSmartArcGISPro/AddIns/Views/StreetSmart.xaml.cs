@@ -16,6 +16,10 @@
  * License along with this library.
  */
 
+using System.Windows.Input;
+
+using ModulestreetSmart = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
+
 namespace StreetSmartArcGISPro.AddIns.Views
 {
   /// <summary>
@@ -31,5 +35,15 @@ namespace StreetSmartArcGISPro.AddIns.Views
     }
 
     #endregion
+
+    private void StreetSmartApi_MouseEnter(object sender, MouseEventArgs e)
+    {
+      ModulestreetSmart.Current.InsideViewer = true; // Set the flag in
+    }
+
+    private void StreetSmartApi_MouseLeave(object sender, MouseEventArgs e)
+    {
+      ModulestreetSmart.Current.InsideViewer = false; // Set the flag in
+    }
   }
 }

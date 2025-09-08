@@ -68,6 +68,17 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public readonly MeasurementList MeasurementList = [];
 
+    public bool InsideViewer
+    {
+      set
+      {
+        if (MeasurementList != null)
+        {
+          MeasurementList.InsideViewer = value;
+        }
+      }
+    }
+
     #endregion
 
     #region Constructor

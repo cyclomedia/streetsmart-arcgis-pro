@@ -98,6 +98,8 @@ namespace StreetSmartArcGISPro.Overlays.Measurement
       Open?.CloseMeasurement();
     }
 
+    public bool InsideViewer { set; get; }
+
     public void RemoveAll()
     {
       while (Count >= 1)

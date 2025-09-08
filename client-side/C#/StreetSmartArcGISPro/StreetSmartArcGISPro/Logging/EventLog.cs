@@ -141,7 +141,7 @@ namespace StreetSmartArcGISPro.Logging
 
       int totalLayers = vectorLayers.Count;
       int visibleOnMapCount = vectorLayers.Count(layer => layer.IsLayerVisible);
-      int visibleInCycloramaCount = vectorLayers.Count(layer => layer.Overlay.Visible);
+      int visibleInCycloramaCount = vectorLayers.Count(layer => layer?.Overlay?.Visible ?? false);
 
       logMessageBuilder.AppendLine($"\nTotal Layers: {totalLayers}");
       logMessageBuilder.AppendLine($" Visible on Map: {visibleOnMapCount}");
