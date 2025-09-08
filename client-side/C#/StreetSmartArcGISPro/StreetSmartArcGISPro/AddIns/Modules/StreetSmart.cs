@@ -359,11 +359,6 @@ namespace StreetSmartArcGISPro.AddIns.Modules
         LayersRemovedEvent.Subscribe(OnLayerRemoved);
       }
 
-      if (cycloMediaLayer.Count == 0)
-      {
-        await cycloMediaLayer.InitializeAsync();
-      }
-
       Setting settings = ProjectList.Instance.GetSettings(args.MapView);
 
       if (settings != null)
