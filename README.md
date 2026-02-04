@@ -1,4 +1,3 @@
-# Street Smart integration for ArcGIS Pro
 
 ## More information
 
