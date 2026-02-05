@@ -198,10 +198,10 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FocusMode16 {
+        internal static Aspose.Drawing.Bitmap FocusMode16 {
             get {
                 object obj = ResourceManager.GetObject("FocusMode16", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((Aspose.Drawing.Bitmap)(obj));
             }
         }
         
@@ -516,20 +516,20 @@ namespace StreetSmartArcGISPro.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SystemSearch16 {
+        internal static Aspose.Drawing.Bitmap SystemSearch16 {
             get {
                 object obj = ResourceManager.GetObject("SystemSearch16", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((Aspose.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap UserTrash16 {
+        internal static Aspose.Drawing.Bitmap UserTrash16 {
             get {
                 object obj = ResourceManager.GetObject("UserTrash16", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((Aspose.Drawing.Bitmap)(obj));
             }
         }
 

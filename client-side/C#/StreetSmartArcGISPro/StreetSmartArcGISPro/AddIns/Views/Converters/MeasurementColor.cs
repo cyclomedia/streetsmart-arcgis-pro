@@ -23,7 +23,7 @@ using System.Windows.Media;
 
 using StreetSmartArcGISPro.Overlays;
 
-using DrawingColor = System.Drawing.Color;
+using DrawingColor = Aspose.Drawing.Color;
 
 namespace StreetSmartArcGISPro.AddIns.Views.Converters
 {

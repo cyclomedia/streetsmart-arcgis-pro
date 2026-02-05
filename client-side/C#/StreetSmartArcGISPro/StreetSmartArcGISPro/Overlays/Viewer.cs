@@ -16,7 +16,8 @@
  * License along with this library.
  */
 
-using System.Drawing;
+using Aspose.Drawing;
+
 using System.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using StreetSmart.Common.Interfaces.Data;

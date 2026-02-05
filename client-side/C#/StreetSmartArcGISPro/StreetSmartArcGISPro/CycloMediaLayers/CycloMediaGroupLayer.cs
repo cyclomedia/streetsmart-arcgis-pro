@@ -84,7 +84,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     #region Functions
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(bool createGroupLayer)
     {
       _updateVisibility = false;
       GroupLayer = null;
@@ -103,7 +103,7 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
           map.RemoveLayers(layersToRemove);
         });
 
-        if (GroupLayer == null)
+        if (GroupLayer == null && createGroupLayer)
         {
           await QueuedTask.Run(() =>
           {

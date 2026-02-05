@@ -1,21 +1,22 @@
 /*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3.0 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
 
+using Aspose.Drawing;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Core.Events;
 using ArcGIS.Desktop.Framework;
@@ -30,7 +31,6 @@ using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.DomElement;
 using StreetSmart.Common.Interfaces.Events;
 using StreetSmart.Common.Interfaces.GeoJson;
-using StreetSmart.Common.Interfaces.SLD;
 using StreetSmart.WPF;
 using StreetSmartArcGISPro.AddIns.Views;
 using StreetSmartArcGISPro.Configuration.File;
@@ -40,12 +40,12 @@ using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
 using StreetSmartArcGISPro.Overlays.Measurement;
+using StreetSmartArcGISPro.SLD;
 using StreetSmartArcGISPro.Utilities;
 using StreetSmartArcGISPro.VectorLayers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -934,7 +934,8 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           }
         }
 
-        IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, sld?.GetSerializedSld(), visible);
+        string serXSerializedSld = sld?.GetSerializedSld();
+        IGeoJsonOverlay overlay = OverlayFactory.Create(geoJson, layerName, srsName, serXSerializedSld, visible);
 
         if (vectorLayer.Overlay == null)
         {
@@ -1145,7 +1146,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         Viewer viewer = _viewerList.GetViewer(panoramaViewer);
         ICoordinate coordinate = recording.XYZ;
         IOrientation orientation = OrientationFactory.Create(0, 0, 0);
-        Color color = await panoramaViewer.GetViewerColor();
+        Color color = (await panoramaViewer.GetViewerColor()).ToAspColor();
         EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (ViewerAdded) set coordinate, orientation and color");
         await viewer.SetAsync(coordinate, orientation, color, _mapView);
 
@@ -1483,7 +1484,7 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
           {
             IRecording recording = await panoramaViewer.GetRecording();
             IOrientation orientation = await panoramaViewer.GetOrientation();
-            Color color = await panoramaViewer.GetViewerColor();
+            Color color = (await panoramaViewer.GetViewerColor()).ToAspColor();
 
             ICoordinate coordinate = recording.XYZ;
             string imageId = recording.Id;

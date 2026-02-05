@@ -1,17 +1,17 @@
 ﻿/*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3.0 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
@@ -21,17 +21,18 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using Aspose.Drawing;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmartArcGISPro.Configuration.File;
+using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
-using SystCol = System.Drawing.Color;
+using SystCol = Aspose.Drawing.Color;
 using WinPoint = System.Windows.Point;
 
 namespace StreetSmartArcGISPro.Overlays
@@ -215,7 +216,7 @@ namespace StreetSmartArcGISPro.Overlays
             Polygon polygon = PolygonBuilderEx.CreatePolygon(polygonPointList);
 #endif
             var colorPolygon = SystCol.FromArgb(Alpha, thisColor);
-            CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon);
+            CIMColor cimColorPolygon = ColorFactory.Instance.CreateColor(colorPolygon.ToSysColor());
             CIMPolygonSymbol polygonSymbol = SymbolFactory.Instance.DefaultPolygonSymbol;
             polygonSymbol.SetColor(cimColorPolygon);
             polygonSymbol.SetOutlineColor(null);

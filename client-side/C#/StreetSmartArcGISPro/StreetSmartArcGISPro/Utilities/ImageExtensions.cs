@@ -16,15 +16,10 @@
  * License along with this library.
  */
 
-using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
-using DrawingImage = System.Drawing.Image;
-using DrawingBitmap = System.Drawing.Bitmap;
+using DrawingImage = Aspose.Drawing.Image;
+using DrawingBitmap = Aspose.Drawing.Bitmap;
 
 namespace StreetSmartArcGISPro.Utilities
 {
@@ -40,28 +35,7 @@ namespace StreetSmartArcGISPro.Utilities
 
     public static BitmapSource ToBitmapSource(this DrawingBitmap source)
     {
-      BitmapSource bitSrc;
-      var hBitmap = source.GetHbitmap();
-
-      try
-      {
-        bitSrc = Imaging.CreateBitmapSourceFromHBitmap(hBitmap, IntPtr.Zero, Int32Rect.Empty,
-          BitmapSizeOptions.FromEmptyOptions());
-      }
-      catch (Win32Exception)
-      {
-        bitSrc = null;
-      }
-      finally
-      {
-        DeleteObject(hBitmap);
-      }
-
-      return bitSrc;
+      return WpfInterop.ToBitmapSourceFast(source);
     }
-
-    [DllImport("gdi32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static extern bool DeleteObject(IntPtr hObject);
   }
 }

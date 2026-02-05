@@ -48,10 +48,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     [XmlElement(IsNullable = true,ElementName = "SyncLayerVisibility")]
     public bool? SyncLayerVisibility
     {
-      get
-      {
-        return _syncLayerVisibility;
-      }
+      get => _syncLayerVisibility;
       set
       {
         if(_syncLayerVisibility != value)

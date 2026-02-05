@@ -26,12 +26,12 @@ using ArcGIS.Desktop.Editing.Templates;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using Aspose.Drawing;
 using Nancy.Json;
 using StreetSmart.Common.Factories;
 using StreetSmart.Common.Interfaces.API;
 using StreetSmart.Common.Interfaces.Data;
 using StreetSmart.Common.Interfaces.GeoJson;
-using StreetSmart.Common.Interfaces.SLD;
 using StreetSmartArcGISPro.Configuration.File;
 using StreetSmartArcGISPro.Logging;
 using StreetSmartArcGISPro.Overlays;
@@ -40,16 +40,19 @@ using StreetSmartArcGISPro.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Tasks;
+using StreetSmartArcGISPro.SLD;
+
 using ColorConverter = StreetSmartArcGISPro.Utilities.ColorConverter;
 using GeometryType = ArcGIS.Core.Geometry.GeometryType;
 using MySpatialReference = StreetSmartArcGISPro.Configuration.Remote.SpatialReference.SpatialReference;
 using StreetSmartModule = StreetSmartArcGISPro.AddIns.Modules.StreetSmart;
 using Unit = ArcGIS.Core.Geometry.Unit;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
+using SLDFactory = StreetSmartArcGISPro.SLD.SLDFactory;
 
 namespace StreetSmartArcGISPro.VectorLayers
 {
@@ -445,8 +448,8 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private bool ShouldSyncLayersVisibility()
     {
-      bool? syncLayerVisibility = ProjectList.Instance.GetSettings(MapView.Active).SyncLayerVisibility;
-      var result = syncLayerVisibility ?? Configuration.File.Configuration.Instance.IsSyncOfVisibilityEnabled;
+      bool? syncLayerVisibility = MapView.Active != null ? ProjectList.Instance?.GetSettings(MapView.Active)?.SyncLayerVisibility : null;
+      var result = syncLayerVisibility ?? (FileConfiguration.Instance?.IsSyncOfVisibilityEnabled ?? false);
       return result;
     }
 
@@ -766,36 +769,44 @@ namespace StreetSmartArcGISPro.VectorLayers
         {
           var measurementGeoJson = serializer.Serialize(measurement[0].Feature.Geometry);
 
-          try
+          if (serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson) != null)
           {
-            measurementX = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["x"];
-            measurementY = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["y"];
-            measurementZ = serializer.Deserialize<Dictionary<string, double>>(measurementGeoJson)["z"];
+            MeasurementObject json = JsonSerializer.Deserialize<MeasurementObject>(measurementGeoJson);
+            measurementX = json.x;
+            measurementY = json.y;
+            measurementZ = json.z;
           }
-          catch (Exception)
+          else if (serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson) != null)
           {
-            try
+            var x = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson);
+
+            if(x.Count >= 1 && x[0] != null)
             {
-              measurementX = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["x"];
-              measurementY = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["y"];
-              measurementZ = serializer.Deserialize<List<Dictionary<string, double>>>(measurementGeoJson)[0]["z"];
+              List<MeasurementObject> json = JsonSerializer.Deserialize<List<MeasurementObject>>(measurementGeoJson);
+              measurementX = json[0].x;
+              measurementY = json[0].y;
+              measurementZ = json[0].z;
             }
-            catch (Exception)
+            else if (serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson) != null)
             {
-              try
+              var y = serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson);
+
+              if (y.Count >= 1 && y[0].Count >= 1 && y[0][0] != null)
               {
-                measurementX =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["x"];
-                measurementY =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["y"];
-                measurementZ =
-                  serializer.Deserialize<List<List<Dictionary<string, double>>>>(measurementGeoJson)[0][0]["z"];
+                List<List<MeasurementObject>> json = JsonSerializer.Deserialize<List<List<MeasurementObject>>>(measurementGeoJson);
+                measurementX = json[0][0].x;
+                measurementY = json[0][0].y;
+                measurementZ = json[0][0].z;
               }
-              catch (Exception e)
+              else
               {
-                EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync) error: {e}");
+                EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync)");
               }
             }
+          }
+          else
+          {
+            EventLog.Write(EventLogLevel.Error, $"Street Smart: (VectorLayer.cs) (AddFeatureAsync)");
           }
 
 #if ARCGISPRO29

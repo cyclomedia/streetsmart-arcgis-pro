@@ -68,6 +68,17 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     public readonly MeasurementList MeasurementList = [];
 
+    public bool InsideViewer
+    {
+      set
+      {
+        if (MeasurementList != null)
+        {
+          MeasurementList.InsideViewer = value;
+        }
+      }
+    }
+
     #endregion
 
     #region Constructor
@@ -290,7 +301,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (cycloMediaGroupLayer.Count == 0)
       {
-        await cycloMediaGroupLayer.InitializeAsync();
+        await cycloMediaGroupLayer.InitializeAsync(true);
       }
 
       if (!string.IsNullOrEmpty(name))
@@ -350,7 +361,7 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
       if (cycloMediaLayer.Count == 0)
       {
-        await cycloMediaLayer.InitializeAsync();
+        await cycloMediaLayer.InitializeAsync(false);
       }
 
       Setting settings = ProjectList.Instance.GetSettings(args.MapView);

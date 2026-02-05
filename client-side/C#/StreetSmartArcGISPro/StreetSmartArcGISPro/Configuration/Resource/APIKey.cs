@@ -38,7 +38,9 @@ namespace StreetSmartArcGISPro.Configuration.Resource
       V3_0,
       V3_1,
       V3_2,
-      V3_3
+      V3_3,
+      V3_4,
+      V3_5
     }
 
     #endregion
@@ -101,6 +103,18 @@ namespace StreetSmartArcGISPro.Configuration.Resource
     public string ApiKey33 { get; set; }
 
     /// <summary>
+    /// API Key 3.4
+    /// </summary>
+    [XmlElement("APIKey_34")]
+    public string ApiKey34 { get; set; }
+
+    /// <summary>
+    /// API Key 3.5
+    /// </summary>
+    [XmlElement("APIKey_35")]
+    public string ApiKey35 { get; set; }
+
+    /// <summary>
     /// Versioned API Key
     /// </summary>
     [XmlIgnore()]
@@ -115,6 +129,8 @@ namespace StreetSmartArcGISPro.Configuration.Resource
           SupportedArcGisProVersion.V3_1 => ApiKey31,
           SupportedArcGisProVersion.V3_2 => ApiKey32,
           SupportedArcGisProVersion.V3_3 => ApiKey33,
+          SupportedArcGisProVersion.V3_4 => ApiKey34,
+          SupportedArcGisProVersion.V3_5 => ApiKey35,
           _ => APIKeyUnsupported // Fallback if the version is not recognized
         };
       }
@@ -169,6 +185,8 @@ namespace StreetSmartArcGISPro.Configuration.Resource
         "3.1" => SupportedArcGisProVersion.V3_1,
         "3.2" => SupportedArcGisProVersion.V3_2,
         "3.3" => SupportedArcGisProVersion.V3_3,
+        "3.4" => SupportedArcGisProVersion.V3_4,
+        "3.5" => SupportedArcGisProVersion.V3_5,
         _ => SupportedArcGisProVersion.Unknown // Fallback if the version is not recognized
       };
     }
