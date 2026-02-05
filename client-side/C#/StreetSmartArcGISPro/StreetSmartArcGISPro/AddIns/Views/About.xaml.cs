@@ -16,7 +16,8 @@
  * License along with this library.
  */
 
-using System.Windows.Controls;
+using System;
+using System.Diagnostics;
 using System.Windows.Navigation;
 
 namespace StreetSmartArcGISPro.AddIns.Views
@@ -39,34 +40,20 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
     private void OnNavigateUri(object sender, RequestNavigateEventArgs e)
     {
-      var window = new NavigationWindow {Source = e.Uri};
-      window.LoadCompleted += LoadCompleted;
-      window.Show();
-    }
-
-    public void LoadCompleted(object sender, NavigationEventArgs e)
-    {
-      if (sender is NavigationWindow { Content: WebBrowser browser })
+      try
       {
-        browser.LoadCompleted += BrowserLoadCompleted;
-      }
-    }
-
-    public void BrowserLoadCompleted(object sender, NavigationEventArgs e)
-    {
-      var browser = sender as WebBrowser;
-
-      if (browser?.Document != null)
-      {
-        dynamic document = browser.Document;
-
-        if (document.readyState == "complete")
+        // Open the URL in the default browser
+        Process.Start(new ProcessStartInfo
         {
-          dynamic script = document.createElement("script");
-          script.type = @"text/javascript";
-          script.text = @"window.onerror = function(msg,url,line){return true;}";
-          document.head.appendChild(script);
-        }
+          FileName = e.Uri.AbsoluteUri,
+          UseShellExecute = true
+        });
+        e.Handled = true;
+      }
+      catch (Exception ex)
+      {
+        // Silently fail if browser launch fails
+        System.Diagnostics.Debug.WriteLine($"Failed to open URL: {ex.Message}");
       }
     }
 

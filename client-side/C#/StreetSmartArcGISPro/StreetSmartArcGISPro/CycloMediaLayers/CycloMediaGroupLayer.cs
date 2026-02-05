@@ -97,11 +97,15 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         var layers = map.GetLayersAsFlattenedList();
         var layersForGroupLayer = map.FindLayers(GroupLayerName);
         GroupLayer = layersForGroupLayer.OfType<GroupLayer>().FirstOrDefault();
-        var layersToRemove = layersForGroupLayer.Except(GroupLayer == null ? [] : [GroupLayer]);
-        await QueuedTask.Run(() =>
+        var layersToRemove = layersForGroupLayer.Except(GroupLayer == null ? [] : [GroupLayer]).ToList();
+
+        if (layersToRemove.Count > 0)
         {
-          map.RemoveLayers(layersToRemove);
-        });
+          await QueuedTask.Run(() =>
+          {
+            map.RemoveLayers(layersToRemove);
+          });
+        }
 
         if (GroupLayer == null && createGroupLayer)
         {
