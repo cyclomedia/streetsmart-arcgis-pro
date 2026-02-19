@@ -67,10 +67,10 @@ namespace StreetSmartArcGISPro.AddIns.Buttons
           {
             Type thisType = GetType();
             Assembly thisAssembly = Assembly.GetAssembly(thisType);
-            const string manualName = "Street Smart for ArcGIS Pro User Manual.pdf";
+            const string manualName = "Street Smart for ArcGIS Pro User Manual.pdf.pdf";
             const string manualPath = @"StreetSmartArcGISPro.Resources." + manualName;
             Stream manualStream = thisAssembly.GetManifestResourceStream(manualPath);
-            string fileName = Path.Combine(FileUtils.FileDir, manualName);
+            string fileName = Path.Combine(FileUtils.FileDir, "Street Smart for ArcGIS Pro User Manual.pdf");
 
             if (File.Exists(fileName))
             {
