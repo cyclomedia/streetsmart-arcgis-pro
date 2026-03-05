@@ -28,7 +28,6 @@ using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 using ArcGisProject = ArcGIS.Desktop.Core.Project;
 using FileProject = StreetSmartArcGISPro.Configuration.File.Project;
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -82,9 +81,7 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       try
       {
-        FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-        XmlProjects.Serialize(streamFile, this);
-        streamFile.Close();
+        FileUtils.SafeSerializeToFile(FileName, XmlProjects, this);
       }
       catch (Exception ex)
       {
@@ -99,19 +96,14 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
+      try
       {
-        try
-        {
-          var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-          _projectList = (ProjectList)XmlProjects.Deserialize(streamFile);
-          streamFile.Close();
-        }
-        catch (Exception ex)
-        {
-          EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Load) error: {ex}");
-          _projectList = [];
-        }
+        _projectList = FileUtils.SafeDeserializeFromFile<ProjectList>(FileName, XmlProjects);
+      }
+      catch (Exception ex)
+      {
+        EventLog.Write(EventLog.EventType.Error, $"Street Smart: (ProjectList.cs) (Load) error: {ex}");
+        _projectList = [];
       }
     }
 

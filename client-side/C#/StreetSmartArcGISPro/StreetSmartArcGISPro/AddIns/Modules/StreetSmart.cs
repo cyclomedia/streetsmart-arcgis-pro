@@ -122,7 +122,12 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void OnApplicationStartupEvent(EventArgs args)
     {
-      if (Login.Instance.IsOAuth)
+      
+      FileUtils.CleanupStaleCacheDirs();
+
+      // Only auto-activate if we have a valid bearer token for this instance.
+      // from the shared Login.xml
+      if (Login.Instance.IsOAuth && !string.IsNullOrEmpty(Login.Instance.Bearer))
       {
         Login.Instance.IsFromSettingsPage = false;
         DockPaneStreetSmart.ActivateStreetSmart();

@@ -21,7 +21,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -173,19 +172,12 @@ namespace StreetSmartArcGISPro.Configuration.File
     public void Save()
     {
       OnPropertyChanged();
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlConfiguration.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlConfiguration, this);
     }
 
     private static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration)XmlConfiguration.Deserialize(streamFile);
-        streamFile.Close();
-      }
+      _configuration = FileUtils.SafeDeserializeFromFile<Configuration>(FileName, XmlConfiguration);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

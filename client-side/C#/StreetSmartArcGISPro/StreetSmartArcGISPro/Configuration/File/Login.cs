@@ -28,7 +28,6 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -226,22 +225,16 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlLogin.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlLogin, this);
       Check();
     }
 
     private static Login Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        using var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _login = (Login)XmlLogin.Deserialize(streamFile);
-        streamFile.Close();
-        if (!_login.IsOAuth)
-          _login.Check();
-      }
+      _login = FileUtils.SafeDeserializeFromFile<Login>(FileName, XmlLogin);
+
+      if (_login != null && !_login.IsOAuth)
+        _login.Check();
 
       return _login;
     }

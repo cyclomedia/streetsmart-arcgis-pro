@@ -390,7 +390,11 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void InitializeApi()
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi)");
-      string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+
+      // Use a process-specific cache directory to avoid CEF/Chromium lock conflicts
+      // when multiple ArcGIS Pro instances run simultaneously.
+      int pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+      string cachePath = Path.Combine(FileUtils.FileDir, $"Cache_{pid}");
 
       try
       {

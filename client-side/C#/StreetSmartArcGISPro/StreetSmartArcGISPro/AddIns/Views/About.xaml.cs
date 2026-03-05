@@ -16,7 +16,7 @@
  * License along with this library.
  */
 
-using System.Windows.Controls;
+using System.Diagnostics;
 using System.Windows.Navigation;
 
 namespace StreetSmartArcGISPro.AddIns.Views
@@ -39,35 +39,12 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
     private void OnNavigateUri(object sender, RequestNavigateEventArgs e)
     {
-      var window = new NavigationWindow {Source = e.Uri};
-      window.LoadCompleted += LoadCompleted;
-      window.Show();
-    }
-
-    public void LoadCompleted(object sender, NavigationEventArgs e)
-    {
-      if (sender is NavigationWindow { Content: WebBrowser browser })
+      Process.Start(new ProcessStartInfo
       {
-        browser.LoadCompleted += BrowserLoadCompleted;
-      }
-    }
-
-    public void BrowserLoadCompleted(object sender, NavigationEventArgs e)
-    {
-      var browser = sender as WebBrowser;
-
-      if (browser?.Document != null)
-      {
-        dynamic document = browser.Document;
-
-        if (document.readyState == "complete")
-        {
-          dynamic script = document.createElement("script");
-          script.type = @"text/javascript";
-          script.text = @"window.onerror = function(msg,url,line){return true;}";
-          document.head.appendChild(script);
-        }
-      }
+        FileName = e.Uri.AbsoluteUri,
+        UseShellExecute = true
+      });
+      e.Handled = true;
     }
 
     #endregion

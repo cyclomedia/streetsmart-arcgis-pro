@@ -21,8 +21,6 @@ using System.Xml.Serialization;
 
 using StreetSmartArcGISPro.Utilities;
 
-using SystemIOFile = System.IO.File;
-
 namespace StreetSmartArcGISPro.Configuration.File
 {
   [XmlRoot("ConstantsRecordingLayer")]
@@ -82,19 +80,12 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlConstantsRecordingLayer.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlConstantsRecordingLayer, this);
     }
 
     private static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _constantsRecordingLayer = (ConstantsRecordingLayer) XmlConstantsRecordingLayer.Deserialize(streamFile);
-        streamFile.Close();
-      }
+      _constantsRecordingLayer = FileUtils.SafeDeserializeFromFile<ConstantsRecordingLayer>(FileName, XmlConstantsRecordingLayer);
     }
 
     private static ConstantsRecordingLayer Create()

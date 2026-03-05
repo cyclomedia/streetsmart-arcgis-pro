@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CycloMedia")]
 [assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2025")]
+[assembly: AssemblyCopyright("Copyright © CycloMedia 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("914cc234-6eac-401d-a7a8-96baa1782909")]
 
-[assembly: AssemblyVersion("3.0.25.9")]
-[assembly: AssemblyFileVersion("3.0.25.9")]
+[assembly: AssemblyVersion("3.0.26.1")]
+[assembly: AssemblyFileVersion("3.0.26.1")]

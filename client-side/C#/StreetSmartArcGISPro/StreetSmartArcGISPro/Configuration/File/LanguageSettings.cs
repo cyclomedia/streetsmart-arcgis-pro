@@ -25,8 +25,6 @@ using System.Xml.Serialization;
 using StreetSmartArcGISPro.Configuration.Resource;
 using StreetSmartArcGISPro.Utilities;
 
-using SystemIOFile = System.IO.File;
-
 namespace StreetSmartArcGISPro.Configuration.File
 {
   [XmlRoot("LanguageSettings")]
@@ -106,19 +104,12 @@ namespace StreetSmartArcGISPro.Configuration.File
     public void Save()
     {
       OnPropertyChanged();
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlLanguageSettings.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlLanguageSettings, this);
     }
 
     private static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _languageSettings = (LanguageSettings) XmlLanguageSettings.Deserialize(streamFile);
-        streamFile.Close();
-      }
+      _languageSettings = FileUtils.SafeDeserializeFromFile<LanguageSettings>(FileName, XmlLanguageSettings);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
