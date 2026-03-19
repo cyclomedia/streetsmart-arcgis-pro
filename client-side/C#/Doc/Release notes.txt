@@ -2,6 +2,12 @@ Release notes:
 ==============
 
 
+Version 3.0.26.1 (02/04/2025)
+============================
+- Compatible with ArcGIS Pro 3.1, 3.2, 3.3, 3.4, 3.5, 3.6
+- Resolved breaking change in map.RemoveLayers() method for Pro 3.6
+
+
 Version 0.1.0 (23/08/2018)
 ============================
 - Start release notes
