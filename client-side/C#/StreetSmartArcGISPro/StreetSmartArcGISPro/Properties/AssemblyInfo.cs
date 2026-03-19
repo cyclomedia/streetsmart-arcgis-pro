@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CycloMedia")]
 [assembly: AssemblyProduct("Street Smart for ArcGIS Pro")]
-[assembly: AssemblyCopyright("Copyright © CycloMedia 2029")]
+[assembly: AssemblyCopyright("Copyright © CycloMedia 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
