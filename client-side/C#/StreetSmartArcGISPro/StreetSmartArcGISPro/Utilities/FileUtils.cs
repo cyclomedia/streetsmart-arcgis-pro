@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
@@ -33,6 +33,12 @@ namespace StreetSmartArcGISPro.Utilities
 
     private const int MaxRetries = 3;
     private const int RetryDelayMs = 150;
+
+    #endregion
+
+    #region Members
+
+    private static Mutex _singleInstanceMutex;
 
     #endregion
 
@@ -134,6 +140,35 @@ namespace StreetSmartArcGISPro.Utilities
       }
 
       return null;
+    }
+
+    /// checks only one ArcGIS Pro instance
+    /// can use the shared CEF cache in single project mode.
+    /// Returns true if this is the first instance
+    /// Returns false if another instance already holds the lock.
+   
+    public static bool TryAcquireSingleInstanceLock()
+    {
+      if (_singleInstanceMutex != null)
+        return true;
+
+      try
+      {
+        var mutex = new Mutex(true, @"Global\StreetSmartArcGISPro_SingleInstance", out bool createdNew);
+
+        if (createdNew)
+        {
+          _singleInstanceMutex = mutex;
+          return true;
+        }
+
+        mutex.Dispose();
+        return false;
+      }
+      catch
+      {
+        return true;
+      }
     }
 
   
