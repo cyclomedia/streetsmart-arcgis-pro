@@ -25,9 +25,12 @@ using System.Windows.Input;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Utilities;
 using FileLogin = StreetSmartArcGISPro.Configuration.File.Login;
 using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
+using ArcGisProject = ArcGIS.Desktop.Core.Project;
 using static StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
@@ -136,6 +139,12 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     private async Task SignInOAuth()
     {
+      if (IsBlockedByAnotherInstance())
+        return;
+
+      if (!IsProjectOpen())
+        return;
+
       _login.IsOAuth = true;
       _login.OAuthAuthenticationStatus = OAuthStatus.SigningIn;
 
@@ -290,6 +299,44 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _login.Save();
       NotifyPropertyChanged("Credentials");
       NotifyPropertyChanged("Username");
+    }
+
+    // Checking if an ArcGIS Pro project is currently open
+   
+   
+    private bool IsProjectOpen()
+    {
+      if (ArcGisProject.Current != null)
+        return true;
+
+      MessageBox.Show(
+        "Please open a project before using Single Sign-On (SSO).\n\n" +
+        "An active project is required to initialize the authentication process.",
+        "Street Smart - No Project Open",
+        System.Windows.MessageBoxButton.OK,
+        System.Windows.MessageBoxImage.Information);
+      return false;
+    }
+
+  
+    // Checkinh active modee and another instance already holds the lock.
+    // Shows a warning if blocked.
+  
+    private bool IsBlockedByAnotherInstance()
+    {
+      if (_configuration.AllowMultipleInstances)
+        return false;
+
+      if (FileUtils.TryAcquireSingleInstanceLock())
+        return false;
+
+      MessageBox.Show(
+        "Another ArcGIS Pro instance is already running Street Smart in single-project mode.\n\n" +
+        "To work with multiple projects simultaneously, enable “Allow multiple projects” in the Login settings of the first instance, then restart all instances.",
+        "Street Smart – Single Project Mode Active",
+        System.Windows.MessageBoxButton.OK,
+        System.Windows.MessageBoxImage.Warning);
+      return true;
     }
 
     #endregion

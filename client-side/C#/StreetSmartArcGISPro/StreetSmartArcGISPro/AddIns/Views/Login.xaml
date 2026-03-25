@@ -365,7 +365,7 @@
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
               <Border.ToolTip>
                 <ToolTip MaxWidth="300">
-                  <TextBlock TextWrapping="Wrap" Text="You are allowed to state how you want to use the Street Smart if multiple project is active you will be required to use 2FA via SSO login on each project."/>
+                                    <TextBlock TextWrapping="Wrap" Text="When “Allow multiple projects” is enabled, you can use Street Smart across multiple projects. Please note that SSO with two-factor authentication is required for each project session."/>
                 </ToolTip>
               </Border.ToolTip>
             </Border>
@@ -405,7 +405,7 @@
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Border.ToolTip>
                   <ToolTip MaxWidth="300">
-                                        <TextBlock TextWrapping="Wrap" Text="When single project is active you will not be allowed to log in at the same time via SSO for the Street Smart if you wish to change log out first from the Prior project opened and then change the toggle."/>
+                                        <TextBlock TextWrapping="Wrap" Text="When single-project mode is active, you can only use Street Smart in one project at a time. To switch projects, sign out from the current session and open Street Smart in another project."/>
                   </ToolTip>
                 </Border.ToolTip>
               </Border>
@@ -439,7 +439,7 @@
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Border.ToolTip>
                   <ToolTip MaxWidth="300">
-                    <TextBlock TextWrapping="Wrap" Text="When multiple project is active you will required to log in for each session via SSO if you wish to change log out first from the Prior project opened and then change the toggle."/>
+                                        <TextBlock TextWrapping="Wrap" Text="When multiple-project mode is enabled, you can use Street Smart across multiple projects simultaneously. Each session requires authentication via SSO. To change this setting, sign out and update the toggle in the Login settings."/>
                   </ToolTip>
                 </Border.ToolTip>
               </Border>

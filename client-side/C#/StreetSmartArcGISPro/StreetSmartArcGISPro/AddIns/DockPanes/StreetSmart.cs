@@ -408,9 +408,9 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         {
           EventLog.Write(EventLogLevel.Warning, "Street Smart: (StreetSmart.cs) (InitializeApi): Another instance is already running in single project mode.");
           MessageBox.Show(
-            "Another ArcGIS Pro project is already running Street Smart in single project mode.\n\n" +
-            "To use multiple projects simultaneously, please enable the 'Allow multiple projects' toggle in the Login settings of your first project, then restart both projects.",
-            "Street Smart - Single Project Mode",
+            "Another ArcGIS Pro instance is already running Street Smart in single-project mode.\n\n" +
+            "To work with multiple projects simultaneously, enable “Allow multiple projects” in the Login settings of the first instance, then restart all instances.",
+            "Street Smart – Single Project Mode Active",
             System.Windows.MessageBoxButton.OK,
             System.Windows.MessageBoxImage.Warning);
           return;
