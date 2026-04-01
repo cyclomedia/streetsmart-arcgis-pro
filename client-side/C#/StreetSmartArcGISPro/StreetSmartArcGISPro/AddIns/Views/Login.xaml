@@ -299,7 +299,7 @@
       </StackPanel>
 
       <!-- Multiple Instances Toggle - between SSO button and bottom -->
-      <StackPanel Margin="10,20,10,5" Orientation="Vertical">
+      <StackPanel Margin="10,2,10,5" Orientation="Vertical">
 
         <!-- Toggle: visible only when logged OUT -->
         <Border CornerRadius="6" Padding="10,8"
