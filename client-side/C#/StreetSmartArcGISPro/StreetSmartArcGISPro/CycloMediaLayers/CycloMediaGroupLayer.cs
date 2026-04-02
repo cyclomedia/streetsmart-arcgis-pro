@@ -97,15 +97,29 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
         var layers = map.GetLayersAsFlattenedList();
         var layersForGroupLayer = map.FindLayers(GroupLayerName);
         GroupLayer = layersForGroupLayer.OfType<GroupLayer>().FirstOrDefault();
-        var layersToRemove = layersForGroupLayer.Except(GroupLayer == null ? [] : [GroupLayer]).ToList();
 
-        if (layersToRemove.Count > 0)
+        // ArcGIS Pro 3.6 update, Map.RemoveLayers() rejects GroupLayer types
+    
+        var nonGroupLayersToRemove = layersForGroupLayer
+            .Where(l => l.GetType() != typeof(ArcGIS.Desktop.Mapping.GroupLayer))
+            .ToList();
+        var duplicateGroupLayers = layersForGroupLayer
+            .OfType<ArcGIS.Desktop.Mapping.GroupLayer>()
+            .Where(g => g != GroupLayer)
+            .ToList();
+
+        await QueuedTask.Run(() =>
         {
-          await QueuedTask.Run(() =>
+          if (nonGroupLayersToRemove.Count > 0)
           {
-            map.RemoveLayers(layersToRemove);
-          });
-        }
+            map.RemoveLayers(nonGroupLayersToRemove);
+          }
+
+          foreach (var duplicateGroup in duplicateGroupLayers)
+          {
+            map.RemoveLayer(duplicateGroup);
+          }
+        });
 
         if (GroupLayer == null && createGroupLayer)
         {

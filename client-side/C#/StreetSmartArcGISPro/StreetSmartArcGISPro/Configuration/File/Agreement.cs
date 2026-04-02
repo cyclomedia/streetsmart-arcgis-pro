@@ -20,7 +20,6 @@ using StreetSmartArcGISPro.Utilities;
 using System;
 using System.IO;
 using System.Xml.Serialization;
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -90,31 +89,19 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlAgreement.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlAgreement, this);
     }
 
     private static Agreement Load()
     {
-      if (SystemIOFile.Exists(FileName))
+      try
       {
-        using var streamFile = new FileStream(FileName, FileMode.Open);
-        try
-        {
-          return (Agreement)XmlAgreement.Deserialize(streamFile);
-        }
-        catch
-        {
-          return null;
-        }
-        finally
-        {
-          streamFile.Close();
-        }
+        return FileUtils.SafeDeserializeFromFile<Agreement>(FileName, XmlAgreement);
       }
-
-      return null;
+      catch
+      {
+        return null;
+      }
     }
 
     private static Agreement Create()

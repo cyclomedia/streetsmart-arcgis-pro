@@ -390,7 +390,34 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
     private void InitializeApi()
     {
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (InitializeApi)");
-      string cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+
+      // Single project mode: shared "Cache" folder preserves SSO cookies across restarts.
+      // Multiple project mode: per-process "Cache_{PID}" allows simultaneous instances
+      // but SSO users must re-authenticate in each instance.
+      bool isMultiple = FileConfiguration.Instance.AllowMultipleInstances;
+      string cachePath;
+
+      if (isMultiple)
+      {
+        cachePath = Path.Combine(FileUtils.FileDir, $"Cache_{System.Diagnostics.Process.GetCurrentProcess().Id}");
+      }
+      else
+      {
+        // In single mode, check if another instance is already running
+        if (!FileUtils.TryAcquireSingleInstanceLock())
+        {
+          EventLog.Write(EventLogLevel.Warning, "Street Smart: (StreetSmart.cs) (InitializeApi): Another instance is already running in single project mode.");
+          MessageBox.Show(
+            "Another ArcGIS Pro instance is already running Street Smart in single-project mode.\n\n" +
+            "To work with multiple projects simultaneously, enable “Allow multiple projects” in the Login settings of the first instance, then restart all instances.",
+            "Street Smart – Single Project Mode Active",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Warning);
+          return;
+        }
+
+        cachePath = Path.Combine(FileUtils.FileDir, "Cache");
+      }
 
       try
       {

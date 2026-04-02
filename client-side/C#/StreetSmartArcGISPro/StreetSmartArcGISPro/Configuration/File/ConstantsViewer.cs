@@ -21,8 +21,6 @@ using System.Xml.Serialization;
 
 using StreetSmartArcGISPro.Utilities;
 
-using SystemIOFile = System.IO.File;
-
 namespace StreetSmartArcGISPro.Configuration.File
 {
   [XmlRoot("ConstantsViewer")]
@@ -97,19 +95,12 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlConstantsViewer.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlConstantsViewer, this);
     }
 
     private static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _constantsViewer = (ConstantsViewer) XmlConstantsViewer.Deserialize(streamFile);
-        streamFile.Close();
-      }
+      _constantsViewer = FileUtils.SafeDeserializeFromFile<ConstantsViewer>(FileName, XmlConstantsViewer);
     }
 
     private static ConstantsViewer Create()

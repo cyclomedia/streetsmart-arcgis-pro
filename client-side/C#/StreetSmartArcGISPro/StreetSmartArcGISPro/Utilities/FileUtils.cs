@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Street Smart integration in ArcGIS Pro
  * Copyright (c) 2018 - 2019, CycloMedia, All rights reserved.
  * 
@@ -17,13 +17,31 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Xml.Serialization;
 
 namespace StreetSmartArcGISPro.Utilities
 {
   internal class FileUtils
   {
+    #region Constants
+
+    private const int MaxRetries = 3;
+    private const int RetryDelayMs = 150;
+
+    #endregion
+
+    #region Members
+
+    private static Mutex _singleInstanceMutex;
+
+    #endregion
+
     #region Properties
 
     public static string FileDir
@@ -80,6 +98,104 @@ namespace StreetSmartArcGISPro.Utilities
           fileStream.Close();
         }
       }
+    }
+
+  
+    /// XML FileShare and retry logic
+    /// to support multiple ArcGIS Pro instances.
+  
+    public static void SafeSerializeToFile<T>(string fileName, XmlSerializer serializer, T obj)
+    {
+      for (int attempt = 0; attempt < MaxRetries; attempt++)
+      {
+        try
+        {
+          using var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+          serializer.Serialize(stream, obj);
+          return;
+        }
+        catch (IOException) when (attempt < MaxRetries - 1)
+        {
+          Thread.Sleep(RetryDelayMs * (attempt + 1));
+        }
+      }
+    }
+
+    public static T SafeDeserializeFromFile<T>(string fileName, XmlSerializer serializer) where T : class
+    {
+      for (int attempt = 0; attempt < MaxRetries; attempt++)
+      {
+        try
+        {
+          if (!File.Exists(fileName))
+            return null;
+
+          using var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+          return (T)serializer.Deserialize(stream);
+        }
+        catch (IOException) when (attempt < MaxRetries - 1)
+        {
+          Thread.Sleep(RetryDelayMs * (attempt + 1));
+        }
+      }
+
+      return null;
+    }
+
+    /// checks only one ArcGIS Pro instance
+    /// can use the shared CEF cache in single project mode.
+    /// Returns true if this is the first instance
+    /// Returns false if another instance already holds the lock.
+   
+    public static bool TryAcquireSingleInstanceLock()
+    {
+      if (_singleInstanceMutex != null)
+        return true;
+
+      try
+      {
+        var mutex = new Mutex(true, @"Global\StreetSmartArcGISPro_SingleInstance", out bool createdNew);
+
+        if (createdNew)
+        {
+          _singleInstanceMutex = mutex;
+          return true;
+        }
+
+        mutex.Dispose();
+        return false;
+      }
+      catch
+      {
+        return true;
+      }
+    }
+
+  
+    /// Removes stale per-process CEF cache directories from previous ArcGIS Pro sessions.
+   
+    public static void CleanupStaleCacheDirs()
+    {
+      try
+      {
+        string baseDir = FileDir;
+        HashSet<int> runningPids = Process.GetProcessesByName("ArcGISPro")
+            .Select(p => p.Id)
+            .ToHashSet();
+
+        foreach (string dir in Directory.GetDirectories(baseDir, "Cache_*"))
+        {
+          string dirName = Path.GetFileName(dir);
+          string pidStr = dirName.Replace("Cache_", "");
+
+          if (int.TryParse(pidStr, out int pid) && !runningPids.Contains(pid))
+          {
+            try { Directory.Delete(dir, true); }
+            catch { /* ignore, may still be locked */ }
+          }
+        }
+      }
+      catch { /* non-critical cleanup */ }
     }
 
     #endregion

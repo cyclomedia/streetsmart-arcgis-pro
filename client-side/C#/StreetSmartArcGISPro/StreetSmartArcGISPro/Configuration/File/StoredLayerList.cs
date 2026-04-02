@@ -23,7 +23,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -77,19 +76,12 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     public void Save()
     {
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlStoredLayerList.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlStoredLayerList, this);
     }
 
     public static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _storedLayerList = (StoredLayerList)XmlStoredLayerList.Deserialize(streamFile);
-        streamFile.Close();
-      }
+      _storedLayerList = FileUtils.SafeDeserializeFromFile<StoredLayerList>(FileName, XmlStoredLayerList);
     }
 
     private static StoredLayerList Create()

@@ -21,7 +21,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-using SystemIOFile = System.IO.File;
 
 namespace StreetSmartArcGISPro.Configuration.File
 {
@@ -46,6 +45,8 @@ namespace StreetSmartArcGISPro.Configuration.File
 
     private bool _useDefaultConfigurationUrl;
     private string _configurationUrlLocation;
+
+    private bool _allowMultipleInstances;
 
     #endregion
 
@@ -131,9 +132,25 @@ namespace StreetSmartArcGISPro.Configuration.File
       }
     }
 
-    /// <summary>
+    /// When enabled, uses a separate browser cache per instance to allow multiple
+    /// ArcGIS Pro projects simultaneously. SSO users will need to re-authenticate
+    /// in each instance. When disabled, a single shared cache preserves SSO cookies.
+     public bool AllowMultipleInstances
+    {
+      get => _allowMultipleInstances;
+      set
+      {
+        if (_allowMultipleInstances != value)
+        {
+          _allowMultipleInstances = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
+    
     /// Proxy service
-    /// </summary>
+   
     public bool UseProxyServer { get; set; }
 
     public string ProxyAddress { get; set; }
@@ -173,19 +190,12 @@ namespace StreetSmartArcGISPro.Configuration.File
     public void Save()
     {
       OnPropertyChanged();
-      FileStream streamFile = SystemIOFile.Open(FileName, FileMode.Create);
-      XmlConfiguration.Serialize(streamFile, this);
-      streamFile.Close();
+      FileUtils.SafeSerializeToFile(FileName, XmlConfiguration, this);
     }
 
     private static void Load()
     {
-      if (SystemIOFile.Exists(FileName))
-      {
-        var streamFile = new FileStream(FileName, FileMode.OpenOrCreate);
-        _configuration = (Configuration)XmlConfiguration.Deserialize(streamFile);
-        streamFile.Close();
-      }
+      _configuration = FileUtils.SafeDeserializeFromFile<Configuration>(FileName, XmlConfiguration);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -201,6 +211,7 @@ namespace StreetSmartArcGISPro.Configuration.File
         _configurationUrlLocation = string.Empty,
         _useDefaultStreetSmartUrl = true,
         _isSyncOfVisibilityEnabled = true,
+        _allowMultipleInstances = false,
         _streetSmartLocation = string.Empty,
         UseProxyServer = false,
         ProxyAddress = string.Empty,

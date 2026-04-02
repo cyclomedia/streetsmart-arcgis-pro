@@ -25,8 +25,12 @@ using System.Windows.Input;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using ArcGIS.Desktop.Framework.Utilities;
+using StreetSmartArcGISPro.Utilities;
 using FileLogin = StreetSmartArcGISPro.Configuration.File.Login;
+using FileConfiguration = StreetSmartArcGISPro.Configuration.File.Configuration;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
+using ArcGisProject = ArcGIS.Desktop.Core.Project;
 using static StreetSmartArcGISPro.Configuration.File.Login;
 
 namespace StreetSmartArcGISPro.AddIns.Pages
@@ -36,6 +40,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     #region Members
 
     private readonly FileLogin _login;
+    private readonly FileConfiguration _configuration;
 
     private readonly string _username;
     private readonly string _password;
@@ -51,6 +56,7 @@ namespace StreetSmartArcGISPro.AddIns.Pages
     protected Login()
     {
       _login = FileLogin.Instance;
+      _configuration = FileConfiguration.Instance;
       _username = _login.Username;
       _password = _login.Password;
       _isOAuth = _login.IsOAuth;
@@ -72,6 +78,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
           case nameof(FileLogin.Credentials):
 
             EventLog.Write(EventLog.EventType.Debug, $"Street Smart: (Pages.Login.cs) (OnLoginPropertyChanged) (Credentials) {_login.Credentials}");
+            NotifyPropertyChanged("IsLoggedIn");
+            NotifyPropertyChanged("AllowMultipleInstances");
 
             break;
           case nameof(FileLogin.OAuthAuthenticationStatus):
@@ -92,6 +100,8 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
             NotifyPropertyChanged("OAuthAuthenticationStatus");
             NotifyPropertyChanged("IsOAuth");
+            NotifyPropertyChanged("IsLoggedIn");
+            NotifyPropertyChanged("AllowMultipleInstances");
 
             break;
           case nameof(FileLogin.OAuthUsername):
@@ -129,6 +139,12 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     private async Task SignInOAuth()
     {
+      if (IsBlockedByAnotherInstance())
+        return;
+
+      if (!IsProjectOpen())
+        return;
+
       _login.IsOAuth = true;
       _login.OAuthAuthenticationStatus = OAuthStatus.SigningIn;
 
@@ -232,6 +248,24 @@ namespace StreetSmartArcGISPro.AddIns.Pages
 
     public bool Credentials => _login.Credentials;
 
+    public bool AllowMultipleInstances
+    {
+      get => _configuration.AllowMultipleInstances;
+      set
+      {
+        if (_configuration.AllowMultipleInstances != value)
+        {
+          IsModified = true;
+          _configuration.AllowMultipleInstances = value;
+          _configuration.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+   
+    public bool IsLoggedIn => _login.Credentials || _login.OAuthAuthenticationStatus == OAuthStatus.SignedIn;
+
     #endregion
 
     #region Overrides
@@ -265,6 +299,44 @@ namespace StreetSmartArcGISPro.AddIns.Pages
       _login.Save();
       NotifyPropertyChanged("Credentials");
       NotifyPropertyChanged("Username");
+    }
+
+    // Checking if an ArcGIS Pro project is currently open
+   
+   
+    private bool IsProjectOpen()
+    {
+      if (ArcGisProject.Current != null)
+        return true;
+
+      MessageBox.Show(
+        "Please open a project before using Single Sign-On (SSO).\n\n" +
+        "An active project is required to initialize the authentication process.",
+        "Street Smart - No Project Open",
+        System.Windows.MessageBoxButton.OK,
+        System.Windows.MessageBoxImage.Information);
+      return false;
+    }
+
+  
+    // Checkinh active modee and another instance already holds the lock.
+    // Shows a warning if blocked.
+  
+    private bool IsBlockedByAnotherInstance()
+    {
+      if (_configuration.AllowMultipleInstances)
+        return false;
+
+      if (FileUtils.TryAcquireSingleInstanceLock())
+        return false;
+
+      MessageBox.Show(
+        "Another ArcGIS Pro instance is already running Street Smart in single-project mode.\n\n" +
+        "To work with multiple projects simultaneously, enable “Allow multiple projects” in the Login settings of the first instance, then restart all instances.",
+        "Street Smart – Single Project Mode Active",
+        System.Windows.MessageBoxButton.OK,
+        System.Windows.MessageBoxImage.Warning);
+      return true;
     }
 
     #endregion

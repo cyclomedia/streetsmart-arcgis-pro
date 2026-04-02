@@ -16,7 +16,6 @@
  * License along with this library.
  */
 
-using System;
 using System.Diagnostics;
 using System.Windows.Navigation;
 
@@ -40,21 +39,12 @@ namespace StreetSmartArcGISPro.AddIns.Views
 
     private void OnNavigateUri(object sender, RequestNavigateEventArgs e)
     {
-      try
+      Process.Start(new ProcessStartInfo
       {
-        // Open the URL in the default browser
-        Process.Start(new ProcessStartInfo
-        {
-          FileName = e.Uri.AbsoluteUri,
-          UseShellExecute = true
-        });
-        e.Handled = true;
-      }
-      catch (Exception ex)
-      {
-        // Silently fail if browser launch fails
-        System.Diagnostics.Debug.WriteLine($"Failed to open URL: {ex.Message}");
-      }
+        FileName = e.Uri.AbsoluteUri,
+        UseShellExecute = true
+      });
+      e.Handled = true;
     }
 
     #endregion

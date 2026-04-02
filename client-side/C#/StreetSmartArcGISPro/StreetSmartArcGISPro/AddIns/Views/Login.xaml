@@ -297,6 +297,156 @@
           </Button>
         </Grid>
       </StackPanel>
+
+      <!-- Multiple Instances Toggle - between SSO button and bottom -->
+      <StackPanel Margin="10,2,10,5" Orientation="Vertical">
+
+        <!-- Toggle: visible only when logged OUT -->
+        <Border CornerRadius="6" Padding="10,8"
+                Visibility="{Binding IsLoggedIn, Converter={StaticResource InverseBoolToVisibility}}">
+          <Border.Style>
+            <Style TargetType="Border">
+              <Setter Property="Background" Value="Transparent"/>
+              <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter Property="Background" Value="#0A000000"/>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Grid Width="40" Height="22" VerticalAlignment="Center" Cursor="Hand"
+                  Background="Transparent"
+                  MouseLeftButtonDown="OnToggleMultipleInstances">
+              <Border CornerRadius="11" Height="22" Width="40">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding AllowMultipleInstances}" Value="True">
+                        <Setter Property="Background" Value="#005bbb"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+                <Canvas Width="40" Height="22">
+                  <Ellipse Width="18" Height="18" Fill="White" Canvas.Top="2">
+                    <Ellipse.RenderTransform>
+                      <TranslateTransform x:Name="ToggleThumbTranslate" X="2"/>
+                    </Ellipse.RenderTransform>
+                  </Ellipse>
+                </Canvas>
+              </Border>
+            </Grid>
+            <TextBlock Text="Allow multiple projects"
+                       FontSize="12" FontWeight="SemiBold"
+                       Foreground="{DynamicResource Esri_Gray155}"
+                       VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <Border CornerRadius="9" Width="18" Height="18"
+                    Margin="8,0,0,0" VerticalAlignment="Center" Cursor="Help"
+                    ToolTipService.InitialShowDelay="0"
+                    ToolTipService.ShowDuration="30000">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Background" Value="#005bbb"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="Background" Value="#0066CC"/>
+                      <Setter Property="Effect">
+                        <Setter.Value>
+                          <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3"/>
+                        </Setter.Value>
+                      </Setter>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <TextBlock Text="?" Foreground="White" FontSize="11" FontWeight="Bold"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Border.ToolTip>
+                <ToolTip MaxWidth="300">
+                                    <TextBlock TextWrapping="Wrap" Text="When “Allow multiple projects” is enabled, you can use Street Smart across multiple projects. Please note that SSO with two-factor authentication is required for each project session."/>
+                </ToolTip>
+              </Border.ToolTip>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- Status: logged in badges -->
+        <Border CornerRadius="6" Padding="10,8"
+                Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                        Visibility="{Binding AllowMultipleInstances, Converter={StaticResource InverseBoolToVisibility}}">
+              <Border CornerRadius="3" Background="#E8E8E8" Padding="6,3">
+                <TextBlock Text="SINGLE PROJECT" FontSize="10" FontWeight="Bold"
+                           Foreground="#666666" VerticalAlignment="Center"/>
+              </Border>
+              <Border CornerRadius="9" Width="18" Height="18"
+                      Margin="8,0,0,0" VerticalAlignment="Center" Cursor="Help"
+                      ToolTipService.InitialShowDelay="0"
+                      ToolTipService.ShowDuration="30000">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Setter Property="Background" Value="#999999"/>
+                    <Style.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#777777"/>
+                        <Setter Property="Effect">
+                          <Setter.Value>
+                            <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3"/>
+                          </Setter.Value>
+                        </Setter>
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+                <TextBlock Text="?" Foreground="White" FontSize="11" FontWeight="Bold"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border.ToolTip>
+                  <ToolTip MaxWidth="300">
+                                        <TextBlock TextWrapping="Wrap" Text="When single-project mode is active, you can only use Street Smart in one project at a time. To switch projects, sign out from the current session and open Street Smart in another project."/>
+                  </ToolTip>
+                </Border.ToolTip>
+              </Border>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                        Visibility="{Binding AllowMultipleInstances, Converter={StaticResource BoolToVisibility}}">
+              <Border CornerRadius="3" Background="#E3F0FF" Padding="6,3">
+                <TextBlock Text="MULTIPLE PROJECTS" FontSize="10" FontWeight="Bold"
+                           Foreground="#005bbb" VerticalAlignment="Center"/>
+              </Border>
+              <Border CornerRadius="9" Width="18" Height="18"
+                      Margin="8,0,0,0" VerticalAlignment="Center" Cursor="Help"
+                      ToolTipService.InitialShowDelay="0"
+                      ToolTipService.ShowDuration="30000">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Setter Property="Background" Value="#999999"/>
+                    <Style.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#777777"/>
+                        <Setter Property="Effect">
+                          <Setter.Value>
+                            <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3"/>
+                          </Setter.Value>
+                        </Setter>
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+                <TextBlock Text="?" Foreground="White" FontSize="11" FontWeight="Bold"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border.ToolTip>
+                  <ToolTip MaxWidth="300">
+                                        <TextBlock TextWrapping="Wrap" Text="When multiple-project mode is enabled, you can use Street Smart across multiple projects simultaneously. Each session requires authentication via SSO. To change this setting, sign out and update the toggle in the Login settings."/>
+                  </ToolTip>
+                </Border.ToolTip>
+              </Border>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
     </StackPanel>
   </Grid>
 </UserControl>

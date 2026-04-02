@@ -51,11 +51,10 @@ namespace StreetSmartArcGISPro.Configuration.File
       {
         if (System.IO.File.Exists(LogDataFileName))
         {
-          using (FileStream streamFile = new FileStream(LogDataFileName, FileMode.Open))
+          using (FileStream streamFile = new FileStream(LogDataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
           {
             XmlSerializer serializer = new XmlSerializer(typeof(LogData));
             _logData = (LogData)serializer.Deserialize(streamFile);
-            streamFile.Close();
           }
         }
       }
@@ -69,11 +68,10 @@ namespace StreetSmartArcGISPro.Configuration.File
     {
       try
       {
-        using (FileStream streamFile = new FileStream(LogDataFileName, FileMode.Create))
+        using (FileStream streamFile = new FileStream(LogDataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
         {
           XmlSerializer serializer = new XmlSerializer(typeof(LogData));
           serializer.Serialize(streamFile, this);
-          streamFile.Close();
         }
       }
       catch (Exception ex)

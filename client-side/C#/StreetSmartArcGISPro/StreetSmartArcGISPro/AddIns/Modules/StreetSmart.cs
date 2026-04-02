@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using DockPaneStreetSmart = StreetSmartArcGISPro.AddIns.DockPanes.StreetSmart;
+using MessageBox = ArcGIS.Desktop.Framework.Dialogs.MessageBox;
 using Project = ArcGIS.Desktop.Core.Project;
 
 namespace StreetSmartArcGISPro.AddIns.Modules
@@ -122,7 +123,27 @@ namespace StreetSmartArcGISPro.AddIns.Modules
 
     private void OnApplicationStartupEvent(EventArgs args)
     {
-      if (Login.Instance.IsOAuth)
+      FileUtils.CleanupStaleCacheDirs();
+
+      // checing at ArcGIS Pro startup.
+      
+      if (!Configuration.File.Configuration.Instance.AllowMultipleInstances)
+      {
+        if (!FileUtils.TryAcquireSingleInstanceLock())
+        {
+          MessageBox.Show(
+            "Another ArcGIS Pro instance is already running Street Smart in single-project mode.\n\n" +
+            "To work with multiple projects simultaneously, enable “Allow multiple projects” in the Login settings of the first instance, then restart all instances.",
+            "Street Smart – Single Project Mode Active",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Warning);
+          return;
+        }
+      }
+
+      // Only auto-activate if we have a valid bearer token for this instance.
+      // from the shared Login.xml
+      if (Login.Instance.IsOAuth && !string.IsNullOrEmpty(Login.Instance.Bearer))
       {
         Login.Instance.IsFromSettingsPage = false;
         DockPaneStreetSmart.ActivateStreetSmart();
