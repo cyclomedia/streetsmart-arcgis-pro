@@ -28,12 +28,12 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && !(bool) value;
+      return value is bool boolValue && !boolValue;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && !(bool) value;
+      return value is bool boolValue && !boolValue;
     }
 
     #endregion
