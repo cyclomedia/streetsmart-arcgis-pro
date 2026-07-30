@@ -305,6 +305,12 @@
     <value>Keep overlays visibility in sync with map view</value>
   </data>
 	<data name="ConfigurationVisibilitySynced" xml:space="preserve">
-    <value>Sync visibility</value>
+	<value>Sync visibility</value>
+  </data>
+  <data name="DockPaneFloatWarning" xml:space="preserve">
+	<value>To ensure application stability, please keep the Cyclorama Viewer pane docked. Using Float or Auto Hide may cause ArcGIS Pro to close unexpectedly or Freeze. Please switch the pane back to the Dock position.</value>
+  </data>
+  <data name="DockPaneFloatWarningTitle" xml:space="preserve">
+	<value>Street Smart - Cyclorama Viewer</value>
   </data>
 </root>
