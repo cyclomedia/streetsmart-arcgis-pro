@@ -29,12 +29,12 @@ namespace StreetSmartArcGISPro.AddIns.Views.Converters
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return value != null && (bool)value ? Visibility.Visible : Visibility.Hidden;
+      return value is bool boolValue && boolValue ? Visibility.Visible : Visibility.Hidden;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      return (Visibility)value == Visibility.Visible;
+      return value is Visibility visibility && visibility == Visibility.Visible;
     }
 
     #endregion
