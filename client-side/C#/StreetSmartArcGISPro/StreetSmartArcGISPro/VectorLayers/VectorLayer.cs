@@ -77,6 +77,12 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     #region Members
 
+    /// <summary>
+    /// Mean earth radius in meters, used to convert a metric draw distance into an
+    /// angular distance when the cyclorama coordinate system is geographic.
+    /// </summary>
+    private const double EarthRadiusInMeters = 6378137.0;
+
     private readonly ViewerList _viewerList;
     private readonly MeasurementList _measurementList;
     private readonly VectorLayerList _vectorLayerList;
@@ -92,6 +98,11 @@ namespace StreetSmartArcGISPro.VectorLayers
     private bool _updateMeasurements;
 
     private string _clickedViewerId;
+
+    // Cached layer elevation offset. Resolving this requires Layer.GetDefinition(),
+    // which is an expensive CIM round trip, and it was previously executed once per
+    // vertex of every feature on every image change.
+    private double? _offsetZ;
 
     #endregion
 
@@ -202,7 +213,29 @@ namespace StreetSmartArcGISPro.VectorLayers
       double factor = unit?.ConversionFactor ?? 1;
       IFeatureCollection featureCollection = null;
       GeoJsonChanged = forceUpdateGeoJson;
-      double distanceFactor = (cyclSpatRef?.IsGeographic ?? true) ? factor : 1 / factor;
+
+      // OverlayDrawDistance is expressed in meters. It has to be converted to the unit of
+      // the cyclorama coordinate system before it is used to build the query envelope.
+      //
+      // For a projected system Unit.ConversionFactor is meters per linear unit, so the
+      // distance in linear units is distance / factor. For feet (US survey foot) this
+      // correctly turns 30 m into ~98.4 ft.
+      //
+      // For a geographic system Unit.ConversionFactor is radians per angular unit, so
+      // multiplying meters by it is dimensionally meaningless and produced an envelope
+      // roughly 1900 times too large (30 m became ~0.52 degrees, about 58 km). That made
+      // every viewer query practically the whole feature class on every image change.
+      //
+      // When the cyclorama spatial reference is unknown the distance is used unchanged,
+     
+      double distanceFactor = 1;
+
+      if (cyclSpatRef != null && factor > 0)
+      {
+        distanceFactor = cyclSpatRef.IsGeographic
+          ? 1 / (EarthRadiusInMeters * factor)
+          : 1 / factor;
+      }
 
       if (Layer.Map == map)
       {
@@ -279,6 +312,14 @@ namespace StreetSmartArcGISPro.VectorLayers
           {
             List<long> objectIds = [];
 
+            // Loop invariant: both spatial references are fixed for the whole run.
+            // Creating this per feature was a significant cost, especially when the
+            // layer and cyclorama coordinate systems use different datums.
+            ProjectionTransformation featureProjection =
+              layerSpatRef != null && layerSpatRef.Wkid != 0 && cyclSpatRef != null
+                ? ProjectionTransformation.Create(layerSpatRef, cyclSpatRef)
+                : null;
+
             var featureTasks = geometries.Select(async geom =>
             {
 #if ARCGISPRO29
@@ -313,10 +354,9 @@ namespace StreetSmartArcGISPro.VectorLayers
                       GeometryType geometryType = geometry?.GeometryType ?? GeometryType.Unknown;
                       Geometry copyGeometry = geometry;
 
-                      if (geometry != null && layerSpatRef.Wkid != 0 && cyclSpatRef != null)
+                      if (geometry != null && featureProjection != null)
                       {
-                        ProjectionTransformation projection = ProjectionTransformation.Create(layerSpatRef, cyclSpatRef);
-                        copyGeometry = GeometryEngine.Instance.ProjectEx(geometry, projection);
+                        copyGeometry = GeometryEngine.Instance.ProjectEx(geometry, featureProjection);
                       }
 
                       if (copyGeometry != null)
@@ -645,13 +685,29 @@ namespace StreetSmartArcGISPro.VectorLayers
     {
       if (Layer == null) return 0.0;
 
-      return await QueuedTask.Run(() =>
+      if (_offsetZ.HasValue)
+      {
+        return _offsetZ.Value;
+      }
+
+      double offsetZ = await QueuedTask.Run(() =>
       {
         CIMBaseLayer cimBaseLayer = Layer?.GetDefinition();
         CIMBasicFeatureLayer cimBasicFeatureLayer = cimBaseLayer as CIMBasicFeatureLayer;
         CIMLayerElevationSurface layerElevation = cimBasicFeatureLayer?.LayerElevation;
         return layerElevation?.OffsetZ ?? 0.0;
       });
+
+      _offsetZ = offsetZ;
+      return offsetZ;
+    }
+
+    /// <summary>
+    /// Clears the cached layer elevation offset, so it is resolved again on next use.
+    /// </summary>
+    public void ResetOffsetZ()
+    {
+      _offsetZ = null;
     }
 
     private async Task<ICoordinate> GeoJsonCoordAsync(MapPoint point)

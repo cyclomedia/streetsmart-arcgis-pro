@@ -185,11 +185,25 @@ namespace StreetSmartArcGISPro.CycloMediaLayers
 
     public bool IsKnownName(string name)
     {
-      return name == GroupLayerName || this.Any(layer => layer.Name == name) ||
+      if (string.IsNullOrEmpty(name) || name == GroupLayerName)
+      {
+        return true;
+      }
+
+      // Must also consider AcceptableLayers, not only the layers already added to this
+      // collection.
+      return IsKnownIn(this, name) || IsKnownIn(AcceptableLayers, name);
+    }
+
+    private static bool IsKnownIn(IEnumerable<CycloMediaLayer> layers, string name)
+    {
+      return layers.Any(layer =>
+        layer.Name == name ||
+        (!string.IsNullOrEmpty(layer.FcName) &&
 #if ARCGISPRO29
-        this.Any(layer => layer.FcName == name?.Substring(0, Math.Min(layer.FcName.Length, name.Length)));
+         layer.FcName == name.Substring(0, Math.Min(layer.FcName.Length, name.Length))));
 #else
-        this.Any(layer => layer.FcName == name?[..Math.Min(layer.FcName.Length, name.Length)]);
+         layer.FcName == name[..Math.Min(layer.FcName.Length, name.Length)]));
 #endif
     }
 
