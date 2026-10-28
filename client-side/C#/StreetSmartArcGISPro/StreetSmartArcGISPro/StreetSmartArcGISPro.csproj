@@ -30,7 +30,7 @@
 		<Optimize>True</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Resources\Street_Smart_for_ArcGIS_Pro_User_Manual_3.0.26.3.pdf" />
+	  <None Remove="Resources\Street_Smart_for_ArcGIS_Pro_User_Manual_3.0.26.4.pdf" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Config.fr.daml" />
@@ -60,7 +60,7 @@
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.dbf" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.shp" />
 		<EmbeddedResource Include="Resources\Recordings\FCRecordings.shx" />
-		<EmbeddedResource Include="Resources\Street_Smart_for_ArcGIS_Pro_User_Manual_3.0.26.3.pdf" />
+		<EmbeddedResource Include="Resources\Street_Smart_for_ArcGIS_Pro_User_Manual_3.0.26.4.pdf" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="StreetSmartArcGISPro.csproj.DotSettings" />

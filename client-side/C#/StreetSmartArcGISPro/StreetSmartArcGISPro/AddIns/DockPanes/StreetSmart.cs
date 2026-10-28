@@ -268,12 +268,21 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
           if (value != null)
           {
-            Setting inSettings = ProjectList.Instance.GetSettings(value);
+            
             _mapView = value;
 
-            if (inSettings != null)
+            try
             {
-              inSettings.PropertyChanged += OnSettingsPropertyChanged;
+              Setting inSettings = ProjectList.Instance.GetSettings(value);
+
+              if (inSettings != null)
+              {
+                inSettings.PropertyChanged += OnSettingsPropertyChanged;
+              }
+            }
+            catch (Exception e)
+            {
+              EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmart.cs) (MapView setter): exception: {e}");
             }
           }
 
@@ -347,9 +356,34 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
       }
     }
 
-    private void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
+    private async void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs args)
     {
+      EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (OnActiveMapViewChanged)");
+
       MapView = args.IncomingView;
+
+      if (args.IncomingView == null)
+      {
+        return;
+      }
+
+      try
+      {
+        // Vector layers are detected once per map view. A map that becomes active
+        // after the dock pane was constructed has never been detected, so its
+        // overlays would never be created.
+        ModulestreetSmart streetSmartModule = ModulestreetSmart.Current;
+        _vectorLayerList = await streetSmartModule.GetVectorLayerListAsync(args.IncomingView);
+
+        if (Api != null && await Api.GetApiReadyState())
+        {
+          await UpdateAllVectorLayersAsync();
+        }
+      }
+      catch (Exception e)
+      {
+        EventLog.Write(EventLogLevel.Error, $"Street Smart: (StreetSmart.cs) (OnActiveMapViewChanged): exception: {e}");
+      }
     }
 
     private async Task CloseViewersAsync()
@@ -890,20 +924,28 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
           EventLog.Write(EventLogLevel.Debug, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Will execute");
 
-          if (_vectorLayerList[MapView].All(x => x.VisibilityChangeStatus != VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate))
+          try
           {
-            EventLog.Write(EventLogLevel.Debug, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Update vector layer will be executed");
-
-            for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+            if (_vectorLayerList[MapView].All(x => x.VisibilityChangeStatus != VectorLayer.VectorLayerVisibilityChangeStatus.InUpdate))
             {
-              VectorLayer vectorLayer = _vectorLayerList[MapView][i];
+              EventLog.Write(EventLogLevel.Debug, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Update vector layer will be executed");
 
-              EventLog.Write(EventLogLevel.Debug, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Update vector layer: " + vectorLayer.NameAndUri);
+              for (int i = 0; i < _vectorLayerList[MapView].Count; i++)
+              {
+                VectorLayer vectorLayer = _vectorLayerList[MapView][i];
 
-              await UpdateVectorLayerAsync(vectorLayer);
+                EventLog.Write(EventLogLevel.Debug, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Update vector layer: " + vectorLayer.NameAndUri);
+
+                await UpdateVectorLayerAsync(vectorLayer);
+              }
             }
           }
-          _inUpdateAllVectorLayers = false;
+          finally
+          {
+            // Must be reset even when an update throws, otherwise every later refresh
+            // returns immediately and the overlays are never updated again.
+            _inUpdateAllVectorLayers = false;
+          }
         }
 
       EventLog.Write(EventLogLevel.Information, $"Street Smart: (StreetSmart.cs) (UpdateAllVectorLayersAsync) Finished");
@@ -927,9 +969,31 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
         return;
       }
 
+      // Never create an overlay against an API instance that is being torn down or
+      // re-initialised. Doing so stores an orphaned overlay handle on the vector
+      // layer, after which UpdateVectorLayerOverlay sees Overlay != null and skips
+      // the layer forever, leaving the cyclorama without any overlay.
+      if (Api == null || !await Api.GetApiReadyState())
+      {
+        EventLog.Write(EventLogLevel.Warning,
+          $"Street Smart: (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync) API not ready, skipping overlay for {vectorLayer.NameAndUri}");
+        return;
+      }
+
       Setting settings = ProjectList.Instance.GetSettings(_mapView);
       MySpatialReference cyclSpatRel = settings?.CycloramaViewerCoordinateSystem;
       string srsName = cyclSpatRel?.SRSName;
+
+      // Before an image is opened there are no viewers, so GenerateJsonAsync produces
+      // an empty feature collection. Publishing that would register an empty overlay
+      // and permanently satisfy the "Overlay != null" gate in UpdateVectorLayerOverlay,
+      // leaving the layer invisible in the cyclorama for the rest of the session.
+      if (vectorLayer.Overlay == null && (vectorLayer.GeoJson?.Features.Count ?? 0) == 0)
+      {
+        EventLog.Write(EventLogLevel.Debug,
+          $"Street Smart: (StreetSmart.cs) (AddOrUpdateVectorLayerOverlayAsync) no features yet, postponing overlay for {vectorLayer.NameAndUri}");
+        return;
+      }
 
       if (!string.IsNullOrEmpty(srsName))
       {
@@ -1086,9 +1150,14 @@ namespace StreetSmartArcGISPro.AddIns.DockPanes
 
             if (_vectorLayerList.ContainsKey(MapView))
             {
-              foreach (var vectorLayer in _vectorLayerList[MapView])
+             
+              foreach (var vectorLayer in _vectorLayerList[MapView].ToList())
               {
-                vectorLayer.PropertyChanged += OnVectorLayerPropertyChanged;
+               
+                vectorLayer.Overlay = null;
+
+                vectorLayer.PropertyChanged -= OnVectorLayerPropertyChanged;
+                OnAddVectorLayer(vectorLayer);
               }
             }
 

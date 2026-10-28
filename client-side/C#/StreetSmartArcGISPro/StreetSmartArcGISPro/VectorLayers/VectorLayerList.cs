@@ -130,6 +130,8 @@ namespace StreetSmartArcGISPro.VectorLayers
       Map map = mapView?.Map;
       IReadOnlyList<Layer> layers = map?.GetLayersAsFlattenedList();
 
+      PurgeCycloMediaLayers(mapView);
+
       if (layers != null)
       {
         var addLayerTasks = layers.Select(layer => AddLayerAsync(layer, mapView));
@@ -141,6 +143,33 @@ namespace StreetSmartArcGISPro.VectorLayers
         AddEvents();
         MapViewInitializedEvent.Subscribe(OnMapViewInitialized);
         MapClosedEvent.Subscribe(OnMapClosed);
+      }
+    }
+
+    /// <summary>
+    /// Removes CycloMedia's own layers (for example the recording points layer) that were
+    /// registered as regular vector layers. This can happen when a detection ran before the
+    /// CycloMediaGroupLayer for that map view had been populated, and would otherwise cause a
+    /// duplicate recording point overlay plus a costly refresh on every image change.
+    /// </summary>
+    private void PurgeCycloMediaLayers(MapView mapView)
+    {
+      if (mapView == null || !TryGetValue(mapView, out List<VectorLayer> layerList))
+      {
+        return;
+      }
+
+      CycloMediaGroupLayer cycloGroupLayer = ModuleStreetSmart.Current.GetOrAddCycloMediaGroupLayer(mapView);
+
+      if (cycloGroupLayer == null)
+      {
+        return;
+      }
+
+      foreach (VectorLayer vectorLayer in layerList.Where(v => cycloGroupLayer.IsKnownName(v.Name)).ToList())
+      {
+        layerList.Remove(vectorLayer);
+        LayerRemoved?.Invoke(vectorLayer);
       }
     }
 
@@ -641,6 +670,15 @@ namespace StreetSmartArcGISPro.VectorLayers
 
     private void OnMapMemberPropertiesChanged(MapMemberPropertiesChangedEventArgs args)
     {
+      // Layer properties changed, so a cached layer elevation offset may be stale.
+      foreach (var layerList in Values)
+      {
+        foreach (VectorLayer vectorLayer in layerList)
+        {
+          vectorLayer.ResetOffsetZ();
+        }
+      }
+
       LayerUpdated?.Invoke();
     }
 
